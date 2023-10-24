@@ -30,14 +30,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
 
+    private lateinit var bluetoothAdapter: BluetoothAdapter
 
     private lateinit var testBtn: Button
     private lateinit var editText: EditText
     private lateinit var data: String
     private lateinit var QRcodeBtn: Button
-
     private lateinit var JsonField: TextView
     private lateinit var dbSyncBtn: Button
+    private lateinit var btConnect: Button
+    private lateinit var btClose: Button
 
     private val requestCode = 101
 
@@ -45,15 +47,27 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        // ============================= UI zone start ====================================
         editText = findViewById(R.id.edit_text)
         testBtn = findViewById(R.id.testBtn)
         QRcodeBtn = findViewById(R.id.QRcodeBtn)
         JsonField = findViewById(R.id.jsonField)
         dbSyncBtn = findViewById(R.id.dbSyncBtn)
+        btConnect = findViewById(R.id.BTConnect)
+        btClose = findViewById(R.id.BTClose)
 
         testBtn.setOnClickListener { view: View->
             onSend("TestButton")
         }
+
+        btConnect.setOnClickListener { view: View->
+            bluetoothInit()
+        }
+        btClose.setOnClickListener { view: View->
+            bluetoothClose()
+        }
+
         QRcodeBtn.setOnClickListener { view: View->
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED
@@ -91,15 +105,12 @@ class MainActivity : AppCompatActivity() {
                 Log.e("Error", e.toString())
             }
         }
+        // ============================= UI zone end ====================================
     }
 
-    fun dataReceive() {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    fun bluetoothInit() {
         val permissionManager = PermissionManager(this)
-
-
         var flagPermissionOK: Boolean = false
-
         while(!flagPermissionOK) {
             permissionManager.checkAndRequestPermission(
                 "android.permission.BLUETOOTH_CONNECT",{
@@ -121,61 +132,28 @@ class MainActivity : AppCompatActivity() {
             val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
             bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
             bluetoothSocket.connect()
-            inputStream = bluetoothSocket.inputStream
 
-            val buffer = ByteArray(1024)
-            val bytesRead = inputStream.read(buffer)
-            val receivedMessage = String(buffer, 0, bytesRead)
-            JsonField.text = receivedMessage;
 
         } catch (e: IOException) {
             e.printStackTrace()
-        } finally {
-            bluetoothSocket.close()
         }
+    }
 
-
+    fun bluetoothClose() {
+        bluetoothSocket.close()
+    }
+    fun dataReceive() {
+        inputStream = bluetoothSocket.inputStream
+        val buffer = ByteArray(1024)
+        val bytesRead = inputStream.read(buffer)
+        val receivedMessage = String(buffer, 0, bytesRead)
+        JsonField.text = receivedMessage;
     }
 
     fun onSend(sendingData: String) {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        val permissionManager = PermissionManager(this)
-
-
-        var flagPermissionOK: Boolean = false
-
-        while(!flagPermissionOK) {
-            permissionManager.checkAndRequestPermission(
-                "android.permission.BLUETOOTH_CONNECT",{
-                    val pairedDevices = bluetoothAdapter.bondedDevices
-                    for (device in pairedDevices) {
-                        if (device.name == "LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
-                            bluetoothDevice = device
-                            break
-                        }
-                    }
-                    flagPermissionOK = true
-                },
-                {
-                    flagPermissionOK = false
-                }
-            )
-        }
-        try {
-            val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
-            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
-            bluetoothSocket.connect()
-            outputStream = bluetoothSocket.outputStream
-
-            val dataToSend = sendingData
-
-            outputStream.write(dataToSend.toByteArray())
-            outputStream.flush()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            bluetoothSocket.close()
-        }
+        outputStream = bluetoothSocket.outputStream
+        outputStream.write(sendingData.toByteArray())
+        outputStream.flush()
     }
     override fun onDestroy() {
         super.onDestroy()
