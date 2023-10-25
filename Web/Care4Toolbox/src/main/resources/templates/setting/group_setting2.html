@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+.selected {
+    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
+}
+
+.hidden-column {
+    display: none;
+}
+
+</style>
+</th:block>
+
+<!-- Main Content -->
+<div class="main-content d-flex flex-column flex-md-row" layout:fragment="content">
+	<div class="mb-4 mb-md-0">
+		<div class="row">
+			<div class="col-md-6">
+				<!-- Tasks Aside -->
+				<nav class="chat_aside">
+					<!-- Aside Header -->
+					<div class="aside-header">
+						<!-- Aside Header Top -->
+						<div class="aside-header-top">
+							<!-- Profile -->
+							<div class="d-flex align-items-center profile">
+								<div class="avatar img-60 position-relative mr-3">
+									<img th:src="@{/img/avatar/m14.png}" alt="" />
+									<span class="avatar-status bg-teal c1-bg"></span>
+								</div>
+								<div class="content">
+									<h4 class="name mb-1">대분류</h4>
+									<p class="font-14">Main Group</p>
+								</div>
+							</div>
+							<!-- End Profile -->
+						</div>
+						<!-- End Aside Header Top -->
+					</div>
+					<!-- End Aside Header -->
+					
+					<!-- Aside Body -->
+					<div class="aside-body" data-trigger="scrollbar">
+						<div class="table-responsive">
+							<!-- Invoice List Table -->
+							<table class="contact-list-table text-nowrap bg-white"id="myTable">
+								<thead>
+									<tr>
+										<th class="hidden-column"> 
+											id
+										</th>
+										<th class="text-center">
+											Name
+											<img
+												th:src="@{/img/svg/table-down-arrow.svg}"
+												alt=""
+												class="svg" />
+										</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<th:block th:each="mainGroupDto : ${mainGroupList}">
+									<tr class="table-row">
+										<td  class="hidden-column" id="id" th:text="${mainGroupDto.id}"></td>
+										<td>
+											<div class="d-flex align-items-center">
+												<div class="img mr-20">
+													<img
+														th:src="@{/img/avatar/m16.png}"
+														class="img-40"
+														alt="" />
+												</div>
+												<div class="name bold" th:text="${mainGroupDto.name}">Arden Spencer</div>
+											</div>
+										</td>
+										<td class="actions">
+											<span
+												class="contact-edit"
+												data-toggle="modal"
+												data-target="#contactEditModal">
+												<img
+													th:src="@{/img/svg/c-edit.svg}"
+													alt=""
+													class="svg" />
+											</span>
+											<span class="contact-close">
+												<img
+													th:src="@{/img/svg/c-close.svg}"
+													alt=""
+													class="svg" />
+											</span>
+										</td>
+									</tr>		
+									</th:block>
+								</tbody>
+							</table>
+						</div>
+						<!-- End Invoice List Table -->
+						
+					</div>
+					<!-- End Aside Body -->
+				</nav>
+				<!-- End Tasks Aside -->
+			</div>
+			
+			<div class="col-md-6">		
+				<!-- Tasks Aside -->
+				<nav class="chat_aside">
+					<!-- Aside Header -->
+					<div class="aside-header">
+						<!-- Aside Header Top -->
+						<div class="aside-header-top">
+							<!-- Profile -->
+							<div class="d-flex align-items-center profile">
+								<div class="avatar img-60 position-relative mr-3">
+									<img th:src="@{/img/avatar/m14.png}" alt="" />
+									<span class="avatar-status bg-teal c1-bg"></span>
+								</div>
+								<div class="content">
+									<h4 class="name mb-1">중분류</h4>
+									<p class="font-14">Sub Group</p>
+								</div>
+							</div>
+							<!-- End Profile -->
+						</div>
+						<!-- End Aside Header Top -->
+					</div>
+					<!-- End Aside Header -->
+					
+					<!-- Aside Body -->
+					<div class="aside-body" data-trigger="scrollbar">
+						<div class="table-responsive">
+							<!-- Invoice List Table -->
+							<table class="contact-list-table text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>
+											<!-- Custom Checkbox -->
+											<label class="custom-checkbox">
+												<input type="checkbox" />
+												<span class="checkmark"></span>
+											</label>
+											<!-- End Custom Checkbox -->
+			
+											<!-- Star -->
+											<div class="star">
+												<a href="#"
+													><img
+														th:src="@{/img/svg/star.svg}"
+														alt=""
+														class="svg"
+												/></a>
+											</div>
+											<!-- End Star -->
+										</th>
+										<th class="text-center">
+											Name
+											<img
+												th:src="@{/img/svg/table-down-arrow.svg}"
+												alt=""
+												class="svg" />
+										</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="table-row">
+										<td>
+											<!-- Custom Checkbox -->
+											<label class="custom-checkbox">
+												<input type="checkbox" />
+												<span class="checkmark"></span>
+											</label>
+											<!-- End Custom Checkbox -->
+			
+											<!-- Star -->
+											<div class="star">
+												<a href="#"
+													><img
+														th:src="@{/img/svg/star.svg}"
+														alt=""
+														class="svg"
+												/></a>
+											</div>
+											<!-- End Star -->
+										</td>
+										<td>
+											<div class="d-flex align-items-center">
+												<div class="img mr-20">
+													<img
+														th:src="@{/img/avatar/m16.png}"
+														class="img-40"
+														alt="" />
+												</div>
+												<div class="name bold">Arden Spencer</div>
+											</div>
+										</td>
+										<td class="actions">
+											<span
+												class="contact-edit"
+												data-toggle="modal"
+												data-target="#contactEditModal">
+												<img
+													th:src="@{/img/svg/c-edit.svg}"
+													alt=""
+													class="svg" />
+											</span>
+											<span class="contact-close">
+												<img
+													th:src="@{/img/svg/c-close.svg}"
+													alt=""
+													class="svg" />
+											</span>
+										</td>
+									</tr>		
+								</tbody>
+							</table>
+						</div>
+						<!-- End Invoice List Table -->
+						
+					</div>
+					<!-- End Aside Body -->
+				</nav>
+				<!-- End Tasks Aside -->
+			</div>
+		</div>
+	</div>
+	
+
+	<!-- Contact Edit PopUp -->
+	<div id="contactEditModal" class="modal fade">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<!-- Modal Body -->
+				<div class="modal-body">
+					<form action="#">
+						<div class="media flex-column flex-sm-row">
+							<div
+								class="modal-upload-avatar mr-0 mr-sm-3 mr-md-5 mb-5 mb-sm-0">
+								<div class="attach-file style--two mb-3">
+									<img
+										th:src="@{/img/product/pg2.png}"
+										class="profile-avatar"
+										alt="" />
+									<div class="upload-button">
+										<img
+											th:src="@{/img/svg/gallery.svg}"
+											alt=""
+											class="svg mr-2" />
+										<span>Upload Photo</span>
+										<input
+											class="file-input"
+											type="file"
+											id="fileUpload2"
+											accept="image/*" />
+									</div>
+								</div>
+
+								<div class="content">
+									<h4 class="mb-2">Upload a Photo</h4>
+									<p class="font-12 c4">
+										Allowed JPG, GIF or PNG. Max size <br />
+										of 800kB
+									</p>
+								</div>
+							</div>
+
+							<div class="contact-account-setting media-body">
+								<h4 class="mb-4">Account Settings</h4>
+
+								<div class="mb-4">
+									<label class="bold black mb-2" for="as_name2"
+										>Name</label
+									>
+									<input
+										type="text"
+										id="as_name2"
+										class="theme-input-style"
+										value="Arden Spencer"
+										required />
+								</div>
+
+								
+
+								<div class="">
+									<a href="#" class="btn mr-4">Save Changes</a>
+									<a
+										href="#"
+										class="cancel font-14 bold"
+										data-dismiss="modal"
+										>Cancel</a
+									>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- End Modal Body -->
+			</div>
+		</div>
+	</div>
+	<!-- End Contact Edit PopUp -->
+
+</div>
+<!-- End Main Content -->
+
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+  // 테이블 요소 가져오기
+  var table = document.getElementById("myTable");
+  
+  // 모든 행에 클릭 이벤트 리스너 추가
+  var rows = table.getElementsByTagName("tr");
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].addEventListener("click", function() {
+      // 클릭된 행의 배경색 변경
+      this.style.backgroundColor = "lightblue";
+      
+      // 다른 행들의 배경색 초기화
+      for (var j = 0; j < rows.length; j++) {
+        if (rows[j] !== this) {
+          rows[j].style.backgroundColor = "";
+        }
+      }
+    });
+  } 
+</script>
+</th:block>
+
+</html>
