@@ -10,6 +10,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface MembershipRepositoryCustom {
 
-	Page<MembershipDto> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable);
+	Page<Membership> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable);
 	
 }

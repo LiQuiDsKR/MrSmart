@@ -15,13 +15,13 @@ import lombok.Setter;
 @Getter @Setter
 public class MembershipSearchDto {
 	
-	private PartDto searchPartDto;
+	//private PartDto searchPartDto;
 	
 	private Role searchRole;
 	
 	private EmploymentState searchEmploymentState;
 	
-    private String searchBy; // id / name / code
+    private String searchBy; // id(?대신에 차라리 PART시리즈로 만드는 편이 낫지 않냐?) / name / code
 	
 	private String searchQuery="";
 	

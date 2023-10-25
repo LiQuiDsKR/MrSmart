@@ -21,13 +21,6 @@ public interface MembershipRepository extends JpaRepository<Membership, Long>,
 	public List<Membership> findAllByPartOrderByNameAsc(Part part);
 	
 	public Membership findByCode(String code);
-	
-	
-	/**
-	 * 2023-10-25 박경수
-	 * search & paging 기능 테스트를 위해 추가했습니다
-	 */
-	public List<Membership> findAllByOrderBynameAsc();
 
 
 }

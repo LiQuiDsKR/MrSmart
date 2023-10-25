@@ -9,6 +9,7 @@ import lombok.ToString;
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.part.PartDto;
+import com.querydsl.core.annotations.QueryProjection;
 
 @Getter @Setter
 @ToString

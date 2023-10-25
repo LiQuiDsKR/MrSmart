@@ -2,15 +2,20 @@ package com.care4u.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,8 +25,10 @@ import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.main_part.MainPartService;
+import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipDto;
 import com.care4u.hr.membership.MembershipFormDto;
+import com.care4u.hr.membership.MembershipSearchDto;
 import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
@@ -33,7 +40,7 @@ import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
-@RequestMapping("/setting")
+//@RequestMapping("/setting")
 public class SettingController {
 	
 	private static final Logger logger = Logger.getLogger(SettingController.class);
@@ -112,14 +119,15 @@ public class SettingController {
     	return "setting/member_setting";
     }
     
+    //Post
     @PostMapping(value="/membership_setting/new")
-    public String updateMembership(@Valid MembershipDto memberFormDto, BindingResult bindingResult, Model model){
+    public String updateMembership(@RequestParam("memberFormPartDtoId") long memberFormPartDtoId, @Valid MembershipDto memberFormDto, BindingResult bindingResult, Model model){
     	if(bindingResult.hasErrors()){
             return "setting/membership_setting";
         }
-    	completeMembershipDto(memberFormDto);
     	try {
-    		MembershipDto result = membershipService.update(memberFormDto.getPartDto().getId(), memberFormDto);
+    		PartDto partDto=partService.get(memberFormPartDtoId);
+    		memberFormDto.setPartDto(partDto);
     	}catch(IllegalStateException e) {
     		model.addAttribute("errorMessage",e.getMessage());
     		return "setting/Membership_setting";
@@ -127,30 +135,63 @@ public class SettingController {
         return "setting/Membership_setting";
     }
     
+    
+    //fetch용 메서드 : subpart
     @GetMapping("/sub_parts")
     @ResponseBody
-    public  List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
+    public List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
         // 메인 그룹 ID를 기반으로 서브 그룹 목록을 데이터베이스 또는 다른 소스에서 가져와서 반환합니다.
         List<SubPartDto> subPartList = subPartService.listByMainPartId(mainPartId);
         return subPartList;
     }
     
+    //fetch용 메서드 : part
     @GetMapping("/parts")
     @ResponseBody
-    public  List<PartDto> getPart(@RequestParam Long subPartId) {
+    public List<PartDto> getPart(@RequestParam Long subPartId) {
         List<PartDto> partList = partService.listBySubPartId(subPartId);
         return partList;
     }
     
     /**
-     * 임시 membershipDto의 빈칸 채워주는 메서드
+     * 2023-10-25 paging용
+     * @param membershipSearchDto
+     * @param page
+     * @param model
+     * @return
      */
-    private void completeMembershipDto(MembershipDto mem) {
-    	List<MembershipDto> list = membershipService.list();
-    	mem.setId((long)list.size()+1);
-    	mem.setRole(Role.USER);
-    	mem.setPartDto(partService.get(mem.getPartDto().getId()));
-    	mem.setEmploymentState(EmploymentState.EMPLOYMENT);
+    @GetMapping(value = {"/membership_setting2", "/membership_setting2/{page}"})
+    public String itemManage(MembershipSearchDto membershipSearchDto, @PathVariable("page") Optional<Integer> page, Model model){
+
+        Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);
+        Page<Membership> memberships = membershipService.getMembershipPage(membershipSearchDto, pageable);
+        
+    	List<MainPartDto> mainPartDtoList = mainPartService.list();
+    	MembershipDto memberFormDto = MembershipDto.builder()
+    			.id(0)
+    			.name(null)
+    			.code(null)
+    			.password(null)
+    			.partDto(null)
+    			.role(Role.USER)
+    			.employmentState(EmploymentState.EMPLOYMENT)
+    			.build();
+    	long memberFormPartDtoId=0;
+    	
+        model.addAttribute("memberships", memberships); //memberships는 page객체입니다
+        model.addAttribute("membershipSearchDto", membershipSearchDto);
+        model.addAttribute("maxPage", 10); 
+        
+    	model.addAttribute("mainPartDtoList", mainPartDtoList);
+    	
+    	model.addAttribute("roles", Role.values());
+    	model.addAttribute("employmentStates", EmploymentState.values());
+    	
+    	//아래 두 개는 form용
+    	model.addAttribute("memberFormDto",memberFormDto);
+    	model.addAttribute("memberFormPartDtoId",memberFormPartDtoId);
+
+        return "setting/member_setting2";
     }
-    
+        
 }
