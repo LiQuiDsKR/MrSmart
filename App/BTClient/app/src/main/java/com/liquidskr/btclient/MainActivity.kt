@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -43,11 +44,24 @@ class MainActivity : AppCompatActivity() {
 
     private val requestCode = 101
 
+    private lateinit var dbHelper: DatabaseHelper
+
+    lateinit var jsonData : String
+    lateinit var jsonMainPart : String
+    lateinit var jsonSubPart : String
+    lateinit var jsonPart : String
+    lateinit var jsonMembership : String
+    lateinit var jsonMainGroup : String
+    lateinit var jsonSubGroup : String
+    lateinit var jsonTool : String
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        dbHelper = DatabaseHelper(this)
         // ============================= UI zone start ====================================
         editText = findViewById(R.id.edit_text)
         testBtn = findViewById(R.id.testBtn)
@@ -58,7 +72,8 @@ class MainActivity : AppCompatActivity() {
         btClose = findViewById(R.id.BTClose)
 
         testBtn.setOnClickListener { view: View->
-            onSend("TestButton")
+            dbHelper.insertDB()
+            JsonField.text = dbHelper.getNameFromDatabase("정비3그룹");
         }
 
         btConnect.setOnClickListener { view: View->
@@ -91,16 +106,19 @@ class MainActivity : AppCompatActivity() {
                 onSend(tempText)
                 data = ""
                 editText.setText("")
+
                 return@setOnEditorActionListener true
             }
             return@setOnEditorActionListener false
         }
 
         dbSyncBtn.setOnClickListener {
-            onSend("request_DB")
+            //onSend("request_DB")
+
 
             try {
                 dataReceive()
+                jsonReceive()
             } catch (e: IOException) {
                 Log.e("Error", e.toString())
             }
@@ -148,6 +166,14 @@ class MainActivity : AppCompatActivity() {
         val bytesRead = inputStream.read(buffer)
         val receivedMessage = String(buffer, 0, bytesRead)
         JsonField.text = receivedMessage;
+    }
+
+    fun jsonReceive() {
+        inputStream = bluetoothSocket.inputStream
+        val buffer = ByteArray(1024)
+        val bytesRead = inputStream.read(buffer)
+        val receivedMessage = String(buffer, 0, bytesRead)
+        jsonData = receivedMessage;
     }
 
     fun onSend(sendingData: String) {
