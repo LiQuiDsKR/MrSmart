@@ -56,8 +56,8 @@ public class MembershipRepositoryCustomImpl  implements MembershipRepositoryCust
 
         List<Membership> content = queryFactory
                 .selectFrom(QMembership.membership)
-                .where(searchRoleEquals(membershipSearchDto.getSearchRole()),
-                		searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentState()),
+                .where(//searchRoleEquals(membershipSearchDto.getSearchRole()),
+                		//searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentState()),
                         searchByLike(membershipSearchDto.getSearchBy(),
                                 membershipSearchDto.getSearchQuery()))
                 .orderBy(QMembership.membership.id.desc())
@@ -66,8 +66,8 @@ public class MembershipRepositoryCustomImpl  implements MembershipRepositoryCust
                 .fetch();
         
         long total = queryFactory.select(Wildcard.count).from(QMembership.membership)
-                .where(searchRoleEquals(membershipSearchDto.getSearchRole()),
-                		searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentState()),
+                .where(//searchRoleEquals(membershipSearchDto.getSearchRole()),
+                		//searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentState()),
                         searchByLike(membershipSearchDto.getSearchBy(),
                                 membershipSearchDto.getSearchQuery()))
                 .fetchOne()

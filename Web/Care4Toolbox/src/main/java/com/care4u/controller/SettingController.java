@@ -40,7 +40,7 @@ import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
-//@RequestMapping("/setting")
+@RequestMapping("/setting")
 public class SettingController {
 	
 	private static final Logger logger = Logger.getLogger(SettingController.class);
@@ -160,7 +160,7 @@ public class SettingController {
      * @param model
      * @return
      */
-    @GetMapping(value = {"/membership_setting2", "/membership_setting2/{page}"})
+    @GetMapping(value = {"membership_setting2", "membership_setting2/{page}"})
     public String itemManage(MembershipSearchDto membershipSearchDto, @PathVariable("page") Optional<Integer> page, Model model){
 
         Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);

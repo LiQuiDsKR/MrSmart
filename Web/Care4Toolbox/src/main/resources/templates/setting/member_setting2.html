@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html
   xmlns:th="http://www.thymeleaf.org"
@@ -294,7 +295,7 @@
 						<div class="modal-content">
 							<!-- Modal Body -->
 							<div class="modal-body">
-								<form th:action="@{/setting/membership_setting/new}" role="form" method="post" th:object="${memberFormDto}">
+								<form th:action="@{membership_setting/new}" role="form" method="post" th:object="${memberFormDto}">
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
 											<h1 class="mb-4">직원 정보 추가</h1>											
@@ -356,7 +357,7 @@
 													<div class="col-4">
 														<label for="addFormPartSelect" class="mb-2 black bold d-block">Part</label>
 														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormPartSelect" th:value="${memberFormPartDto}">
+															<select class="theme-input-style" id="addFormPartSelect">
 																
 															</select>
 														</div>
@@ -402,7 +403,7 @@
 												</div>
 											</div>
 											<div class="mb-4">
-												<button class="btn mr-4" type="submit">저장</button>
+												<button id="addFormBtn" class="btn mr-4" type="submit">저장</button>
 												<a
 													href="#"
 													class="cancel font-14 bold"
@@ -564,7 +565,7 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 <script th:inline="javascript">
-	const partSelects=[
+	[
 		[
 			document.getElementById("addFormMainPartSelect"),
 			document.getElementById("addFormSubPartSelect"),
@@ -605,9 +606,9 @@
         var searchBy = $("#searchBy").val();
         var searchQuery = $("#searchQuery").val();
 
-        location.href="/membership_setting2/" + page + "?searchRole=" + searchRole
-        + "&searchEmploymentState=" + searchEmploymentState
-        + "&searchBy=" + searchBy
+        location.href="/setting/membership_setting2/" + page // + "?searchRole=" + searchRole
+       // + "&searchEmploymentState=" + searchEmploymentState
+        + "?searchBy=" + searchBy
         + "&searchQuery=" + searchQuery;
     }
 	
@@ -642,6 +643,39 @@
                 console.error('part 목록을 불러오는 중 오류가 발생했습니다.');
             });
 	}
+	
+	
+	$("#addFormBtn").click(e=>{
+		console.log(e);
+		post(
+			"/setting/membership_setting2/new",
+			"membershipFormPartDtoId",
+			parseInt($("#addFormPartSelect").val()),
+			"/setting/membership_setting2");
+	})
+	
+		
+	function post(url,requestParamName,paramData,redirection){
+		const data = new FormData();
+		data.append(requestParamName, paramData);
+		fetch(url, {
+		  method:"POST",
+		  body: data,
+		})
+		  .then(response => {
+		    if (!response.ok) {
+		      throw new Error(`HTTP error! Status: ${response.status}`);
+		    }
+		    return response.json();
+		  })
+		  .then(data => {
+			location.href=redirection;
+		  })
+		  .catch(error => {
+		    console.error('Error:', error);
+		  });
+	}
+
 </script>
 </th:block>
 
