@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -25,7 +24,7 @@ import java.util.UUID
 import com.google.zxing.integration.android.IntentIntegrator
 
 
-class MainActivity : AppCompatActivity() {
+class BluetoothManager : AppCompatActivity() {
     private lateinit var bluetoothDevice: BluetoothDevice
     private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var inputStream: InputStream
@@ -72,8 +71,7 @@ class MainActivity : AppCompatActivity() {
         btClose = findViewById(R.id.BTClose)
 
         testBtn.setOnClickListener { view: View->
-            dbHelper.insertDB()
-            JsonField.text = dbHelper.getNameFromDatabase("정비3그룹");
+
         }
 
         btConnect.setOnClickListener { view: View->
@@ -173,7 +171,10 @@ class MainActivity : AppCompatActivity() {
         val buffer = ByteArray(1024)
         val bytesRead = inputStream.read(buffer)
         val receivedMessage = String(buffer, 0, bytesRead)
-        jsonData = receivedMessage;
+        jsonData = receivedMessage
+
+        val jsonToDBTable = JsonToDBTable(jsonData) // SQLite에 JSON DB 입력
+        jsonToDBTable.insertDataIntoMembershipTable() // 파싱 및 저장
     }
 
     fun onSend(sendingData: String) {

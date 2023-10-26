@@ -50,5 +50,7 @@ dependencies {
 
     implementation ("androidx.appcompat:appcompat:1.0.2")
     implementation ("pub.devrel:easypermissions:3.0.0")
+    implementation ("com.google.code.gson:gson:2.8.8")
+
 
 }

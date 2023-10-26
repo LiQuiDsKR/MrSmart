@@ -1,53 +1,24 @@
 package com.liquidskr.btclient
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.content.ContentValues
 
-class DatabaseHelper (context: Context) :SQLiteOpenHelper (context, "sqliteDB", null, 1) {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    companion object {
+        private const val DATABASE_NAME = "YourDatabaseName"
+        private const val DATABASE_VERSION = 1
+    }
 
     override fun onCreate(db: SQLiteDatabase) {
-        val createTableSQL = "CREATE TABLE IF NOT EXISTS tableName (id INTEGER PRIMARY KEY AUTOINCREMENT, json_data TEXT)"
-        db.execSQL(createTableSQL)
+        db.execSQL("CREATE TABLE IF NOT EXISTS Membership (id INTEGER PRIMARY KEY, name TEXT)")
+        // 나머지 테이블도 생성합니다.
     }
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // 데이터베이스 업그레이드 시 필요한 작업을 수행합니다.
-    }
-
-    public fun insertDB() {
-        val dbHelper = DatabaseHelper(MainActivity().baseContext)
-        val db = dbHelper.writableDatabase
-
-        val jsonData = MainActivity().jsonData
-
-        val values = ContentValues()
-        values.put("json_data", jsonData)
-
-        val rowId = db.insert("tableName", null, values)
-
-        db.close()
-    }
-    @SuppressLint("Range")
-    public fun getNameFromDatabase(nameToFind: String): String? {
-        val dbHelper = DatabaseHelper(MainActivity().baseContext)
-        val db = dbHelper.readableDatabase
-
-        val query = "SELECT name FROM tableName WHERE name = ?"
-        val selectionArgs = arrayOf(nameToFind)
-
-        val cursor = db.rawQuery(query, selectionArgs)
-
-        var result: String? = null
-
-        if (cursor.moveToFirst()) {
-            result = cursor.getString(cursor.getColumnIndex("name"))
-        }
-
-        cursor.close()
-        db.close()
-
-        return result
+        // 데이터베이스 스키마가 업데이트될 때 호출됩니다.
+        // 여기에서 테이블 업그레이드 논리를 구현합니다.
+        // 예를 들어, 기존 테이블을 삭제하고 새로운 테이블을 생성할 수 있습니다.
     }
 }
