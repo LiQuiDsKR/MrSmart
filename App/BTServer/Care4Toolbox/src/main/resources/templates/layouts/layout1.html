@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<title>똑똑이</title>
+	<!-- Meta Data -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	
+	<!-- Favicon -->
+	<link rel="shortcut icon" th:href="@{/img/favicon.png}" />
+	
+	<!-- Web Fonts -->
+	<link
+		href="https://fonts.googleapis.com/css?family=PT+Sans:400,400i,700,700i&display=swap"
+		rel="stylesheet" />
+	
+	<!-- ======= BEGIN GLOBAL MANDATORY STYLES ======= -->
+	<link type="text/css" th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+	<link type="text/css" th:href="@{/fonts/icofont/icofont.min.css}" rel="stylesheet"/>
+	<link type="text/css" th:href="@{/plugins/perfect-scrollbar/perfect-scrollbar.min.css}" rel="stylesheet"/>
+	<!-- ======= END BEGIN GLOBAL MANDATORY STYLES ======= -->
+	
+	<!-- ======= BEGIN PAGE LEVEL PLUGINS STYLES ======= -->
+	<link type="text/css" th:href="@{/plugins/apex/apexcharts.css}" rel="stylesheet"/>
+	<!-- ======= END BEGIN PAGE LEVEL PLUGINS STYLES ======= -->
+	
+	<!-- ======= MAIN STYLES ======= -->
+	<link type="text/css" th:href="@{/css/style.css}" rel="stylesheet"/>
+	<!-- ======= END MAIN STYLES ======= -->
+	
+	<th:block layout:fragment="css"></th:block>
+
+</head>
+
+<body>
+   
+	<!-- Offcanval Overlay -->
+	<div class="offcanvas-overlay"></div>
+	<!-- Offcanval Overlay -->
+
+	<!-- Wrapper -->
+	<div class="wrapper">
+
+		<div th:replace="fragments/header::header"></div>
+
+		<!-- Main Wrapper -->
+		<div class="main-wrapper">
+
+			<header th:replace="fragments/sidebar::sidebar"></header>
+
+			<div layout:fragment="content"></div>
+
+			<!--div th:replace="fragments/footer::footer"></div-->
+
+		</div>
+		<!-- End Main Wrapper -->
+	</div>
+	<!-- End wrapper -->
+	
+	<!-- JS, Popper.js, and jQuery -->
+	<!-- ======= BEGIN GLOBAL MANDATORY SCRIPTS ======= -->
+	<script th:src="@{/js/jquery.min.js}"></script>
+	<script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/plugins/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+	<script th:src="@{/js/script.js}"></script>
+	<!-- ======= BEGIN GLOBAL MANDATORY SCRIPTS ======= -->
+	
+	<!-- ======= BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS ======= -->
+	<script th:src="@{/plugins/apex/apexcharts.min.js}"></script>
+	<script th:src="@{/plugins/apex/custom-apexcharts.js}"></script>
+	<!-- ======= End BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS ======= -->
+	
+</body> 
+
+<th:block layout:fragment="script"></th:block>
+
+</html>
