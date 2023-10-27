@@ -15,6 +15,11 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <Button
+            android:id="@+id/DBSyncBtn"
+            android:layout_width="59dp"
+            android:layout_height="33dp" />
+
         <ImageView
             android:id="@+id/appLogo"
             android:layout_width="wrap_content"

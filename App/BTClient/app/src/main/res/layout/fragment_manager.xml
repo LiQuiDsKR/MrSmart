@@ -32,7 +32,7 @@
             android:paddingBottom="30dp">
 
             <EditText
-                android:id="@+id/editTextText2"
+                android:id="@+id/LoginTextField"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -42,7 +42,7 @@
                 android:textSize="28sp" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/LoginBtn"
                 android:layout_width="89dp"
                 android:layout_height="46dp"
                 android:text="로그인" />
