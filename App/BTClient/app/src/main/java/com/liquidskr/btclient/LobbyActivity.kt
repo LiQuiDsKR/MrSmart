@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
@@ -11,13 +12,19 @@ import androidx.fragment.app.FragmentTransaction
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
     lateinit var managerBtn: ImageButton
+    lateinit var dbSyncBtn: Button
+    lateinit var bluetoothManager: BluetoothManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
+        bluetoothManager = BluetoothManager(this)
+
+
 
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
+        dbSyncBtn = findViewById(R.id.DBSyncBtn)
 
         workerBtn.setOnClickListener {
             val fragment = WorkerFragment.newInstance()
@@ -32,6 +39,10 @@ class LobbyActivity  : AppCompatActivity() {
                 .add(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
+        }
+        dbSyncBtn.setOnClickListener {
+            bluetoothManager.bluetoothOpen() // 여기가 뭔가 이상함
+            bluetoothManager.dataReceive() // 여기가 뭔가 이상함
         }
 
     }
