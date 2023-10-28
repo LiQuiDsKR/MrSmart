@@ -62,7 +62,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 	}
 	
 	/**
-     * 10/19 16:25 박경수 추가
+     * 2023-10-19 박경수 추가
      * MembershipDto list 뽑아가려고 했는데 메서드가 만들어진 게 없어서 만들어봤습니다
      */
     @Transactional(readOnly = true)
@@ -87,5 +87,14 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
     public Page<Membership> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
         return repository.getMembershipPage(membershipSearchDto, pageable);
     }
+	
+	/**
+	 * 2023-10-27 박경수
+	 * 신규 항목 id 지정을 위해 추가했습니다
+	 */
+	public long getCount() {
+		return repository.count();
+	}
+	
 	
 }

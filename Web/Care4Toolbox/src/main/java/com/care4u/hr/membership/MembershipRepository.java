@@ -22,5 +22,10 @@ public interface MembershipRepository extends JpaRepository<Membership, Long>,
 	
 	public Membership findByCode(String code);
 
+	/**
+	 * 2023-10-27 박경수
+	 * 신규 항목 id 지정을 위해 추가했습니다
+	 */
+	public long count();
 
 }
