@@ -1,4 +1,4 @@
-package com.care4u.controller;
+package com.care4u.hr.membership;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +29,6 @@ import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.main_part.MainPartService;
-import com.care4u.hr.membership.Membership;
-import com.care4u.hr.membership.MembershipDto;
-import com.care4u.hr.membership.MembershipFormDto;
-import com.care4u.hr.membership.MembershipSearchDto;
-import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
@@ -44,9 +39,9 @@ import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @RestController //rest
-public class SettingRestController {
+public class MembershipRestController {
 	
-	private static final Logger logger = Logger.getLogger(SettingRestController.class);
+	private static final Logger logger = Logger.getLogger(MembershipRestController.class);
 	
 	@Autowired
 	private MainGroupService mainGroupService;
@@ -67,9 +62,21 @@ public class SettingRestController {
 	private PartService partService;
 	
     
+
+    @GetMapping("/setting/sub_parts")
+    public List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
+        List<SubPartDto> subPartList = subPartService.listByMainPartId(mainPartId);
+        return subPartList;
+    }
+    @GetMapping("/setting/parts")
+    public List<PartDto> getPart(@RequestParam Long subPartId) {
+        List<PartDto> partList = partService.listBySubPartId(subPartId);
+        return partList;
+    }
+    
+	
   //Post
     @PostMapping(value="/setting/membership_setting2/new")
-    @ResponseBody
     public ResponseEntity<String> updateMembership2(@Valid @RequestBody MembershipFormDto memberFormDto){
     	try {
     		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
@@ -81,7 +88,7 @@ public class SettingRestController {
     				.password(memberFormDto.getPassword())
     				.partDto(partDto)
     				.role(Role.USER)
-    				.employmentState(EmploymentState.EMPLOYMENT)
+    				.employmentStatus(EmploymentState.EMPLOYMENT)
     				.build()
     				);
     	}catch(IllegalStateException e) {

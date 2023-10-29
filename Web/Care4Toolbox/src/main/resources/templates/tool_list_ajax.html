@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css"><style></style></th:block>
+
+<!-- Page Content-->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<!-- Page-Title -->
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="page-title-box">
+					<div class="float-right">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">Web</a>
+							</li>
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">Ecommerce</a>
+							</li>
+							<li class="breadcrumb-item active">Tool List</li>
+						</ol>
+					</div>
+					<h4 class="page-title">Tool List</h4>
+				</div>
+				<!--end page-title-box-->
+			</div>
+			<!--end col-->
+		</div>
+		<!-- end page title end breadcrumb -->
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<ul class="list-unstyled topbar-nav mb-0">
+							<li class="hide-phone app-search">
+								<form role="search" class="">
+									<input
+										type="text"
+										id="AllCompo"
+										placeholder="Search..."
+										class="form-control" />
+									<a href=""><i class="fas fa-search"></i></a>
+								</form>
+							</li>
+						</ul>
+						<table
+							id="datatable"
+							class="table table-bordered dt-responsive nowrap"
+							style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+							<thead>
+								<tr>
+									<th>Tool Name</th>
+									<th>Code</th>
+									<th>Spec</th>
+									<th>Unit</th>
+									<th>Price</th>
+									<th>Avai.Color</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+
+							<tbody>
+							
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- end col -->
+		</div>
+		<!-- end row -->
+	</div>
+	<!-- container -->
+</div>
+<!-- end page content -->
+
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<!-- Required datatable js -->
+	<script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+	<script th:src="@{/plugins/datatables/dataTables.bootstrap4.min.js}"></script>
+	
+	<script>
+	$(document).ready(function() {
+		var table = $('#datatable').DataTable({
+			"paging": true,          // 페이지네이션 사용
+			//"pageLength": 10, 		// 페이지당 항목 수
+			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
+			"searching": false,       // 검색 기능 사용
+			"ordering": false,        // 정렬 기능 사용
+			"info": true,            // 정보 표시
+			"autoWidth": false,      // 너비 자동 조정 비활성화
+			"serverSide": false,
+			"processing": false,
+			"ajax": {
+				"url": "/api/tool_list", // 데이터를 가져올 엔드포인트 URL
+				"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (data) {
+					// 페이지 번호와 페이지 크기 추가
+					var currentPage = Math.floor(data.start / data.length); // 페이지 번호
+					var pageSize = data.length; // 페이지 크기
+					
+					// 페이지 번호가 NaN인 경우 0으로 설정
+					data.page = isNaN(currentPage) ? 0 : currentPage;
+					data.size = pageSize; // 페이지 크기 설정
+				}
+			},
+			
+			"columns": [
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+					    // 제품 정보 표시
+					    return '<img src="/images/products/img-2.png" alt="" height="52" />' +
+					        '<p class="d-inline-block align-middle mb-0">' +
+					        '<a href="" class="d-inline-block align-middle mb-0 product-name">' + data.name + '</a><br />' +
+					        '<span class="text-muted font-13">' + data.id + '</span></p>';
+					}
+                },
+				{"data": "code"},
+				{"data": "spec"},
+				{"data": "unit"},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 상태 뱃지 표시
+						return '<span class="badge badge-md badge-soft-warning">Stock</span>';
+					}
+				},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 색상 아이콘 표시
+						return '<ul class="list-inline mb-0">' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-success"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-danger"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-info"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-warning"></i></li></ul>';
+					}
+				},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 편집 및 삭제 액션 버튼 표시
+						return '<a href="#"><i class="far fa-edit text-info mr-1"></i></a>' 
+							+ '<a href="#"><i class="far fa-trash-alt text-danger"></i></a>';
+					}
+				}
+			]
+		});
+	});
+	</script>
+
+</th:block>
+
+</html>

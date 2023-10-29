@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,13 @@ public class ToolService {
 	public List<ToolDto> list(){
 		List<Tool> list = repository.findAllByOrderByNameAsc();
 		return getDtoList(list);
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ToolDto> list(Pageable pageable){
+		Page<Tool> toolPage = repository.findAllByOrderByNameAsc(pageable);
+		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
+		return toolPage.map(ToolDto::new);
 	}
 	
 	@Transactional(readOnly = true)

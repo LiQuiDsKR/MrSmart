@@ -1,4 +1,4 @@
-package com.care4u.controller;
+package com.care4u.hr.membership;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +29,6 @@ import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.main_part.MainPartService;
-import com.care4u.hr.membership.Membership;
-import com.care4u.hr.membership.MembershipDto;
-import com.care4u.hr.membership.MembershipFormDto;
-import com.care4u.hr.membership.MembershipSearchDto;
-import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
@@ -45,9 +40,9 @@ import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller //rest
 @RequestMapping("/setting")
-public class SettingController {
+public class MembershipController {
 	
-	private static final Logger logger = Logger.getLogger(SettingController.class);
+	private static final Logger logger = Logger.getLogger(MembershipController.class);
 	
 	@Autowired
 	private MainGroupService mainGroupService;
@@ -112,7 +107,7 @@ public class SettingController {
     			.password(null)
     			.partDto(null)
     			.role(Role.USER)
-    			.employmentState(EmploymentState.EMPLOYMENT)
+    			.employmentStatus(EmploymentState.EMPLOYMENT)
     			.build();
     			
     	
@@ -140,23 +135,6 @@ public class SettingController {
     }
     
     
-    //fetch용 메서드 : subpart
-    @GetMapping("/sub_parts")
-    @ResponseBody
-    public List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
-        // 메인 그룹 ID를 기반으로 서브 그룹 목록을 데이터베이스 또는 다른 소스에서 가져와서 반환합니다.
-        List<SubPartDto> subPartList = subPartService.listByMainPartId(mainPartId);
-        return subPartList;
-    }
-    
-    //fetch용 메서드 : part
-    @GetMapping("/parts")
-    @ResponseBody
-    public List<PartDto> getPart(@RequestParam Long subPartId) {
-        List<PartDto> partList = partService.listBySubPartId(subPartId);
-        return partList;
-    }
-    
     /**
      * 2023-10-25 paging용
      * @param membershipSearchDto
@@ -169,6 +147,11 @@ public class SettingController {
 
         Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);
         Page<Membership> memberships = membershipService.getMembershipPage(membershipSearchDto, pageable);
+        
+        for (Membership item : memberships.getContent()) {
+        	logger.info(item.toString());
+        }
+        
         
     	List<MainPartDto> mainPartDtoList = mainPartService.list();
     	MembershipFormDto memberFormDto = MembershipFormDto.builder()
@@ -233,4 +216,55 @@ public class SettingController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     */      
+    
+    
+    
+    /**
+     * 23-10-29 박경수
+     * 원래 있던거랑 이거랑 합침
+     * @param model
+     * @return
+     */
+    @GetMapping(value = "/new")
+    public String newForm(Model model){
+        model.addAttribute("membershipFormDto", MembershipFormDto.builder()
+        		.name(null)
+        		.code(null)
+        		.password(null)
+        		.partDtoId(null).build());
+        return "membership/newForm";
+    }
+
+    @PostMapping(value = "/new")
+    public String addNew(@Valid MembershipFormDto membershipFormDto, BindingResult bindingResult, Model model){
+
+        if(bindingResult.hasErrors()){
+            return "membership/newForm";
+        }
+
+        try {
+            Membership item = Membership.builder()
+            							.memberFormDto(membershipFormDto)
+            							.build();
+            membershipService.addNew(item);
+        } catch (IllegalStateException e){
+            model.addAttribute("errorMessage", e.getMessage());
+            return "membership/newForm";
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping(value = "/login")
+    public String login(){
+        return "/membership/loginForm";
+    }
+
+    @GetMapping(value = "/login/error")
+    public String loginError(Model model){
+        model.addAttribute("loginErrorMsg", "아이디 또는 비밀번호를 확인해주세요");
+        return "/membership/loginForm";
+    }
+    
+    
 }

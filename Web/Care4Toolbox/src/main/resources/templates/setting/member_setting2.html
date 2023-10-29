@@ -241,7 +241,7 @@
 									<td th:text="${membershipDto.code}"></td>
 									<td th:text="${membershipDto.part.name}"></td>
 									<td th:text="${membershipDto.role}"></td>
-									<td th:text="${membershipDto.employmentState}"></td>
+									<td th:text="${membershipDto.employmentStatus}"></td>
 									<td th:text="${membershipDto.password}"></td>
 									<td class="actions">
 										<span
@@ -672,6 +672,7 @@
 		    if (!response.ok) {
 		      throw new Error(`HTTP error! Status: ${response.status}`);
 		    }
+			location.href=redirection;
 		    return response.json();
 		  })
 		  .then(data => {

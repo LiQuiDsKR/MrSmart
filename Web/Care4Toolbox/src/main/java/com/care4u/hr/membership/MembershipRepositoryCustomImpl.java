@@ -35,7 +35,7 @@ public class MembershipRepositoryCustomImpl  implements MembershipRepositoryCust
     }
     
     private BooleanExpression searchEmploymentStateEquals(EmploymentState searchEmploymentState){
-        return searchEmploymentState == null ? null : QMembership.membership.employmentState.eq(searchEmploymentState);
+        return searchEmploymentState == null ? null : QMembership.membership.employmentStatus.eq(searchEmploymentState);
     }
     
     private BooleanExpression searchByLike(String searchBy, String searchQuery){

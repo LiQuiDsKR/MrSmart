@@ -28,17 +28,17 @@ public class MembershipDto {
 	
 	private Role role;
 	
-	private EmploymentState employmentState;
+	private EmploymentState employmentStatus;
 
 	@Builder
-	public MembershipDto(long id, String name, String code, String password, PartDto partDto, Role role, EmploymentState employmentState) {
+	public MembershipDto(long id, String name, String code, String password, PartDto partDto, Role role, EmploymentState employmentStatus) {
 		this.id = id;
 		this.name = name;
 		this.code = code;
 		this.password = password;
 		this.partDto = partDto;
 		this.role = role;
-		this.employmentState = employmentState;
+		this.employmentStatus = employmentStatus;
 	}
 	
 	public MembershipDto(Membership membership) {
@@ -48,6 +48,6 @@ public class MembershipDto {
 		this.password = membership.getPassword();
 		this.partDto = new PartDto(membership.getPart());
 		this.role = membership.getRole();
-		this.employmentState = membership.getEmploymentState();
+		this.employmentStatus = membership.getEmploymentStatus();
 	}
 }
