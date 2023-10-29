@@ -60,7 +60,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return id
     }
-
     @SuppressLint("Range")
     fun getNameByCode(codeToFind: String): String? {
         val db = this.readableDatabase
@@ -75,7 +74,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         cursor.close()
         db.close()
-
         return name
     }
 }
