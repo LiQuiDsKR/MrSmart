@@ -18,7 +18,7 @@ class LobbyActivity  : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
-        bluetoothManager = BluetoothManager(this)
+        bluetoothManager = BluetoothManager(this, this)
 
 
 
@@ -41,8 +41,9 @@ class LobbyActivity  : AppCompatActivity() {
                 .commit()
         }
         dbSyncBtn.setOnClickListener {
-            bluetoothManager.bluetoothOpen() // 여기가 뭔가 이상함
-            bluetoothManager.dataReceive() // 여기가 뭔가 이상함
+            bluetoothManager.init()
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager.dataReceive()
         }
 
     }

@@ -1,9 +1,12 @@
 package com.liquidskr.btclient
 
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -13,7 +16,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 
 
 
-class BluetoothManager (private val context: Context){
+class BluetoothManager (private val context: Context, private val activity: Activity) {
     private lateinit var bluetoothDevice: BluetoothDevice
     private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var inputStream: InputStream
@@ -27,24 +30,28 @@ class BluetoothManager (private val context: Context){
 
     fun init() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        dbHelper = DatabaseHelper(context)
         dataSet = ""
     }
 
     fun bluetoothOpen() {
-        val permissionManager = PermissionManager(LobbyActivity())
+        val permissionManager = PermissionManager(activity)
         var flagPermissionOK: Boolean = false
         while(!flagPermissionOK) {
             permissionManager.checkAndRequestPermission(
                 "android.permission.BLUETOOTH_CONNECT",{
                     val pairedDevices = bluetoothAdapter.bondedDevices
-                    for (device in pairedDevices) {
-                        if (device.name == "LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
-                            bluetoothDevice = device
-                            break
+                    if (pairedDevices.size > 0) {
+                        for (device in pairedDevices) {
+                            if (device.name == "LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
+                                bluetoothDevice = device
+                                break
+                            }
                         }
+                        flagPermissionOK = true
+                    } else {
+                        Toast.makeText(context, "연결된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
                     }
-                    flagPermissionOK = true
+
                 },
                 {
                     flagPermissionOK = false
@@ -66,15 +73,17 @@ class BluetoothManager (private val context: Context){
         bluetoothSocket.close()
     }
     fun dataReceive() {
-        inputStream = bluetoothSocket.inputStream
-        val buffer = ByteArray(1024 * 1024)
-        val bytesRead = inputStream.read(buffer)
-        val receivedMessage = String(buffer, 0, bytesRead)
-        dataSet = dataSet + receivedMessage
-        if (receivedMessage.equals("EndMembership")) {
-            dataEndFlag = true
-            insertMembership(dataSet)
-            //JsonField.text = dataSet.length.toString() // size check
+        while(!dataEndFlag) {
+            inputStream = bluetoothSocket.inputStream
+            val buffer = ByteArray(1024)
+            val bytesRead = inputStream.read(buffer)
+            val receivedMessage = String(buffer, 0, bytesRead)
+            dataSet = dataSet + receivedMessage
+            if (receivedMessage.equals("EndMembership")) {
+                dataEndFlag = true
+                insertMembership(dataSet)
+            }
+            dataReceive()
         }
     }
 
@@ -84,14 +93,16 @@ class BluetoothManager (private val context: Context){
 
         for (row in rows) {
             val columns = row.split(",")
-            if (columns.size == 6) {
-                val code = columns[0].trim()
-                val password = columns[1].trim()
-                val name = columns[2].trim()
-                val part = columns[3].trim()
-                val role = columns[4].trim() // 정수로 변환
-                val employmentState = columns[5].trim() // 정수로 변환
+            if (columns.size == 7) {
+                val id = columns[0].trim()
+                val code = columns[1].trim()
+                val password = columns[2].trim()
+                val name = columns[3].trim()
+                val part = columns[4].trim()
+                val role = columns[5].trim()
+                val employmentState = columns[6].trim()
                 dbHelper.insertData(code, password, name, part, role, employmentState)
+
             }
         }
         dbHelper.close()

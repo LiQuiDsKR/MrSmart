@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.IOException
@@ -99,13 +100,17 @@ class BluetoothActivity : AppCompatActivity() {
             if (actionId == EditorInfo.IME_ACTION_DONE ||
                 (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
             ) {
-                // Enter 키를 누르면 실행할 작업을 여기에 추가
-                val tempText = editText.text.toString()
-                tempText.substring(0, tempText.length - 1)
-                data = tempText
-                dataSend(tempText)
-                data = ""
-                editText.setText("")
+                try {
+                    val tempText = editText.text.toString()
+                    tempText.substring(0, tempText.length - 1)
+                    data = tempText
+                    dataSend(tempText)
+                    data = ""
+                    editText.setText("")
+                } catch (e: StringIndexOutOfBoundsException) {
+                    Toast.makeText(this,"빈 내용을 전송할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+
 
                 return@setOnEditorActionListener true
             }
@@ -117,8 +122,9 @@ class BluetoothActivity : AppCompatActivity() {
             while(!dataEndFlag) { // 데이터 수신이 끝나지 않았다면
                 try {
                     dataReceive()
-                } catch (e: IOException) {
-                    Log.e("Error", e.toString())
+                } catch (e: UninitializedPropertyAccessException) {
+                    Toast.makeText(this,"블루투스 연결이 없습니다.", Toast.LENGTH_SHORT).show()
+                    break
                 }
             }
 
@@ -153,12 +159,16 @@ class BluetoothActivity : AppCompatActivity() {
 
 
         } catch (e: IOException) {
-            e.printStackTrace()
+            Toast.makeText(this,"IOException, read failed.\n소켓이 닫혔거나 Timeout 상태입니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun bluetoothClose() {
-        bluetoothSocket.close()
+        try {
+            bluetoothSocket.close()
+        } catch (e: UninitializedPropertyAccessException) {
+            Toast.makeText(this,"블루투스 연결이 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
     fun dataReceive() {
         inputStream = bluetoothSocket.inputStream
@@ -176,7 +186,7 @@ class BluetoothActivity : AppCompatActivity() {
 
     fun insertMembership(dataSet: String) {
         val rows = dataSet.split("\n")
-        val dbHelper = DatabaseHelper(this) // 'this'는 현재 액티비티를 가리킵니다.
+        val dbHelper = DatabaseHelper(this)
 
         for (row in rows) {
             val columns = row.split(",")
@@ -185,8 +195,8 @@ class BluetoothActivity : AppCompatActivity() {
                 val password = columns[1].trim()
                 val name = columns[2].trim()
                 val part = columns[3].trim()
-                val role = columns[4].trim() // 정수로 변환
-                val employmentState = columns[5].trim() // 정수로 변환
+                val role = columns[4].trim()
+                val employmentState = columns[5].trim()
                 dbHelper.insertData(code, password, name, part, role, employmentState)
             }
         }
@@ -194,15 +204,20 @@ class BluetoothActivity : AppCompatActivity() {
     }
 
     fun dataSend(sendingData: String) {
-        outputStream = bluetoothSocket.outputStream
-        outputStream.write(sendingData.toByteArray())
-        outputStream.flush()
+        try {
+            outputStream = bluetoothSocket.outputStream
+            outputStream.write(sendingData.toByteArray())
+            outputStream.flush()
+        } catch (e: UninitializedPropertyAccessException) {
+            Toast.makeText(this,"블루투스 연결이 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+
     }
     override fun onDestroy() {
         super.onDestroy()
         try {
             bluetoothSocket.close()
-        } catch (e: IOException) {
+        } catch (e: UninitializedPropertyAccessException) {
             e.printStackTrace()
         }
     }
