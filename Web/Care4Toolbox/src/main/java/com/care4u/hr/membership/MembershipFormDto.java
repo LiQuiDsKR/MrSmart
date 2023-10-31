@@ -32,6 +32,7 @@ public class MembershipFormDto {
     @NotEmpty(message = "부서는 필수 입력 값입니다.")
     private String partDtoId;
     
-    //private EmploymentState employmentState;
+    @NotEmpty(message = "부서는 필수 입력 값입니다.")
+    private EmploymentState employmentStatus;
 
 }

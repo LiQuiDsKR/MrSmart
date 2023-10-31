@@ -18,15 +18,15 @@
 					<div class="float-right">
 						<ol class="breadcrumb">
 							<li class="breadcrumb-item">
-								<a href="javascript:void(0);">Web</a>
+								<a href="javascript:void(0);">추가</a>
 							</li>
 							<li class="breadcrumb-item">
-								<a href="javascript:void(0);">Ecommerce</a>
+								<a href="javascript:void(0);">수정</a>
 							</li>
-							<li class="breadcrumb-item active">Tool List</li>
+							<li class="breadcrumb-item active">조회</li>
 						</ol>
 					</div>
-					<h4 class="page-title">Tool List</h4>
+					<h2 class="page-title">공기구 목록</h2>
 				</div>
 				<!--end page-title-box-->
 			</div>
@@ -55,13 +55,13 @@
 							style="border-collapse: collapse; border-spacing: 0; width: 100%;">
 							<thead>
 								<tr>
-									<th>Tool Name</th>
-									<th>Code</th>
-									<th>Spec</th>
-									<th>Unit</th>
-									<th>Price</th>
-									<th>Avai.Color</th>
-									<th>Action</th>
+									<th>이름</th>
+									<th>코드</th>
+									<th>세부</th>
+									<th>단위</th>
+									<th>가격</th>
+									<th></th>
+									<th>행동</th>
 								</tr>
 							</thead>
 
@@ -96,7 +96,7 @@
 			"ordering": false,        // 정렬 기능 사용
 			"info": true,            // 정보 표시
 			"autoWidth": false,      // 너비 자동 조정 비활성화
-			"serverSide": false,
+			"serverSide": true,
 			"processing": false,
 			"ajax": {
 				"url": "/api/tool_list", // 데이터를 가져올 엔드포인트 URL

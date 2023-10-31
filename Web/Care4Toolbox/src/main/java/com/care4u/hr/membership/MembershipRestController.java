@@ -62,13 +62,13 @@ public class MembershipRestController {
 	private PartService partService;
 	
     
-
-    @GetMapping("/setting/sub_parts")
+	// 나중에 이거 partrest랑 subpartrestcontroller로 옮기세요
+    @GetMapping("/sub_part/get")
     public List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
         List<SubPartDto> subPartList = subPartService.listByMainPartId(mainPartId);
         return subPartList;
     }
-    @GetMapping("/setting/parts")
+    @GetMapping("/part/get")
     public List<PartDto> getPart(@RequestParam Long subPartId) {
         List<PartDto> partList = partService.listBySubPartId(subPartId);
         return partList;
@@ -82,7 +82,7 @@ public class MembershipRestController {
     		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
     		membershipService.addNew(
     				MembershipDto.builder()
-    				.id(membershipService.getCount()+1)
+    				.id(0)
     				.name(memberFormDto.getName())
     				.code(memberFormDto.getCode())
     				.password(memberFormDto.getPassword())
@@ -109,5 +109,74 @@ public class MembershipRestController {
 	    		//+ ", empl=" + memberFormDto.getEmploymentState()
 	    		;
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }      
+    }  
+    
+    /**
+     * 2023-10-25 paging용
+     * @param membershipSearchDto
+     * @param page
+     * @param model
+     * @return
+     */
+    @GetMapping(value="/membership/getpage")
+    public ResponseEntity<Page<MembershipDto>> getMembershipPage(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "searchBy", defaultValue = "null") String searchBy,
+            @RequestParam(name = "role" , defaultValue = "null") Role role,
+            @RequestParam(name = "employmentStatus" , defaultValue= "null") EmploymentState employmentStatus,
+            @RequestParam(name = "mainPartId", defaultValue="null") Long mainPartId,
+            @RequestParam(name = "subPartId", required=false) Long subPartId,
+            @RequestParam(name = "partId", required= false) Long partId,
+            @RequestParam(name = "search", required = false) String searchQuery
+            ){
+
+    	
+    	
+    	logger.info("page=" + page + ", size=" + size);
+    	if (searchQuery != null) {
+    		logger.info("search=" + searchQuery);
+    	}
+    	
+    	List<Long> partIds = new ArrayList<>();
+    	if (partId!=null) {
+    		partIds.add(partId);
+    	}else if (subPartId!=null) {
+    		for (PartDto partDto : partService.listBySubPartId(subPartId))
+    		partIds.add(partDto.getId());
+    	}else if (mainPartId!=null) {
+    		for (SubPartDto subPartDto : subPartService.listByMainPartId(mainPartId))
+    		partIds.add(subPartDto.getId());
+    	}else {
+    		partIds.clear();
+    	}
+    	
+    	MembershipSearchDto membershipSearchDto = MembershipSearchDto.builder()
+    			.ids(partIds)
+    			.searchRole(role)
+    			.searchEmploymentStatus(employmentStatus)
+    			.searchBy(searchBy)
+    			.searchQuery(searchQuery)
+    			.build();
+    		
+        Pageable pageable = PageRequest.of(page,size);
+        Page<MembershipDto> membershipPage = membershipService.getMembershipPage(membershipSearchDto, pageable);
+        
+        for (MembershipDto item : membershipPage.getContent()) {
+        	logger.info(item.toString());
+        }
+        
+        
+    	List<MainPartDto> mainPartDtoList = mainPartService.list();
+    	MembershipFormDto memberFormDto = MembershipFormDto.builder()
+    			.name(null)
+    			.code(null)
+    			.password(null)
+    			.partDtoId(null)
+    			.employmentStatus(null)
+    			.build();
+    	long memberFormPartDtoId=0;
+        return ResponseEntity.ok(membershipPage);
+    }
+    
 }

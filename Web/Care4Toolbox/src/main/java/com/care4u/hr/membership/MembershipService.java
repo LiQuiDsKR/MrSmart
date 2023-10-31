@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.care4u.constant.Role;
 import com.care4u.hr.part.Part;
 import com.care4u.hr.part.PartRepository;
+import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolDto;
 
 @Service
 @Transactional
@@ -82,19 +84,13 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 	/**
 	 * 2023-10-25 박경수
 	 * search & paging 기능 테스트를 위해 추가했습니다
+	 * 2023-10-31 박경수
+	 * return을 Page<dto>로 변환했습니다
 	 */
 	@Transactional(readOnly = true)
-    public Page<Membership> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
-        return repository.getMembershipPage(membershipSearchDto, pageable);
+    public Page<MembershipDto> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
+		Page<Membership> membershipPage = repository.getMembershipPage(membershipSearchDto, pageable);
+		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
+		return membershipPage.map(MembershipDto::new);
     }
-	
-	/**
-	 * 2023-10-27 박경수
-	 * 신규 항목 id 지정을 위해 추가했습니다
-	 */
-	public long getCount() {
-		return repository.count();
-	}
-	
-	
 }

@@ -18,28 +18,34 @@
 		<!-- Nav -->
 		<ul class="nav">
 			<li class="nav-category">기준정보</li>
-			<li class="active">
-				<a th:href="@{/setting/membership_setting}">
-					<i class="icofont-pie-chart"></i>
-					<span class="link-title">조직/인원</span>
-				</a>
-			</li>
-			<li class="active">
+			<li class="">
 				<a th:href="@{/setting/group_setting}">
-					<i class="icofont-pie-chart"></i>
-					<span class="link-title">조직2</span>
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">조직 정보</span>
 				</a>
 			</li>
-			<li>
+			<li class="active">
 				<a href="pages/social-media.html">
-					<i class="icofont-chart-histogram"></i>
-					<span class="link-title">공기구</span>
+					<i class="icofont-ui-user"></i>
+					<span class="link-title">인원 정보</span>
+				</a>
+			</li><li class="">
+				<a th:href="@{/setting/group_setting}">
+					<i class="icofont-database"></i>
+					<span class="link-title">정비실 정보</span>
 				</a>
 			</li>
-
+			<li class="">
+				<a href="pages/social-media.html">
+					<i class="icofont-automation"></i>
+					<span class="link-title">공기구 정보</span>
+				</a>
+			</li>
+			
+			
 			<!-- 원본 -->
 			<li class="nav-category">Markets</li>
-			<li class="active">
+			<li class="">
 				<a href="index.html">
 					<i class="icofont-pie-chart"></i>
 					<span class="link-title">Dashboard</span>

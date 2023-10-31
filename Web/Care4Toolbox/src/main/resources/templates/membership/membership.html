@@ -1,0 +1,700 @@
+
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+.selected {
+    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
+}
+
+.hidden-column {
+    display: none;
+}
+
+</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div class="card bg-transparent">
+					<!-- Contact Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-30" >
+					
+						<!-- Btn header -->
+						<div class="col-12 col-sm-2 d-flex align-items-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn"
+									data-toggle="modal"
+									data-target="#contactAddModal">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+									<span>추가</span>
+								</a>
+							</div>
+							<!-- End Add New Contact Btn -->
+						</div>
+						<!-- Search header -->
+						<form
+							action="@{'member_setting2/'+${memberships.number}}"
+							role="form"
+							method="get"
+							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0"
+							th:object="${membershipSearchDto}"
+							>
+							<!-- layer 1 -->
+							<div class="row"style="width:100%; box-sizing: content-box;" >			
+								<!-- Search Form -->								
+								<div class="search-form" style="width:100%; box-sizing: content-box;">
+									<div class="theme-input-group style--two">
+										<input
+											id="searchQuery"
+											th:field="*{searchQuery}"
+											type="text"
+											class="theme-input-style"
+											placeholder="검색" />
+										<button id="searchBtn" type="submit">
+											<img
+												th:src="@{/img/svg/search-icon.svg}"
+												alt=""
+												class="svg" />
+										</button>
+									</div>
+								</div>
+								<!-- End Search Form -->
+							</div>
+						
+							<!-- layer 2 -->
+							<!-- Search Condition header -->
+							<div class="row m-2" style="width:100%; box-sizing: content-box;">
+								<div style="justify-content:end; width:100%;">
+								
+									<div class="row" style="width:100%; box-sizing: content-box; margin:0px;">
+										<!-- part는 생각해보니까 적용하기가 까다로와갖고 일단 hidden -->
+										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
+											<label for="searchMainPartSelect" class="m-1 black bold d-block">Main Part</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchMainPartSelect">
+													<option >전체</option>
+													<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
+												</select>
+											</div>
+										</div>
+										<div class="col-4 col-xl-2"style="padding-left:5px;padding-right:5px;">
+											<label for="searchSubPartSelect" class="m-1 black bold d-block">Sub Part</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchSubPartSelect">
+													<option >전체</option>
+												</select>
+											</div>
+										</div>
+										<div class="col-4 col-xl-2"style="padding-left:5px;padding-right:5px;">
+											<label for="searchPartSelect" class="m-1 black bold d-block">Part</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchPartSelect">
+													<option >전체</option>
+												</select>
+											</div>
+										</div>
+										<!--여기까지 part-->
+										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
+											<label for="searchRoleSelect" class="m-1 black bold d-block">Role</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchRoleSelect">
+													<option >전체</option>
+													<option th:each="role : ${roles}"th:value="${role}" th:text="${role}" th:field="*{searchRole}">name?</option>
+												</select>
+											</div>
+										</div>
+										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
+											<label for="searchEmploymentStateSelect" class="m-1 black bold d-block">상태</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchEmploymentStateSelect">
+													<option >전체</option>
+													<option th:each="employmentStatus : ${employmentStates}"th:value="${employmentStatus}" th:text="${employmentStatus}" th:field="*{searchEmploymentStatus}">name?</option>
+												</select>
+											</div>
+										</div>
+										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
+											<label for="searchBy" class="m-1 black bold d-block" id="search">로 검색</label>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="searchBy" th:field="*{searchBy}">
+													<option value="">전체</option>									
+													<option value="name">이름</option>
+													<option value="id">아이디</option>
+													<option value="code">사원번호</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+						<!-- End Search Condition -->
+					</div>
+	
+					<div class="table-responsive">
+						<!-- Invoice List Table -->
+						<table id="datatable" class="invoice-list-table text-nowrap bg-white">
+							<thead>
+								<tr>
+									<th>
+										<!-- Custom Checkbox -->
+										<label class="custom-checkbox">
+											<input type="checkbox" />
+											<span class="checkmark"></span>
+										</label>
+										<!-- End Custom Checkbox -->
+	
+										<!-- Star -->
+										<div class="star">
+											<a href="#"
+												><img
+													th:src="@{/img/svg/star.svg}"
+													alt=""
+													class="svg"
+											/></a>
+										</div>
+										<!-- End Star -->
+									</th>
+									<th>
+										Id
+										<img
+											th:src="@{/img/svg/table-down-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										이름
+										<img
+											th:src="@{/img/svg/table-down-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										사원번호
+										<img
+											th:src="@{/img/svg/table-up-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										부서
+										<img
+											th:src="@{/img/svg/table-up-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										Role
+										<img
+											th:src="@{/img/svg/table-up-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										상태
+										<img
+											th:src="@{/img/svg/table-up-arrow.svg}"
+											alt=""
+											class="svg" />
+									</th>
+									<th>
+										비밀번호
+									</th>
+									<th>수정</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+							</tbody>
+						</table>
+						<!-- End Contact List Table -->
+					</div>
+					
+					
+				</div>
+				<!-- End Card -->
+				
+				<!-- Contact Add New PopUp -->
+				<div id="contactAddModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 class="mb-4">직원 정보 추가</h1>											
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="addFormName"
+													>이름</label>
+												<input
+													type="text"
+													id="addFormName"
+													class="theme-input-style"
+													placeholder="이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-4">
+												<label for="addFormCode" class="mb-2 black bold"
+													>사원번호</label
+												>
+												<input
+													type="number"
+													class="theme-input-style"
+													id="addFormCode"
+													placeholder="사원번호를 입력하세요" 
+													required />
+											</div>
+											<div class="mb-4">
+												<label class="bold black mb-2" for="addFormPassword"
+													>비밀번호</label
+												>
+												<input
+													type="text"
+													id="addFormPassword"
+													class="theme-input-style"
+													placeholder="비밀번호를 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-4">
+												<div class="row">
+													<div class="col-4">
+														<label for="addFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormMainPartSelect">
+																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="addFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormSubPartSelect">
+																
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="addFormPartSelect" class="mb-2 black bold d-block">Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormPartSelect">
+																
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div id="addFormRadios" class="form-group mb-4">
+												<label for="addFormRadios"class="mb-3 font-14 bold">재직 상태</label>
+												
+												<div class="row">
+												<div class="col-3 d-flex align-items-center mb-3">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="radio9" name="radio-group" checked="" value="EMPLOYMENT">
+														<label for="radio9"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="radio9">재직</label>
+												</div>
+	
+												<div class="col-3 d-flex align-items-center mb-3">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="radio8" name="radio-group" value="LEAVE_OF_ABSENCE">
+														<label for="radio8"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="radio8">휴직</label>
+												</div>
+	
+												<div class="col-3 d-flex align-items-center">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="radio7" name="radio-group" value="RESIGNATION">
+														<label for="radio7"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="radio7" class="c4">퇴사</label>
+												</div>
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="addFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Add New PopUp -->
+
+				<!-- Contact Edit PopUp -->
+				<div id="contactEditModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form action="#">
+									<div class="media flex-column flex-sm-row">
+										<div
+											class="modal-upload-avatar mr-0 mr-sm-3 mr-md-5 mb-5 mb-sm-0">
+											<div class="attach-file style--two mb-3">
+												<img
+													th:src="@{/img/product/pg2.png}"
+													class="profile-avatar"
+													alt="" />
+												<div class="upload-button">
+													<img
+														th:src="@{/img/svg/gallery.svg}"
+														alt=""
+														class="svg mr-2" />
+													<span>Upload Photo</span>
+													<input
+														class="file-input"
+														type="file"
+														id="fileUpload2"
+														accept="image/*" />
+												</div>
+											</div>
+
+											<div class="content">
+												<h4 class="mb-2">Upload a Photo</h4>
+												<p class="font-12 c4">
+													Allowed JPG, GIF or PNG. Max size <br />
+													of 800kB
+												</p>
+											</div>
+										</div>
+
+										<div class="contact-account-setting media-body">
+											<h4 class="mb-4">Account Settings</h4>
+
+											<div class="mb-4">
+												<label class="bold black mb-2" for="as_name2"
+													>Name</label
+												>
+												<input
+													type="text"
+													id="as_name2"
+													class="theme-input-style"
+													value="Arden Spencer"
+													required />
+											</div>
+
+											<div class="mb-4">
+												<label class="bold black mb-2" for="as_email2"
+													>Email</label
+												>
+												<input
+													type="email"
+													id="as_email2"
+													class="theme-input-style"
+													value="Evangeline62@yahoo.com"
+													required />
+											</div>
+
+											<div class="mb-4">
+												<label class="bold black mb-2" for="as_phone2"
+													>Phone</label
+												>
+												<input
+													type="text"
+													id="as_phone2"
+													class="theme-input-style"
+													value="(023) 708-6818 x4267"
+													required />
+											</div>
+
+											<div class="mb-4">
+												<label class="bold black mb-2" for="as_age2"
+													>Age</label
+												>
+												<input
+													type="text"
+													id="as_age2"
+													class="theme-input-style"
+													value="28"
+													required />
+											</div>
+
+											<div class="mb-4">
+												<label class="bold black mb-2" for="as_post2"
+													>Post</label
+												>
+												<input
+													type="text"
+													id="as_post2"
+													class="theme-input-style"
+													value="UX Researcher"
+													required />
+											</div>
+
+											<div class="mb-30">
+												<label class="bold black mb-2"
+													>Joining Date</label
+												>
+
+												<div
+													class="date datepicker dashboard-date style--two"
+													id="datePickerExample2">
+													<span class="input-group-addon mr-0"><img
+															th:src="@{/img/svg/calender.svg}"
+															alt=""
+															class="svg"
+													/></span>
+													<input type="text" class="pl-2" required />
+												</div>
+											</div>
+
+											<div class="">
+												<a href="#" class="btn mr-4">Save Changes</a>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>Cancel</a
+												>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Edit PopUp -->
+				
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+	[
+		[
+			document.getElementById("addFormMainPartSelect"),
+			document.getElementById("addFormSubPartSelect"),
+			document.getElementById("addFormPartSelect")
+		],
+		[
+			document.getElementById("searchMainPartSelect"),
+			document.getElementById("searchSubPartSelect"),
+			document.getElementById("searchPartSelect")
+		],
+	].forEach(v=>{
+		//new&add form-partevent : <select>
+		v[0].addEventListener("change",e=>{
+			v[2].options.length=0;
+			v[1].options.length=0;
+			loadSubParts.apply(v[1],[parseInt(e.target.value)]);
+		});
+		v[1].addEventListener("change",e=>{
+			v[2].options.length=0;
+			loadParts.apply(v[2],[parseInt(e.target.value)]);
+		});
+	})
+	
+	
+	//231025 검색 기능
+	$(document).ready(function(){
+           /*
+            $("#searchBtn").on("click",function(e) {
+                e.preventDefault();
+                page(0);
+            });
+            */
+            
+            
+		var table = $('#datatable').DataTable({
+			"paging": true,          // 페이지네이션 사용
+			//"pageLength": 10, 		// 페이지당 항목 수
+			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
+			"searching": false,       // 검색 기능 사용
+			"ordering": false,        // 정렬 기능 사용
+			"info": true,            // 정보 표시
+			"autoWidth": true,      // 너비 자동 조정 비활성화
+			"serverSide": true,
+			"processing": false,
+			"ajax": {
+				"url": "/membership/getpage", // 데이터를 가져올 엔드포인트 URL
+				"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (data) {
+					// 페이지 번호와 페이지 크기 추가
+					var currentPage = Math.floor(data.start / data.length); // 페이지 번호
+					var pageSize = data.length; // 페이지 크기
+					
+					// 페이지 번호가 NaN인 경우 0으로 설정
+					data.page = isNaN(currentPage) ? 0 : currentPage;
+					data.size = pageSize; // 페이지 크기 설정
+				}
+			},
+			
+			"columns": [
+				{
+					"data": null,
+					"render": function() {
+					    // 제품 정보 표시
+					    return '<label class="custom-checkbox">'+
+								'<input type="checkbox" />'+
+								'<span class="checkmark"></span>'+
+								'</label>'+
+								'<div class="star">'+
+								'<a href="#"'+
+								'<img'+
+								'th:src="@{/img/svg/star.svg}"'+
+								'alt=""'+
+								'class="svg"'+
+								'/></a>'+
+								'</div>'
+					}
+                },
+				{"data": "id"},
+				{"data": "name"},
+				{"data": "code"},
+				{"data": "part.name"},
+				{"data": "role"},
+				{"data": "employmentStatus"},
+				{"data": "password"},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 상태 뱃지 표시
+						return '<span' +
+								'class="contact-edit"' +
+								'data-toggle="modal"' +
+								'data-target="#contactEditModal"' +
+								'style="cursor:pointer;">' +
+								'<img' +
+								'th:src="@{/img/svg/c-edit.svg}"' +
+								'alt=""' +
+								'class="svg" />' +
+								'</span>'
+					}
+				}
+			]
+		});
+	});
+	
+	//231025 검색과 함께 페이징
+    function page(page){
+        var searchPartDto = $("#searchPartSelect").val();
+        var searchRole = $("#searchRoleSelect").val();
+        var searchEmploymentState = $("#searchEmploymentStateSelect").val();
+        var searchBy = $("#searchBy").val();
+        var searchQuery = $("#searchQuery").val();
+
+        location.href="/setting/membership_setting2/" + page
+        // + "?searchRole=" + searchRole
+        // + "&searchEmploymentState=" + searchEmploymentState
+        + "?searchBy=" + searchBy
+        + "&searchQuery=" + searchQuery;
+    }
+	
+	
+	//fetch subparts & parts
+    function loadSubParts(mainPartId) {
+        fetch('/sub_part/get?mainPartId=' + mainPartId)
+            .then(response => response.json())
+            .then(data => {
+                var subPartList = '';
+                data.forEach(function (subPart) {
+                    subPartList += '<option value="' + subPart.id + '">' + subPart.name + '</option>';
+                });
+                this.innerHTML = subPartList;
+            })
+            .catch(error => {
+                console.error('subpart 목록을 불러오는 중 오류가 발생했습니다.');
+            });
+    }
+    function loadParts(subPartId){
+		fetch('/part/get?subPartId=' + subPartId)
+            .then(response => response.json())
+            .then(data => {
+                // 서버에서 받은 데이터를 채웁니다.
+                var partList = '';
+                data.forEach(function (part) {
+                    partList += '<option value="' + part.id + '">' + part.name + '</option>';
+                });
+                this.innerHTML = partList;
+            })
+            .catch(error => {
+                console.error('part 목록을 불러오는 중 오류가 발생했습니다.');
+            });
+	}
+	
+	
+	$("#addFormBtn").click(e=>{
+		console.log(e);
+		e.preventDefault();
+		post(
+			"/setting/membership_setting2/new",
+			{
+                name: document.getElementById('addFormName').value,
+                code: document.getElementById('addFormCode').value,
+                
+                password: document.getElementById('addFormPassword').value,
+                partDtoId: (document.getElementById('addFormPartSelect').value) //parseint는 걍 controller에서 하기로
+                //employmentState: document.getElementById('addFormRadios').value,
+            },
+			"/setting/membership_setting2");
+	})
+	
+	function post(url,paramData,redirection){
+		fetch(url, {
+		  method:"POST",
+		  headers:{
+			  //'header': document.querySelector('meta[name="_csrf"]').content,
+              "Content-Type": "application/json",
+              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
+		  },
+		  body: JSON.stringify(paramData),
+		})
+		  .then(response => {
+		    if (!response.ok) {
+		      throw new Error(`HTTP error! Status: ${response.status}`);
+		    }
+			location.href=redirection;
+		    return response.json();
+		  })
+		  .then(data => {
+			location.href=redirection;
+		  })
+		  .catch(error => {
+		    console.error('Error:', error);
+		  });
+	}
+</script>
+</th:block>
+
+</html>
