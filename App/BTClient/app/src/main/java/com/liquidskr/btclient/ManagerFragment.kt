@@ -23,7 +23,7 @@ class ManagerFragment : Fragment() {
         loginBtn.setOnClickListener {
             var id = loginTextField.text.toString()
             var dbHelper = DatabaseHelper(requireContext())
-            var name = dbHelper.getNameByCode(id)
+            var name = dbHelper.getToolNameByCode(id)
             Toast.makeText(requireContext(),name + "님 반갑습니다!", Toast.LENGTH_SHORT).show()
 
         }

@@ -23,9 +23,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
-    private lateinit var dbHelper: DatabaseHelper
     private lateinit var dataSet: String
-    private lateinit var data: String
     var dataEndFlag = false
 
     fun init() {
@@ -73,36 +71,105 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         bluetoothSocket.close()
     }
     fun dataReceive() {
+        inputStream = bluetoothSocket.inputStream
         while(!dataEndFlag) {
-            inputStream = bluetoothSocket.inputStream
-            val buffer = ByteArray(1024)
+            val buffer = ByteArray(1024 * 64)
             val bytesRead = inputStream.read(buffer)
             val receivedMessage = String(buffer, 0, bytesRead)
-            dataSet = dataSet + receivedMessage
+            Log.d("asdf", receivedMessage)
             if (receivedMessage.equals("EndMembership")) {
                 dataEndFlag = true
+                Log.d("EndMembership", "################################")
+                Log.d("EndMembership", dataSet)
                 insertMembership(dataSet)
+            } else {
+                dataSet += receivedMessage
             }
-            dataReceive()
         }
+        dataSet = ""
+        dataEndFlag = false
+        while(!dataEndFlag) {
+            val buffer = ByteArray(1024 * 64)
+            val bytesRead = inputStream.read(buffer)
+            val receivedMessage = String(buffer, 0, bytesRead)
+            Log.d("asdf", receivedMessage)
+            if (receivedMessage.equals("EndTool")) {
+                dataEndFlag = true
+                Log.d("EndTool", "################################")
+                //Log.d("EndTool", dataSet)
+                insertTool(dataSet)
+            } else {
+                dataSet += receivedMessage
+            }
+        }
+        bluetoothSocket.close()
     }
 
-    fun insertMembership(dataSet: String) {
+    private fun insertMembership(dataSet: String) {
         val rows = dataSet.split("\n")
         val dbHelper = DatabaseHelper(context)
 
         for (row in rows) {
             val columns = row.split(",")
-            if (columns.size == 7) {
-                val id = columns[0].trim()
+            if (columns.size == 9) {
+                val id = columns[0].trim().toLong()
                 val code = columns[1].trim()
                 val password = columns[2].trim()
                 val name = columns[3].trim()
                 val part = columns[4].trim()
-                val role = columns[5].trim()
-                val employmentState = columns[6].trim()
-                dbHelper.insertData(code, password, name, part, role, employmentState)
+                val subpart = columns[5].trim()
+                val mainpart = columns[6].trim()
+                val role = columns[7].trim()
+                val employmentState = columns[8].trim()
+                dbHelper.insertMembershipData(id, code, password, name, part, subpart, mainpart, role, employmentState)
+            }
+        }
+        dbHelper.close()
+    }
 
+    fun insertTool(dataSet: String) {
+        val rows = dataSet.split("\n")
+        val dbHelper = DatabaseHelper(context)
+
+        for (row in rows) {
+            val columns = row.split(",")
+            if (columns.size == 11) {
+                val toolId = columns[0].trim().toLong()
+                val toolMaingroup = columns[1].trim()
+                val toolSubgroup = columns[2].trim()
+                val toolCode = columns[3].trim()
+                val toolKrName = columns[4].trim()
+                val toolEngName = columns[5].trim()
+                val toolSpec = columns[6].trim()
+                val toolUnit = columns[7].trim()
+                val toolPrice = columns[8].trim().toInt()
+                val toolReplacementCycle = columns[9].trim().toInt()
+                val toolBuyCode = columns[10].trim()
+                dbHelper.insertToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle, toolBuyCode)
+            }
+        }
+        dbHelper.close()
+    }
+
+    fun updateTool(dataSet: String) {
+        val rows = dataSet.split("\n")
+        val dbHelper = DatabaseHelper(context)
+
+        for (row in rows) {
+            val columns = row.split(",")
+            if (columns.size == 11) {
+                val toolId = columns[0].trim().toLong()
+                val toolMaingroup = columns[1].trim()
+                val toolSubgroup = columns[2].trim()
+                val toolCode = columns[3].trim()
+                val toolKrName = columns[4].trim()
+                val toolEngName = columns[5].trim()
+                val toolSpec = columns[6].trim()
+                val toolUnit = columns[7].trim()
+                val toolPrice = columns[8].trim().toInt()
+                val toolReplacementCycle = columns[9].trim().toInt()
+                val toolBuyCode = columns[10].trim()
+                dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle, toolBuyCode)
             }
         }
         dbHelper.close()

@@ -5,71 +5,224 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
+import android.util.Log
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_VERSION = 1
-        private const val DATABASE_NAME = "MyDatabase.db"
-        private const val TABLE_NAME = "MyTable"
-        private const val COLUMN_ID = "id"
-        private const val COLUMN_CODE = "code"
-        private const val COLUMN_PASSWORD = "password"
-        private const val COLUMN_NAME = "name"
-        private const val COLUMN_PART = "part"
-        private const val COLUMN_ROLE = "role"
-        private const val COLUMN_EMPLOYMENT_STATE = "employment_state"
+        private const val DATABASE_NAME = "StandardInfo.db"
+
+        private const val TABLE_Membership_NAME = "Membership"
+        private const val COLUMN_Membership_ID = "id"
+        private const val COLUMN_Membership_CODE = "code"
+        private const val COLUMN_Membership_PASSWORD = "password"
+        private const val COLUMN_Membership_NAME = "name"
+        private const val COLUMN_Membership_PART = "part"
+        private const val COLUMN_Membership_SUBPART = "subpart"
+        private const val COLUMN_Membership_MAINPART = "mainpart"
+        private const val COLUMN_Membership_ROLE = "role"
+        private const val COLUMN_Membership_EMPLOYMENT_STATE = "employment_state"
+
+        private const val TABLE_TOOL_NAME = "Tool"
+        private const val COLUMN_TOOL_ID = "tool_id"
+        private const val COLUMN_TOOL_MAINGROUP = "tool_maingroup"
+        private const val COLUMN_TOOL_SUBGROUP = "tool_subgroup"
+        private const val COLUMN_TOOL_CODE = "tool_code"
+        private const val COLUMN_TOOL_KRNAME = "tool_krname"
+        private const val COLUMN_TOOL_ENGNAME = "tool_engname"
+        private const val COLUMN_TOOL_SPEC = "tool_spec"
+        private const val COLUMN_TOOL_UNIT = "tool_unit"
+        private const val COLUMN_TOOL_PRICE = "tool_price"
+        private const val COLUMN_TOOL_REPLACEMENTCYCLE = "tool_replacementcycle"
+        private const val COLUMN_TOOL_BUYCODE = "tool_buycode"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        val createTableQuery = "CREATE TABLE $TABLE_NAME " +
-                "($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_CODE TEXT, " +
-                "$COLUMN_PASSWORD TEXT, " +
-                "$COLUMN_NAME TEXT, " +
-                "$COLUMN_PART TEXT, " +
-                "$COLUMN_ROLE TEXT, " +
-                "$COLUMN_EMPLOYMENT_STATE TEXT)"
+        val createMembershipTableQuery = "CREATE TABLE $TABLE_Membership_NAME " +
+                "($COLUMN_Membership_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_Membership_CODE TEXT, " +
+                "$COLUMN_Membership_PASSWORD TEXT, " +
+                "$COLUMN_Membership_NAME TEXT, " +
+                "$COLUMN_Membership_PART TEXT, " +
+                "$COLUMN_Membership_SUBPART TEXT, " +
+                "$COLUMN_Membership_MAINPART TEXT, " +
+                "$COLUMN_Membership_ROLE TEXT, " +
+                "$COLUMN_Membership_EMPLOYMENT_STATE TEXT)"
 
-        db.execSQL(createTableQuery)
+        val createToolTableQuery = "CREATE TABLE $TABLE_TOOL_NAME " +
+                "($COLUMN_TOOL_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TOOL_MAINGROUP TEXT, " +
+                "$COLUMN_TOOL_SUBGROUP TEXT, " +
+                "$COLUMN_TOOL_CODE TEXT, " +
+                "$COLUMN_TOOL_KRNAME TEXT, " +
+                "$COLUMN_TOOL_ENGNAME TEXT, " +
+                "$COLUMN_TOOL_SPEC TEXT, " +
+                "$COLUMN_TOOL_UNIT TEXT, " +
+                "$COLUMN_TOOL_PRICE INTEGER, " +
+                "$COLUMN_TOOL_REPLACEMENTCYCLE INTEGER, " +
+                "$COLUMN_TOOL_BUYCODE TEXT)"
+
+        db.execSQL(createMembershipTableQuery)
+        db.execSQL(createToolTableQuery)
     }
 
+    // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_Membership_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOL_NAME")
+
         onCreate(db)
     }
 
-    fun insertData(
-        code: String,
-        password: String,
-        name: String,
-        part: String,
-        role: String,
-        employmentState: String
+
+    fun insertMembershipData(
+        membershipId: Long,
+        membershipCode: String,
+        membershipPassword: String,
+        membershipName: String,
+        membershipPart: String,
+        membershipSubpart: String,
+        membershipMainpart: String,
+        membershipRole: String,
+        membershipEmploymentState: String
     ): Long {
         val values = ContentValues()
-        values.put(COLUMN_CODE, code)
-        values.put(COLUMN_PASSWORD, password)
-        values.put(COLUMN_NAME, name)
-        values.put(COLUMN_PART, part)
-        values.put(COLUMN_ROLE, role)
-        values.put(COLUMN_EMPLOYMENT_STATE, employmentState)
+        values.put(COLUMN_Membership_ID, membershipId)
+        values.put(COLUMN_Membership_CODE, membershipCode)
+        values.put(COLUMN_Membership_PASSWORD, membershipPassword)
+        values.put(COLUMN_Membership_NAME, membershipName)
+        values.put(COLUMN_Membership_PART, membershipPart)
+        values.put(COLUMN_Membership_SUBPART, membershipSubpart)
+        values.put(COLUMN_Membership_MAINPART, membershipMainpart)
+        values.put(COLUMN_Membership_ROLE, membershipRole)
+        values.put(COLUMN_Membership_EMPLOYMENT_STATE, membershipEmploymentState)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_NAME, null, values)
+        val id = db.insert(TABLE_Membership_NAME, null, values)
+
         db.close()
         return id
     }
+
+    fun updateMembershipData(
+        membershipId: Long,
+        membershipCode: String,
+        membershipPassword: String,
+        membershipName: String,
+        membershipPart: String,
+        membershipSubpart: String,
+        membershipMainpart: String,
+        membershipRole: String,
+        membershipEmploymentState: String
+    ): Int {
+        val values = ContentValues()
+        values.put(COLUMN_Membership_ID, membershipId)
+        values.put(COLUMN_Membership_CODE, membershipCode)
+        values.put(COLUMN_Membership_PASSWORD, membershipPassword)
+        values.put(COLUMN_Membership_NAME, membershipName)
+        values.put(COLUMN_Membership_PART, membershipPart)
+        values.put(COLUMN_Membership_SUBPART, membershipSubpart)
+        values.put(COLUMN_Membership_MAINPART, membershipMainpart)
+        values.put(COLUMN_Membership_ROLE, membershipRole)
+        values.put(COLUMN_Membership_EMPLOYMENT_STATE, membershipEmploymentState)
+
+        val db = this.writableDatabase
+        val updatedRows = db.update(TABLE_TOOL_NAME, values, "$COLUMN_TOOL_ID = ?", arrayOf(membershipId.toString()))
+        db.close()
+        return updatedRows
+    }
+
+    fun insertToolData(
+        toolId: Long,
+        toolMaingroup: String,
+        toolSubgroup: String,
+        toolCode: String,
+        toolKrName: String,
+        toolEngName: String,
+        toolSpec: String,
+        toolUnit: String,
+        toolPrice: Int,
+        toolReplacementCycle: Int,
+        toolBuyCode: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TOOL_ID, toolId)
+        values.put(COLUMN_TOOL_MAINGROUP, toolMaingroup)
+        values.put(COLUMN_TOOL_SUBGROUP, toolSubgroup)
+        values.put(COLUMN_TOOL_CODE, toolCode)
+        values.put(COLUMN_TOOL_KRNAME, toolKrName)
+        values.put(COLUMN_TOOL_ENGNAME, toolEngName)
+        values.put(COLUMN_TOOL_SPEC, toolSpec)
+        values.put(COLUMN_TOOL_UNIT, toolUnit)
+        values.put(COLUMN_TOOL_PRICE, toolPrice)
+        values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
+        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_TOOL_NAME, null, values)
+        db.close()
+        return id
+    }
+
+    fun updateToolData(
+        toolId: Long,
+        toolMaingroup: String,
+        toolSubgroup: String,
+        toolCode: String,
+        toolKrName: String,
+        toolEngName: String,
+        toolSpec: String,
+        toolUnit: String,
+        toolPrice: Int,
+        toolReplacementCycle: Int,
+        toolBuyCode: String
+    ): Int {
+        val values = ContentValues()
+        values.put(COLUMN_TOOL_MAINGROUP, toolMaingroup)
+        values.put(COLUMN_TOOL_SUBGROUP, toolSubgroup)
+        values.put(COLUMN_TOOL_CODE, toolCode)
+        values.put(COLUMN_TOOL_KRNAME, toolKrName)
+        values.put(COLUMN_TOOL_ENGNAME, toolEngName)
+        values.put(COLUMN_TOOL_SPEC, toolSpec)
+        values.put(COLUMN_TOOL_UNIT, toolUnit)
+        values.put(COLUMN_TOOL_PRICE, toolPrice)
+        values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
+        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+
+        val db = this.writableDatabase
+        val updatedRows = db.update(TABLE_TOOL_NAME, values, "$COLUMN_TOOL_ID = ?", arrayOf(toolId.toString()))
+        db.close()
+        return updatedRows
+    }
+
     @SuppressLint("Range")
-    fun getNameByCode(codeToFind: String): String? {
+    fun getMembershipNameByCode(codeToFind: String): String? {
         val db = this.readableDatabase
         var name: String? = null
-        val query = "SELECT $COLUMN_NAME FROM $TABLE_NAME WHERE $COLUMN_CODE = ?"
+        val query = "SELECT $COLUMN_Membership_NAME FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
         val selectionArgs = arrayOf(codeToFind)
 
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
-            name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME))
+            name = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
+        }
+
+        cursor.close()
+        db.close()
+        return name
+    }
+
+    @SuppressLint("Range")
+    fun getToolNameByCode(codeToFind: String): String? {
+        val db = this.readableDatabase
+        var name: String? = null
+        val query = "SELECT $COLUMN_TOOL_KRNAME FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
+        val selectionArgs = arrayOf(codeToFind)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_KRNAME))
         }
 
         cursor.close()
