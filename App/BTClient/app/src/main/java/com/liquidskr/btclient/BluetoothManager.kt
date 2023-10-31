@@ -76,11 +76,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             val buffer = ByteArray(1024 * 64)
             val bytesRead = inputStream.read(buffer)
             val receivedMessage = String(buffer, 0, bytesRead)
-            Log.d("asdf", receivedMessage)
             if (receivedMessage.equals("EndMembership")) {
                 dataEndFlag = true
-                Log.d("EndMembership", "################################")
-                Log.d("EndMembership", dataSet)
                 insertMembership(dataSet)
             } else {
                 dataSet += receivedMessage
@@ -92,11 +89,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             val buffer = ByteArray(1024 * 64)
             val bytesRead = inputStream.read(buffer)
             val receivedMessage = String(buffer, 0, bytesRead)
-            Log.d("asdf", receivedMessage)
             if (receivedMessage.equals("EndTool")) {
                 dataEndFlag = true
-                Log.d("EndTool", "################################")
-                //Log.d("EndTool", dataSet)
                 insertTool(dataSet)
             } else {
                 dataSet += receivedMessage
