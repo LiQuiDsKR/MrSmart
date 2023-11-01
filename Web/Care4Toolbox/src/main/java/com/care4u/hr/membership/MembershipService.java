@@ -89,7 +89,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 	 */
 	@Transactional(readOnly = true)
     public Page<MembershipDto> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
-		Page<Membership> membershipPage = repository.getMembershipPage(membershipSearchDto, pageable);
+		Page<Membership> membershipPage = repository.findAll(pageable);
 		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
 		return membershipPage.map(MembershipDto::new);
     }

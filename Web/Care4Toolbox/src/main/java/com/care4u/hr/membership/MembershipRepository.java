@@ -1,9 +1,9 @@
 package com.care4u.hr.membership;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
@@ -25,5 +25,7 @@ public interface MembershipRepository extends JpaRepository<Membership, Long>
 	public List<Membership> findAllByPartOrderByNameAsc(Part part);
 		
 	public Membership findByCode(String code);
+	
+	public Page<Membership> findAll(Pageable pageable);
 
 }

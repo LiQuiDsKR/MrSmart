@@ -89,7 +89,7 @@
 											<label for="searchMainPartSelect" class="m-1 black bold d-block">Main Part</label>
 											<div class="custom-select style--two" style="max-width:none">
 												<select class="theme-input-style" id="searchMainPartSelect">
-													<option >전체</option>
+													<option value="">전체</option>
 													<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
 												</select>
 											</div>
@@ -98,7 +98,7 @@
 											<label for="searchSubPartSelect" class="m-1 black bold d-block">Sub Part</label>
 											<div class="custom-select style--two" style="max-width:none">
 												<select class="theme-input-style" id="searchSubPartSelect">
-													<option >전체</option>
+													<option value="">전체</option>
 												</select>
 											</div>
 										</div>
@@ -106,7 +106,7 @@
 											<label for="searchPartSelect" class="m-1 black bold d-block">Part</label>
 											<div class="custom-select style--two" style="max-width:none">
 												<select class="theme-input-style" id="searchPartSelect">
-													<option >전체</option>
+													<option value="">전체</option>
 												</select>
 											</div>
 										</div>
@@ -115,7 +115,7 @@
 											<label for="searchRoleSelect" class="m-1 black bold d-block">Role</label>
 											<div class="custom-select style--two" style="max-width:none">
 												<select class="theme-input-style" id="searchRoleSelect">
-													<option >전체</option>
+													<!--<option value="USER">전체</option>-->
 													<option th:each="role : ${roles}"th:value="${role}" th:text="${role}" th:field="*{searchRole}">name?</option>
 												</select>
 											</div>
@@ -124,7 +124,7 @@
 											<label for="searchEmploymentStateSelect" class="m-1 black bold d-block">상태</label>
 											<div class="custom-select style--two" style="max-width:none">
 												<select class="theme-input-style" id="searchEmploymentStateSelect">
-													<option >전체</option>
+													<!--<option value="EMPLOYMENT">전체</option>-->
 													<option th:each="employmentStatus : ${employmentStates}"th:value="${employmentStatus}" th:text="${employmentStatus}" th:field="*{searchEmploymentStatus}">name?</option>
 												</select>
 											</div>
@@ -153,65 +153,22 @@
 							<thead>
 								<tr>
 									<th>
-										<!-- Custom Checkbox -->
-										<label class="custom-checkbox">
-											<input type="checkbox" />
-											<span class="checkmark"></span>
-										</label>
-										<!-- End Custom Checkbox -->
-	
-										<!-- Star -->
-										<div class="star">
-											<a href="#"
-												><img
-													th:src="@{/img/svg/star.svg}"
-													alt=""
-													class="svg"
-											/></a>
-										</div>
-										<!-- End Star -->
-									</th>
-									<th>
 										Id
-										<img
-											th:src="@{/img/svg/table-down-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										이름
-										<img
-											th:src="@{/img/svg/table-down-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										사원번호
-										<img
-											th:src="@{/img/svg/table-up-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										부서
-										<img
-											th:src="@{/img/svg/table-up-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										Role
-										<img
-											th:src="@{/img/svg/table-up-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										상태
-										<img
-											th:src="@{/img/svg/table-up-arrow.svg}"
-											alt=""
-											class="svg" />
 									</th>
 									<th>
 										비밀번호
@@ -538,12 +495,15 @@
             
 		var table = $('#datatable').DataTable({
 			"paging": true,          // 페이지네이션 사용
-			//"pageLength": 10, 		// 페이지당 항목 수
+			"pageLength": 10, 		// 페이지당 항목 수
 			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
-			"searching": false,       // 검색 기능 사용
-			"ordering": false,        // 정렬 기능 사용
+			"searching": true,       // 검색 기능 사용
+			"ordering": true,        // 정렬 기능 사용
+			"order":[
+				[0,'asc']
+			],
 			"info": true,            // 정보 표시
-			"autoWidth": true,      // 너비 자동 조정 비활성화
+			"autoWidth": false,      // 너비 자동 조정 비활성화
 			"serverSide": true,
 			"processing": false,
 			"ajax": {
@@ -557,11 +517,11 @@
 					// 페이지 번호가 NaN인 경우 0으로 설정
 					data.page = isNaN(currentPage) ? 0 : currentPage;
 					data.size = pageSize; // 페이지 크기 설정
-				}
+				},
 			},
 			
 			"columns": [
-				{
+				/*{
 					"data": null,
 					"render": function() {
 					    // 제품 정보 표시
@@ -572,34 +532,65 @@
 								'<div class="star">'+
 								'<a href="#"'+
 								'<img'+
-								'th:src="@{/img/svg/star.svg}"'+
+								'src="/img/svg/star.svg"'+
 								'alt=""'+
 								'class="svg"'+
 								'/></a>'+
 								'</div>'
 					}
-                },
-				{"data": "id"},
+                },*/
+				{
+					"data": "id",
+					"type": Number
+				},
 				{"data": "name"},
 				{"data": "code"},
-				{"data": "part.name"},
-				{"data": "role"},
-				{"data": "employmentStatus"},
+				{
+					"data": "partDto",
+					"render":function(data,type,row){
+						if(type==="display"){
+							return data.subPartDto.mainPartDto.name + "/"
+							+ data.subPartDto.name + "/" + data.name;
+						}
+						return data;
+					}
+				},
+				{
+					"data": "role",
+					"type": String,
+					"render":function(data,type,row){
+						if(type==="display"){
+							return {
+								"USER":"작업자",
+								"MANAGER":"매니저",
+								"ADMIN":"관리자",
+								default:"NULL"
+							}[data];
+						}
+					}
+				},
+				{
+					"data": "employmentStatus",
+					"type": String,
+					"render":function(data,type,row){
+						if(type==="display"){
+							return {
+								"EMPLOYMENT":"재직",
+								"LEAVE_OF_ABSENCE":"휴직",
+								"RESIGNATION":"퇴사",
+								default:"NULL"
+							}[data];
+						}
+					}
+				},
 				{"data": "password"},
 				{
 					"data": null,
 					"render": function(data, type, full, meta) {
 						// 상태 뱃지 표시
-						return '<span' +
-								'class="contact-edit"' +
-								'data-toggle="modal"' +
-								'data-target="#contactEditModal"' +
-								'style="cursor:pointer;">' +
-								'<img' +
-								'th:src="@{/img/svg/c-edit.svg}"' +
-								'alt=""' +
-								'class="svg" />' +
-								'</span>'
+						return '<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" style="cursor:pointer;">' +
+								'<img src="/img/svg/c-edit.svg" alt="" class="svg" />' +
+								'</span>';
 					}
 				}
 			]

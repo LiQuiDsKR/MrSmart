@@ -2,7 +2,6 @@ package com.care4u.hr.membership;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -13,16 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.care4u.constant.EmploymentState;
@@ -33,21 +26,13 @@ import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
-import com.care4u.toolbox.group.main_group.MainGroupDto;
 import com.care4u.toolbox.group.main_group.MainGroupService;
-import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
-@RestController //rest
+@RestController
 public class MembershipRestController {
 	
 	private static final Logger logger = Logger.getLogger(MembershipRestController.class);
-	
-	@Autowired
-	private MainGroupService mainGroupService;
-	
-	@Autowired
-	private SubGroupService subGroupService;
 	
 	@Autowired
 	private MembershipService membershipService;
@@ -123,9 +108,9 @@ public class MembershipRestController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "searchBy", defaultValue = "null") String searchBy,
-            @RequestParam(name = "role" , defaultValue = "null") Role role,
-            @RequestParam(name = "employmentStatus" , defaultValue= "null") EmploymentState employmentStatus,
-            @RequestParam(name = "mainPartId", defaultValue="null") Long mainPartId,
+            @RequestParam(name = "role" , defaultValue = "USER") Role role,
+            @RequestParam(name = "employmentStatus" , defaultValue= "EMPLOYMENT") EmploymentState employmentStatus,
+            @RequestParam(name = "mainPartId", defaultValue="0") Long mainPartId,
             @RequestParam(name = "subPartId", required=false) Long subPartId,
             @RequestParam(name = "partId", required= false) Long partId,
             @RequestParam(name = "search", required = false) String searchQuery
@@ -139,12 +124,12 @@ public class MembershipRestController {
     	}
     	
     	List<Long> partIds = new ArrayList<>();
-    	if (partId!=null) {
+    	if (partId!=null && partService.get(partId)!=null) {
     		partIds.add(partId);
-    	}else if (subPartId!=null) {
+    	}else if (subPartId!=null && subPartService.get(subPartId)!=null) {
     		for (PartDto partDto : partService.listBySubPartId(subPartId))
     		partIds.add(partDto.getId());
-    	}else if (mainPartId!=null) {
+    	}else if (mainPartId!=null && mainPartService.get(mainPartId)!=null) {
     		for (SubPartDto subPartDto : subPartService.listByMainPartId(mainPartId))
     		partIds.add(subPartDto.getId());
     	}else {
@@ -165,18 +150,6 @@ public class MembershipRestController {
         for (MembershipDto item : membershipPage.getContent()) {
         	logger.info(item.toString());
         }
-        
-        
-    	List<MainPartDto> mainPartDtoList = mainPartService.list();
-    	MembershipFormDto memberFormDto = MembershipFormDto.builder()
-    			.name(null)
-    			.code(null)
-    			.password(null)
-    			.partDtoId(null)
-    			.employmentStatus(null)
-    			.build();
-    	long memberFormPartDtoId=0;
         return ResponseEntity.ok(membershipPage);
     }
-    
 }

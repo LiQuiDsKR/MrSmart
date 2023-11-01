@@ -17,13 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.main_part.MainPartService;
-import com.care4u.hr.part.PartDto;
-import com.care4u.hr.part.PartService;
 
 @Controller
 @RequestMapping("/membership")

@@ -5,7 +5,6 @@
 
 package com.care4u.hr.membership;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -17,7 +16,6 @@ import org.thymeleaf.util.StringUtils;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
-import com.care4u.hr.part.PartDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
