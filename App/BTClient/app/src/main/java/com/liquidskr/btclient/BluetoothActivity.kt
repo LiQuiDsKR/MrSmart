@@ -179,28 +179,9 @@ class BluetoothActivity : AppCompatActivity() {
         dataSet = dataSet + receivedMessage
         if (receivedMessage.equals("EndMembership")) {
             dataEndFlag = true
-            insertMembership(dataSet)
+            //insertMembership(dataSet)
             JsonField.text = "[" + dataSet.length.toString() + "] " + dataSet // size check
         }
-    }
-
-    fun insertMembership(dataSet: String) {
-        val rows = dataSet.split("\n")
-        val dbHelper = DatabaseHelper(this)
-
-        for (row in rows) {
-            val columns = row.split(",")
-            if (columns.size == 6) {
-                val code = columns[0].trim()
-                val password = columns[1].trim()
-                val name = columns[2].trim()
-                val part = columns[3].trim()
-                val role = columns[4].trim()
-                val employmentState = columns[5].trim()
-                dbHelper.insertData(code, password, name, part, role, employmentState)
-            }
-        }
-        dbHelper.close()
     }
 
     fun dataSend(sendingData: String) {
