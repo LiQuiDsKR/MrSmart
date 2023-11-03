@@ -20,14 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
-import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.main_part.MainPartService;
 import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
-import com.care4u.toolbox.group.main_group.MainGroupService;
-import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @RestController
 public class MembershipRestController {
@@ -45,24 +42,9 @@ public class MembershipRestController {
 	
 	@Autowired
 	private PartService partService;
-	
     
-	// 나중에 이거 partrest랑 subpartrestcontroller로 옮기세요
-    @GetMapping("/sub_part/get")
-    public List<SubPartDto> getSubPart(@RequestParam Long mainPartId) {
-        List<SubPartDto> subPartList = subPartService.listByMainPartId(mainPartId);
-        return subPartList;
-    }
-    @GetMapping("/part/get")
-    public List<PartDto> getPart(@RequestParam Long subPartId) {
-        List<PartDto> partList = partService.listBySubPartId(subPartId);
-        return partList;
-    }
-    
-	
-  //Post
-    @PostMapping(value="/setting/membership_setting2/new")
-    public ResponseEntity<String> updateMembership2(@Valid @RequestBody MembershipFormDto memberFormDto){
+    @PostMapping(value="/membership/new")
+    public ResponseEntity<String> newMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
     	try {
     		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
     		membershipService.addNew(
@@ -82,7 +64,7 @@ public class MembershipRestController {
     				+ ", 코드=" + memberFormDto.getCode()
 		    		+ ", pw=" + memberFormDto.getPassword()
 		    		+ ", partid=" + memberFormDto.getPartDtoId()
-		    		//+ ", empl=" + memberFormDto.getEmploymentState()
+		    		+ ", empl=" + memberFormDto.getEmploymentStatus()
 		    		;
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
@@ -91,10 +73,47 @@ public class MembershipRestController {
 				+ ", 코드=" + memberFormDto.getCode()
 	    		+ ", pw=" + memberFormDto.getPassword()
 	    		+ ", partid=" + memberFormDto.getPartDtoId()
-	    		//+ ", empl=" + memberFormDto.getEmploymentState()
+	    		+ ", empl=" + memberFormDto.getEmploymentStatus()
 	    		;
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }  
+    }
+
+    @PostMapping(value="/membership/edit")
+    public ResponseEntity<String> editMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
+    	try {
+    		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
+    		membershipService.update(
+    				partDto.getId(), //
+    				MembershipDto.builder()
+    				.id(0)
+    				.name(memberFormDto.getName())
+    				.code(memberFormDto.getCode())
+    				.password(memberFormDto.getPassword())
+    				.partDto(partDto)
+    				.role(Role.USER)
+    				.employmentStatus(EmploymentState.EMPLOYMENT)
+    				.build()
+    				);
+    	}catch(IllegalStateException e) {
+    		String response = "서버에서 받은 데이터:"
+    				+ "이름=" + memberFormDto.getName()
+    				+ ", 코드=" + memberFormDto.getCode()
+		    		+ ", pw=" + memberFormDto.getPassword()
+		    		+ ", partid=" + memberFormDto.getPartDtoId()
+		    		+ ", empl=" + memberFormDto.getEmploymentStatus()
+		    		;
+            return new ResponseEntity<>(response, HttpStatus.OK);
+    	}
+    	String response = "서버에서 받은 데이터:"
+				+ "이름=" + memberFormDto.getName()
+				+ ", 코드=" + memberFormDto.getCode()
+	    		+ ", pw=" + memberFormDto.getPassword()
+	    		+ ", partid=" + memberFormDto.getPartDtoId()
+	    		+ ", empl=" + memberFormDto.getEmploymentStatus()
+	    		;
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
     
     /**
      * 2023-10-25 paging용

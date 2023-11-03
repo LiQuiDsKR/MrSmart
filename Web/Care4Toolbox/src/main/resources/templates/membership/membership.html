@@ -264,34 +264,34 @@
 												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio9" name="radio-group" checked="" value="EMPLOYMENT">
-														<label for="radio9"></label>
+														<input type="radio" id="addFormRadio0" name="radio-group" checked="" value="EMPLOYMENT">
+														<label for="addFormRadio0"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
-													<label for="radio9">재직</label>
+													<label for="addFormRadio0">재직</label>
 												</div>
 	
 												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio8" name="radio-group" value="LEAVE_OF_ABSENCE">
-														<label for="radio8"></label>
+														<input type="radio" id="addFormRadio1" name="radio-group" value="LEAVE_OF_ABSENCE">
+														<label for="addFormRadio1"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
-													<label for="radio8">휴직</label>
+													<label for="addFormRadio1">휴직</label>
 												</div>
 	
 												<div class="col-3 d-flex align-items-center">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio7" name="radio-group" value="RESIGNATION">
-														<label for="radio7"></label>
+														<input type="radio" id="addFormRadio2" name="radio-group" value="RESIGNATION">
+														<label for="addFormRadio2"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
-													<label for="radio7" class="c4">퇴사</label>
+													<label for="addFormRadio2" class="c4">퇴사</label>
 												</div>
 												</div>
 											</div>
@@ -319,126 +319,115 @@
 						<div class="modal-content">
 							<!-- Modal Body -->
 							<div class="modal-body">
-								<form action="#">
+								<form>
 									<div class="media flex-column flex-sm-row">
-										<div
-											class="modal-upload-avatar mr-0 mr-sm-3 mr-md-5 mb-5 mb-sm-0">
-											<div class="attach-file style--two mb-3">
-												<img
-													th:src="@{/img/product/pg2.png}"
-													class="profile-avatar"
-													alt="" />
-												<div class="upload-button">
-													<img
-														th:src="@{/img/svg/gallery.svg}"
-														alt=""
-														class="svg mr-2" />
-													<span>Upload Photo</span>
-													<input
-														class="file-input"
-														type="file"
-														id="fileUpload2"
-														accept="image/*" />
-												</div>
-											</div>
-
-											<div class="content">
-												<h4 class="mb-2">Upload a Photo</h4>
-												<p class="font-12 c4">
-													Allowed JPG, GIF or PNG. Max size <br />
-													of 800kB
-												</p>
-											</div>
-										</div>
-
 										<div class="contact-account-setting media-body">
-											<h4 class="mb-4">Account Settings</h4>
-
+											<h1 class="mb-4">직원 정보 수정</h1>											
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="editFormName"
+													>이름</label>
+												<input
+													type="text"
+													id="editFormName"
+													class="theme-input-style"
+													placeholder="이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-4">
+												<label for="editFormCode" class="mb-2 black bold"
+													>사원번호</label
+												>
+												<input
+													type="number"
+													class="theme-input-style"
+													id="editFormCode"
+													placeholder="사원번호를 입력하세요" 
+													required />
+											</div>
 											<div class="mb-4">
-												<label class="bold black mb-2" for="as_name2"
-													>Name</label
+												<label class="bold black mb-2" for="editFormPassword"
+													>비밀번호</label
 												>
 												<input
 													type="text"
-													id="as_name2"
+													id="editFormPassword"
 													class="theme-input-style"
-													value="Arden Spencer"
+													placeholder="비밀번호를 입력하세요"
 													required />
 											</div>
-
-											<div class="mb-4">
-												<label class="bold black mb-2" for="as_email2"
-													>Email</label
-												>
-												<input
-													type="email"
-													id="as_email2"
-													class="theme-input-style"
-													value="Evangeline62@yahoo.com"
-													required />
-											</div>
-
-											<div class="mb-4">
-												<label class="bold black mb-2" for="as_phone2"
-													>Phone</label
-												>
-												<input
-													type="text"
-													id="as_phone2"
-													class="theme-input-style"
-													value="(023) 708-6818 x4267"
-													required />
-											</div>
-
-											<div class="mb-4">
-												<label class="bold black mb-2" for="as_age2"
-													>Age</label
-												>
-												<input
-													type="text"
-													id="as_age2"
-													class="theme-input-style"
-													value="28"
-													required />
-											</div>
-
-											<div class="mb-4">
-												<label class="bold black mb-2" for="as_post2"
-													>Post</label
-												>
-												<input
-													type="text"
-													id="as_post2"
-													class="theme-input-style"
-													value="UX Researcher"
-													required />
-											</div>
-
-											<div class="mb-30">
-												<label class="bold black mb-2"
-													>Joining Date</label
-												>
-
-												<div
-													class="date datepicker dashboard-date style--two"
-													id="datePickerExample2">
-													<span class="input-group-addon mr-0"><img
-															th:src="@{/img/svg/calender.svg}"
-															alt=""
-															class="svg"
-													/></span>
-													<input type="text" class="pl-2" required />
+											<div class="form-group mb-4">
+												<div class="row">
+													<div class="col-4">
+														<label for="editFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="editFormMainPartSelect">
+																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="editFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="editFormSubPartSelect">
+																
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="editFormPartSelect" class="mb-2 black bold d-block">Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="editFormPartSelect">
+																
+															</select>
+														</div>
+													</div>
 												</div>
 											</div>
-
-											<div class="">
-												<a href="#" class="btn mr-4">Save Changes</a>
+											<div id="editFormRadios" class="form-group mb-4">
+												<label for="editFormRadios"class="mb-3 font-14 bold">재직 상태</label>
+												
+												<div class="row">
+												<div class="col-3 d-flex align-items-center mb-3">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="edirFormRadio0" name="radio-group" checked="" value="EMPLOYMENT">
+														<label for="edirFormRadio0"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="edirFormRadio0">재직</label>
+												</div>
+	
+												<div class="col-3 d-flex align-items-center mb-3">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="edirFormRadio1" name="radio-group" value="LEAVE_OF_ABSENCE">
+														<label for="edirFormRadio1"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="edirFormRadio1">휴직</label>
+												</div>
+	
+												<div class="col-3 d-flex align-items-center">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="edirFormRadio2" name="radio-group" value="RESIGNATION">
+														<label for="edirFormRadio2"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="edirFormRadio2" class="c4">퇴사</label>
+												</div>
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="editFormBtn" class="btn mr-4" type="button">저장</button>
 												<a
 													href="#"
 													class="cancel font-14 bold"
 													data-dismiss="modal"
-													>Cancel</a
-												>
+													>취소</a>
 											</div>
 										</div>
 									</div>
@@ -465,6 +454,11 @@
 			document.getElementById("addFormPartSelect")
 		],
 		[
+			document.getElementById("editFormMainPartSelect"),
+			document.getElementById("editFormSubPartSelect"),
+			document.getElementById("editFormPartSelect")
+		],
+		[
 			document.getElementById("searchMainPartSelect"),
 			document.getElementById("searchSubPartSelect"),
 			document.getElementById("searchPartSelect")
@@ -483,21 +477,22 @@
 	})
 	
 	
-	//231025 검색 기능
 	$(document).ready(function(){
-           /*
-            $("#searchBtn").on("click",function(e) {
-                e.preventDefault();
-                page(0);
-            });
-            */
+		
+		//231025 검색 기능
+       /*
+        $("#searchBtn").on("click",function(e) {
+            e.preventDefault();
+            page(0);
+        });
+        */
             
             
 		var table = $('#datatable').DataTable({
 			"paging": true,          // 페이지네이션 사용
 			"pageLength": 10, 		// 페이지당 항목 수
 			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
-			"searching": true,       // 검색 기능 사용
+			"searching": false,       // 검색 기능 사용
 			"ordering": true,        // 정렬 기능 사용
 			"order":[
 				[0,'asc']
@@ -505,19 +500,35 @@
 			"info": true,            // 정보 표시
 			"autoWidth": false,      // 너비 자동 조정 비활성화
 			"serverSide": true,
-			"processing": false,
+			"processing": true,
 			"ajax": {
 				"url": "/membership/getpage", // 데이터를 가져올 엔드포인트 URL
-				"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
-				"data": function (data) {
-					// 페이지 번호와 페이지 크기 추가
-					var currentPage = Math.floor(data.start / data.length); // 페이지 번호
-					var pageSize = data.length; // 페이지 크기
-					
-					// 페이지 번호가 NaN인 경우 0으로 설정
-					data.page = isNaN(currentPage) ? 0 : currentPage;
-					data.size = pageSize; // 페이지 크기 설정
+				//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (d) {
+					var data = {
+			           "page": parseInt(d.start / d.length),
+			           "size": d.length,	
+			           //"order": columnsDefine[d.order[0].column].column,
+			           //"search": 'tagid',
+			           //"direction": d.order[0].dir.toUpperCase(),
+			           //"keyword": d.search.value
+			        };
+			        return data;
 				},
+				"dataFilter": function (data) {
+					data.dataSrc="content";
+					data = JSON.parse(data);
+					var json = {
+						recordsTotal: data.totalElements,
+						recordsFiltered: data.totalElements,
+						data: data.content
+					};  
+					console.log("filtered ",data);
+					return JSON.stringify(json)
+			    },
+			    "complete":function(data){
+					console.log(data);
+				}
 			},
 			
 			"columns": [
@@ -595,9 +606,23 @@
 				}
 			]
 		});
+		table.on('click', '.contact-edit', function() {
+	        var data = table.row($(this).parents('tr')).data();
+	        console.log(data);
+			document.getElementById('editFormName').value = data.name;
+            document.getElementById('editFormCode').value = data.code;
+            document.getElementById('editFormPassword').value = data.password;
+            document.getElementById('editFormMainPartSelect').value = data.partDto.subPartDto.mainPartDto.id;
+            document.getElementById('editFormSubPartSelect').value = data.partDto.subPartDto.id;
+            document.getElementById('editFormPartSelect').value = data.partDto.id;
+            //document.getElementById("editFormRadio0"),
+	    });
 	});
-	
-	//231025 검색과 함께 페이징
+    
+    
+	//231025 검색과 함께 페이징 
+	// for querydsl 
+	/*
     function page(page){
         var searchPartDto = $("#searchPartSelect").val();
         var searchRole = $("#searchRoleSelect").val();
@@ -611,7 +636,7 @@
         + "?searchBy=" + searchBy
         + "&searchQuery=" + searchQuery;
     }
-	
+	*/
 	
 	//fetch subparts & parts
     function loadSubParts(mainPartId) {
@@ -649,17 +674,27 @@
 		console.log(e);
 		e.preventDefault();
 		post(
-			"/setting/membership_setting2/new",
+			"membership/new",
 			{
                 name: document.getElementById('addFormName').value,
                 code: document.getElementById('addFormCode').value,
-                
                 password: document.getElementById('addFormPassword').value,
-                partDtoId: (document.getElementById('addFormPartSelect').value) //parseint는 걍 controller에서 하기로
-                //employmentState: document.getElementById('addFormRadios').value,
+                partDtoId: (document.getElementById('addFormPartSelect').value), //parseint는 걍 controller에서 하기로
+                employmentStatus: document.getElementById("addFormRadio0"),
             },
-			"/setting/membership_setting2");
-	})
+			"membership"
+		);
+	});
+	$("#editFormBtn").click(e=>{
+		e.preventDefault();
+		post(
+			"membership/edit",
+			{
+				
+			},
+			"membership"
+		);
+	});
 	
 	function post(url,paramData,redirection){
 		fetch(url, {

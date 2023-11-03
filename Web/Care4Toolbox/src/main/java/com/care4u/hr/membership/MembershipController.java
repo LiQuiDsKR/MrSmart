@@ -115,9 +115,11 @@ public class MembershipController {
     /**
      * 23-10-29 박경수
      * 원래 있던거랑 이거랑 합침
+     * 로그인/회원가입 과 관련. 일단 주석처리
+     * 
      * @param model
      * @return
-     */
+
     @GetMapping(value = "/new")
     public String newForm(Model model){
         model.addAttribute("membershipFormDto", MembershipFormDto.builder()
@@ -158,5 +160,7 @@ public class MembershipController {
         model.addAttribute("loginErrorMsg", "아이디 또는 비밀번호를 확인해주세요");
         return "/membership/loginForm";
     }
+    
+         */
     
 }
