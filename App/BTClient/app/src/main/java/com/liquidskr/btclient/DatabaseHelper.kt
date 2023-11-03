@@ -5,7 +5,10 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
-import android.util.Log
+import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.tool.Tool
+import java.lang.reflect.Member
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -144,7 +147,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         toolUnit: String,
         toolPrice: Int,
         toolReplacementCycle: Int,
-        toolBuyCode: String
+        //toolBuyCode: String
     ): Long {
         val values = ContentValues()
         values.put(COLUMN_TOOL_ID, toolId)
@@ -157,7 +160,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_TOOL_UNIT, toolUnit)
         values.put(COLUMN_TOOL_PRICE, toolPrice)
         values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
-        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+        //values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_TOOL_NAME, null, values)
@@ -176,7 +179,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         toolUnit: String,
         toolPrice: Int,
         toolReplacementCycle: Int,
-        toolBuyCode: String
+        //toolBuyCode: String
     ): Int {
         val values = ContentValues()
         values.put(COLUMN_TOOL_MAINGROUP, toolMaingroup)
@@ -188,7 +191,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_TOOL_UNIT, toolUnit)
         values.put(COLUMN_TOOL_PRICE, toolPrice)
         values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
-        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+        //values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
 
         val db = this.writableDatabase
         val updatedRows = db.update(TABLE_TOOL_NAME, values, "$COLUMN_TOOL_ID = ?", arrayOf(toolId.toString()))
@@ -197,20 +200,63 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
-    fun getMembershipNameByCode(codeToFind: String): String? {
+    fun getMembershipByCode(codeToFind: String): MembershipSQLite {
         val db = this.readableDatabase
-        var name: String? = null
+        val query = "SELECT $COLUMN_Membership_ID, $COLUMN_Membership_NAME, $COLUMN_Membership_CODE, $COLUMN_Membership_PASSWORD, $COLUMN_Membership_PART, $COLUMN_Membership_SUBPART, $COLUMN_Membership_MAINPART, $COLUMN_Membership_ROLE, $COLUMN_Membership_EMPLOYMENT_STATE FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
+        val selectionArgs = arrayOf(codeToFind)
+        lateinit var membershipSQLite: MembershipSQLite
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_Membership_ID))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_CODE))
+            val password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
+            val part = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PART))
+            val subPart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_SUBPART))
+            val mainPart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_MAINPART))
+            val role = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_ROLE))
+            val employmentStatus = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_EMPLOYMENT_STATE))
+
+            membershipSQLite = MembershipSQLite(id, name, code, password, part, subPart, mainPart, role, employmentStatus)
+        }
+
+        cursor.close()
+        db.close()
+        return membershipSQLite
+    }
+
+    @SuppressLint("Range")
+    fun getMembershipPasswordById(codeToFind: String): String? {
+        val db = this.readableDatabase
+        var password: String? = null
+        val query = "SELECT $COLUMN_Membership_PASSWORD FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
+        val selectionArgs = arrayOf(codeToFind)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
+        }
+
+        cursor.close()
+        db.close()
+        return password
+    }
+    @SuppressLint("Range")
+    fun getMembershipNameById(codeToFind: String): String? {
+        val db = this.readableDatabase
+        var password: String? = null
         val query = "SELECT $COLUMN_Membership_NAME FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
         val selectionArgs = arrayOf(codeToFind)
 
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
-            name = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
+            password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
         }
 
         cursor.close()
         db.close()
-        return name
+        return password
     }
 
     @SuppressLint("Range")
@@ -229,4 +275,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return name
     }
+    @SuppressLint("Range")
+    fun getAllUsers(): List<User> {
+        val userList = mutableListOf<User>()
+        val query = "SELECT * FROM $TABLE_Membership_NAME"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_Membership_ID))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_CODE))
+            val password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
+            val part = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PART))
+            val subpart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_SUBPART))
+            val mainpart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_MAINPART))
+            val role = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_ROLE))
+            val employmentState = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_EMPLOYMENT_STATE))
+
+            val user = User(id, code, password, name, part, subpart, mainpart, role, employmentState)
+            userList.add(user)
+        }
+
+        cursor.close()
+        db.close()
+
+        return userList
+    }
+
 }
