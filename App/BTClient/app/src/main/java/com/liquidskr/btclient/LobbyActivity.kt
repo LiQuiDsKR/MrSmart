@@ -3,12 +3,16 @@ package com.liquidskr.btclient
 import android.os.Bundle
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import com.liquidskr.fragment.ManagerFragment
+import com.liquidskr.fragment.UserListFragment
+import com.liquidskr.fragment.WorkerFragment
 
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
     lateinit var managerBtn: ImageButton
     lateinit var dbSyncBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
+    private var workerFragment: WorkerFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +47,8 @@ class LobbyActivity  : AppCompatActivity() {
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()
+        } else if (workerFragment != null) {
+            workerFragment?.popBackStack()
         } else {
             super.onBackPressed()
         }

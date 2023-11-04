@@ -1,15 +1,16 @@
-package com.liquidskr.btclient
+package com.liquidskr.fragment
 
 import android.os.Bundle
-import android.provider.ContactsContract.Data
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.R
+
 class ManagerFragment : Fragment() {
     lateinit var loginBtn: ImageButton
     lateinit var idTextField: EditText
@@ -27,14 +28,19 @@ class ManagerFragment : Fragment() {
 
 
         loginBtn.setOnClickListener {
-            var code = idTextField.text.toString()
-            var dbHelper = DatabaseHelper(requireContext())
-            var password = dbHelper.getMembershipPasswordById(code)
-            var member = dbHelper.getMembershipByCode(code)
-            Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
-            if (pwTextField.text.toString().equals(password)) {
-                Toast.makeText(requireContext(),"로그인 성공", Toast.LENGTH_SHORT).show()
+            try {
+                var code = idTextField.text.toString()
+                var dbHelper = DatabaseHelper(requireContext())
+                var password = dbHelper.getMembershipPasswordById(code)
+                var member = dbHelper.getMembershipByCode(code)
+                Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
+                if (pwTextField.text.toString().equals(password)) {
+                    Toast.makeText(requireContext(),"로그인 성공", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: UninitializedPropertyAccessException) {
+                Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
+
 
         }
         /*
