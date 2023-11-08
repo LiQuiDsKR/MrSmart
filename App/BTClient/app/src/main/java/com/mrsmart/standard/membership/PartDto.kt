@@ -1,7 +1,7 @@
 package com.mrsmart.standard.membership
 
-data class Part(
+data class PartDto(
     val id: Long,
     val name: String,
-    val subPartDto: SubPart
+    val subPartDto: SubPartDto
 )

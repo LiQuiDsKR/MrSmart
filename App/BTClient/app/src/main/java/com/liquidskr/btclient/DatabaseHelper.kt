@@ -5,10 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
-import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.tool.Tool
-import java.lang.reflect.Member
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 

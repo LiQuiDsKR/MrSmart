@@ -1,8 +1,6 @@
-package com.mrsmart.standard
+package com.mrsmart.standard.page
 
-import com.mrsmart.standard.membership.Membership
-
-data class PageData(
+data class Page(
     val content: Any?,
     val pageable: Pageable,
     val totalPage: Int,

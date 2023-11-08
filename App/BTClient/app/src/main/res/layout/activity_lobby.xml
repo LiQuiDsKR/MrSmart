@@ -10,6 +10,12 @@
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            style="?android:attr/progressBarStyleHorizontal" />
 
         <LinearLayout
             android:id="@+id/titleLayout"
@@ -87,6 +93,26 @@
             android:padding="5dp">
 
             <ImageButton
+                android:id="@+id/bluetoothBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:backgroundTint="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                app:srcCompat="@drawable/lobby_db_sync" />
+
+            <ImageButton
+                android:id="@+id/testSendBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:backgroundTint="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                app:srcCompat="@drawable/lobby_db_sync" />
+
+            <ImageButton
                 android:id="@+id/DBSyncBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -95,6 +121,7 @@
                 android:scaleX="1.5"
                 android:scaleY="1.5"
                 app:srcCompat="@drawable/lobby_db_sync" />
+
         </LinearLayout>
     </FrameLayout>
 
