@@ -24,7 +24,7 @@
 	<div class="container-fluid mb-4 mb-md-0">
 		<div class="row">
 			<!-- Card -->
-			<div class="col-12 col-md-4" style="height: auto;">
+			<div class="col-12" style="height: auto;">
 				<nav class="chat_aside bg-white" style="width:auto;">
 					<!-- Header -->
 					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
@@ -49,7 +49,7 @@
 						<!-- title -->
 						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
 							<h4 class="font-20">
-								메인 부서
+								정비실 등록
 							</h4>	
 						</div>
 					</div>
@@ -73,11 +73,11 @@
 											</tr>
 										</thead>
 										<tbody>
-											<tr class="selectable" th:each="mainPart : ${mainPartList}" style="cursor:pointer;">
-												<td th:text="${mainPart.id}" hidden></td>
-												<td th:text="${mainPart.name}"></td>
+											<tr th:each="toolbox : ${toolboxList}">
+												<td th:text="${toolbox.id}" hidden></td>
+												<td th:text="${toolbox.name}"></td>
 												<td>
-													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="main_part" style="cursor:pointer;">
+													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" style="cursor:pointer;">
 														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
 													</span>
 												</td>
@@ -104,15 +104,12 @@
 								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
-											<h1 id="addFormTitle" class="mb-4">부서 정보 추가</h1>
+											<h1 id="addFormTitle" class="mb-4">정비실 정보 추가</h1>
 											<input id="addFormId" hidden></input>				
 											<div class="form-group mb-4">
 												<label class="bold black mb-2" for="addFormName"
 													>이름</label>
 												<div class="input-group addon" style="flex-wrap:nowrap;">
-													<div class="input-group-prepend">
-														<div id="addFormNameAddOn" class="input-group-text black bold">@</div>
-													</div>
 													<input
 														type="text"
 														id="addFormName"
@@ -122,31 +119,15 @@
 												</div>
 											</div>
 											<div class="form-group mb-4" hidden>
-												<div class="row">
-													<div class="col-4">
-														<label for="addFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormMainPartSelect">
-																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
-															</select>
-														</div>
-													</div>
-													<div class="col-4">
-														<label for="addFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormSubPartSelect">
-																
-															</select>
-														</div>
-													</div>
-													<div class="col-4">
-														<label for="addFormPartSelect" class="mb-2 black bold d-block">Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormPartSelect">
-																
-															</select>
-														</div>
-													</div>
+												<label class="bold black mb-2" for="addFormManagerName"
+													>정비실장</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="addFormManagerName"
+														class="theme-input-style"
+														placeholder="직원 이름을 입력하세요"
+														required />
 												</div>
 											</div>
 											<div class="mb-4">
@@ -176,15 +157,12 @@
 								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
-											<h1 id="editFormTitle" class="mb-4">부서 정보 추가</h1>	
-											<input id="editFormId" hidden></input>										
+											<h1 id="editFormTitle" class="mb-4">정비실 정보 수정</h1>
+											<input id="editFormId" hidden></input>				
 											<div class="form-group mb-4">
 												<label class="bold black mb-2" for="editFormName"
 													>이름</label>
 												<div class="input-group addon" style="flex-wrap:nowrap;">
-													<div class="input-group-prepend">
-														<div id="editFormNameAddOn" class="input-group-text black bold">@</div>
-													</div>
 													<input
 														type="text"
 														id="editFormName"
@@ -194,35 +172,19 @@
 												</div>
 											</div>
 											<div class="form-group mb-4" hidden>
-												<div class="row">
-													<div class="col-4">
-														<label for="editFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormMainPartSelect">
-																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
-															</select>
-														</div>
-													</div>
-													<div class="col-4">
-														<label for="editFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormSubPartSelect">
-																
-															</select>
-														</div>
-													</div>
-													<div class="col-4">
-														<label for="editFormPartSelect" class="mb-2 black bold d-block">Part</label>
-														<div class="custom-select style--two">
-															<select class="theme-input-style" id="addFormPartSelect">
-																
-															</select>
-														</div>
-													</div>
+												<label class="bold black mb-2" for="editFormManagerName"
+													>정비실장</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="editFormManagerName"
+														class="theme-input-style"
+														placeholder="직원 이름을 입력하세요"
+														required />
 												</div>
 											</div>
 											<div class="mb-4">
-												<button id="editFormBtn" data-post-data="null" class="btn mr-4" type="button">저장</button>
+												<button id="editFormBtn" class="btn mr-4" type="button">저장</button>
 												<a
 													href="#"
 													class="cancel font-14 bold"
@@ -246,6 +208,35 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 <script th:inline="javascript"> 	
+	document.getElementById("addFormBtn").addEventListener("click",e=>{
+		post(
+			"toolbox/new",
+			{
+				id:0,
+				name:document.getElementById("addFormName").value,
+				managerDtoCode:"100001"
+			},
+			"toolbox"
+		);
+	});
+	document.getElementById("editFormBtn").addEventListener("click",e=>{
+		post(
+			"toolbox/edit",
+			{
+				id:document.getElementById("editFormId").value,
+				name:document.getElementById("editFormName").value,
+				managerDtoCode:"100001"
+			},
+			"toolbox"
+		);
+	});
+	document.querySelectorAll("table .contact-edit").forEach(element=>{
+		element.addEventListener("click",e=>{
+			const parentTable=element.closest("table");
+			document.getElementById("editFormId").value = parseInt(parentTable.querySelector('td:nth-child(1)').textContent.trim());
+			document.getElementById("editFormName").value=parentTable.querySelector('td:nth-child(2)').textContent.trim();
+		});
+	});
 	function post(url,paramData,redirection){
 		fetch(url, {
 		  method:"POST",

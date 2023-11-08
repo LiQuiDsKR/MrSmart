@@ -27,8 +27,10 @@
 				<!-- Card -->
 				<div class="card bg-transparent">
 					<!-- Contact Header -->
-					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-30" >
-					
+					<div class="contact-header d-flex align-items-sm-center flex-row flex-wrap bg-white mb-30" >
+						<div class="col-12">
+							<!-- 직원 정보 등록 이라는 문구가 들어갈 예정 -->
+						</div>
 						<!-- Btn header -->
 						<div class="col-12 col-sm-2 d-flex align-items-center">
 							<!-- Add New Contact Btn -->
@@ -447,35 +449,6 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 <script th:inline="javascript">
-	[
-		[
-			document.getElementById("addFormMainPartSelect"),
-			document.getElementById("addFormSubPartSelect"),
-			document.getElementById("addFormPartSelect")
-		],
-		[
-			document.getElementById("editFormMainPartSelect"),
-			document.getElementById("editFormSubPartSelect"),
-			document.getElementById("editFormPartSelect")
-		],
-		[
-			document.getElementById("searchMainPartSelect"),
-			document.getElementById("searchSubPartSelect"),
-			document.getElementById("searchPartSelect")
-		],
-	].forEach(v=>{
-		//new&add form-partevent : <select>
-		v[0].addEventListener("change",e=>{
-			v[2].options.length=0;
-			v[1].options.length=0;
-			loadSubParts.apply(v[1],[parseInt(e.target.value)]);
-		});
-		v[1].addEventListener("change",e=>{
-			v[2].options.length=0;
-			loadParts.apply(v[2],[parseInt(e.target.value)]);
-		});
-	})
-	
 	
 	$(document).ready(function(){
 		
@@ -523,13 +496,9 @@
 						recordsTotal: data.totalElements,
 						recordsFiltered: data.totalElements,
 						data: data.content
-					};  
-					console.log("filtered ",data);
+					};
 					return JSON.stringify(json)
-			    },
-			    "complete":function(data){
-					console.log(data);
-				}
+			    }
 			},
 			"columnDefs":[
 				{
@@ -614,7 +583,6 @@
 		});
 		table.on('click', '.contact-edit', function() {
 	        var data = table.row($(this).parents('tr')).data();
-	        console.log(data);
 			document.getElementById('editFormName').value = data.name;
             document.getElementById('editFormCode').value = data.code;
             document.getElementById('editFormPassword').value = data.password;
@@ -627,7 +595,6 @@
             .then(resolved=>
             	document.getElementById('editFormPartSelect').value = data.partDto.id
             );
-            console.log(data.employmentStatus)
             document.getElementsByName("editFormRadio").forEach(e=>{
 				e.checked=false;
 			});
@@ -649,8 +616,74 @@
 			table.draw();
 		});
 	});
-    
-    
+    $("#addFormBtn").click(e=>{
+		e.preventDefault();
+		post(
+			"membership/new",
+			{
+                name: document.getElementById('addFormName').value,
+                code: document.getElementById('addFormCode').value,
+                password: document.getElementById('addFormPassword').value,
+                partDtoId: parseInt(document.getElementById('addFormPartSelect').value), //parseint는 걍 controller에서 하기로
+                employmentStatus:function(){
+						const radios= document.getElementsByName("addFormRadio");
+						for(let i=0;i<radios.length;i++){
+							if (radios[i].checked) {return radios[i].value;}
+						}
+					}()
+            },
+			"membership"
+		);
+	});
+	$("#editFormBtn").click(e=>{
+		e.preventDefault();
+		post(
+			"membership/edit",
+			{
+				name: document.getElementById('editFormName').value,
+                code: document.getElementById('editFormCode').value,
+                password: document.getElementById('editFormPassword').value,
+                partDtoId:parseInt(document.getElementById('editFormPartSelect').value), //parseint는 걍 controller에서 하기로 ??도대체 왜
+                employmentStatus:function(){
+						const radios= document.getElementsByName("editFormRadio");
+						for(let i=0;i<radios.length;i++){
+							if (radios[i].checked) {return radios[i].value;}
+						}
+					}()
+			},
+			"membership"
+		);
+	});
+	[
+		[
+			document.getElementById("addFormMainPartSelect"),
+			document.getElementById("addFormSubPartSelect"),
+			document.getElementById("addFormPartSelect")
+		],
+		[
+			document.getElementById("editFormMainPartSelect"),
+			document.getElementById("editFormSubPartSelect"),
+			document.getElementById("editFormPartSelect")
+		],
+		[
+			document.getElementById("searchMainPartSelect"),
+			document.getElementById("searchSubPartSelect"),
+			document.getElementById("searchPartSelect")
+		],
+	].forEach(v=>{
+		//new&add form-partevent : <select>
+		v[0].addEventListener("change",e=>{
+			v[2].options.length=0;
+			v[1].options.length=0;
+			loadSubParts.apply(v[1],[parseInt(e.target.value)]);
+		});
+		v[1].addEventListener("change",e=>{
+			v[2].options.length=0;
+			loadParts.apply(v[2],[parseInt(e.target.value)]);
+		});
+	});
+	
+	
 	//231025 검색과 함께 페이징 
 	// for querydsl 
 	/*
@@ -707,48 +740,6 @@
             });
         });
 	}
-	
-	
-	$("#addFormBtn").click(e=>{
-		console.log(e);
-		e.preventDefault();
-		post(
-			"membership/new",
-			{
-                name: document.getElementById('addFormName').value,
-                code: document.getElementById('addFormCode').value,
-                password: document.getElementById('addFormPassword').value,
-                partDtoId: parseInt(document.getElementById('addFormPartSelect').value), //parseint는 걍 controller에서 하기로
-                employmentStatus:function(){
-						const radios= document.getElementsByName("addFormRadio");
-						for(let i=0;i<radios.length;i++){
-							if (radios[i].checked) {return radios[i].value;}
-						}
-					}()
-            },
-			"membership"
-		);
-	});
-	$("#editFormBtn").click(e=>{
-		e.preventDefault();
-		post(
-			"membership/edit",
-			{
-				name: document.getElementById('editFormName').value,
-                code: document.getElementById('editFormCode').value,
-                password: document.getElementById('editFormPassword').value,
-                partDtoId:parseInt(document.getElementById('editFormPartSelect').value), //parseint는 걍 controller에서 하기로 ??도대체 왜
-                employmentStatus:function(){
-						const radios= document.getElementsByName("editFormRadio");
-						for(let i=0;i<radios.length;i++){
-							if (radios[i].checked) {return radios[i].value;}
-						}
-					}()
-			},
-			"membership"
-		);
-	});
-	
 	function post(url,paramData,redirection){
 		fetch(url, {
 		  method:"POST",
@@ -763,7 +754,6 @@
 		    if (!response.ok) {
 		      throw new Error(`HTTP error! Status: ${response.status}`);
 		    }
-			location.href=redirection;
 		    return response.json();
 		  })
 		  .then(data => {
@@ -771,6 +761,16 @@
 		  })
 		  .catch(error => {
 		    console.error('Error:', error);
+		    console.error('Error:', error);
+			Swal.fire({
+			  type: "error",
+			  title: "Error!",
+			  text: error,
+			});
+			setTimeout(_=>{
+			$("#contactAddModal").modal("hide");
+			$("#contactEditModal").modal("hide");
+			},0);
 		  });
 	}
 </script>

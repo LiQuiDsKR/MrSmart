@@ -21,8 +21,6 @@ public class MainGroupDto {
 	
 	private String name;
 	
-	private List<SubGroupDto> subGroupDtoList;
-	
 	@Builder
 	public MainGroupDto(long id, String name) {
 		this.id = id;

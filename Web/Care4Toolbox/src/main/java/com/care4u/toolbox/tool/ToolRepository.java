@@ -21,5 +21,7 @@ public interface ToolRepository extends JpaRepository<Tool, Long> {
 	List<Tool> findAllBySubGroupIdOrderByNameAsc(long subGroupId);
 		
 	Tool findByCode(String code);
+
+	Page<Tool> findByNameContaining(Pageable pageable, String name);
 	
 }

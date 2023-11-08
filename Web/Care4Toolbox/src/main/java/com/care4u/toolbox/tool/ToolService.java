@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.hr.membership.Membership;
+import com.care4u.hr.membership.MembershipDto;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.group.sub_group.SubGroupRepository;
@@ -56,13 +58,6 @@ public class ToolService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Page<ToolDto> list(Pageable pageable){
-		Page<Tool> toolPage = repository.findAllByOrderByNameAsc(pageable);
-		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
-		return toolPage.map(ToolDto::new);
-	}
-	
-	@Transactional(readOnly = true)
 	public List<ToolDto> listBySubGroupId(long subGroupId){
 		List<Tool> list = repository.findAllBySubGroupIdOrderByNameAsc(subGroupId);
 		return getDtoList(list);
@@ -71,8 +66,8 @@ public class ToolService {
 	public ToolDto addNew(ToolDto toolDto) throws IllegalStateException {
 		Tool findItem = repository.findByCode(toolDto.getCode());
 		if(findItem != null){
-			logger.error("이미 등옥된 코드입니다. : " + toolDto.getCode());
-			throw new IllegalStateException("이미 등옥된 코드입니다.");
+			logger.error("이미 등록된 코드입니다. : " + toolDto.getCode());
+			throw new IllegalStateException("이미 등록된 코드입니다.");
 		}
 		return update(toolDto.getSubGroupDto().getId(), toolDto);
 	}
@@ -101,4 +96,16 @@ public class ToolService {
 		return dtoList;
 	}
 
+	@Transactional(readOnly = true)
+	public Page<ToolDto> getToolPageByName(Pageable pageable, String name){
+		Page<Tool> membershipPage = repository.findByNameContaining(pageable, name);
+		return membershipPage.map(ToolDto::new);
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ToolDto> getToolPage(Pageable pageable){
+		Page<Tool> toolPage = repository.findAllByOrderByNameAsc(pageable);
+		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
+		return toolPage.map(ToolDto::new);
+	}
 }

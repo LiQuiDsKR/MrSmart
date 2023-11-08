@@ -28,12 +28,7 @@ public class MainController {
         return "index";
     }
     
-    @GetMapping(value = "/crm-index")
-    public String crmIndex(Model model){
-    	
-        return "crm-index";
-    }
-    
+    /*
     
     @GetMapping(value = "/tool_list")
     public String getToolList(@RequestParam(name = "page", defaultValue = "0") int page,
@@ -71,5 +66,6 @@ public class MainController {
         
         return ResponseEntity.ok(toolPage);
     }
+    */
    
 }

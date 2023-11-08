@@ -10,6 +10,7 @@ import com.care4u.constant.EmploymentState;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -26,8 +27,8 @@ public class ToolFormDto {
     
     private String engName;
     
-    @NotEmpty(message = "분류는 필수 입력 값입니다.")
-    private String subGroupDto;
+    @NotNull(message = "분류는 필수 입력 값입니다.")
+    private Long subGroupDtoId;
     
     private String spec;
     

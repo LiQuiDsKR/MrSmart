@@ -58,9 +58,13 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		return new MembershipDto(repository.save(membership));
 	}
 
-	public Membership loadUserByCode(String code) {
-		Membership member = repository.findByCode(code);                        
-		return member;
+	public MembershipDto loadUserByCode(String code) {
+		Membership membership = repository.findByCode(code);
+		if (membership==null) {
+			logger.error("Invalid code : " + code);
+			return null;
+		}
+		return new MembershipDto(membership);
 	}
 	
 	/**

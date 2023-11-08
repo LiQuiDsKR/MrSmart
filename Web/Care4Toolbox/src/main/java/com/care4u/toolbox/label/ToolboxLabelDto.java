@@ -19,6 +19,8 @@ public class ToolboxLabelDto {
 	
 	private ToolDto toolDto;
 	
+	private String qrcode;
+	
 	@Builder
 	public ToolboxLabelDto(long id, ToolboxDto toolboxDto, String location, ToolDto toolDto) {
 		this.id = id;

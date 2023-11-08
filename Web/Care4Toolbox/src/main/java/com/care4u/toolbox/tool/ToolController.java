@@ -43,42 +43,26 @@ public class ToolController {
 	private MainGroupService mainGroupService;
 	
 	@Autowired
-	private SubGroupService aubGroupService;
+	private SubGroupService subGroupService;
     
-    /**
-     * 2023-10-25 paging용
-     * @param toolSearchDto
-     * @param page
-     * @param model
-     * @return
-     */
     @GetMapping(value = "")
-    public String itemManage(/*ToolSearchDto toolSearchDto,*/ @PathVariable("page") Optional<Integer> page, Model model){
+    public String toolPage(/*ToolSearchDto toolSearchDto,*/ @PathVariable("page") Optional<Integer> page, Model model){
 
         Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);
-        Page<ToolDto> toolPage = toolService.list(pageable);
+        Page<ToolDto> toolPage = toolService.getToolPage(pageable);
         
         for (ToolDto item : toolPage.getContent()) {
         	logger.info(item.toString());
         }
         
-        List<MainGroupDto> mainGroupDtoList = mainGroupService.list();
-        for (MainGroupDto mainGroupDto : mainGroupDtoList) {
-        	mainGroupDto.setSubGroupDtoList(aubGroupService.listByMainGroupId(mainGroupDto.getId()));
-        }
-        
-        
-    	List<ToolboxDto> toolboxDtoList = toolboxService.list();
+    	List<MainGroupDto> mainGroupDtoList = mainGroupService.list();
     	ToolFormDto toolFormDto = new ToolFormDto();
     	
-        model.addAttribute("toolPage", toolPage); //tools는 page객체입니다
+        model.addAttribute("toolPage", toolPage);
         //model.addAttribute("toolSearchDto", toolSearchDto);
-        model.addAttribute("maxPage", 10); 
+        //model.addAttribute("maxPage", 10); 
         
-    	model.addAttribute("toolboxDtoList", toolboxDtoList);
-    	
     	model.addAttribute("mainGroupDtoList", mainGroupDtoList);
-    	
     	
     	//아래 두 개는 form용
     	model.addAttribute("toolFormDto",toolFormDto);
@@ -86,91 +70,4 @@ public class ToolController {
 
         return "tool/tool";
     }
-    
-   /*	
-    @GetMapping(value = "/group_setting")
-    public String getMainGroup(Model model){
-    	List<MainGroupDto> mainGroupList = mainGroupService.list();
-    	
-    	
-    	model.addAttribute("mainGroupList", mainGroupList);
-    	
-        return "setting/group_setting";
-    }
-    
-    @GetMapping(value = "/list_subgroup")
-    public List<SubGroupDto> getMainGroup(@RequestParam("mainGroupId") long mainGroupId){
-    	//List<SubGroupDto> subGroupList = subGroupService.listByMainGroupId(mainGroupId);
-    	List<SubGroupDto> subGroupList = new ArrayList<SubGroupDto>();
-    	
-        return subGroupList;
-    }
-    
-    @PostMapping(value = "/group_setting/set")
-    public String updateMainGroup(@Valid MainGroupDto mainGroupDto, BindingResult bindingResult, Model model){
-    	if(bindingResult.hasErrors()){
-            return "tool/newForm";
-        }
-    	
-    	
-    	MainGroupDto mainGroupList = mainGroupService.update(mainGroupDto);
-    	
-    	model.addAttribute("mainGroupList", mainGroupList);
-    	
-        return "setting/group_setting";
-    }
-    
-    */      
-    
-    /**
-     * 23-10-29 박경수
-     * 원래 있던거랑 이거랑 합침
-     * 로그인/회원가입 과 관련. 일단 주석처리
-     * 
-     * @param model
-     * @return
-
-    @GetMapping(value = "/new")
-    public String newForm(Model model){
-        model.addAttribute("toolFormDto", toolFormDto.builder()
-        		.name(null)
-        		.code(null)
-        		.password(null)
-        		.partDtoId(null).build());
-        return "tool/newForm";
-    }
-
-    @PostMapping(value = "/new")
-    public String addNew(@Valid toolFormDto toolFormDto, BindingResult bindingResult, Model model){
-
-        if(bindingResult.hasErrors()){
-            return "tool/newForm";
-        }
-
-        try {
-            tool item = tool.builder()
-            							.memberFormDto(toolFormDto)
-            							.build();
-            toolService.addNew(item);
-        } catch (IllegalStateException e){
-            model.addAttribute("errorMessage", e.getMessage());
-            return "tool/newForm";
-        }
-
-        return "redirect:/";
-    }
-
-    @GetMapping(value = "/login")
-    public String login(){
-        return "/tool/loginForm";
-    }
-
-    @GetMapping(value = "/login/error")
-    public String loginError(Model model){
-        model.addAttribute("loginErrorMsg", "아이디 또는 비밀번호를 확인해주세요");
-        return "/tool/loginForm";
-    }
-    
-         */
-    
 }

@@ -27,6 +27,7 @@ import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.google.gson.Gson;
 
 @RestController
 public class ToolRestController {
@@ -40,9 +41,11 @@ public class ToolRestController {
 	private SubGroupService subGroupService;
 	
     @PostMapping(value="/tool/new")
-    public ResponseEntity<String> newMembership(@Valid @RequestBody ToolFormDto toolFormDto){
+    public ResponseEntity<String> newTool(@Valid @RequestBody ToolFormDto toolFormDto){
+
+		Gson gson = new Gson();
     	try {
-    		SubGroupDto subGroupDto = subGroupService.get(Long.parseLong(toolFormDto.getSubGroupDto()));
+    		SubGroupDto subGroupDto = subGroupService.get(toolFormDto.getSubGroupDtoId());
     		toolService.addNew(
     				ToolDto.builder()
     				.id(0)
@@ -58,10 +61,37 @@ public class ToolRestController {
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"+toolFormDto.toString();
+    		String response = gson.toJson(toolFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-    	String response = "서버에서 받은 데이터:"+toolFormDto.toString();
+    	String response = gson.toJson(toolFormDto);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping(value="/tool/edit")
+    public ResponseEntity<String> editTool(@Valid @RequestBody ToolFormDto toolFormDto){
+    	Gson gson = new Gson();
+    	try {
+    		SubGroupDto subGroupDto = subGroupService.get(toolFormDto.getSubGroupDtoId());
+    		toolService.update(
+    				subGroupDto.getId(),
+    				ToolDto.builder()
+    				.id(0)
+    				.name(toolFormDto.getName())
+    				.engName(toolFormDto.getEngName())
+    				.code(toolFormDto.getCode())
+    				.buyCode(toolFormDto.getBuyCode())
+    				.subGroupDto(subGroupDto)
+    				.spec(toolFormDto.getSpec())
+    				.unit(toolFormDto.getUnit())
+    				.price(toolFormDto.getPrice())
+    				.replacementCycle(toolFormDto.getReplacementCycle())
+    				.build()
+    				);
+    	}catch(IllegalStateException e) {
+        	String response = gson.toJson(toolFormDto);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+    	}
+    	String response = gson.toJson(toolFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
@@ -74,15 +104,16 @@ public class ToolRestController {
      * @return
      */
     @GetMapping(value="/tool/getpage")
-    public ResponseEntity<Page<ToolDto>> getMembershipPage(
+    public ResponseEntity<Page<ToolDto>> getToolPage(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "name", defaultValue = "") String name
             ){
 
     	logger.info("page=" + page + ", size=" + size);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<ToolDto> toolPage = toolService.list(pageable);
+        Page<ToolDto> toolPage = toolService.getToolPageByName(pageable,name);
         
         for (ToolDto item : toolPage.getContent()) {
         	logger.info(item.toString());
