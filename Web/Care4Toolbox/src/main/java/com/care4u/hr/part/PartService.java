@@ -76,7 +76,7 @@ public class PartService {
 		Optional<SubPart> subPart = subPartRepository.findById(subPartId);
 		if (subPart.isEmpty()) {
 			logger.error("Invalid subPartId : " + subPartId);
-			throw new IllegalStateException("등록되지 않은 그룹입니다.");
+			throw new IllegalStateException("등록되지 않은 서브 부서입니다.");
 		}
 		
 		Part part = repository.findBySubPartIdAndName(subPartId, partDto.getName());
@@ -88,11 +88,26 @@ public class PartService {
 		return new PartDto(repository.save(part));
 	}
 	
+	public PartDto update(PartDto partDto) throws IllegalStateException {
+		Optional<SubPart> subPart = subPartRepository.findById(partDto.getSubPartDto().getId());
+		if (subPart.isEmpty()) {
+			logger.error("Invalid subPartId : " + partDto.getSubPartDto().getId());
+			throw new IllegalStateException("등록되지 않은 서브 부서입니다.");
+		}
+		
+		Part part = repository.findById(partDto.getId()).get();
+		if (part==null) {
+			part = new Part();
+		}
+		part.update(subPart.get(),partDto);
+		
+		return new PartDto(repository.save(part));
+	}
+	
 	private List<PartDto> getDtoList(List<Part> list){
 		List<PartDto> dtoList = new ArrayList<PartDto>();
 		for (Part item : list) {
 			dtoList.add(new PartDto(item));
-			
 		}
 		return dtoList;
 	}

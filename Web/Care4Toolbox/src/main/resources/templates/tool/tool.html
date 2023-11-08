@@ -50,7 +50,7 @@
 						</div>
 						<!-- Search header -->
 						<form
-							action="@{${membershipPage.number}}"
+							action="@{'member_setting2/'+${memberships.number}}"
 							role="form"
 							method="get"
 							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0"
@@ -63,7 +63,6 @@
 									<div class="theme-input-group style--two">
 										<input
 											id="searchInput"
-											th:field="*{searchQuery}"
 											type="text"
 											class="theme-input-style"
 											placeholder="검색" />
@@ -80,70 +79,7 @@
 						
 							<!-- layer 2 -->
 							<!-- Search Condition header -->
-							<div class="row m-2" style="width:100%; box-sizing: content-box;">
-								<div style="justify-content:end; width:100%;">
-								
-									<div class="row" style="width:100%; box-sizing: content-box; margin:0px;">
-										<!-- part는 생각해보니까 적용하기가 까다로와갖고 일단 hidden -->
-										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
-											<label for="searchMainPartSelect" class="m-1 black bold d-block">Main Part</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchMainPartSelect">
-													<option value="">전체</option>
-													<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
-												</select>
-											</div>
-										</div>
-										<div class="col-4 col-xl-2"style="padding-left:5px;padding-right:5px;">
-											<label for="searchSubPartSelect" class="m-1 black bold d-block">Sub Part</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchSubPartSelect">
-													<option value="">전체</option>
-												</select>
-											</div>
-										</div>
-										<div class="col-4 col-xl-2"style="padding-left:5px;padding-right:5px;">
-											<label for="searchPartSelect" class="m-1 black bold d-block">Part</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchPartSelect">
-													<option value="">전체</option>
-												</select>
-											</div>
-										</div>
-										<!--여기까지 part-->
-										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
-											<label for="searchRoleSelect" class="m-1 black bold d-block">Role</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchRoleSelect">
-													<!--<option value="USER">전체</option>-->
-													<option th:each="role : ${roles}"th:value="${role}" th:text="${role}" th:field="*{searchRole}">name?</option>
-												</select>
-											</div>
-										</div>
-										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
-											<label for="searchEmploymentStateSelect" class="m-1 black bold d-block">상태</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchEmploymentStateSelect">
-													<!--<option value="EMPLOYMENT">전체</option>-->
-													<option th:each="employmentStatus : ${employmentStates}"th:value="${employmentStatus}" th:text="${employmentStatus}" th:field="*{searchEmploymentStatus}">name?</option>
-												</select>
-											</div>
-										</div>
-										<div class="col-4 col-xl-2" style="padding-left:5px;padding-right:5px;">
-											<label for="searchBy" class="m-1 black bold d-block" id="search">로 검색</label>
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="searchBy" th:field="*{searchBy}">
-													<option value="">전체</option>									
-													<option value="name">이름</option>
-													<option value="id">아이디</option>
-													<option value="code">사원번호</option>
-												</select>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</form>
+							
 						<!-- End Search Condition -->
 					</div>
 	
@@ -159,19 +95,28 @@
 										이름
 									</th>
 									<th>
-										사원번호
+										영문이름
 									</th>
 									<th>
-										부서
+										품목번호
 									</th>
 									<th>
-										Role
+										대분류
 									</th>
 									<th>
-										상태
+										중분류
 									</th>
 									<th>
-										비밀번호
+										스펙
+									</th>
+									<th>
+										단위
+									</th>
+									<th>
+										가격
+									</th>
+									<th>
+										교체주기
 									</th>
 									<th>수정</th>
 								</tr>
@@ -261,10 +206,10 @@
 												<label for="addFormRadios"class="mb-3 font-14 bold">재직 상태</label>
 												
 												<div class="row">
-												<div class="col-3 d-flex align-items-center">
+												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="addFormRadio0" name="addFormRadio" checked="" value="EMPLOYMENT">
+														<input type="radio" id="addFormRadio0" name="radio-group" checked="" value="EMPLOYMENT">
 														<label for="addFormRadio0"></label>
 													</div>
 													<!-- End Custom Radio -->
@@ -272,10 +217,10 @@
 													<label for="addFormRadio0">재직</label>
 												</div>
 	
-												<div class="col-3 d-flex align-items-center">
+												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="addFormRadio1" name="addFormRadio" value="LEAVE_OF_ABSENCE">
+														<input type="radio" id="addFormRadio1" name="radio-group" value="LEAVE_OF_ABSENCE">
 														<label for="addFormRadio1"></label>
 													</div>
 													<!-- End Custom Radio -->
@@ -286,7 +231,7 @@
 												<div class="col-3 d-flex align-items-center">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="addFormRadio2" name="addFormRadio" value="RESIGNATION">
+														<input type="radio" id="addFormRadio2" name="radio-group" value="RESIGNATION">
 														<label for="addFormRadio2"></label>
 													</div>
 													<!-- End Custom Radio -->
@@ -342,7 +287,7 @@
 													class="theme-input-style"
 													id="editFormCode"
 													placeholder="사원번호를 입력하세요" 
-													disabled />
+													required />
 											</div>
 											<div class="mb-4">
 												<label class="bold black mb-2" for="editFormPassword"
@@ -387,37 +332,37 @@
 												<label for="editFormRadios"class="mb-3 font-14 bold">재직 상태</label>
 												
 												<div class="row">
-												<div class="col-3 d-flex align-items-center">
+												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="editFormRadio0" name="editFormRadio" checked="" value="EMPLOYMENT">
-														<label for="editFormRadio0"></label>
+														<input type="radio" id="edirFormRadio0" name="radio-group" checked="" value="EMPLOYMENT">
+														<label for="edirFormRadio0"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
-													<label for="editFormRadio0">재직</label>
+													<label for="edirFormRadio0">재직</label>
+												</div>
+	
+												<div class="col-3 d-flex align-items-center mb-3">
+													<!-- Custom Radio -->
+													<div class="custom-radio mr-3">
+														<input type="radio" id="edirFormRadio1" name="radio-group" value="LEAVE_OF_ABSENCE">
+														<label for="edirFormRadio1"></label>
+													</div>
+													<!-- End Custom Radio -->
+	
+													<label for="edirFormRadio1">휴직</label>
 												</div>
 	
 												<div class="col-3 d-flex align-items-center">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="editFormRadio1" name="editFormRadio" value="LEAVE_OF_ABSENCE">
-														<label for="editFormRadio1"></label>
+														<input type="radio" id="edirFormRadio2" name="radio-group" value="RESIGNATION">
+														<label for="edirFormRadio2"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
-													<label for="editFormRadio1">휴직</label>
-												</div>
-	
-												<div class="col-3 d-flex align-items-center">
-													<!-- Custom Radio -->
-													<div class="custom-radio mr-3">
-														<input type="radio" id="editFormRadio2" name="editFormRadio" value="RESIGNATION">
-														<label for="editFormRadio2"></label>
-													</div>
-													<!-- End Custom Radio -->
-	
-													<label for="editFormRadio2" class="c4">퇴사</label>
+													<label for="edirFormRadio2" class="c4">퇴사</label>
 												</div>
 												</div>
 											</div>
@@ -447,35 +392,7 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 <script th:inline="javascript">
-	[
-		[
-			document.getElementById("addFormMainPartSelect"),
-			document.getElementById("addFormSubPartSelect"),
-			document.getElementById("addFormPartSelect")
-		],
-		[
-			document.getElementById("editFormMainPartSelect"),
-			document.getElementById("editFormSubPartSelect"),
-			document.getElementById("editFormPartSelect")
-		],
-		[
-			document.getElementById("searchMainPartSelect"),
-			document.getElementById("searchSubPartSelect"),
-			document.getElementById("searchPartSelect")
-		],
-	].forEach(v=>{
-		//new&add form-partevent : <select>
-		v[0].addEventListener("change",e=>{
-			v[2].options.length=0;
-			v[1].options.length=0;
-			loadSubParts.apply(v[1],[parseInt(e.target.value)]);
-		});
-		v[1].addEventListener("change",e=>{
-			v[2].options.length=0;
-			loadParts.apply(v[2],[parseInt(e.target.value)]);
-		});
-	})
-	
+
 	
 	$(document).ready(function(){
 		
@@ -485,9 +402,7 @@
             e.preventDefault();
             page(0);
         });
-        */
-            
-            
+        */            
 		var table = $('#datatable').DataTable({
 			"paging": true,          // 페이지네이션 사용
 			"pageLength": 10, 		// 페이지당 항목 수
@@ -502,13 +417,12 @@
 			"serverSide": true,
 			"processing": true,
 			"ajax": {
-				"url": "/membership/getpage", // 데이터를 가져올 엔드포인트 URL
+				"url": "/tool/getpage", // 데이터를 가져올 엔드포인트 URL
 				//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
 				"data": function (d) {
 					var data = {
 			           "page": parseInt(d.start / d.length),
-			           "size": d.length,
-			           "name": $("#searchInput").val()
+			           "size": d.length,	
 			           //"order": columnsDefine[d.order[0].column].column,
 			           //"search": 'tagid',
 			           //"direction": d.order[0].dir.toUpperCase(),
@@ -531,12 +445,7 @@
 					console.log(data);
 				}
 			},
-			"columnDefs":[
-				{
-					"targets":[0],
-					"visible":false
-				}
-			],
+			
 			"columns": [
 				/*{
 					"data": null,
@@ -561,46 +470,30 @@
 					"type": Number
 				},
 				{"data": "name"},
+				{"data": "engName"},
 				{"data": "code"},
 				{
-					"data": "partDto",
+					"data": "subGroupDto",
 					"render":function(data,type,row){
 						if(type==="display"){
-							return data.subPartDto.mainPartDto.name + "/"
-							+ data.subPartDto.name + "/" + data.name;
+							return data.mainGroupDto.name;
 						}
 						return data;
 					}
 				},
 				{
-					"data": "role",
-					"type": String,
+					"data": "subGroupDto",
 					"render":function(data,type,row){
 						if(type==="display"){
-							return {
-								"USER":"작업자",
-								"MANAGER":"매니저",
-								"ADMIN":"관리자",
-								default:"NULL"
-							}[data];
+							return data.name;
 						}
+						return data;
 					}
 				},
-				{
-					"data": "employmentStatus",
-					"type": String,
-					"render":function(data,type,row){
-						if(type==="display"){
-							return {
-								"EMPLOYMENT":"재직",
-								"LEAVE_OF_ABSENCE":"휴직",
-								"RESIGNATION":"퇴사",
-								default:"NULL"
-							}[data];
-						}
-					}
-				},
-				{"data": "password"},
+				{"data": "spec"},
+				{"data": "unit"},
+				{"data": "price", "type":Number},
+				{"data": "replacementCycle", "type":Number},
 				{
 					"data": null,
 					"render": function(data, type, full, meta) {
@@ -618,96 +511,13 @@
 			document.getElementById('editFormName').value = data.name;
             document.getElementById('editFormCode').value = data.code;
             document.getElementById('editFormPassword').value = data.password;
-			document.getElementById('editFormMainPartSelect').value = data.partDto.subPartDto.mainPartDto.id;
-			loadSubParts.apply(document.getElementById('editFormSubPartSelect'),[data.partDto.subPartDto.mainPartDto.id])
-			.then(resolved=>
-            	document.getElementById('editFormSubPartSelect').value = data.partDto.subPartDto.id
-            );
-            loadParts.apply(document.getElementById('editFormPartSelect'),[data.partDto.subPartDto.id])
-            .then(resolved=>
-            	document.getElementById('editFormPartSelect').value = data.partDto.id
-            );
-            console.log(data.employmentStatus)
-            document.getElementsByName("editFormRadio").forEach(e=>{
-				e.checked=false;
-			});
-            switch(data.employmentStatus){
-				case "EMPLOYMENT":
-					document.getElementById("editFormRadio0").checked=true;
-				break;
-				case "LEAVE_OF_ABSENCE":
-					document.getElementById("editFormRadio1").checked=true;
-				break;
-				case "RESIGNATION":
-					document.getElementById("editFormRadio2").checked=true;
-				break;
-				default:
-			}
+            document.getElementById('editFormMainPartSelect').value = data.partDto.subPartDto.mainPartDto.id;
+            document.getElementById('editFormSubPartSelect').value = data.partDto.subPartDto.id;
+            document.getElementById('editFormPartSelect').value = data.partDto.id;
+            //document.getElementById("editFormRadio0"),
 	    });
-	    $("#searchBtn").on("click",e=>{
-			e.preventDefault();
-			table.draw();
-		});
 	});
     
-    
-	//231025 검색과 함께 페이징 
-	// for querydsl 
-	/*
-    function page(page){
-        var searchPartDto = $("#searchPartSelect").val();
-        var searchRole = $("#searchRoleSelect").val();
-        var searchEmploymentState = $("#searchEmploymentStateSelect").val();
-        var searchBy = $("#searchBy").val();
-        var searchQuery = $("#searchQuery").val();
-
-        location.href="/setting/membership_setting2/" + page
-        // + "?searchRole=" + searchRole
-        // + "&searchEmploymentState=" + searchEmploymentState
-        + "?searchBy=" + searchBy
-        + "&searchQuery=" + searchQuery;
-    }
-	*/
-	
-	//fetch subparts & parts
-    function loadSubParts(mainPartId) {
-		return new Promise((resolved, rejected)=>{
-        fetch('/sub_part/get?mainPartId=' + mainPartId)
-            .then(response => response.json())
-            .then(data => {
-                var subPartList = '';
-                data.forEach(function (subPart) {
-                    subPartList += '<option value="' + subPart.id + '">' + subPart.name + '</option>';
-                });
-                this.innerHTML = subPartList;
-                resolved();
-            })
-            .catch(error => {
-                console.error('subpart 목록을 불러오는 중 오류가 발생했습니다.');
-                rejected();
-            });
-        });
-    }
-    function loadParts(subPartId){
-		return new Promise((resolved, rejected)=>{
-		fetch('/part/get?subPartId=' + subPartId)
-            .then(response => response.json())
-            .then(data => {
-                // 서버에서 받은 데이터를 채웁니다.
-                var partList = '';
-                data.forEach(function (part) {
-                    partList += '<option value="' + part.id + '">' + part.name + '</option>';
-                });
-                this.innerHTML = partList;
-                resolved();
-            })
-            .catch(error => {
-                console.error('part 목록을 불러오는 중 오류가 발생했습니다.');
-                rejected();
-            });
-        });
-	}
-	
 	
 	$("#addFormBtn").click(e=>{
 		console.log(e);
@@ -718,13 +528,8 @@
                 name: document.getElementById('addFormName').value,
                 code: document.getElementById('addFormCode').value,
                 password: document.getElementById('addFormPassword').value,
-                partDtoId: parseInt(document.getElementById('addFormPartSelect').value), //parseint는 걍 controller에서 하기로
-                employmentStatus:function(){
-						const radios= document.getElementsByName("addFormRadio");
-						for(let i=0;i<radios.length;i++){
-							if (radios[i].checked) {return radios[i].value;}
-						}
-					}()
+                partDtoId: (document.getElementById('addFormPartSelect').value), //parseint는 걍 controller에서 하기로
+                employmentStatus: document.getElementById("addFormRadio0"),
             },
 			"membership"
 		);
@@ -734,16 +539,7 @@
 		post(
 			"membership/edit",
 			{
-				name: document.getElementById('editFormName').value,
-                code: document.getElementById('editFormCode').value,
-                password: document.getElementById('editFormPassword').value,
-                partDtoId:parseInt(document.getElementById('editFormPartSelect').value), //parseint는 걍 controller에서 하기로 ??도대체 왜
-                employmentStatus:function(){
-						const radios= document.getElementsByName("editFormRadio");
-						for(let i=0;i<radios.length;i++){
-							if (radios[i].checked) {return radios[i].value;}
-						}
-					}()
+				
 			},
 			"membership"
 		);

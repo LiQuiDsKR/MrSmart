@@ -87,6 +87,22 @@ public class SubPartService {
 		return new SubPartDto(repository.save(subPart));
 	}
 	
+	public SubPartDto update(SubPartDto subPartDto) throws IllegalStateException {
+		Optional<MainPart> mainPart = mainPartRepository.findById(subPartDto.getMainPartDto().getId());
+		if (mainPart.isEmpty()) {
+			logger.error("Invalid mainPartId : " + subPartDto.getMainPartDto().getId());
+			throw new IllegalStateException("등록되지 않은 정비실입니다.");
+		}
+		
+		SubPart subPart = repository.findById(subPartDto.getId()).get();
+		if (subPart == null) {
+			subPart = new SubPart();			
+		}
+		subPart.update(mainPart.get(), subPartDto);
+		
+		return new SubPartDto(repository.save(subPart));
+	}
+	
 	private List<SubPartDto> getDtoList(List<SubPart> list){
 		List<SubPartDto> dtoList = new ArrayList<SubPartDto>();
 		for (SubPart item : list) {

@@ -35,6 +35,7 @@
 	<!-- ======= BEGIN PAGE LEVEL PLUGINS STYLES ======= -->
 	<link type="text/css" th:href="@{/plugins/apex/apexcharts.css}" rel="stylesheet"/>
 	<link type="text/css" th:href="@{/plugins/datatables/datatables.min.css}" rel="stylesheet"/>
+	<link type="text/css" th:href="@{/plugins/sweetalert2/sweetalert2.min.css}" rel="stylesheet"/>
 	<!-- ======= END BEGIN PAGE LEVEL PLUGINS STYLES ======= -->
 	
 	<!-- ======= MAIN STYLES ======= -->
@@ -42,6 +43,19 @@
 	<!-- ======= END MAIN STYLES ======= -->
 	
 	<th:block layout:fragment="css"></th:block>
+	
+	<script th:inline="javascript">
+        // 현재 URL을 가져와 해당하는 메뉴 아이템을 활성화합니다.
+        var currentUrl = [[${#httpServletRequest.requestURI}]]; // 현재 URL을 Thymeleaf로 가져오기
+        window.onload = function () {
+            var menuItems = document.querySelectorAll('.nav li a');
+            menuItems.forEach(function (item) {
+                if (item.getAttribute('href') === currentUrl) {
+                    item.parentElement.classList.add('active');
+                }
+            });
+        };
+	</script>
 
 </head>
 
@@ -79,8 +93,9 @@
 	<!-- ======= BEGIN GLOBAL MANDATORY SCRIPTS ======= -->
 	<!-- ======= BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS ======= -->
 	<script th:src="@{/plugins/apex/apexcharts.min.js}"></script>
-	<script th:src="@{/plugins/apex/custom-apexcharts.js}"></script>
+	<script th:src="@{/plugins/apex/custom-apexchart2.js}"></script>
 	<script th:src="@{/plugins/datatables/datatables.min.js}"></script>
+	<script th:src="@{/plugins/sweetalert2/sweetalert2.all.min.js}"></script>
 	<!-- ======= End BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS ======= -->
 	
 </body> 

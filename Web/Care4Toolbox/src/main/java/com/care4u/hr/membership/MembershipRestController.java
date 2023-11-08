@@ -46,7 +46,7 @@ public class MembershipRestController {
     @PostMapping(value="/membership/new")
     public ResponseEntity<String> newMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
     	try {
-    		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
+    		PartDto partDto=partService.get(memberFormDto.getPartDtoId());
     		membershipService.addNew(
     				MembershipDto.builder()
     				.id(0)
@@ -55,7 +55,7 @@ public class MembershipRestController {
     				.password(memberFormDto.getPassword())
     				.partDto(partDto)
     				.role(Role.USER)
-    				.employmentStatus(EmploymentState.EMPLOYMENT)
+    				.employmentStatus(memberFormDto.getEmploymentStatus())
     				.build()
     				);
     	}catch(IllegalStateException e) {
@@ -81,7 +81,7 @@ public class MembershipRestController {
     @PostMapping(value="/membership/edit")
     public ResponseEntity<String> editMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
     	try {
-    		PartDto partDto=partService.get(Long.parseLong(memberFormDto.getPartDtoId()));
+    		PartDto partDto=partService.get(memberFormDto.getPartDtoId());
     		membershipService.update(
     				partDto.getId(), //
     				MembershipDto.builder()
@@ -91,7 +91,7 @@ public class MembershipRestController {
     				.password(memberFormDto.getPassword())
     				.partDto(partDto)
     				.role(Role.USER)
-    				.employmentStatus(EmploymentState.EMPLOYMENT)
+    				.employmentStatus(memberFormDto.getEmploymentStatus())
     				.build()
     				);
     	}catch(IllegalStateException e) {
@@ -126,6 +126,9 @@ public class MembershipRestController {
     public ResponseEntity<Page<MembershipDto>> getMembershipPage(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "name", defaultValue = "") String name,
+            
+            //아래는 querydsl용으로 만들어만 뒀던 파라미터들. 사용하지 않고 있습니다
             @RequestParam(name = "searchBy", defaultValue = "null") String searchBy,
             @RequestParam(name = "role" , defaultValue = "USER") Role role,
             @RequestParam(name = "employmentStatus" , defaultValue= "EMPLOYMENT") EmploymentState employmentStatus,
@@ -164,7 +167,7 @@ public class MembershipRestController {
     			.build();
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<MembershipDto> membershipPage = membershipService.getMembershipPage(membershipSearchDto, pageable);
+        Page<MembershipDto> membershipPage = membershipService.getMembershipPageByName(pageable,name);
         
         for (MembershipDto item : membershipPage.getContent()) {
         	logger.info(item.toString());

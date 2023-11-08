@@ -41,6 +41,9 @@ public class ToolboxLabel extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Tool tool;
 	
+	@NotNull
+	private String qrcode;
+	
 	@Builder
 	public ToolboxLabel(Toolbox toolbox, String location, Tool tool) {
 		this.toolbox = toolbox;

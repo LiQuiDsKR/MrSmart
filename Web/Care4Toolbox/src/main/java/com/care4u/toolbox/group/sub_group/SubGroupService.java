@@ -89,6 +89,22 @@ public class SubGroupService {
 		return new SubGroupDto(repository.save(subGroup));
 	}
 	
+	public SubGroupDto update(SubGroupDto subGroupDto) throws IllegalStateException {
+		Optional<MainGroup> mainGroup = mainGroupRepository.findById(subGroupDto.getMainGroupDto().getId());
+		if (mainGroup.isEmpty()) {
+			logger.error("등록되지 않은 대분류 id입니다. : " + subGroupDto.getMainGroupDto().getId());
+			throw new IllegalStateException("등록되지 않은 대분류 코드입니다.");
+		}
+		
+		SubGroup subGroup = repository.findById(subGroupDto.getId()).get();
+		if (subGroup == null) {
+			subGroup = new SubGroup();
+		}
+		subGroup.update(subGroupDto, mainGroup.get());
+		
+		return new SubGroupDto(repository.save(subGroup));
+	}
+	
 	private List<SubGroupDto> getDtoList(List<SubGroup> list){
 		List<SubGroupDto> dtoList = new ArrayList<SubGroupDto>();
 		for (SubGroup item : list) {

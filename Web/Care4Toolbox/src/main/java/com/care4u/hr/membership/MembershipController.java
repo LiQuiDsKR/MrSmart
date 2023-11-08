@@ -42,7 +42,7 @@ public class MembershipController {
      * @return
      */
     @GetMapping(value = "")
-    public String itemManage(MembershipSearchDto membershipSearchDto, @PathVariable("page") Optional<Integer> page, Model model){
+    public String membershipPage(MembershipSearchDto membershipSearchDto, @PathVariable("page") Optional<Integer> page, Model model){
 
         Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);
         Page<MembershipDto> membershipPage = membershipService.getMembershipPage(membershipSearchDto, pageable);
@@ -53,15 +53,9 @@ public class MembershipController {
         
         
     	List<MainPartDto> mainPartDtoList = mainPartService.list();
-    	MembershipFormDto memberFormDto = MembershipFormDto.builder()
-    			.name(null)
-    			.code(null)
-    			.password(null)
-    			.partDtoId(null)
-    			.employmentStatus(null)
-    			.build();
+    	MembershipFormDto memberFormDto = new MembershipFormDto();
     	
-        model.addAttribute("membershipPage", membershipPage); //memberships는 page객체입니다
+        model.addAttribute("membershipPage", membershipPage);
         model.addAttribute("membershipSearchDto", membershipSearchDto);
         model.addAttribute("maxPage", 10); 
         
@@ -77,40 +71,6 @@ public class MembershipController {
         return "membership/membership";
     }
     
-   /*	
-    @GetMapping(value = "/group_setting")
-    public String getMainGroup(Model model){
-    	List<MainGroupDto> mainGroupList = mainGroupService.list();
-    	
-    	
-    	model.addAttribute("mainGroupList", mainGroupList);
-    	
-        return "setting/group_setting";
-    }
-    
-    @GetMapping(value = "/list_subgroup")
-    public List<SubGroupDto> getMainGroup(@RequestParam("mainGroupId") long mainGroupId){
-    	//List<SubGroupDto> subGroupList = subGroupService.listByMainGroupId(mainGroupId);
-    	List<SubGroupDto> subGroupList = new ArrayList<SubGroupDto>();
-    	
-        return subGroupList;
-    }
-    
-    @PostMapping(value = "/group_setting/set")
-    public String updateMainGroup(@Valid MainGroupDto mainGroupDto, BindingResult bindingResult, Model model){
-    	if(bindingResult.hasErrors()){
-            return "membership/newForm";
-        }
-    	
-    	
-    	MainGroupDto mainGroupList = mainGroupService.update(mainGroupDto);
-    	
-    	model.addAttribute("mainGroupList", mainGroupList);
-    	
-        return "setting/group_setting";
-    }
-    
-    */      
     
     /**
      * 23-10-29 박경수

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+.selected {
+    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
+}
+
+.hidden-column {
+    display: none;
+}
+
+</style>
+</th:block>
+
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid mb-4 mb-md-0">
+		<div class="row">
+			<!-- Card -->
+			<div class="col-12 col-md-4" style="height: auto;">
+				<nav class="chat_aside bg-white" style="width:auto;">
+					<!-- Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+						<!-- Btn -->
+						<div class="col-1 d-flex align-items-center justify-content-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn-circle"
+									data-toggle="modal"
+									data-target="#contactAddModal"
+									data-part-type="main_part">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+								</a>
+							</div>
+						</div>
+						<!-- title -->
+						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+							<h4 class="font-20">
+								메인 부서
+							</h4>	
+						</div>
+					</div>
+					
+					<!-- Content -->
+					<div class="aside-body ps" data-trigger="scrollbar">
+						<div class="tab-content">
+							<div >
+								<div class="table-responsive">
+									<!-- Invoice List Table -->
+									<table id="mainPartTable" class="text-nowrap bg-white">
+										<thead>
+											<tr>
+												<th hidden>
+													Id
+												</th>
+												<th>
+													이름
+												</th>
+												<th>수정</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr class="selectable" th:each="mainPart : ${mainPartList}" style="cursor:pointer;">
+												<td th:text="${mainPart.id}" hidden></td>
+												<td th:text="${mainPart.name}"></td>
+												<td>
+													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="main_part" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+													</span>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<!-- End Contact List Table -->
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End Content -->
+				</nav>
+			</div>
+			<!-- End Card-->
+			<!-- Card -->
+			<div class="col-12 col-md-4" style="height: auto;">
+				<nav class="chat_aside bg-white" style="width:auto;">
+					<!-- Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+						<!-- Btn -->
+						<div class="col-1 d-flex align-items-center justify-content-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn-circle"
+									data-toggle="modal"
+									data-target="#contactAddModal"
+									data-part-type="sub_part">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+								</a>
+							</div>
+						</div>
+						<!-- title -->
+						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+							<h4 class="font-20">
+								중간 부서
+							</h4>	
+						</div>
+					</div>
+					
+					<!-- Content -->
+					<div class="aside-body ps" data-trigger="scrollbar">
+						<div class="tab-content">
+							<div >
+								<div class="table-responsive">
+									<!-- Invoice List Table -->
+									<table id="subPartTable" class="text-nowrap bg-white">
+										<thead>
+											<tr>
+												<th hidden>
+													Id
+												</th>
+												<th>
+													이름
+												</th>
+												<th>수정</th>
+											</tr>
+										</thead>
+										<tbody>
+											
+										</tbody>
+									</table>
+									<!-- End Contact List Table -->
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End Content -->
+				</nav>
+			</div>
+			<!-- End Card-->
+			<!-- Card -->
+			<div class="col-12 col-md-4" style="height: auto;">
+				<nav class="chat_aside bg-white" style="width:auto;">
+					<!-- Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+						<!-- Btn -->
+						<div class="col-1 d-flex align-items-center justify-content-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn-circle"
+									data-toggle="modal"
+									data-target="#contactAddModal"
+									data-part-type="part">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+								</a>
+							</div>
+						</div>
+						<!-- title -->
+						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+							<h4 class="font-20">
+								부서
+							</h4>	
+						</div>
+					</div>
+					
+					<!-- Content -->
+					<div class="aside-body ps" data-trigger="scrollbar">
+						<div class="tab-content">
+							<div >
+								<div class="table-responsive">
+									<!-- Invoice List Table -->
+									<table id="partTable" class="text-nowrap bg-white">
+										<thead>
+											<tr>
+												<th hidden>
+													Id
+												</th>
+												<th>
+													이름
+												</th>
+												<th>수정</th>
+											</tr>
+										</thead>
+										<tbody>
+
+										</tbody>
+									</table>
+									<!-- End Contact List Table -->
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End Content -->
+				</nav>
+			</div>
+			<!-- End Card-->
+		</div>
+	</div>
+	
+
+				<!-- Contact Add New PopUp -->
+				<div id="contactAddModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 id="addFormTitle" class="mb-4">부서 정보 추가</h1>
+											<input id="addFormId" hidden></input>				
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="addFormName"
+													>이름</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<div class="input-group-prepend">
+														<div id="addFormNameAddOn" class="input-group-text black bold">@</div>
+													</div>
+													<input
+														type="text"
+														id="addFormName"
+														class="theme-input-style"
+														placeholder="이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="form-group mb-4" hidden>
+												<div class="row">
+													<div class="col-4">
+														<label for="addFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormMainPartSelect">
+																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="addFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormSubPartSelect">
+																
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="addFormPartSelect" class="mb-2 black bold d-block">Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormPartSelect">
+																
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="addFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Add New PopUp -->
+
+				<!-- Contact Edit PopUp -->
+				<div id="contactEditModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 id="editFormTitle" class="mb-4">부서 정보 추가</h1>	
+											<input id="editFormId" hidden></input>										
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="editFormName"
+													>이름</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<div class="input-group-prepend">
+														<div id="editFormNameAddOn" class="input-group-text black bold">@</div>
+													</div>
+													<input
+														type="text"
+														id="editFormName"
+														class="theme-input-style"
+														placeholder="이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="form-group mb-4" hidden>
+												<div class="row">
+													<div class="col-4">
+														<label for="editFormMainPartSelect" class="mb-2 black bold d-block">Main Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormMainPartSelect">
+																<option th:each="mainPartDto : ${mainPartDtoList}"th:value="${mainPartDto.id}" th:text="${mainPartDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="editFormSubPartSelect" class="mb-2 black bold d-block">Sub Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormSubPartSelect">
+																
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="editFormPartSelect" class="mb-2 black bold d-block">Part</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormPartSelect">
+																
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="editFormBtn" data-post-data="null" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Edit PopUp -->
+				
+
+</div>
+<!-- End Main Content -->
+
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript"> 	
+	function loadSubParts(mainPartId, withTrRatherThanOptions) {
+		return new Promise((resolved, rejected)=>{
+	    fetch('/sub_part/get?mainPartId=' + mainPartId)
+	        .then(response => response.json())
+	        .then(data => {
+	            var subPartList = '';
+	            data.forEach(function (subPart) {
+					if (withTrRatherThanOptions){
+	                subPartList += 
+						'<tr class="selectable" style="cursor:pointer;">'+
+							'<td hidden>'+subPart.id+'</td>'+
+							'<td>'+subPart.name+'</td>'+
+							'<td>'+
+								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="sub_part" style="cursor:pointer;">' +
+									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;" />' +
+								'</span>'
+							'</td>'+
+						'</tr>'
+					}else{
+						subPartList += '<option value="' + subPart.id + '">' + subPart.name + '</option>';
+					}
+	            });
+	            this.innerHTML = subPartList;
+	            resolved();
+	        })
+	        .catch(error => {
+	            console.error('subpart 목록을 불러오는 중 오류가 발생했습니다.');
+	            rejected();
+	        });
+	    });
+	}
+	function loadParts(subPartId,withTrRatherThanOptions){
+		return new Promise((resolved, rejected)=>{
+		fetch('/part/get?subPartId=' + subPartId)
+	        .then(response => response.json())
+	        .then(data => {
+	            var partList = '';
+	            data.forEach(function (part) {
+					if (withTrRatherThanOptions){
+	                partList += 
+		                '<tr class="selectable">'+
+							'<td hidden>'+part.id+'</td>'+
+							'<td>'+part.name+'</td>'+
+							'<td>'+
+								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="part" style="cursor:pointer;">' +
+									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;"/>' +
+								'</span>'
+							'</td>'+
+						'</tr>'
+					}else{
+						partList += '<option value="' + part.id + '">' + part.name + '</option>';
+					}
+	            });
+	            this.innerHTML = partList;
+	            resolved();
+	        })
+	        .catch(error => {
+	            console.error('part 목록을 불러오는 중 오류가 발생했습니다.');
+	            rejected();
+	        });
+	    });
+	}
+	
+	
+	document.querySelectorAll(".btn-circle").forEach(element=>{
+		element.addEventListener("click",e=>{
+			const pt=element.getAttribute("data-part-type")
+			document.getElementById("addFormBtn").setAttribute("data-part-type",pt);
+			const data = {
+						id:null,
+						name:null,
+						partType:{
+							key:null, // "main_part" / "sub_part" / "part"
+							display:null, // 한글, 표시용
+						},
+						parentPart:{
+							id:null, // id
+							display:null, // 표시용
+						},
+					};
+			       
+			        switch(pt){
+						case "main_part":
+							data.partType.key="main_part";
+							data.partType.display="메인 부서";
+							data.parentPart.id=0;
+							data.parentPart.display="/";
+							break;
+						case "sub_part":
+							data.partType.key="sub_part";
+							data.partType.display="서브 부서";
+							data.parentPart.id=selectStates["mainPartTable"]?.id;
+							data.parentPart.display=selectStates["mainPartTable"]?.name+"/";
+							break;
+						case "part":
+							data.partType.key="part";
+							data.partType.display="부서";
+							data.parentPart.id=selectStates["subPartTable"]?.id;
+							data.parentPart.display=
+								selectStates["mainPartTable"]?.name+"/"+
+								selectStates["subPartTable"]?.name+"/";
+							break;
+						default:
+					}
+					if (data.parentPart?.id==null) {
+						Swal.fire({
+						  type: "warning",
+						  title: "선택된 상위 부서 없음",
+						  text: "왼쪽 박스에서 상위 부서를 먼저 선택해주세요!",
+						});
+						setTimeout(_=>{
+						$("#contactAddModal").modal("hide");},10);
+						return ;
+					}
+					document.getElementById("addFormTitle").textContent=data.partType.display+" 정보 추가"
+					document.getElementById("addFormNameAddOn").textContent=data.parentPart.display;
+		});
+	});
+	document.getElementById("addFormBtn").addEventListener("click",e=>{
+		const pt=document.getElementById("addFormBtn").getAttribute("data-part-type");
+		post(
+			pt+"/new",
+			pt==="main_part"?
+			{
+				id:0,
+				name: document.getElementById('addFormName').value
+			}:
+			pt==="sub_part"?
+			{
+				id:0,
+				name: document.getElementById('addFormName').value,
+				mainPartDtoId:selectStates["mainPartTable"].id
+			}:
+			pt==="part"?
+			{
+				id:0,
+				name: document.getElementById('addFormName').value,
+				subPartDtoId:selectStates["subPartTable"].id
+			}:
+			null,
+			"parts"
+		);
+	});
+	document.getElementById("editFormBtn").addEventListener("click",e=>{
+		e.preventDefault();
+		const pt=document.getElementById("editFormBtn").getAttribute("data-part-type");
+		post(
+			pt+"/edit",
+			pt==="main_part"?
+			{
+				id:document.getElementById('editFormId').value,
+				name: document.getElementById('editFormName').value
+			}:
+			pt==="sub_part"?
+			{
+				id:document.getElementById('editFormId').value,
+				name: document.getElementById('editFormName').value,
+				mainPartDtoId:selectStates["mainPartTable"].id
+			}:
+			pt==="part"?
+			{
+				id:document.getElementById('editFormId').value,
+				name: document.getElementById('editFormName').value,
+				subPartDtoId:selectStates["subPartTable"].id
+			}:
+			null,
+			"parts"
+		);
+	});
+	function post(url,paramData,redirection){
+		fetch(url, {
+		  method:"POST",
+		  headers:{
+			  //'header': document.querySelector('meta[name="_csrf"]').content,
+              "Content-Type": "application/json",
+              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
+		  },
+		  body: JSON.stringify(paramData),
+		})
+		  .then(response => {
+		    if (!response.ok) {
+		      throw new Error(`HTTP error! Status: ${response.status}`);
+		    }
+		    return JSON.stringify(response);
+		  })
+		  .then(data => {
+			debugger;
+			location.href=redirection;
+		  })
+		  .catch(error => {
+		    console.error('Error:', error);
+		  });
+	}
+
+
+	const selectStates = {
+		mainPartTable: null,
+		subPartTable: null,
+	};
+
+    function addClickHandler(tableId) {
+        const table = document.getElementById(tableId);
+        const selectableRows = table.querySelectorAll('.selectable');
+
+        selectableRows.forEach(row => {
+            row.addEventListener('click', function(event){
+				const clickedElement = event.target;
+                if (clickedElement.tagName === 'path' || clickedElement.tagName==='IMG') {
+                    // If clicked element is a data-toggle span, do nothing.
+                    return;
+                }
+                // color switch
+                if (!this.classList.contains('bg-primary-light')) {
+                    selectableRows.forEach(row => {
+                        row.classList.remove('bg-primary-light');
+                    });
+                    this.classList.add('bg-primary-light');
+                    
+                    
+                    //load & draw
+                    if (tableId === 'mainPartTable') {
+                        loadSubParts.apply(
+							document.querySelector("#subPartTable tbody"),
+							[
+								parseInt(this.querySelector('td').textContent.trim()),
+								true
+							])
+                        .then(resolved=>{
+                        	addClickHandler("subPartTable");
+                        	clearAndAddMessage('partTable');
+                    		//eventListener
+                    		addEditFormModalEventListener();
+                    	});
+                    } else if (tableId === 'subPartTable') {
+                        loadParts.apply(
+							document.querySelector("#partTable tbody"), 
+							[
+								parseInt(this.querySelector('td').textContent.trim()),
+								true
+							])
+						.then(resolved=>{
+		                    //eventListener
+		                    addEditFormModalEventListener();
+						});
+                    }
+                    selectStates[tableId] = {
+						id:parseInt(this.querySelector('td:nth-child(1)').textContent.trim()),
+						name:this.querySelector('td:nth-child(2)').textContent.trim()
+					}
+                } else {
+                    this.classList.remove('bg-primary-light');
+                    selectStates[tableId] = null;
+                    if (tableId === 'mainPartTable') {
+                        clearAndAddMessage('subPartTable');
+                        clearAndAddMessage('partTable');
+                    } else if (tableId === 'subPartTable') {
+                        clearAndAddMessage('partTable');
+                    }
+                }
+            });
+        });
+    }
+    
+    function clearAndAddMessage(tableId) {
+        const table = document.getElementById(tableId);
+        const tbody = table.querySelector('tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="999"><span>왼쪽 박스에서 상위 부서 항목을 선택해주세요.</span></td></tr>';
+        }
+    }
+    function addEditFormModalEventListener(){
+	    document.querySelectorAll("table .contact-edit").forEach(element=>{
+			if (!element.classList.contains("listener-added")) {
+		        element.classList.add("listener-added");
+				element.addEventListener("click",event=>{
+					const data = {
+						id:null,
+						name:null,
+						partType:{
+							key:null, // "main_part" / "sub_part" / "part"
+							display:null, // 한글, 표시용
+						},
+						parentPart:{
+							id:null, // id
+							display:null, // 표시용
+						},
+					};
+			        const parentTr = element.closest('tr');
+			        const parentTable = element.closest('table');
+			        
+			        data.id = parseInt(parentTr.querySelector('td:nth-child(1)').textContent);
+			        data.name = parentTr.querySelector('td:nth-child(2)').textContent;
+			        switch(parentTable.id){
+						case "mainPartTable":
+							data.partType.key="main_part";
+							data.partType.display="메인 부서";
+							data.parentPart.id=0;
+							data.parentPart.display="/";
+							break;
+						case "subPartTable":
+							data.partType.key="sub_part";
+							data.partType.display="중간 부서";
+							data.parentPart.id=selectStates["mainPartTable"].id;
+							data.parentPart.display=selectStates["mainPartTable"].name+"/";
+							break;
+						case "partTable":
+							data.partType.key="part";
+							data.partType.display="부서";
+							data.parentPart.id=selectStates["subPartTable"].id;
+							data.parentPart.display=
+								selectStates["mainPartTable"].name+"/"+
+								selectStates["subPartTable"].name+"/";
+							break;
+						default:
+					}
+					document.getElementById("editFormTitle").textContent=data.partType.display+" 정보 수정"
+					document.getElementById("editFormNameAddOn").textContent=data.parentPart.display;
+					document.getElementById("editFormName").value=data.name;
+					document.getElementById("editFormId").value=data.id;
+					document.getElementById("editFormBtn").setAttribute("data-part-type",data.partType.key);
+				});
+			}
+		});
+	}
+
+	addEditFormModalEventListener();
+    addClickHandler('mainPartTable');
+    addClickHandler('subPartTable');
+    clearAndAddMessage('subPartTable');
+    clearAndAddMessage('partTable');
+</script>
+</th:block>
+
+</html>

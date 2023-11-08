@@ -93,4 +93,10 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
 		return membershipPage.map(MembershipDto::new);
     }
+	
+	@Transactional(readOnly = true)
+	public Page<MembershipDto> getMembershipPageByName(Pageable pageable, String name){
+		Page<Membership> membershipPage = repository.findByNameContaining(pageable, name);
+		return membershipPage.map(MembershipDto::new);
+	}
 }
