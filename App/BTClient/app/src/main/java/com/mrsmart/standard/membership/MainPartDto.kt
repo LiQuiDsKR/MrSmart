@@ -2,7 +2,7 @@ package com.mrsmart.standard.membership
 
 import com.google.gson.annotations.SerializedName
 
-data class MainPart(
+data class MainPartDto(
     val id: Long,
     val name: String,
     @SerializedName("latitude") val unusedLatitude: String,

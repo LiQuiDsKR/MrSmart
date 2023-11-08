@@ -1,5 +1,5 @@
 package com.mrsmart.standard.membership
 
 enum class EmploymentStatus {
-    EMPLOYMENT, VACATION
+    EMPLOYMENT, LEAVE_OF_ABSENCE, RESIGNATION
 }

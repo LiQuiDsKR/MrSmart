@@ -1,7 +1,7 @@
 package com.mrsmart.standard.tool
 
-data class SubGroup(
+data class WorkingToolBoxDto(
     val id: Long,
     val name: String,
-    val mainGroupDto: MainGroup
+    val remark: String
 )

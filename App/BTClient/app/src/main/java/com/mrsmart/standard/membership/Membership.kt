@@ -5,12 +5,21 @@ data class Membership(
     val name: String,
     val code: String,
     val password: String,
-    val partDto: Part,
+    val partDto: PartDto,
     val role: Role,
     val employmentStatus: EmploymentStatus
-
-    public Membership(MembershipSQLite membershipSQLite){
-        id = membershipSQLite.getid();
-        employmentStatus = EmploymentStatus.of(membershipSQLite.getEmploymentStatus())
+) {
+    fun toMembershipSQLite(): MembershipSQLite {
+        return MembershipSQLite(
+            id,
+            name,
+            code,
+            password,
+            partDto.name,
+            partDto.subPartDto.name,
+            partDto.subPartDto.mainPartDto.name,
+            role.name,
+            employmentStatus.name
+        )
     }
-)
+}

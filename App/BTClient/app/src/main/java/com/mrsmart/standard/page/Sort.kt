@@ -1,4 +1,4 @@
-package com.mrsmart.standard
+package com.mrsmart.standard.page
 
 data class Sort(
     val sort: Boolean,
