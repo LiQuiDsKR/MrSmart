@@ -542,6 +542,7 @@
 		);
 	});
 	function post(url,paramData,redirection){
+		debugger;
 		fetch(url, {
 		  method:"POST",
 		  headers:{
@@ -555,7 +556,8 @@
 		    if (!response.ok) {
 		      throw new Error(`HTTP error! Status: ${response.status}`);
 		    }
-		    return JSON.stringify(response);
+			console.log(response.data);
+		    return response.data;
 		  })
 		  .then(data => {
 			location.href=redirection;

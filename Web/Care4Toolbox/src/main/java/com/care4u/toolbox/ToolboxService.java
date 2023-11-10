@@ -74,10 +74,20 @@ public class ToolboxService {
 			return null;
 		}
 		
-		Toolbox toolbox = repository.findByName(toolboxDto.getName());
-		if (toolbox == null) {
-			toolbox = new Toolbox();
+		Toolbox findItem = repository.findByName(toolboxDto.getName());
+		if(findItem != null){
+			logger.error("이미 등옥된 이름입니다. : " + toolboxDto.getName());
+			throw new IllegalStateException("이미 등옥된 이름입니다.");
 		}
+		
+		Toolbox toolbox;
+		Optional<Toolbox> optionalToolbox = repository.findById(toolboxDto.getId());
+		if (optionalToolbox.isEmpty()) {
+			toolbox = new Toolbox(toolboxDto.getName(), manager, toolboxDto.isSystemOperability());
+		} else {
+			toolbox=optionalToolbox.get();
+		}
+		
 		toolbox.update(toolboxDto.getName(), manager, toolboxDto.isSystemOperability());
 		
 		return new ToolboxDto(repository.save(toolbox));

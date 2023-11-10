@@ -14,6 +14,8 @@ public interface RentalRequestSheetRepository extends JpaRepository<RentalReques
 	
 	Page<RentalRequestSheet> findAllByToolboxIdAndEventTimestampBetween(long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
+	Page<RentalRequestSheet> findAllByToolboxId(long toolboxId, Pageable pageable);
+	
 	@Query(value = "SELECT * FROM RentalRequestSheet WHERE (worker_id = :id1 OR leader_id = :id2) " +
             "AND event_timestamp BETWEEN :startDate AND :endDate", nativeQuery = true)
 	Page<RentalRequestSheet> findAllByWorkerIdOrLeaderIdAndEventTimestampBetween(@Param("id1") long workerId, @Param("id2") long leaderId, 

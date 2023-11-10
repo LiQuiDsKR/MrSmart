@@ -1,0 +1,662 @@
+
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+.selected {
+    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
+}
+
+.hidden-column {
+    display: none;
+}
+
+</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid" style="height:100%;">
+		<div class="row">
+			
+			<!-- Left List Div -->
+			<div class="col-6">
+				<div class="card bg-transparent">
+					<!-- Contact Header -->
+					<div class=" d-flex flex-column bg-white mb-30" >
+						<h4 class="font-30 m-3">공기구 대여 신청 리스트 작성</h4>
+						<div class="table-responsive" >
+							<!-- Invoice List Table -->
+							<table class="text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>
+											작업명
+										</th>
+										<th>
+											정비실
+										</th>
+										<th>
+											작업자
+										</th>
+										<th>
+											리더
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+										<div class="d-flex justify-content-between">
+											<div >
+												새 작업 공기구 리스트
+											</div>
+											<div >
+												 <span class="contact-edit" data-toggle="modal" data-target="#workNameEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+												</span>
+											</div>
+										</div>
+										</td>
+										<td>
+										<div class="d-flex justify-content-between">
+											<div>
+												선강정비1실
+											</div>
+											<div>
+												 <span class="contact-edit" data-toggle="modal" data-target="#toolboxEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+												</span>
+											</div>
+										</div>
+										</td>
+										<td>
+										<div class="d-flex justify-content-between">
+											<div >
+												선택
+											</div>
+											<div >
+												 <span class="contact-edit" data-toggle="modal" data-target="#workerEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+												</span>
+											</div>
+										</div>
+										</td>
+										<td>
+										<div class="d-flex justify-content-between">
+											<div >
+												선택
+											</div>
+											<div >
+												 <span class="contact-edit" data-toggle="modal" data-target="#leaderEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+												</span>
+											</div>
+										</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<!-- End Contact List Table -->
+						</div>
+					</div>
+					<div class="overflow-auto bg-white" style="height:calc(100vh - 440px)">
+						<div class="">
+							<!-- Invoice List Table -->
+							<table class="text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th hidden>
+											Id
+										</th>
+										<th>
+											이름
+										</th>
+										<th hidden>
+											영문이름
+										</th>
+										<th>
+											품목번호
+										</th>
+										<th>
+											대분류
+										</th>
+										<th>
+											중분류
+										</th>
+										<th hidden>
+											스펙
+										</th>
+										<th hidden>
+											단위
+										</th>
+										<th hidden>
+											가격
+										</th>
+										<th hidden>
+											교체주기
+										</th>
+										<th>수량</th>
+									</tr>
+								</thead>
+								<tbody id="rentalList">
+									
+								</tbody>
+							</table>
+							<!-- End Contact List Table -->
+						</div>
+					</div>
+					<div class=" d-flex justify-content-end bg-white m-0 p-3" >
+						<a href="#" class="btn p-3 mr-2 disabled" >
+							즐겨찾기
+						</a>
+						<a href="#" class="btn p-3">
+							신청하기
+						</a>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+			
+			<!-- Right Tool Div -->
+			<div class="col-6">
+				<!-- Card -->
+				<div class="card bg-transparent"style="height:100%;">
+					<!-- Contact Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-30" >
+						<!-- Search header -->
+						<form
+							action="@{'member_setting2/'+${memberships.number}}"
+							role="form"
+							method="get"
+							class="col-12 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0"
+							th:object="${membershipSearchDto}"
+							>
+							<!-- layer 1 -->
+							<div class="row"style="width:100%; box-sizing: content-box;" >			
+								<!-- Search Form -->								
+								<div class="search-form" style="width:100%; box-sizing: content-box;">
+									<div class="theme-input-group style--two">
+										<input
+											id="searchInput"
+											type="text"
+											class="theme-input-style"
+											placeholder="검색" />
+										<button id="searchBtn" type="submit">
+											<img
+												th:src="@{/img/svg/search-icon.svg}"
+												alt=""
+												class="svg" />
+										</button>
+									</div>
+								</div>
+								<!-- End Search Form -->
+							</div>
+						
+							<!-- layer 2 -->
+							<!-- Search Condition header -->
+							
+						<!-- End Search Condition -->
+					</div>
+					<div class="table-responsive"style="height:100%;">
+						<!-- Invoice List Table -->
+						<table id="datatable" class="text-nowrap bg-white"style="height:100%;">
+							<thead>
+								<tr>
+									<th>
+										Id
+									</th>
+									<th>
+										이름
+									</th>
+									<th>
+										영문이름
+									</th>
+									<th>
+										품목번호
+									</th>
+									<th>
+										대분류
+									</th>
+									<th>
+										중분류
+									</th>
+									<th>
+										스펙
+									</th>
+									<th>
+										단위
+									</th>
+									<th>
+										가격
+									</th>
+									<th>
+										교체주기
+									</th>
+									<th>추가</th>
+								</tr>
+							</thead>
+							<tbody style="height:100%;">
+								
+							</tbody>
+						</table>
+						<!-- End Contact List Table -->
+					</div>
+					
+					
+				</div>
+				<!-- End Card -->
+				
+				<!-- Modal space -->
+				
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+
+	
+	$(document).ready(function(){
+		
+		//231025 검색 기능
+       /*
+        $("#searchBtn").on("click",function(e) {
+            e.preventDefault();
+            page(0);
+        });
+        */            
+		var table = $('#datatable').DataTable({
+			"paging": true,          // 페이지네이션 사용
+			"pageLength": 10, 		// 페이지당 항목 수
+			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
+			"searching": false,       // 검색 기능 사용
+			"ordering": true,        // 정렬 기능 사용
+			"order":[
+				[0,'asc']
+			],
+			"info": true,            // 정보 표시
+			"autoWidth": false,      // 너비 자동 조정 비활성화
+			"serverSide": true,
+			"processing": true,
+			"ajax": {
+				"url": "/tool/getpage", // 데이터를 가져올 엔드포인트 URL
+				//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (d) {
+					var data = {
+			           "page": parseInt(d.start / d.length),
+			           "size": d.length,	
+			           "name": $("#searchInput").val()
+			           //"order": columnsDefine[d.order[0].column].column,
+			           //"search": 'tagid',
+			           //"direction": d.order[0].dir.toUpperCase(),
+			           //"keyword": d.search.value
+			        };
+			        return data;
+				},
+				"dataFilter": function (data) {
+					data.dataSrc="content";
+					data = JSON.parse(data);
+					var json = {
+						recordsTotal: data.totalElements,
+						recordsFiltered: data.totalElements,
+						data: data.content
+					};
+					return JSON.stringify(json)
+			    }
+			},
+			"columnDefs":[
+				{
+					"targets":[0,2,6,7,8,9],
+					"visible":false
+				}
+			],			
+			"columns": [
+				/*{
+					"data": null,
+					"render": function() {
+					    // 제품 정보 표시
+					    return '<label class="custom-checkbox">'+
+								'<input type="checkbox" />'+
+								'<span class="checkmark"></span>'+
+								'</label>'+
+								'<div class="star">'+
+								'<a href="#"'+
+								'<img'+
+								'src="/img/svg/star.svg"'+
+								'alt=""'+
+								'class="svg"'+
+								'/></a>'+
+								'</div>'
+					}
+                },*/
+				{
+					"data": "id",
+					"type": Number
+				},
+				{"data": "name"},
+				{"data": "engName"},
+				{"data": "code"},
+				{
+					"data": "subGroupDto",
+					"render":function(data,type,row){
+						if(type==="display"){
+							return data.mainGroupDto.name;
+						}
+						return data;
+					}
+				},
+				{
+					"data": "subGroupDto",
+					"render":function(data,type,row){
+						if(type==="display"){
+							return data.name;
+						}
+						return data;
+					}
+				},
+				{"data": "spec"},
+				{"data": "unit"},
+				{"data": "price", "type":Number},
+				{"data": "replacementCycle", "type":Number},
+				{
+					"data": null,
+					"render":function(data,type,row){
+						if(type==="display"){ 
+							return '<a href="#" class="btn addRentalToolBtn p-2">' +
+									    '<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
+									    //'<span></span>' +
+								    '</a>' ;
+						}
+						return data;
+					}
+				}
+			]
+		});
+		table.on('click', '.addRentalToolBtn', function() {
+			var data = table.row($(this).parents('tr')).data();
+			addTool(data.id);			
+	    });
+	    $("#searchBtn").on("click",e=>{
+			e.preventDefault();
+			table.draw();
+		});
+	});
+	
+	/*
+	//나중에 분류별 검색 되면 그때 살리기
+	[
+		[
+			document.getElementById("addFormMainGroupSelect"),
+			document.getElementById("addFormSubGroupSelect")
+		],
+		[
+			document.getElementById("editFormMainGroupSelect"),
+			document.getElementById("editFormSubGroupSelect")
+		],
+	].forEach(v=>{
+		v[0].addEventListener("change",e=>{
+			v[1].options.length=0;
+			loadSubGroups.apply(v[1],[parseInt(e.target.value)]);
+		});
+	});
+	*/
+	
+	const list=[];
+	const stack=[];
+	
+	function addTool(id){
+		getToolDtoById(id)
+			.then(data=>{
+				if (!list.every(e=>e.id!==id)){
+					alert("이미 추가된 항목입니다");
+					return ;
+				} // 혹은 disabled class추가
+				// 혹은 개수 추가
+				
+				const rowLayout=[
+					["name"],
+					["code"],
+					["subGroupDto","mainGroupDto","name"],
+					["subGroupDto","name"],
+				];
+				
+				list.push({
+					id:id,
+					count:1,
+				});
+				let newRowString="";
+				rowLayout.forEach(e=>{
+					newRowString+="<td>";
+					let tmpdata;
+					for(let i=0;i<e.length;i++){
+						if (i==0) { tmpdata=data[e[i]]; }
+						else tmpdata=tmpdata[e[i]];
+					}
+					newRowString+=tmpdata;
+					newRowString+="</td>";
+				});
+				newRowString+='<td class="d-flex justify-content-between">'+
+					'<a href="#" class="btn bg-success increaseBtn p-2">' +
+					    '<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
+					'</a>'+
+					'<p class="d-flex align-items-center toolCount">'+list[list.length-1].count+'</p>'+
+					'<a href="#" class="btn bg-danger decreaseBtn p-2">' +
+					    '<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
+					'</a>';
+					
+				const newRow=document.createElement("tr");
+				newRow.innerHTML=newRowString;
+				document.getElementById("rentalList").appendChild(newRow);
+				
+				const increaseBtn = newRow.querySelector(".increaseBtn");
+				const decreaseBtn = newRow.querySelector(".decreaseBtn");
+				increaseBtn.addEventListener("click",function(){
+					increaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+				})
+				decreaseBtn.addEventListener("click",function(){
+					decreaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+				})
+				stack.push({key:"a",param:id});
+			});
+	}
+	function removeTool(id){
+		const index=findIndexById(list,id);
+		if (index<0){
+			return "? 그런거 없다";
+		}
+		list.splice(index,1);
+		const row=getTRFromTBodyByIndex(index);
+		row.remove();
+		
+		stack.push({key:"r",param:id});
+	}
+	function findIndexById(arr, id) {
+		for (let i = 0; i < arr.length; i++) {
+			if (arr[i].id === id) {
+				return i; // 일치하는 객체의 인덱스를 반환합니다.
+    		}
+  		}
+		return -1;
+	}
+	function getTRFromTBodyByIndex(index) {
+		const tbody = document.getElementById('rentalList');
+		if (tbody) {
+			const rows = tbody.getElementsByTagName('tr');
+			if (index >= 0 && index < rows.length) {
+				return rows[index];
+			}
+		}
+		return null; // 인덱스에 해당하는 <tr>을 찾지 못한 경우
+	}
+	function increaseCount(index){
+		//조건문 추가해야함 총 count불러와서 ㅇㅇ
+		if(index>=list.length){
+			return "없다 그런거";
+		}
+		list[index].count++;
+		const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+		count.textContent=parseInt(count.textContent)+1;
+		
+		stack.push({key:"i",param:index});
+	}
+	function decreaseCount(index){
+		if(index>=list.length){
+			return "없다 그런거";
+		}
+		if(list[index].count<=1){
+			removeTool(list[index].id);
+		}else{
+			list[index].count--;
+			const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+			count.textContent=parseInt(count.textContent)-1;
+			
+			stack.push({key:"d",param:index});
+		}
+	}
+	function updateManually(){
+		const tbody=document.getElementById("rentalList");
+		tbody.children().forEach(e=>{
+			e.remove();
+		})
+		for (let i=0;i<list.length;i++){
+			getToolDtoById(list[i].id)
+				.then(data=>{
+					const rowLayout=[
+						["name"],
+						["code"],
+						["subGroupDto","mainGroupDto","name"],
+						["subGroupDto","name"],
+					];
+					
+					list.push({
+						id:id,
+						count:1,
+					});
+					let newRow="<tr>";
+					rowLayout.forEach(e=>{
+						newRow+="<td>";
+						let tmpdata;
+						for(let i=0;i<e.length;i++){
+							if (i==0) { tmpdata=data[e[i]]; }
+							else tmpdata=tmpdata[e[i]];
+						}
+						newRow+=tmpdata;
+						newRow+="</td>";
+					});
+					newRow+='<td class="d-flex justify-content-between">'+
+						'<a href="#" class="btn rounded-circle bg-success increaseBtn p-2">' +
+						    '<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
+						'</a>'+
+						'<p class="d-flex align-items-center toolCount">'+list[i].count+'</p>'+
+						'<a href="#" class="btn rounded-circle bg-danger decreaseBtn p-2">' +
+						    '<img src="/img/svg/minus_white.svg" alt="" class="svg m-1"/>' +
+						'</a>';
+					document.getElementById("rentalList").innerHTML=newRow;
+				});
+		}
+	}
+	function undo(){
+		const action=stack.pop();
+		if (action==null){
+			return ;
+		}
+		const callbacks={
+			a:removeTool,
+			r:addTool,
+			i:decreaseCount,
+			d:increaseCount,
+		};
+		callbacks[action.key]?.(action.param);
+	}
+	
+	function loadSubGroups(mainGroupId) {
+		return new Promise((resolved, rejected)=>{
+	    fetch('/sub_group/get?mainGroupId=' + mainGroupId)
+	        .then(response => response.json())
+	        .then(data => {
+	            var subGroupList = '';
+	            data.forEach(function (subGroup) {
+					subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
+	            });
+	            this.innerHTML = subGroupList;
+	            resolved();
+	        })
+	        .catch(error => {
+	            console.error('subgroup 목록을 불러오는 중 오류가 발생했습니다.');
+	            rejected();
+	        });
+	    });
+	}
+	function post(url,paramData,redirection){
+		fetch(url, {
+		  method:"POST",
+		  headers:{
+			  //'header': document.querySelector('meta[name="_csrf"]').content,
+              "Content-Type": "application/json",
+              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
+		  },
+		  body: JSON.stringify(paramData),
+		})
+		  .then(response => {
+		    if (!response.ok) {
+		      throw new Error(`HTTP error! Status: ${response.status}`);
+		    }
+		    return response.json();
+		  })
+		  .then(data => {
+			  debugger;
+			location.href=redirection;
+		  })
+		  .catch(error => {
+		    console.error('Error:', error);
+			Swal.fire({
+			  type: "error",
+			  title: "Error!",
+			  text: error,
+			});
+			setTimeout(_=>{
+			$("#contactAddModal").modal("hide");
+			$("#contactEditModal").modal("hide");
+			},0);
+			return ;
+		  });
+	}
+	function getToolDtoById(id) {
+	    return new Promise((resolve, reject) => {
+	        fetch(`/tool/get?id=${id}`, {
+	            method: 'GET',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            }
+	        })
+	        .then(response => {
+	            if (response.ok) {
+	                return response.json();
+	            }
+	            throw new Error('서버 오류 발생');
+	        })
+	        .then(data => {
+	            resolve(data);
+	        })
+	        .catch(error => {
+	            reject(error);
+	        });
+	    });
+	}
+	window.addEventListener("keypress",e=>{
+		if (e.ctrlKey && e.key=="\x1A"){
+			undo();
+		}
+	})
+</script>
+</th:block>
+
+</html>

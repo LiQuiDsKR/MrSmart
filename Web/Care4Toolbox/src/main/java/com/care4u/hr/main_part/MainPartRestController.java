@@ -19,6 +19,7 @@ import com.care4u.hr.membership.MembershipDto;
 import com.care4u.hr.membership.MembershipFormDto;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.google.gson.Gson;
 
 @RestController
 public class MainPartRestController {
@@ -33,61 +34,45 @@ public class MainPartRestController {
 	
     @PostMapping(value="/main_part/new")
     public ResponseEntity<String> newMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto){
+    	
+    	Gson gson = new Gson();
     	try {
     		mainPartService.addNew(
     				MainPartDto.builder()
     				.id(0)
     				.name(mainPartFormDto.getName())
-    				.latitude(mainPartFormDto.getLatitude())
-    				.longitude(mainPartFormDto.getLongitude())
-    				.mapScale(mainPartFormDto.getMapScale())
+    				//.latitude(mainPartFormDto.getLatitude())
+    				//.longitude(mainPartFormDto.getLongitude())
+    				//.mapScale(mainPartFormDto.getMapScale())
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + mainPartFormDto.getName()
-		    		+ ", latitude=" + mainPartFormDto.getLatitude()
-		    		+ ", longitude=" + mainPartFormDto.getLongitude()
-		    		+ ", mapScale=" + mainPartFormDto.getMapScale()
-		    		;
+    		String response = gson.toJson(mainPartFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-		String response = "서버에서 받은 데이터:"
-				+ "이름=" + mainPartFormDto.getName()
-	    		+ ", latitude=" + mainPartFormDto.getLatitude()
-	    		+ ", longitude=" + mainPartFormDto.getLongitude()
-	    		+ ", mapScale=" + mainPartFormDto.getMapScale()
-	    		;
+    	String response = gson.toJson(mainPartFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(value="/main_part/edit")
     public ResponseEntity<String> editMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto){
+    	Gson gson = new Gson();
+
     	try {
     		mainPartService.update(
     				MainPartDto.builder()
     				.id(mainPartFormDto.getId())
     				.name(mainPartFormDto.getName())
-    				.latitude(mainPartFormDto.getLatitude())
-    				.longitude(mainPartFormDto.getLongitude())
-    				.mapScale(mainPartFormDto.getMapScale())
+    				//.latitude(mainPartFormDto.getLatitude())
+    				//.longitude(mainPartFormDto.getLongitude())
+    				//.mapScale(mainPartFormDto.getMapScale())
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + mainPartFormDto.getName()
-		    		+ ", latitude=" + mainPartFormDto.getLatitude()
-		    		+ ", longitude=" + mainPartFormDto.getLongitude()
-		    		+ ", mapScale=" + mainPartFormDto.getMapScale()
-		    		;
+    		String response = gson.toJson(mainPartFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-		String response = "서버에서 받은 데이터:"
-				+ "이름=" + mainPartFormDto.getName()
-	    		+ ", latitude=" + mainPartFormDto.getLatitude()
-	    		+ ", longitude=" + mainPartFormDto.getLongitude()
-	    		+ ", mapScale=" + mainPartFormDto.getMapScale()
-	    		;
+    	String response = gson.toJson(mainPartFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -120,4 +120,10 @@ public class ToolRestController {
         }
         return ResponseEntity.ok(toolPage);
     }
+    
+    @GetMapping(value="tool/get")
+    public ResponseEntity<ToolDto> getTool(@RequestParam(name="id") Long id){
+    	ToolDto tool = toolService.get(id);
+    	return ResponseEntity.ok(tool);
+    }
 }
