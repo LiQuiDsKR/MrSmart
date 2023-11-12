@@ -8,14 +8,14 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 <style>
-.selected {
-    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
-}
-
-.hidden-column {
-    display: none;
-}
-
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+	
+	.selectable:hover{
+		box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+	}
 </style>
 </th:block>
 
@@ -27,9 +27,9 @@
 			<div class="col-12 col-md-4" style="height: auto;">
 				<nav class="chat_aside bg-white" style="width:auto;">
 					<!-- Header -->
-					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+					<div class="contact-header d-flex align-items-center justify-content-start flex-row bg-white border-bottom" >
 						<!-- Btn -->
-						<div class="col-1 d-flex align-items-center justify-content-center">
+						<div class="d-flex align-items-center justify-content-center mr-20">
 							<!-- Add New Contact Btn -->
 							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
 							<div class="add-new-contact">
@@ -38,7 +38,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-part-type="main_part">
+									data-group-type="main_group">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -47,7 +47,7 @@
 							</div>
 						</div>
 						<!-- title -->
-						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+						<div class=" d-flex flex-column align-items-start justify-content-center">
 							<h4 class="font-20">
 								메인 부서
 							</h4>	
@@ -69,14 +69,14 @@
 												<th>
 													이름
 												</th>
-												<th>수정</th>
+												<th class="th_btn">수정</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr class="selectable" th:each="mainPart : ${mainPartList}" style="cursor:pointer;">
 												<td th:text="${mainPart.id}" hidden></td>
 												<td th:text="${mainPart.name}"></td>
-												<td>
+												<td class="td_btn">
 													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="main_part" style="cursor:pointer;">
 														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
 													</span>
@@ -97,9 +97,9 @@
 			<div class="col-12 col-md-4" style="height: auto;">
 				<nav class="chat_aside bg-white" style="width:auto;">
 					<!-- Header -->
-					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+					<div class="contact-header d-flex align-items-center justify-content-start flex-row bg-white border-bottom" >
 						<!-- Btn -->
-						<div class="col-1 d-flex align-items-center justify-content-center">
+						<div class="d-flex align-items-center justify-content-center mr-20">
 							<!-- Add New Contact Btn -->
 							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
 							<div class="add-new-contact">
@@ -108,7 +108,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-part-type="sub_part">
+									data-group-type="main_group">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -117,7 +117,7 @@
 							</div>
 						</div>
 						<!-- title -->
-						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+						<div class=" d-flex flex-column align-items-start justify-content-center">
 							<h4 class="font-20">
 								중간 부서
 							</h4>	
@@ -139,7 +139,7 @@
 												<th>
 													이름
 												</th>
-												<th>수정</th>
+												<th class="th_btn">수정</thclass="th_btn">
 											</tr>
 										</thead>
 										<tbody>
@@ -159,9 +159,9 @@
 			<div class="col-12 col-md-4" style="height: auto;">
 				<nav class="chat_aside bg-white" style="width:auto;">
 					<!-- Header -->
-					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+					<div class="contact-header d-flex align-items-center justify-content-start flex-row bg-white border-bottom" >
 						<!-- Btn -->
-						<div class="col-1 d-flex align-items-center justify-content-center">
+						<div class="d-flex align-items-center justify-content-center mr-20">
 							<!-- Add New Contact Btn -->
 							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
 							<div class="add-new-contact">
@@ -170,7 +170,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-part-type="part">
+									data-group-type="main_group">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -179,7 +179,7 @@
 							</div>
 						</div>
 						<!-- title -->
-						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+						<div class=" d-flex flex-column align-items-start justify-content-center">
 							<h4 class="font-20">
 								부서
 							</h4>	
@@ -201,7 +201,7 @@
 												<th>
 													이름
 												</th>
-												<th>수정</th>
+												<th class="th_btn">수정</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -384,7 +384,7 @@
 						'<tr class="selectable" style="cursor:pointer;">'+
 							'<td hidden>'+subPart.id+'</td>'+
 							'<td>'+subPart.name+'</td>'+
-							'<td>'+
+							'<td class="td_btn">'+
 								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="sub_part" style="cursor:pointer;">' +
 									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;" />' +
 								'</span>'
@@ -415,7 +415,7 @@
 		                '<tr class="selectable">'+
 							'<td hidden>'+part.id+'</td>'+
 							'<td>'+part.name+'</td>'+
-							'<td>'+
+							'<td class="td_btn">'+
 								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="part" style="cursor:pointer;">' +
 									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;"/>' +
 								'</span>'

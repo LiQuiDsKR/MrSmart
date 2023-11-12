@@ -4,8 +4,13 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
+import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +23,9 @@ public class RentalRequestToolService {
 	
 	private final RentalRequestToolRepository repository;
 	
+	@Autowired
+	private final ToolRepository toolRepository;
+	
 	@Transactional(readOnly = true)
 	public RentalRequestToolDto get(long id){
 		Optional<RentalRequestTool> item = repository.findById(id);
@@ -27,6 +35,21 @@ public class RentalRequestToolService {
 		}
 		
 		return new RentalRequestToolDto(item.get());
+	}
+	
+	@Transactional
+	public RentalRequestTool addNew(RentalRequestToolFormDto formDto, RentalRequestSheet rentalRequestSheet) {
+		Optional<Tool> tool = toolRepository.findById(formDto.getToolDtoId());
+		
+		RentalRequestTool rentalRequestTool = RentalRequestTool.builder()
+				.rentalRequestSheet(rentalRequestSheet)
+				.tool(tool.get())
+				.count(formDto.getCount())
+				.Tags("")
+				.build();
+		
+		
+		return repository.save(rentalRequestTool);
 	}
 
 }

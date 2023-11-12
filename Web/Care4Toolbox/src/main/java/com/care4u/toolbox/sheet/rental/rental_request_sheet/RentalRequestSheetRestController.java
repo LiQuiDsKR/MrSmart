@@ -26,6 +26,7 @@ import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.toolbox.tool.ToolDto;
+import com.google.gson.Gson;
 
 @RestController
 public class RentalRequestSheetRestController {
@@ -37,13 +38,14 @@ public class RentalRequestSheetRestController {
 	
     @PostMapping(value="/rental/request_sheet/apply")
     public ResponseEntity<String> newMembership(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto){
+    	Gson gson = new Gson();
     	try {
-    		//대충 서비스에다가 formdto 주고 add하는 내용
+    		rentalRequestSheetService.addNew(rentalRequestSheetFormDto);
     	}catch(IllegalStateException e) {
-    		String response = "aa";
+    		String response = gson.toJson(rentalRequestSheetFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-    	String response = "aa";
+		String response = gson.toJson(rentalRequestSheetFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     

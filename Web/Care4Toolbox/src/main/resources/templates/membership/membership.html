@@ -9,14 +9,14 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 <style>
-.selected {
-    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
-}
-
-.hidden-column {
-    display: none;
-}
-
+	.td_btn,
+	.th_btn{
+		display: flex;
+		justify-content: end;
+	}
+	#datatable th{
+		padding:12px 20px;
+	}
 </style>
 </th:block>
 <!-- Main Content -->
@@ -52,9 +52,7 @@
 						</div>
 						<!-- Search header -->
 						<form
-							action="@{${membershipPage.number}}"
-							role="form"
-							method="get"
+							
 							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0"
 							th:object="${membershipSearchDto}"
 							>
@@ -175,7 +173,7 @@
 									<th>
 										비밀번호
 									</th>
-									<th>수정</th>
+									<th class="th_btn">수정</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -195,7 +193,6 @@
 						<div class="modal-content">
 							<!-- Modal Body -->
 							<div class="modal-body">
-								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
 											<h1 class="mb-4">직원 정보 추가</h1>											
@@ -307,7 +304,6 @@
 											</div>
 										</div>
 									</div>
-								</form>
 							</div>
 							<!-- End Modal Body -->
 						</div>
@@ -321,7 +317,6 @@
 						<div class="modal-content">
 							<!-- Modal Body -->
 							<div class="modal-body">
-								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
 											<h1 class="mb-4">직원 정보 수정</h1>											
@@ -433,7 +428,6 @@
 											</div>
 										</div>
 									</div>
-								</form>
 							</div>
 							<!-- End Modal Body -->
 						</div>
@@ -504,6 +498,14 @@
 				{
 					"targets":[0],
 					"visible":false
+				},
+				{
+					"targets":[0,3,4,5,6,7],
+					"orderable":false
+				},
+				{
+					"targets":[7],
+					"className":"td_btn"
 				}
 			],
 			"columns": [
@@ -760,7 +762,6 @@
 			location.href=redirection;
 		  })
 		  .catch(error => {
-		    console.error('Error:', error);
 		    console.error('Error:', error);
 			Swal.fire({
 			  type: "error",

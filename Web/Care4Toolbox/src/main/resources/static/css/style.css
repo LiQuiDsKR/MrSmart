@@ -4482,8 +4482,8 @@ a.text-dark:hover {
 	border: none;
 	text-transform: capitalize;
 	outline: 0 !important;
-	-webkit-box-shadow: 0 5px 10px rgba(4, 0, 252, 0.2) !important;
-	box-shadow: 0 5px 10px rgba(4, 0, 252, 0.2) !important;
+	-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) !important;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .btn svg,
@@ -4882,7 +4882,7 @@ table tr:not(:last-child) td {
 table th,
 table td {
 	font-size: 16px;
-	padding: 12px 8px;
+	padding: 12px 20px;
 }
 
 table thead th {
@@ -5166,7 +5166,7 @@ table.invoice-list-table tbody td,
 table.contact-list-table tbody td,
 table.invoice-list tbody td {
 	font-size: 16px;
-	padding: 12px 8px;
+	padding: 12px 20px;
 }
 
 table.invoice-list-table tbody tr:hover,
@@ -8347,8 +8347,6 @@ body.sidebar-folded .main-content {
 	position: relative;
 	width: 375px;
 	height: auto;
-	margin-right: 15px;
-	margin-left: 15px;
 }
 
 @media only screen and (min-width: 0px) and (max-width: 1200px) {
@@ -10474,8 +10472,7 @@ body.sidebar-folded .main-content {
 	padding-right: 10px;
 }
 
-#contactAddModal .modal-dialog,
-#contactEditModal .modal-dialog {
+.modal-dialog {
 	max-width: 750px;
 }
 

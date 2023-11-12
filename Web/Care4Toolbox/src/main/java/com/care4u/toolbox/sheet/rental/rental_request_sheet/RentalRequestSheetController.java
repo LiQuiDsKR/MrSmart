@@ -29,13 +29,19 @@ import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
 @RequestMapping("/rental")
-public class RentalRequestController {
+public class RentalRequestSheetController {
 	
-	private static final Logger logger = Logger.getLogger(RentalRequestController.class);
+	private static final Logger logger = Logger.getLogger(RentalRequestSheetController.class);
 	
+	@Autowired
+	private ToolboxService toolboxService;
 	
     @GetMapping(value = "request_sheet")
     public String createRequestSheet(Model model){
+    	
+    	List<ToolboxDto> toolboxList = toolboxService.list();
+    	
+    	model.addAttribute("toolboxList",toolboxList);
 
         return "rental/request_sheet";
     }

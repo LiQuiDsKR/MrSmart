@@ -8,14 +8,14 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 <style>
-.selected {
-    background-color: #f0f0f0; /* 선택한 행의 배경색을 원하는 색상으로 변경 */
-}
-
-.hidden-column {
-    display: none;
-}
-
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+	
+	.selectable:hover{
+		box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+	}
 </style>
 </th:block>
 
@@ -69,14 +69,14 @@
 												<th>
 													이름
 												</th>
-												<th>수정</th>
+												<th class="th_btn">수정</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr th:each="toolbox : ${toolboxList}">
 												<td th:text="${toolbox.id}" hidden></td>
 												<td th:text="${toolbox.name}"></td>
-												<td>
+												<td class="td_btn">
 													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" style="cursor:pointer;">
 														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
 													</span>

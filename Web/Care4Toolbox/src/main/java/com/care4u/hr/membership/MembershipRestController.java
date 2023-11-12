@@ -25,6 +25,7 @@ import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.google.gson.Gson;
 
 @RestController
 public class MembershipRestController {
@@ -45,6 +46,7 @@ public class MembershipRestController {
     
     @PostMapping(value="/membership/new")
     public ResponseEntity<String> newMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
+    	Gson gson = new Gson();
     	try {
     		PartDto partDto=partService.get(memberFormDto.getPartDtoId());
     		membershipService.addNew(
@@ -59,27 +61,16 @@ public class MembershipRestController {
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + memberFormDto.getName()
-    				+ ", 코드=" + memberFormDto.getCode()
-		    		+ ", pw=" + memberFormDto.getPassword()
-		    		+ ", partid=" + memberFormDto.getPartDtoId()
-		    		+ ", empl=" + memberFormDto.getEmploymentStatus()
-		    		;
+    		String response = gson.toJson(memberFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-    	String response = "서버에서 받은 데이터:"
-				+ "이름=" + memberFormDto.getName()
-				+ ", 코드=" + memberFormDto.getCode()
-	    		+ ", pw=" + memberFormDto.getPassword()
-	    		+ ", partid=" + memberFormDto.getPartDtoId()
-	    		+ ", empl=" + memberFormDto.getEmploymentStatus()
-	    		;
+    	String response = gson.toJson(memberFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(value="/membership/edit")
     public ResponseEntity<String> editMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
+    	Gson gson = new Gson();
     	try {
     		PartDto partDto=partService.get(memberFormDto.getPartDtoId());
     		membershipService.update(
@@ -95,22 +86,10 @@ public class MembershipRestController {
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + memberFormDto.getName()
-    				+ ", 코드=" + memberFormDto.getCode()
-		    		+ ", pw=" + memberFormDto.getPassword()
-		    		+ ", partid=" + memberFormDto.getPartDtoId()
-		    		+ ", empl=" + memberFormDto.getEmploymentStatus()
-		    		;
+    		String response = gson.toJson(memberFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-    	String response = "서버에서 받은 데이터:"
-				+ "이름=" + memberFormDto.getName()
-				+ ", 코드=" + memberFormDto.getCode()
-	    		+ ", pw=" + memberFormDto.getPassword()
-	    		+ ", partid=" + memberFormDto.getPartDtoId()
-	    		+ ", empl=" + memberFormDto.getEmploymentStatus()
-	    		;
+		String response = gson.toJson(memberFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
@@ -173,5 +152,13 @@ public class MembershipRestController {
         	logger.info(item.toString());
         }
         return ResponseEntity.ok(membershipPage);
+    }
+    
+    @GetMapping(value="/membership/get")
+    public ResponseEntity<MembershipDto> getMembershipById(
+    		@RequestParam(name="id") Long id
+    		){
+    	MembershipDto membershipDto = membershipService.getMembershipById(id);
+    	return ResponseEntity.ok(membershipDto);
     }
 }

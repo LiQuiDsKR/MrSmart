@@ -103,4 +103,15 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		Page<Membership> membershipPage = repository.findByNameContaining(pageable, name);
 		return membershipPage.map(MembershipDto::new);
 	}
+	
+	@Transactional(readOnly=true)
+	public MembershipDto getMembershipById(Long id) {
+		Optional<Membership> membership = repository.findById(id);
+		if (membership.isEmpty()) {
+			logger.error("Invalid id : "+id);
+			return null;
+		}else {
+			return new MembershipDto(membership.get());
+		}
+	}
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.care4u.constant.SheetState;
@@ -29,7 +30,7 @@ public class RentalRequestSheetFormDto {
 	private Long leaderDtoId;
 	@NotNull(message="정비실 정보는 필수 입력값입니다.")
 	private Long toolboxDtoId;
-	@NotBlank(message="공기구 목록은 필수 입력값입니다.")
+	@NotEmpty(message="공기구 목록은 필수 입력값입니다.")
 	private List<RentalRequestToolFormDto> toolList;
 	
 }
