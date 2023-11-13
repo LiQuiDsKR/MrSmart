@@ -9,6 +9,7 @@ import com.care4u.hr.membership.MembershipDto;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
+import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -30,10 +31,10 @@ public class RentalRequestSheetDto {
 	
 	private LocalDateTime eventTimestamp;
 	
-	private List<RentalRequestTool> toolList;
+	private List<RentalRequestToolDto> toolList;
 	
 	@Builder
-	public RentalRequestSheetDto(long id, Membership worker, Membership leader, Toolbox toolbox, SheetState status, LocalDateTime eventTimestamp, List<RentalRequestTool> toolList) {
+	public RentalRequestSheetDto(long id, Membership worker, Membership leader, Toolbox toolbox, SheetState status, LocalDateTime eventTimestamp, List<RentalRequestToolDto> toolList) {
 		this.id = id;
 		this.workerDto = new MembershipDto(worker);
 		this.leaderDto = new MembershipDto(leader);
@@ -43,13 +44,13 @@ public class RentalRequestSheetDto {
 		this.toolList = toolList;
 	}
 	
-	public RentalRequestSheetDto(RentalRequestSheet rentalSheet, List<RentalRequestTool> toolList) {
-		this.id = rentalSheet.getId();
-		this.workerDto = new MembershipDto(rentalSheet.getWorker());
-		this.leaderDto = new MembershipDto(rentalSheet.getLeader());
-		this.toolboxDto = new ToolboxDto(rentalSheet.getToolbox());
-		this.status = rentalSheet.getStatus();
-		this.eventTimestamp = rentalSheet.getEventTimestamp();
+	public RentalRequestSheetDto(RentalRequestSheet sheet, List<RentalRequestToolDto> toolList) {
+		this.id = sheet.getId();
+		this.workerDto = new MembershipDto(sheet.getWorker());
+		this.leaderDto = new MembershipDto(sheet.getLeader());
+		this.toolboxDto = new ToolboxDto(sheet.getToolbox());
+		this.status = sheet.getStatus();
+		this.eventTimestamp = sheet.getEventTimestamp();
 		this.toolList = toolList;
 	}
 	

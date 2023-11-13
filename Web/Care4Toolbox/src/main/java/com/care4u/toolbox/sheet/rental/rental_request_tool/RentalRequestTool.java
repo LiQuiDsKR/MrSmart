@@ -24,7 +24,7 @@ import lombok.ToString;
 @ToString
 
 @Entity
-@Table(name="rental_tool")
+@Table(name="rental_request_tool")
 public class RentalRequestTool extends BaseEntity {
 	
 	@Id

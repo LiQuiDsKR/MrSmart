@@ -38,11 +38,11 @@ public class RentalRequestToolService {
 	}
 	
 	@Transactional
-	public RentalRequestTool addNew(RentalRequestToolFormDto formDto, RentalRequestSheet rentalRequestSheet) {
+	public RentalRequestTool addNew(RentalRequestToolFormDto formDto, RentalRequestSheet sheet) {
 		Optional<Tool> tool = toolRepository.findById(formDto.getToolDtoId());
 		
 		RentalRequestTool rentalRequestTool = RentalRequestTool.builder()
-				.rentalRequestSheet(rentalRequestSheet)
+				.rentalRequestSheet(sheet)
 				.tool(tool.get())
 				.count(formDto.getCount())
 				.Tags("")

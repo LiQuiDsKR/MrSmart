@@ -17,6 +17,7 @@ import com.care4u.constant.SheetState;
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipRepository;
 import com.care4u.toolbox.Toolbox;
+import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -49,6 +50,15 @@ public class RentalRequestSheetService {
 	
 	
 	@Transactional(readOnly = true)
+	public List<RentalRequestSheetDto> list(){
+		List<RentalRequestSheet> list = repository.findAll();
+		
+		List<RentalRequestSheetDto> dtoList = new ArrayList<RentalRequestSheetDto>();
+		list.forEach(e->dtoList.add(convertToDto(e)));
+		return dtoList;
+	}
+	
+	@Transactional(readOnly = true)
 	public RentalRequestSheetDto get(long id){
 		Optional<RentalRequestSheet> item = repository.findById(id);
 		if (item == null) {
@@ -60,14 +70,18 @@ public class RentalRequestSheetService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Page<RentalRequestSheetDto> getRentalRequestSheetPageByToolboxId( Pageable pageable , Long toolboxId) {
+	public Page<RentalRequestSheetDto> getRentalRequestSheetPageByToolboxId( Long toolboxId, Pageable pageable ) {
 		Page<RentalRequestSheet> page = repository.findAllByToolboxId(toolboxId, pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	
 	private RentalRequestSheetDto convertToDto(RentalRequestSheet rentalRequestSheet) {
+		List<RentalRequestToolDto> dtoList = new ArrayList<RentalRequestToolDto>();
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(rentalRequestSheet.getId());
-		return new RentalRequestSheetDto(rentalRequestSheet,toolList);
+		for (RentalRequestTool tool : toolList) {
+			dtoList.add(new RentalRequestToolDto(tool));
+		}
+		return new RentalRequestSheetDto(rentalRequestSheet,dtoList);
 	}
 
 	@Transactional
@@ -94,8 +108,12 @@ public class RentalRequestSheetService {
 			RentalRequestTool newTool = rentalRequestToolService.addNew(tool, rentalRequestSheet);
 			toolList.add(newTool);
 		}
-		
-		
-		return new RentalRequestSheetDto(savedRentalRequestSheet,toolList);
+		return convertToDto(savedRentalRequestSheet);
+	}
+	
+	@Transactional(readOnly=true)
+	public Page<RentalRequestSheetDto> getRentalRequestSheetPageByStatusAndToolboxId( SheetState status, Long toolboxId, Pageable pageable){
+		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
+		return page.map(e->convertToDto(e));
 	}
 }

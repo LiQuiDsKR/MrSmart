@@ -558,6 +558,7 @@
 				list.push({
 					id:id,
 					count:1,
+					name:data.name,
 				});
 				let newRowString="";
 				rowLayout.forEach(e=>{
@@ -967,56 +968,94 @@
 	// =============== ▼ apply ===============
 	
 	document.getElementById("applyBtn").addEventListener("click",e=>{
-		post(
-			"/rental/request_sheet/apply",
-			{
-				workName:mainData.workName.name,
-				workerDtoId:mainData.worker.id,
-				leaderDtoId:mainData.leader.id,addTool,
-				toolboxDtoId:mainData.toolbox.id,
-				toolList:list.map(item => ({ toolDtoId: item.id, count: item.count }))
-			}
-		)
+		Swal.fire({
+	        type: 'question',
+	        title: '신청하시겠습니까?',
+	        html: '<p>' +stringifyList()+ '</p>',
+	        showCancelButton: true,
+	        confirmButtonText: '예',
+			cancelButtonText: '아니오',
+			buttonStyling:false,
+		}).then(result =>{
+			if (result.isConfirmed) {	
+				post(
+					"/rental/request_sheet/apply",
+					{
+						workName:mainData.workName.name,
+						workerDtoId:mainData.worker.id,
+						leaderDtoId:mainData.leader.id,addTool,
+						toolboxDtoId:mainData.toolbox.id,
+						toolList:list.map(item => ({ toolDtoId: item.id, count: item.count }))
+					}
+				)
+				.then(data=>{
+					Swal.fire({
+					  type: "success",
+					  title: "대여 신청 완료",
+					  text: "공기구 대여 목록을 정상적으로 신청하였습니다",
+					});
+				})
+				.catch(error=>{
+					Swal.fire({
+						type: "error",
+						title: "대여 신청 실패",
+						text: error,
+					})
+				})
+			} else{
+				return;
+			}  
+		})
 	});
 	
+	function stringifyList(){
+		var result=""
+		for (let i=0;i<list.length;i++){
+			result+="품명:"+list[i]["name"]+",수량:"+list[i]["count"]+"<br/>";
+		}
+		return result;
+	}
 	
 	// =============== ▼ post ===============
 	
-	function post(url,paramData,redirection){
-		fetch(url, {
-		  method:"POST",
-		  headers:{
-			  //'header': document.querySelector('meta[name="_csrf"]').content,
-              "Content-Type": "application/json",
-              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
-		  },
-		  body: JSON.stringify(paramData),
-		})
-		  .then(response => {
-		    if (!response.ok) {
-		      throw new Error(`HTTP error! Status: ${response.status}`);
-		    }
-		    return response.json();
-		  })
-		  .then(data => {
-			if (redirection!=null){
-				location.href=redirection;
-			}
-		  })
-		  .catch(error => {
-		    console.error('Error:', error);
-			Swal.fire({
-			  type: "error",
-			  title: "Error!",
-			  text: error,
-			});
-			setTimeout(_=>{
-			$("#contactAddModal").modal("hide");
-			$("#contactEditModal").modal("hide");
-			},0);
-			return ;
-		  });
+	function post(url, paramData, redirection) {
+	    return new Promise((resolve, reject) => {
+	        fetch(url, {
+	            method: "POST",
+	            headers: {
+	                "Content-Type": "application/json",
+	            },
+	            body: JSON.stringify(paramData),
+	        })
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error(`HTTP error! Status: ${response.status}`);
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            if (redirection != null) {
+	                location.href = redirection;
+	            } else {
+	            	resolve(data);
+	            }
+	        })
+	        .catch(error => {
+	            console.error('Error:', error);
+	            Swal.fire({
+	                type: "error",
+	                title: "Error!",
+	                text: error,
+	            });
+	            setTimeout(() => {
+	                $("#contactAddModal").modal("hide");
+	                $("#contactEditModal").modal("hide");
+	            }, 0);
+	            reject(error);
+	        });
+	    });
 	}
+
 </script>
 </th:block>
 
