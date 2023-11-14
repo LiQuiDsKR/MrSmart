@@ -97,7 +97,7 @@ public class ToolRestController {
     
     
     /**
-     * 2023-10-25 paging용
+     * @deprecated
      * @param membershipSearchDto
      * @param page
      * @param model
@@ -119,6 +119,26 @@ public class ToolRestController {
         	logger.info(item.toString());
         }
         return ResponseEntity.ok(toolPage);
+    }
+    
+    @PostMapping(value="/tool/getpage/rental")
+    public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "name", defaultValue = "") String name,
+            @RequestParam(name = "toolboxId") Long toolboxId,
+            @RequestBody List<Long> subGroupId
+            ){
+
+    	logger.info("page=" + page + ", size=" + size);
+    		
+        Pageable pageable = PageRequest.of(page,size);
+        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalPage(pageable, name, toolboxId, subGroupId);
+        
+        for (ToolForRentalDto item : toolForRentalDtoPage.getContent()) {
+        	logger.info(item.toString());
+        }
+        return ResponseEntity.ok(toolForRentalDtoPage);
     }
     
     @GetMapping(value="tool/get")

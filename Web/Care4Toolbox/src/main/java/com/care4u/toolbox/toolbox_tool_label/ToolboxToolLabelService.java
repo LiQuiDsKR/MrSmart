@@ -1,4 +1,4 @@
-package com.care4u.toolbox.label;
+package com.care4u.toolbox.toolbox_tool_label;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,55 +20,61 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ToolboxLabelService {
+public class ToolboxToolLabelService {
 
-	private final Logger logger = LoggerFactory.getLogger(ToolboxLabelService.class);
+	private final Logger logger = LoggerFactory.getLogger(ToolboxToolLabelService.class);
 	
-	private final ToolboxLabelRepository repository;
+	private final ToolboxToolLabelRepository repository;
 	private final ToolboxRepository toolboxRepository;
 	private final ToolRepository toolRepository;
 	
 	@Transactional(readOnly = true)
-	public ToolboxLabelDto get(long id){
-		Optional<ToolboxLabel> item = repository.findById(id);
+	public ToolboxToolLabelDto get(long id){
+		Optional<ToolboxToolLabel> item = repository.findById(id);
 		if (item == null) {
 			logger.error("Invalid id : " + id);
 			return null;
 		}
 		
-		return new ToolboxLabelDto(item.get());
+		return new ToolboxToolLabelDto(item.get());
 	}	
 	
 	@Transactional(readOnly = true)
-	public ToolboxLabelDto get(ToolboxDto toolboxDto, String location){
+	public ToolboxToolLabelDto get(ToolboxDto toolboxDto, String location){
 		Toolbox toolbox = toolboxRepository.findByName(toolboxDto.getName());
 		if (toolbox == null) {
 			logger.error("Invalid toolboxDto : " + toolboxDto.getName());
 			return null;
 		}
 		
-		ToolboxLabel item = repository.findByToolboxAndLocation(toolbox, location);
+		ToolboxToolLabel item = repository.findByToolboxAndLocation(toolbox, location);
 		if (item == null) {
 			logger.error("Invalid location : " + location);
 			return null;
 		}
 		
-		return new ToolboxLabelDto(item);
+		return new ToolboxToolLabelDto(item);
 	}
 	
 	@Transactional(readOnly = true)
-	public List<ToolboxLabelDto> listByToolboxId(long toolboxId){
-		List<ToolboxLabelDto> list = new ArrayList<ToolboxLabelDto>();
+	public ToolboxToolLabelDto get(long toolId, long toolboxId){
+		ToolboxToolLabel label = repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		return new ToolboxToolLabelDto(label);
+	}
+	
+	@Transactional(readOnly = true)
+	public List<ToolboxToolLabelDto> listByToolboxId(long toolboxId){
+		List<ToolboxToolLabelDto> list = new ArrayList<ToolboxToolLabelDto>();
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolbox : " + toolboxId);
 			return list;
 		}
-		List<ToolboxLabel> subGroupList = repository.findAllByToolboxOrderByLocationAsc(toolbox.get());
+		List<ToolboxToolLabel> subGroupList = repository.findAllByToolboxOrderByLocationAsc(toolbox.get());
 		return getDtoList(subGroupList);
 	}
 	
-	public ToolboxLabelDto update(ToolboxLabelDto toolboxToolLabelDto) {
+	public ToolboxToolLabelDto update(ToolboxToolLabelDto toolboxToolLabelDto) {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxToolLabelDto.getToolboxDto().getId());
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxToolLabelDto.getToolboxDto().getId());
@@ -81,19 +87,19 @@ public class ToolboxLabelService {
 			return null;
 		}
 		
-		ToolboxLabel toolboxToolLabel = repository.findByToolboxAndLocation(toolbox.get(), toolboxToolLabelDto.getLocation());
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolboxAndLocation(toolbox.get(), toolboxToolLabelDto.getLocation());
 		if (toolboxToolLabel == null) {
-			toolboxToolLabel = new ToolboxLabel();
+			toolboxToolLabel = new ToolboxToolLabel();
 		}
-		toolboxToolLabel.update(toolbox.get(), toolboxToolLabelDto.getLocation(), tool.get());
+		toolboxToolLabel.update(toolbox.get(), toolboxToolLabelDto.getLocation(), tool.get(), toolboxToolLabelDto.getQrcode());
 		
-		return new ToolboxLabelDto(repository.save(toolboxToolLabel));
+		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
 	}
 	
-	private List<ToolboxLabelDto> getDtoList(List<ToolboxLabel> list){
-		List<ToolboxLabelDto> dtoList = new ArrayList<ToolboxLabelDto>();
-		for (ToolboxLabel item : list) {
-			dtoList.add(new ToolboxLabelDto(item));
+	private List<ToolboxToolLabelDto> getDtoList(List<ToolboxToolLabel> list){
+		List<ToolboxToolLabelDto> dtoList = new ArrayList<ToolboxToolLabelDto>();
+		for (ToolboxToolLabel item : list) {
+			dtoList.add(new ToolboxToolLabelDto(item));
 			
 		}
 		return dtoList;

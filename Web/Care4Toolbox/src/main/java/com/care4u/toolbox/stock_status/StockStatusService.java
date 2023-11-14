@@ -1,5 +1,8 @@
 package com.care4u.toolbox.stock_status;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -27,6 +30,16 @@ public class StockStatusService {
 		}
 		
 		return new StockStatusDto(item.get());
+	}
+	
+	@Transactional(readOnly = true)
+	public StockStatusDto get(long toolId, long toolboxId) {
+		
+		LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(0,0,0));
+		LocalDateTime endDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+		StockStatus status= repository.findByToolIdAndToolboxIdAndCurrentDayBetween(toolId, toolboxId, startDateTime, endDateTime);
+		
+		return new StockStatusDto(status);
 	}
 
 }

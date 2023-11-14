@@ -1,4 +1,4 @@
-package com.care4u.toolbox.label;
+package com.care4u.toolbox.toolbox_tool_label;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,8 +23,8 @@ import lombok.ToString;
 @ToString
 
 @Entity
-@Table(name="toolbox_label")
-public class ToolboxLabel extends BaseEntity {
+@Table(name="toolbox_tool_label")
+public class ToolboxToolLabel extends BaseEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -45,15 +45,17 @@ public class ToolboxLabel extends BaseEntity {
 	private String qrcode;
 	
 	@Builder
-	public ToolboxLabel(Toolbox toolbox, String location, Tool tool) {
+	public ToolboxToolLabel(Toolbox toolbox, String location, Tool tool, String qrcode) {
 		this.toolbox = toolbox;
 		this.location = location;
 		this.tool = tool;
+		this.qrcode = qrcode;
 	}
 	
-	public void update(Toolbox toolbox, String location, Tool tool) {
+	public void update(Toolbox toolbox, String location, Tool tool, String qrcode) {
 		this.toolbox = toolbox;
 		this.location = location;
 		this.tool = tool;
+		this.qrcode = qrcode;
 	}
 }
