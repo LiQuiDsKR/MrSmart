@@ -8,6 +8,6 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 
 public interface RentalToolRepository extends JpaRepository<RentalTool, Long> {
 	
-	List<RentalTool> findAllByRentalSheet(RentalSheet RentalSheet);
+	List<RentalTool> findAllByRentalSheetId(long RentalSheetId);
 	
 }

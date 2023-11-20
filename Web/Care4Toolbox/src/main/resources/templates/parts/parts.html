@@ -38,7 +38,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-group-type="main_group">
+									data-part-type="main_part">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -108,7 +108,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-group-type="main_group">
+									data-part-type="sub_part">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -170,7 +170,7 @@
 									class="btn-circle"
 									data-toggle="modal"
 									data-target="#contactAddModal"
-									data-group-type="main_group">
+									data-part-type="part">
 									<img
 										th:src="@{/img/svg/plus_white.svg}"
 										alt=""
@@ -462,7 +462,7 @@
 							break;
 						case "sub_part":
 							data.partType.key="sub_part";
-							data.partType.display="서브 부서";
+							data.partType.display="중간 부서";
 							data.parentPart.id=selectStates["mainPartTable"]?.id;
 							data.parentPart.display=selectStates["mainPartTable"]?.name+"/";
 							break;

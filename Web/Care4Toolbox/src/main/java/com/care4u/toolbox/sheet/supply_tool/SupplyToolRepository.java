@@ -9,5 +9,7 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 public interface SupplyToolRepository extends JpaRepository<SupplyTool, Long> {
 	
 	List<SupplyTool> findAllBySupplySheet(RentalSheet RentalSheet);
+
+	List<SupplyTool> findAllBySupplySheetId(long id);
 	
 }

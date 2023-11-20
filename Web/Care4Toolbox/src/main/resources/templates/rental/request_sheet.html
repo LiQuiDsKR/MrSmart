@@ -114,17 +114,17 @@
 										<th hidden>
 											영문이름
 										</th>
-										<th>
+										<th hidden>
 											품목번호
 										</th>
-										<th>
+										<th hidden>
 											대분류
 										</th>
-										<th>
+										<th hidden>
 											중분류
 										</th>
-										<th hidden>
-											스펙
+										<th >
+											규격
 										</th>
 										<th hidden>
 											단위
@@ -229,6 +229,9 @@
 									</th>
 									<th>
 										교체주기
+									</th>
+									<th>
+										재고
 									</th>
 									<th>추가</th>
 								</tr>
@@ -386,7 +389,7 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript">
 
-	
+	var table={draw:function(){console.log('not initialized yet')}};
 	$(document).ready(function(){
 		
 		//231025 검색 기능
@@ -396,7 +399,7 @@
             page(0);
         });
         */            
-		var table = $('#datatable').DataTable({
+		table = $('#datatable').DataTable({
 			"paging": true,          // 페이지네이션 사용
 			"pageLength": 10, 		// 페이지당 항목 수
 			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
@@ -410,19 +413,24 @@
 			"serverSide": true,
 			"processing": true,
 			"ajax": {
-				"url": "/tool/getpage", // 데이터를 가져올 엔드포인트 URL
+				"url": `/tool/getpage/rental`, // 데이터를 가져올 엔드포인트 URL
 				//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"method":"POST",
+				"contentType": "application/json",
 				"data": function (d) {
 					var data = {
 			           "page": parseInt(d.start / d.length),
-			           "size": d.length,	
-			           "name": $("#searchInput").val()
+			           "size": d.length,
+			           "name": $("#searchInput").val(),
+			           "toolboxId": parseInt($("#toolboxSelect").val()),
+			           "subGroupId": [71, 73, 75,81,86,100,102,104,113,128,159,166,185,189,191,196,200,204,206,227,229,239,255,308,543,879,882,887,909,1253,1255,1257,1264,1274,1277,1283,1285,1287,1344,1352,1443,1444,1445,1446,1447,1448,1449,1450,1451,1452,1453,1454,1455,1456,1457,1458,1459,1460,1461,1462,1463,1464,1465,1466,1467,1468],
+			           
 			           //"order": columnsDefine[d.order[0].column].column,
 			           //"search": 'tagid',
 			           //"direction": d.order[0].dir.toUpperCase(),
 			           //"keyword": d.search.value
 			        };
-			        return data;
+			        return JSON.stringify(data);
 				},
 				"dataFilter": function (data) {
 					data.dataSrc="content";
@@ -461,14 +469,14 @@
 					}
                 },*/
 				{
-					"data": "id",
+					"data": "toolDto.id",
 					"type": Number
 				},
-				{"data": "name"},
-				{"data": "engName"},
-				{"data": "code"},
+				{"data": "toolDto.name"},
+				{"data": "toolDto.engName"},
+				{"data": "toolDto.code"},
 				{
-					"data": "subGroupDto",
+					"data": "toolDto.subGroupDto",
 					"render":function(data,type,row){
 						if(type==="display"){
 							return data.mainGroupDto.name;
@@ -477,7 +485,7 @@
 					}
 				},
 				{
-					"data": "subGroupDto",
+					"data": "toolDto.subGroupDto",
 					"render":function(data,type,row){
 						if(type==="display"){
 							return data.name;
@@ -485,10 +493,11 @@
 						return data;
 					}
 				},
-				{"data": "spec"},
-				{"data": "unit"},
-				{"data": "price", "type":Number},
-				{"data": "replacementCycle", "type":Number},
+				{"data": "toolDto.spec"},
+				{"data": "toolDto.unit"},
+				{"data": "toolDto.price", "type":Number},
+				{"data": "toolDto.replacementCycle", "type":Number},
+				{"data": "stockDto.totalCount"},
 				{
 					"data": null,
 					"render":function(data,type,row){
@@ -504,7 +513,7 @@
 		});
 		table.on('click', '.addRentalToolBtn', function() {
 			var data = table.row($(this).parents('tr')).data();
-			addTool(data.id).bind(this);			
+			addTool.apply(this,[data.toolDto.id]);			
 	    });
 	    
 	    $("#searchBtn").on("click",e=>{
@@ -544,20 +553,20 @@
 			.then(data=>{
 				if (!list.every(e=>e.id!==id)){
 					Swal.fire({
-						title: '',
+						title: '이미 추가됨',
 						text: '이미 추가된 항목입니다. 왼쪽의 버튼으로 수량을 조절하세요.',
 						type: 'warning', 
 						confirmButtonText: '확인'
 					});
 					return ;
-				} // 혹은 disabled class추가
-				// 혹은 개수 추가
+				}
 				
 				const rowLayout=[
 					["name"],
-					["code"],
-					["subGroupDto","mainGroupDto","name"],
-					["subGroupDto","name"],
+					["spec"],
+					//["code"],
+					//["subGroupDto","mainGroupDto","name"],
+					//["subGroupDto","name"],
 				];
 				
 				list.push({
@@ -605,7 +614,12 @@
 	function removeTool(id){
 		const index=findIndexById(list,id);
 		if (index<0){
-			return "? 그런거 없다";
+			Swal.fire({
+				type:'error',
+				title: 'No Index',
+				text: '리스트를 처리하는 중 에러가 발생했습니다.',
+			});
+			return;
 		}
 		list.splice(index,1);
 		const row=getTRFromTBodyByIndex(index);
@@ -631,16 +645,32 @@
 		}
 		return null; // 인덱스에 해당하는 <tr>을 찾지 못한 경우
 	}
+	function resetTool(){
+		list.length=0;
+		const tbody = document.getElementById('rentalList');
+		tbody.innerHTML="";
+	}
 	function increaseCount(index){
-		//조건문 추가해야함 총 count불러와서 ㅇㅇ
-		if(index>=list.length){
-			return "없다 그런거";
-		}
-		list[index].count++;
-		const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-		count.textContent=parseInt(count.textContent)+1;
-		
-		stack.push({key:"i",param:index});
+		getStockDtoByToolAndToolboxId(list[index].id,parseInt(toolboxSelect.value))
+		.then(stockData=>{
+			if (stockData.totalCount<=list[index].count){
+				Swal.fire({
+					type:"info",
+					title:"재고 부족",
+					text:"이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
+				});
+				return ;
+			}else{
+				if(index>=list.length){
+					return "없다 그런거";
+				}
+				list[index].count++;
+				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+				count.textContent=parseInt(count.textContent)+1;
+				
+				stack.push({key:"i",param:index});
+			}
+		})
 	}
 	function decreaseCount(index){
 		if(index>=list.length){
@@ -656,6 +686,8 @@
 			stack.push({key:"d",param:index});
 		}
 	}
+	
+	/*
 	function updateManually(){
 		const tbody=document.getElementById("rentalList");
 		tbody.children().forEach(e=>{
@@ -705,6 +737,8 @@
 			});
 		}
 	}
+	*/
+	
 	function undo(){
 		const action=stack.pop();
 		if (action==null){
@@ -759,6 +793,23 @@
 	        });
 	    });
 	}
+	function getStockDtoByToolAndToolboxId(toolId,toolboxId){
+		return new Promise((resolve, reject) => {
+			fetch(`/stock_status/get?toolId=${toolId}&toolboxId=${toolboxId}`)
+	        .then(response => {
+	            if (response.ok) {
+	                return response.json();
+	            }
+	            throw new Error('서버 오류 발생');
+	        })
+	        .then(data => {
+	            resolve(data);
+	        })
+	        .catch(error => {
+	            reject(error);
+	        });
+        });
+	}
 	window.addEventListener("keypress",e=>{
 		if (e.ctrlKey && e.key=="\x1A"){
 			undo();
@@ -786,22 +837,45 @@
 		}
 	}
 	
-	
 	document.getElementById("workNameEditModalBtn").addEventListener("click",function(){
 		document.getElementById("workNameInput").value=mainData.workName.name;
 	});
 	
-	
 	document.getElementById("workNameSubmitBtn").addEventListener("click",function(){
 		mainData.workName.name=document.getElementById("workNameInput").value;
+		mainData.workName.name=document.getElementById("workNameInput").focus();
 		document.getElementById("workName").textContent=mainData.workName.name;
 	});
 	
-	document.getElementById("toolboxSelect").addEventListener("change",toolboxChangeEventHandler)
+	const toolboxSelect= document.getElementById("toolboxSelect");
+	toolboxSelect.setAttribute('former-data',toolboxSelect.value);
+	toolboxSelect.addEventListener("change",toolboxChangeEventHandler)
 	
 	function toolboxChangeEventHandler(){
 		mainData.toolbox.id=this.value;
 		mainData.toolbox.name=this.textContent;
+		if (list.length>0){
+			Swal.fire({
+	        type: 'warning',
+	        title: '정비실 변경',
+	        text: '목록을 작성하는 중 정비실을 변경하면, 지금까지 작성한 공기구 목록 정보는 전부 초기화됩니다. 정말로 정비실을 변경하시겠습니까?',
+	        showCancelButton: true,
+	        confirmButtonText: '예',
+			cancelButtonText: '아니오',
+			buttonStyling:false,
+			}).then(result =>{
+				if (result.value==true) {
+					this.setAttribute('former-data',this.value);
+					resetTool();
+					table.draw();
+				}else{
+					this.value=toolboxSelect.getAttribute('former-data');
+				}
+			});
+		}else{
+			this.setAttribute('former-data',this.value);
+			table.draw();
+		}
 	}
 	
 	toolboxChangeEventHandler.apply(document.getElementById("toolboxSelect"));
@@ -817,7 +891,6 @@
 	});
 	document.getElementById("workerSubmitBtn").addEventListener("click",membershipFormSubmitBtnEventHandler.bind(null,"worker"));
 	
-	
 	document.getElementById("leaderEditModalBtn").addEventListener("click",membershipFormEditModalBtnEventHandler.bind(null,"leader"));
 	document.getElementById("leaderSearchBtn").addEventListener("click",membershipFormSearchBtnEventHandler.bind(null,"leader"));
 	document.getElementById("leaderInput").addEventListener("keypress",e=>{
@@ -826,8 +899,6 @@
 		}
 	});
 	document.getElementById("leaderSubmitBtn").addEventListener("click",membershipFormSubmitBtnEventHandler.bind(null,"leader"));
-	
-	
 	
 	function membershipFormEditModalBtnEventHandler(formName){
 		document.getElementById(formName + "Id").value=mainData[formName].id;
@@ -984,7 +1055,7 @@
 			cancelButtonText: '아니오',
 			buttonStyling:false,
 		}).then(result =>{
-			if (result.isConfirmed) {	
+			if (result.value==true) {	
 				post(
 					"/rental/request_sheet/apply",
 					{
@@ -1001,6 +1072,11 @@
 					  title: "대여 신청 완료",
 					  text: "공기구 대여 목록을 정상적으로 신청하였습니다",
 					});
+				})
+				.then(result2=>{
+					if(result2){
+						location.href='/rental/request_sheet'
+					}
 				})
 				.catch(error=>{
 					Swal.fire({

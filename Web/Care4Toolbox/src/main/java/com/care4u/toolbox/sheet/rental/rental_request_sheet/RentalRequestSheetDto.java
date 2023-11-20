@@ -3,6 +3,9 @@ package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+
 import com.care4u.constant.SheetState;
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipDto;
@@ -21,10 +24,11 @@ public class RentalRequestSheetDto {
 	
 	private long id;
 	
+	@Valid
 	private MembershipDto workerDto;
-	
+	@Valid
 	private MembershipDto leaderDto;
-	
+	@Valid
 	private ToolboxDto toolboxDto;
 	
 	private SheetState status;

@@ -5179,7 +5179,7 @@ table.invoice-list tbody tr:hover {
 table.invoice-list-table tbody tr.selected,
 table.contact-list-table tbody tr.selected,
 table.invoice-list tbody tr.selected {
-	background-color: #f0f0f0;
+	background-color: #dedede;
 }
 
 table.invoice-list-table.style-two,

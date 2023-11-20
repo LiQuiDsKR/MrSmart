@@ -23,6 +23,7 @@ import com.care4u.service.LogWriterService;
 import com.care4u.toolbox.group.main_group.MainGroupDto;
 import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.ToolService;
 
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	@Autowired
 	private ToolService toolService;
 	
+	@Autowired
+	private StockStatusService stockStatusService;
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
@@ -65,6 +69,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		
 		//ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService);
 		//toolParsing.readCsvFile("C:/Temp/tool.csv");
+		
+		//stockStatusService.addMock();
 		
 		logger.info("Care4UManager  afterPropertiesSet... ");
 	}

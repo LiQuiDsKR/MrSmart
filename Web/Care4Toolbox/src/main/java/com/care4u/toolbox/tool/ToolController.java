@@ -47,27 +47,16 @@ public class ToolController {
     
     @GetMapping(value = "")
     public String toolPage(/*ToolSearchDto toolSearchDto,*/ @PathVariable("page") Optional<Integer> page, Model model){
-
-        Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 30);
-        Page<ToolDto> toolPage = toolService.getToolPage(pageable);
-        
-        for (ToolDto item : toolPage.getContent()) {
-        	logger.info(item.toString());
-        }
         
     	List<MainGroupDto> mainGroupDtoList = mainGroupService.list();
     	ToolFormDto toolFormDto = new ToolFormDto();
     	
-        model.addAttribute("toolPage", toolPage);
+        //model.addAttribute("toolPage", toolPage);
         //model.addAttribute("toolSearchDto", toolSearchDto);
         //model.addAttribute("maxPage", 10); 
         
     	model.addAttribute("mainGroupDtoList", mainGroupDtoList);
     	
-    	//아래 두 개는 form용
-    	model.addAttribute("toolFormDto",toolFormDto);
-    	//model.addAttribute("memberFormPartDtoId",memberFormPartDtoId); //memberFormDto로 합침
-
         return "tool/tool";
     }
 }

@@ -70,8 +70,14 @@ public class RentalRequestSheetService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Page<RentalRequestSheetDto> getRentalRequestSheetPageByToolboxId( Long toolboxId, Pageable pageable ) {
+	public Page<RentalRequestSheetDto> getPage( Long toolboxId, Pageable pageable ) {
 		Page<RentalRequestSheet> page = repository.findAllByToolboxId(toolboxId, pageable);	
+		return page.map(e->convertToDto(e));
+	}
+
+	@Transactional(readOnly=true)
+	public Page<RentalRequestSheetDto> getPage( SheetState status, Long toolboxId, Pageable pageable){
+		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	
@@ -90,6 +96,18 @@ public class RentalRequestSheetService {
 		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerDtoId());
 		Optional<Membership> leader = membershipRepository.findById(formDto.getLeaderDtoId());
 		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxDtoId());
+		if (worker.isEmpty()) {
+			logger.debug("worker : " + worker);
+			return null;
+		}
+		if (leader.isEmpty()) {
+			logger.debug("leader :" + leader);
+			return null;
+		}
+		if (toolbox.isEmpty()) {
+			logger.debug("toolbox : " + toolbox);
+			return null;
+		}
 
 		logger.debug("worker : " + worker + "\r\n" + "leader : " + leader + "\r\n" + "toolbox : " + toolbox);
 		
@@ -105,15 +123,42 @@ public class RentalRequestSheetService {
 		
 		List<RentalRequestTool> toolList = new ArrayList<RentalRequestTool>();
 		for (RentalRequestToolFormDto tool : formDto.getToolList()) {
-			RentalRequestTool newTool = rentalRequestToolService.addNew(tool, rentalRequestSheet);
+			RentalRequestTool newTool = rentalRequestToolService.addNew(tool, savedRentalRequestSheet);
 			toolList.add(newTool);
 		}
 		return convertToDto(savedRentalRequestSheet);
 	}
 	
-	@Transactional(readOnly=true)
-	public Page<RentalRequestSheetDto> getRentalRequestSheetPageByStatusAndToolboxId( SheetState status, Long toolboxId, Pageable pageable){
-		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
-		return page.map(e->convertToDto(e));
+	
+	@Transactional
+	public RentalRequestSheetDto update(RentalRequestSheetDto sheetDto) {
+		RentalRequestSheet rentalRequestSheet;
+		
+		Optional<RentalRequestSheet> rentalRequestSheetOptional = repository.findById(sheetDto.getId());
+		Optional<Membership> worker = membershipRepository.findById(sheetDto.getWorkerDto().getId());
+		Optional<Membership> leader = membershipRepository.findById(sheetDto.getLeaderDto().getId());
+		Optional<Toolbox> toolbox = toolboxRepository.findById(sheetDto.getToolboxDto().getId());
+		if (rentalRequestSheetOptional.isEmpty()) {
+			logger.debug("sheet not found");
+			return null;
+		} 
+		if (worker.isEmpty()) {
+			logger.debug("worker : " + worker);
+			return null;
+		}
+		if (leader.isEmpty()) {
+			logger.debug("leader :" + leader);
+			return null;
+		}
+		if (toolbox.isEmpty()) {
+			logger.debug("toolbox : " + toolbox);
+			return null;
+		}
+		
+		rentalRequestSheet=rentalRequestSheetOptional.get();
+		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), sheetDto.getStatus(), sheetDto.getEventTimestamp());
+		
+		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
 	}
+	
 }

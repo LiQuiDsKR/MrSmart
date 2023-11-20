@@ -166,7 +166,7 @@
 								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
-											<h1 id="addFormTitle" class="mb-4">부서 정보 추가</h1>
+											<h1 id="addFormTitle" class="mb-4">분류 정보 추가</h1>
 											<input id="addFormId" hidden></input>				
 											<div class="form-group mb-4">
 												<label class="bold black mb-2" for="addFormName"
@@ -230,7 +230,7 @@
 								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
-											<h1 id="editFormTitle" class="mb-4">부서 정보 추가</h1>	
+											<h1 id="editFormTitle" class="mb-4">분류 정보 추가</h1>	
 											<input id="editFormId" hidden></input>										
 											<div class="form-group mb-4">
 												<label class="bold black mb-2" for="editFormName"
@@ -344,13 +344,13 @@
 			        switch(pt){
 						case "main_group":
 							data.groupType.key="main_group";
-							data.groupType.display="메인 부서";
+							data.groupType.display="대분류";
 							data.parentGroup.id=0;
 							data.parentGroup.display="/";
 							break;
 						case "sub_group":
 							data.groupType.key="sub_group";
-							data.groupType.display="서브 부서";
+							data.groupType.display="중분류";
 							data.parentGroup.id=selectStates["mainGroupTable"]?.id;
 							data.parentGroup.display=selectStates["mainGroupTable"]?.name+"/";
 							break;
@@ -359,8 +359,8 @@
 					if (data.parentGroup?.id==null) {
 						Swal.fire({
 						  type: "warning",
-						  title: "상위 부서 없음",
-						  text: "왼쪽 박스에서 상위 부서를 먼저 선택해주세요!",
+						  title: "상위 분류 없음",
+						  text: "왼쪽 박스에서 상위 분류를 먼저 선택해주세요!",
 						});
 						setTimeout(_=>{
 						$("#contactAddModal").modal("hide");},10);
@@ -426,7 +426,6 @@
 		    return JSON.stringify(response);
 		  })
 		  .then(data => {
-			debugger;
 			location.href=redirection;
 		  })
 		  .catch(error => {
@@ -518,13 +517,13 @@
 			        switch(parentTable.id){
 						case "mainGroupTable":
 							data.groupType.key="main_group";
-							data.groupType.display="메인 부서";
+							data.groupType.display="대분류";
 							data.parentGroup.id=0;
 							data.parentGroup.display="/";
 							break;
 						case "subGroupTable":
 							data.groupType.key="sub_group";
-							data.groupType.display="서브 부서";
+							data.groupType.display="중분류";
 							data.parentGroup.id=selectStates["mainGroupTable"].id;
 							data.parentGroup.display=selectStates["mainGroupTable"].name+"/";
 							break;

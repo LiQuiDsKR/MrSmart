@@ -59,4 +59,13 @@ public class RentalRequestSheet extends BaseEntity {
 		this.toolbox = toolbox;
 		this.eventTimestamp = eventTimestamp;
 	}
+	
+	public void update(Membership worker, Membership leader, Toolbox toolbox, SheetState status, LocalDateTime eventTimestamp) {
+		this.worker = worker;
+		this.leader = leader;
+		this.status = status;
+		this.toolbox = toolbox;
+		this.eventTimestamp = eventTimestamp;
+	}
+	
 }

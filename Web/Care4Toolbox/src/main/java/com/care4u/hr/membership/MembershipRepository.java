@@ -18,7 +18,8 @@ public interface MembershipRepository extends JpaRepository<Membership, Long>
  * 추가 extend : QuerydslPredicateExecutor<Membership>, MembershipRepositoryCustom
  * search & paging 기능 테스트를 위해 추가했습니다
  */
-		,QuerydslPredicateExecutor<Membership>, MembershipRepositoryCustom{
+		//,QuerydslPredicateExecutor<Membership>, MembershipRepositoryCustom
+{
 
 	public List<Membership> findAllByRoleOrderByNameAsc(Role role);
 	

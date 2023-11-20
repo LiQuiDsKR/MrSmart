@@ -40,6 +40,10 @@ public class RentalRequestToolService {
 	@Transactional
 	public RentalRequestTool addNew(RentalRequestToolFormDto formDto, RentalRequestSheet sheet) {
 		Optional<Tool> tool = toolRepository.findById(formDto.getToolDtoId());
+		if (tool.isEmpty()){
+			logger.error("tool not found");
+			return null;
+		}
 		
 		RentalRequestTool rentalRequestTool = RentalRequestTool.builder()
 				.rentalRequestSheet(sheet)
@@ -47,7 +51,6 @@ public class RentalRequestToolService {
 				.count(formDto.getCount())
 				.Tags("")
 				.build();
-		
 		
 		return repository.save(rentalRequestTool);
 	}

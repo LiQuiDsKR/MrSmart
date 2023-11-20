@@ -25,6 +25,7 @@ import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.tool.ToolDto;
 import com.google.gson.Gson;
 
@@ -37,7 +38,7 @@ public class RentalRequestSheetRestController {
 	private RentalRequestSheetService rentalRequestSheetService;
 	
     @PostMapping(value="/rental/request_sheet/apply")
-    public ResponseEntity<String> newMembership(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto){
+    public ResponseEntity<String> applyRentalRequestSheet(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto){
     	Gson gson = new Gson();
     	try {
     		rentalRequestSheetService.addNew(rentalRequestSheetFormDto);
@@ -49,22 +50,31 @@ public class RentalRequestSheetRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @GetMapping(value="/rental/request_sheet/getpage")
-    public ResponseEntity<Page<RentalRequestSheetDto>> getToolPage(
+    @PostMapping(value="/rental/request_sheet/getpage")
+    public ResponseEntity<Page<RentalRequestSheetDto>> getRentalRequestSheetPage(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "toolboxId") long id
+            @RequestParam(name = "toolboxId") long toolboxId
             ){
 
     	logger.info("page=" + page + ", size=" + size);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<RentalRequestSheetDto> rentalRequestSheetPage = rentalRequestSheetService.getRentalRequestSheetPageByToolboxId(id,pageable);
+        Page<RentalRequestSheetDto> rentalRequestSheetPage = rentalRequestSheetService.getPage(toolboxId,pageable);
         
         for (RentalRequestSheetDto item : rentalRequestSheetPage.getContent()) {
         	logger.info(item.toString());
         }
         return ResponseEntity.ok(rentalRequestSheetPage);
+    }
+    
+    @PostMapping(value="/rental/request_sheet/approve")
+    public ResponseEntity<RentalSheetDto> approveRentalRequestSheet(
+    		@Valid @RequestBody RentalRequestSheetDto sheetDto,
+    		@RequestParam(name = "approverId") long approverId
+    		){
+
+		return null;
     }
 
 }

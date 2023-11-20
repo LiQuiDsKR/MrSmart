@@ -113,7 +113,7 @@ public class ToolRestController {
     	logger.info("page=" + page + ", size=" + size);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<ToolDto> toolPage = toolService.getToolPageByName(pageable,name);
+        Page<ToolDto> toolPage = toolService.getToolPage(pageable,name);
         
         for (ToolDto item : toolPage.getContent()) {
         	logger.info(item.toString());
@@ -122,18 +122,12 @@ public class ToolRestController {
     }
     
     @PostMapping(value="/tool/getpage/rental")
-    public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "name", defaultValue = "") String name,
-            @RequestParam(name = "toolboxId") Long toolboxId,
-            @RequestBody List<Long> subGroupId
-            ){
+    public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(@RequestBody ToolForRentalPostFormDto data){
 
-    	logger.info("page=" + page + ", size=" + size);
+    	logger.info("page=" + data.page + ", size=" + data.size);
     		
-        Pageable pageable = PageRequest.of(page,size);
-        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalPage(pageable, name, toolboxId, subGroupId);
+        Pageable pageable = PageRequest.of(data.page,data.size);
+        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalDtoPage(pageable, data.toolboxId, data.name, data.subGroupId);
         
         for (ToolForRentalDto item : toolForRentalDtoPage.getContent()) {
         	logger.info(item.toString());

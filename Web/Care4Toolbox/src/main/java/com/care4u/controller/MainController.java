@@ -28,6 +28,11 @@ public class MainController {
         return "index";
     }
     
+    @GetMapping(value = "/test")
+    public String test(Model model) {
+    	return "test";
+    }
+    
     /*
     
     @GetMapping(value = "/tool_list")

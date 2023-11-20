@@ -3,6 +3,7 @@ package com.care4u.toolbox.toolbox_tool_label;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class ToolboxToolLabelService {
 	private final ToolboxToolLabelRepository repository;
 	private final ToolboxRepository toolboxRepository;
 	private final ToolRepository toolRepository;
+	private final ToolboxService toolboxService;
 	
 	@Transactional(readOnly = true)
 	public ToolboxToolLabelDto get(long id){
@@ -55,10 +59,30 @@ public class ToolboxToolLabelService {
 		
 		return new ToolboxToolLabelDto(item);
 	}
-	
+
+	/**
+	 * 만약 없으면 addDummy로 만들어버림에 유의
+	 * @param toolboxToolLabelDto
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public ToolboxToolLabelDto get(long toolId, long toolboxId){
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);		
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
 		ToolboxToolLabel label = repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		if (label == null) {
+			return null;
+		}
 		return new ToolboxToolLabelDto(label);
 	}
 	
@@ -87,20 +111,70 @@ public class ToolboxToolLabelService {
 			return null;
 		}
 		
-		ToolboxToolLabel toolboxToolLabel = repository.findByToolboxAndLocation(toolbox.get(), toolboxToolLabelDto.getLocation());
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId());
 		if (toolboxToolLabel == null) {
-			toolboxToolLabel = new ToolboxToolLabel();
+			return null;
 		}
 		toolboxToolLabel.update(toolbox.get(), toolboxToolLabelDto.getLocation(), tool.get(), toolboxToolLabelDto.getQrcode());
 		
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
 	}
 	
+	
+	/**
+	 * tool에 대해 임의의 toolbox를 연결하는 toolboxToolLabelDto를 생성합니다
+	 * location="", qrcode=tool.code
+	 * @param toolDto
+	 * @return new toolboxToolLabelDto
+	 */
+	private ToolboxToolLabelDto addDummy(ToolDto toolDto) {
+		
+		Optional<Tool> tool = toolRepository.findById(toolDto.getId());		
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolDto.getId());
+			return null;
+		}
+		
+		List<ToolboxDto> toolboxList = toolboxService.list();
+		Random random = new Random();
+		int randomIndex = random.nextInt(toolboxList.size());
+		ToolboxDto toolboxDto = toolboxList.get(randomIndex);
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxDto.getId());
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxDto.getId());
+			return null;
+		}
+		
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolDto.getId(),toolboxDto.getId());
+		if (toolboxToolLabel == null) {
+			toolboxToolLabel = new ToolboxToolLabel();
+			toolboxToolLabel.update(toolbox.get(),"",tool.get(),toolDto.getCode());
+		} else {
+			return new ToolboxToolLabelDto(toolboxToolLabel);
+		}
+		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
+	}
+	
+	/**
+	 * buy시 생성하셔야 합니다 + 일단 기준정보 페이지에 없는 내용이라 Dto로 안하긴 했는데
+	 * @return
+	 */
+	@Transactional
+	public ToolboxToolLabel addNew(Tool tool, Toolbox toolbox) {
+		Random random = new Random();
+		ToolboxToolLabel label = ToolboxToolLabel.builder()
+			.tool(tool)
+			.toolbox(toolbox)
+			.location(toolbox.getName())
+			.qrcode(toolbox.getId()+""+tool.getId())
+			.build();
+		return repository.save(label);
+	}
+	
 	private List<ToolboxToolLabelDto> getDtoList(List<ToolboxToolLabel> list){
 		List<ToolboxToolLabelDto> dtoList = new ArrayList<ToolboxToolLabelDto>();
 		for (ToolboxToolLabel item : list) {
 			dtoList.add(new ToolboxToolLabelDto(item));
-			
 		}
 		return dtoList;
 	}
