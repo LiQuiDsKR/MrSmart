@@ -5,22 +5,22 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.zxing.integration.android.IntentIntegrator
+import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.message.Message
+import com.mrsmart.standard.page.Page
+import com.mrsmart.standard.tool.ToolDto
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
-import android.os.Handler
-import android.os.Looper
-import android.widget.ProgressBar
-import com.google.zxing.integration.android.IntentIntegrator
-import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.membership.Membership
-import com.mrsmart.standard.message.Message
-import com.mrsmart.standard.tool.ToolDto
 
 
 class BluetoothManager (private val context: Context, private val activity: Activity) {
@@ -49,7 +49,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var totalPercentage: Int = 0
 
     val backgroundThread = Thread { // 쓰레드, 백그라운드 실행
-        dataReceive()
+        dataReceiveToWriteDB()
     }
     var stopThread = false // 쓰레드 종료 Flag
 
@@ -93,18 +93,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     fun stopBackgroundThread() {
         stopThread = true // 스레드 중지를 요청
     }
-    fun onReceive(): ByteArray {
-        val size = inputStream.available()
-        val buffer = ByteArray(size)
-        inputStream.read(buffer)
-        Log.d("TEST", String(buffer))
 
-        return buffer
-    }
-    fun onReceiveToString(): String {
-        return String(onReceive())
-    }
-    fun dataReceive() {
+    fun dataReceiveToWriteDB() {
         val timeoutRunnable = Runnable { // 예상된 데이터보다 적은 데이터를 받아 Loop를 돌다 Timeout이 일어난 경우
             timeout = true
             dataSend("TIMEOUT")
@@ -169,6 +159,81 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
             }
         }
+    }
+    fun dataReceive(): String {
+        val timeoutRunnable = Runnable { // 예상된 데이터보다 적은 데이터를 받아 Loop를 돌다 Timeout이 일어난 경우
+            timeout = true
+            dataSend("TIMEOUT")
+        }
+        while (!stopThread) {
+            timeout = false // Timeout Flag 초기화
+            if (inputStream.available() > 0) {
+                when (dataCheckStep) {
+                    0 -> { // 0단계, 전체 데이터의 크기를 미리 받고 체크하는 단계
+                        val size = inputStream.available()
+                        val buffer = ByteArray(size)
+                        val readData = inputStream.read(buffer)
+                        val receivedMessage = String(buffer, 0, readData)
+                        dataSend(receivedMessage)
+                        dataCheckStep = 1 // 받은 데이터의 크기를 그대로 반송하며 1단계 진입
+                        dataCheckSize = receivedMessage.toInt()// 받은 데이터 저장
+                    }
+
+                    1 -> { // 1단계, 실제 데이터를 받는 단계
+                        timeoutHandler.postDelayed(
+                            timeoutRunnable,
+                            10000
+                        ) // 예상한 데이터 크기보다 적게들어올 경우 Timeout 처리
+                        totalByteList.clear()
+                        while (true) {
+                            val size = inputStream.available()
+                            val buffer = ByteArray(size)
+                            val readData = inputStream.read(buffer)
+                            val receivedByte = buffer.copyOf(readData)
+                            totalByteList.add(receivedByte) // 받은 내용 누적
+
+                            val byteListSize = String(combineByteArrays(totalByteList),Charsets.UTF_8).toByteArray().size
+                            if (byteListSize == dataCheckSize) { // 예상된 데이터와 현재 받은 데이터의 크기가 일치한다면
+                                dataSend("DATASIZE_OK") // 데이터 수신 정상, 사이클 종료
+                                dataCheckStep = 0
+                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
+                                totalMessage = String(combineByteArrays(totalByteList),Charsets.UTF_8)
+                                break
+                            } else if (byteListSize > dataCheckSize) { // 아직 Timeout 전이지만 예상된 데이터보다 많이 받았을 경우
+                                dataSend("DATASIZE_OVERFLOW") // 데이터 과수신, 2단계로 재진입 (정보 수신대기)
+                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
+                                dataCheckStep = 1
+                                break
+                            } else if (byteListSize < dataCheckSize) {
+                                dataSend("DATASIZE_UNDERFLOW")
+                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
+                                dataCheckStep = 1
+                                break
+                            }
+                            if (timeout) {
+                                break
+                            }
+                        }
+                        dataCheckStep = 0
+                    }
+                }
+            }
+            try {
+                Thread.sleep(1000) // 100ms
+            } catch (e: InterruptedException) {
+
+            }
+        }
+
+        return totalMessage
+    }
+
+    fun dataReceiveSingle(): String {
+        val size = inputStream.available()
+        val buffer = ByteArray(size)
+        val readData = inputStream.read(buffer)
+        val receivedByte = buffer.copyOf(readData)
+        return String(receivedByte)
     }
 
     fun combineByteArrays(byteArrays: List<ByteArray>): ByteArray {

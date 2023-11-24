@@ -9,6 +9,10 @@ data class ToolDto(
     val spec: String,
     val unit: String,
     val price: Int,
-    val replacementCycle: Int
-    // val buyCode: String
-)
+    val replacementCycle: Int,
+    val buyCode: String
+) {
+    fun toToolDtoSQLite (): ToolDtoSQLite {
+        return ToolDtoSQLite(id, subGroupDto.name, subGroupDto.mainGroupDto.name, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+    }
+}

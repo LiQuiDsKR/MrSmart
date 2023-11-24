@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="-2dp">
+        <shape android:shape="rectangle" >
+            <stroke
+                android:width="3dp"
+                android:color="#4C96F1" />	<!--테두리 색-->
+
+            <solid android:color="#E0EEFF" />	<!--배경 색-->
+        </shape>
+    </item>
+
+</layer-list>

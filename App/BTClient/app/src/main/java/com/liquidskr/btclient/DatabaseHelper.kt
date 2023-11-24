@@ -1,11 +1,12 @@
 package com.liquidskr.btclient
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.content.ContentValues
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -224,57 +225,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
-    fun getMembershipPasswordById(codeToFind: String): String? {
-        val db = this.readableDatabase
-        var password: String? = null
-        val query = "SELECT $COLUMN_Membership_PASSWORD FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
-        val selectionArgs = arrayOf(codeToFind)
-
-        val cursor = db.rawQuery(query, selectionArgs)
-        if (cursor.moveToFirst()) {
-            password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
-        }
-
-        cursor.close()
-        db.close()
-        return password
-    }
-    @SuppressLint("Range")
-    fun getMembershipNameById(codeToFind: String): String? {
-        val db = this.readableDatabase
-        var password: String? = null
-        val query = "SELECT $COLUMN_Membership_NAME FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
-        val selectionArgs = arrayOf(codeToFind)
-
-        val cursor = db.rawQuery(query, selectionArgs)
-        if (cursor.moveToFirst()) {
-            password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
-        }
-
-        cursor.close()
-        db.close()
-        return password
-    }
-
-    @SuppressLint("Range")
-    fun getToolNameByCode(codeToFind: String): String? {
-        val db = this.readableDatabase
-        var name: String? = null
-        val query = "SELECT $COLUMN_TOOL_KRNAME FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
-        val selectionArgs = arrayOf(codeToFind)
-
-        val cursor = db.rawQuery(query, selectionArgs)
-        if (cursor.moveToFirst()) {
-            name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_KRNAME))
-        }
-
-        cursor.close()
-        db.close()
-        return name
-    }
-    @SuppressLint("Range")
-    fun getAllUsers(): List<User> {
-        val userList = mutableListOf<User>()
+    fun getAllMemberships(): List<MembershipSQLite> {
+        val membershipList = mutableListOf<MembershipSQLite>()
         val query = "SELECT * FROM $TABLE_Membership_NAME"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
@@ -290,14 +242,60 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val role = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_ROLE))
             val employmentState = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_EMPLOYMENT_STATE))
 
-            val user = User(id, code, password, name, part, subpart, mainpart, role, employmentState)
-            userList.add(user)
+            val membership = MembershipSQLite(id, name, code, password, part, subpart, mainpart, role, employmentState)
+            membershipList.add(membership)
         }
 
         cursor.close()
         db.close()
 
-        return userList
+        return membershipList
     }
 
+    @SuppressLint("Range")
+    fun getAllTools(): List<ToolDtoSQLite> {
+        val toolList = mutableListOf<ToolDtoSQLite>()
+        val query = "SELECT * FROM $TABLE_TOOL_NAME"
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(query, null)
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
+            val subGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SUBGROUP))
+            val mainGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_MAINGROUP))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_CODE))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_KRNAME))
+            val engName = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_ENGNAME))
+            val spec = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SPEC))
+            val unit = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_UNIT))
+            val price = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_PRICE))
+            val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
+            val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
+
+            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            toolList.add(tool)
+        }
+
+        cursor.close()
+        db.close()
+
+        return toolList
+    }
+
+    @SuppressLint("Range")
+    fun getMembershipPasswordById(codeToFind: String): String? {
+        val db = this.readableDatabase
+        var password: String? = null
+        val query = "SELECT $COLUMN_Membership_PASSWORD FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_CODE = ?"
+        val selectionArgs = arrayOf(codeToFind)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
+        }
+
+        cursor.close()
+        db.close()
+        return password
+    }
 }

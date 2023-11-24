@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import com.liquidskr.fragment.ManagerFragment
-import com.liquidskr.fragment.UserListFragment
+import com.liquidskr.fragment.ManagerRentalFragment
+import com.liquidskr.fragment.ManagerReturnFragment
+import com.liquidskr.fragment.MembershipFindFragment
 import com.liquidskr.fragment.WorkerFragment
+import com.liquidskr.fragment.WorkerRentalFragment
+import com.mrsmart.standard.membership.MembershipSQLite
 
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
@@ -15,12 +19,19 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var testSendBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
+    lateinit var managerRentalFragment: ManagerRentalFragment
+    lateinit var managerReturnFragment: ManagerReturnFragment
+    lateinit var workerRentalFragment: WorkerRentalFragment
     private var workerFragment: WorkerFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
         bluetoothManager = BluetoothManager(this, this)
+        managerRentalFragment = ManagerRentalFragment()
+        managerReturnFragment = ManagerReturnFragment()
+
+        workerRentalFragment = WorkerRentalFragment()
 
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
@@ -47,7 +58,7 @@ class LobbyActivity  : AppCompatActivity() {
             bluetoothManager.BackgroundThread()
         }
         testSendBtn.setOnClickListener {
-            bluetoothManager.dataSend("REQUEST")
+            bluetoothManager.dataSend("REQUEST_StandardDB")
         }
         bluetoothBtn.setOnClickListener {
             bluetoothManager.bluetoothOpen()

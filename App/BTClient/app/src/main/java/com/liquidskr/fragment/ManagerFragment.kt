@@ -1,5 +1,6 @@
 package com.liquidskr.fragment
 
+import SharedViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 
@@ -17,6 +19,10 @@ class ManagerFragment : Fragment() {
     lateinit var pwTextField: EditText
 
     lateinit var searchuserBtn: ImageButton
+
+    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
+        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager, container, false)
 
@@ -24,7 +30,6 @@ class ManagerFragment : Fragment() {
         loginBtn = view.findViewById(R.id.LoginBtn)
         idTextField = view.findViewById(R.id.IDtextField)
         pwTextField = view.findViewById(R.id.PWtextField)
-        searchuserBtn = view.findViewById(R.id.SearchUserBtn)
 
 
         loginBtn.setOnClickListener {
@@ -33,26 +38,19 @@ class ManagerFragment : Fragment() {
                 var dbHelper = DatabaseHelper(requireContext())
                 var password = dbHelper.getMembershipPasswordById(code)
                 var member = dbHelper.getMembershipByCode(code)
-                Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
+                //Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
                 if (pwTextField.text.toString().equals(password)) {
-                    Toast.makeText(requireContext(),"로그인 성공", Toast.LENGTH_SHORT).show()
+                    sharedViewModel.loginManager = member
+                    val fragment = ManagerLobbyFragment(member.toMembership())
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack(null)
+                        .commit()
                 }
             } catch (e: UninitializedPropertyAccessException) {
                 Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
-
-
         }
-        /*
-        searchuserBtn.setOnClickListener {
-            val fragment = WorkerFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }*/
-
-
         return view
     }
     companion object {
