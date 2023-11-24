@@ -20,9 +20,9 @@ public class RentalRequestToolDto {
 	private String Tags;
 	
 	@Builder
-	public RentalRequestToolDto(long id, Tool tool, int count, String Tags) {
+	public RentalRequestToolDto(long id, ToolDto toolDto, int count, String Tags) {
 		this.id = id;
-		this.toolDto = new ToolDto(tool);
+		this.toolDto = toolDto;
 		this.count = count;
 		this.Tags = Tags;
 	}

@@ -23,18 +23,11 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript">
 document.getElementById("btn").addEventListener("click",function(){
-	const mainData = JSON.parse(document.getElementById("in").value);
+	//const mainData = JSON.parse(document.getElementById("in").value);
 
 				post(
-					"/rental/request_sheet/apply",
-					{
-						workName:mainData.workName,
-						workerDtoId:mainData.workerDtoId,
-						leaderDtoId:mainData.leaderDtoId,
-						toolboxDtoId:mainData.toolboxDtoId,
-						toolList:mainData.toolList
-					}
-				)
+			`/rental/request_sheet/getpage?page=0&size=10&toolboxId=${5222}`
+		)
 				.then(data=>{
 					Swal.fire({
 					  type: "success",

@@ -17,6 +17,7 @@ import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipRepository;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
@@ -27,6 +28,8 @@ import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolService;
 import com.care4u.toolbox.sheet.supply_tool.SupplyTool;
+import com.care4u.toolbox.tag.Tag;
+import com.care4u.toolbox.tag.TagRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +44,9 @@ public class RentalSheetService {
 	private final MembershipRepository membershipRepository;
 	private final ToolboxRepository toolboxRepository;
 	private final RentalToolRepository rentalToolRepository;
+	private final TagRepository tagRepository;
 	private final RentalToolService rentalToolService;
+	private final OutstandingRentalSheetService outstandingRentalSheetService;
 	
 	@Transactional(readOnly = true)
 	public RentalSheetDto get(long id){
@@ -54,15 +59,24 @@ public class RentalSheetService {
 		return convertToDto(item.get());
 	}
 	
+	@Transactional
 	private RentalSheetDto convertToDto(RentalSheet rentalSheet) {
 		List<RentalToolDto> dtoList = new ArrayList<RentalToolDto>();
 		List<RentalTool> toolList = rentalToolRepository.findAllByRentalSheetId(rentalSheet.getId());
 		for (RentalTool tool : toolList) {
-			dtoList.add(new RentalToolDto(tool));
+			List<Tag> tagList = tagRepository.findAllByRentalToolId(tool.getId());
+			dtoList.add(new RentalToolDto(tool,tagList));
 		}
 		return new RentalSheetDto(rentalSheet,dtoList);
 	}
 	
+	
+	/**
+	 * RentalSheet, RentalTool, OutstandingRentalSheet를 전부 생성합니다.
+	 * @param requestSheetDto
+	 * @param approverId
+	 * @return rentalSheetDto
+	 */
 	@Transactional
 	public RentalSheetDto addNew(RentalRequestSheetDto requestSheetDto, long approverId) {
 		Optional<Membership> worker = membershipRepository.findById(requestSheetDto.getWorkerDto().getId());
@@ -70,22 +84,22 @@ public class RentalSheetService {
 		Optional<Membership> approver = membershipRepository.findById(approverId);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(requestSheetDto.getToolboxDto().getId());
 		
-		if (worker.isEmpty()) {
-			logger.debug("worker : " + worker);
-			return null;
-		}
-		if (leader.isEmpty()) {
-			logger.debug("leader :" + leader);
-			return null;
-		}
-		if (approver.isEmpty()) {
-			logger.debug("approver :" + approver);
-			return null;
-		}
-		if (toolbox.isEmpty()) {
-			logger.debug("toolbox : " + toolbox);
-			return null;
-		}
+	    if (worker.isEmpty()) {
+	        logger.debug("Worker not found");
+	        throw new IllegalArgumentException("Worker not found");
+	    }
+	    if (leader.isEmpty()) {
+	        logger.debug("Leader not found");
+	        throw new IllegalArgumentException("Leader not found");
+	    }
+	    if (approver.isEmpty()) {
+	        logger.debug("Approver not found");
+	        throw new IllegalArgumentException("Approver not found");
+	    }
+	    if (toolbox.isEmpty()) {
+	        logger.debug("Toolbox not found");
+	        throw new IllegalArgumentException("Toolbox not found");
+	    }
 		
 		RentalSheet rentalSheet = RentalSheet.builder()
 				.worker(worker.get())
@@ -106,7 +120,11 @@ public class RentalSheetService {
 			}
 			toolList.add(newTool);
 		}
-		return convertToDto(savedRentalSheet);
+		RentalSheetDto result=convertToDto(savedRentalSheet);
+		
+		outstandingRentalSheetService.addNew(savedRentalSheet, toolList);
+		
+		return result;
 	}
 
 }

@@ -83,6 +83,76 @@
 					</div>
 					<!-- End Contact Header -->
 					
+					<!-- Sheet -->
+					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+						<!-- Header Table -->
+						<div class="col-12" style="overflow-x:auto;">
+							<table class="text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>대여신청시간</th>
+										<th>정비실</th>
+										<th>작업자</th>
+										<th>리더</th>
+										<th>상태</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="time">${formatDate(element.eventTimestamp)}</td>
+										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="worker">${element.workerDto.name}</td>
+										<td class="leader">${element.leaderDto.name}</td>
+										<td class="sheetstate">${sheetState}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- End Header Table-->
+						<div class="col-12" style="overflow-x:auto;">
+							<table class="tool-list invoice-list-table text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>
+											<label class="custom-checkbox">
+												<input type="checkbox">
+												<span class="checkmark"></span>
+											</label>
+										</th>
+										<th>정비실명</th>
+										<th>이름</th>
+										<th>규격</th>
+										<th>신청수량</th>
+										<th>QR정보</th>
+										<th>삭제</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<label class="custom-checkbox">
+												<input type="checkbox">
+												<span class="checkmark"></span>
+											</label>
+										</td>
+										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="name">${tool.toolDto.name}</td>
+										<td class="spec">${tool.toolDto.spec}</td>
+										<td class="count">${tool.count}</td>
+										<td class="qrcode"></td>
+										<td class="delete">
+											<span style="cursor:pointer;">
+												<img src="/img/svg/c-close.svg" alt="" class="svg">
+											</span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<!-- End Sheet -->
+					
+					
 				</div>
 				<!-- End Card -->
 				
@@ -95,12 +165,13 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript">
 	
+	/*
 	$(document).ready(function(){
 			
 		const toolboxId = 5222; // 로그인 구현 후 사용자 정보를 불러와서 수정하기
 		
 		post(
-			`/rental/request_sheet/getpage?page=0&size=10&toolboxId=${toolboxId}`
+			`/rental/sheet/getpage?page=0&size=10&toolboxId=${toolboxId}`
 		).then(data=>{
 			console.log(data);
 			const mainCard=document.getElementById("mainCard");
@@ -117,7 +188,7 @@
 				  <!-- Sheet -->
 				  <div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
 				    <!-- Header Table -->
-				    <div class="col-10" style="overflow-x:auto;">
+				    <div class="col-12" style="overflow-x:auto;">
 				      <table class="text-nowrap bg-white">
 				        <thead>
 				          <tr>
@@ -140,11 +211,6 @@
 				      </table>
 				    </div>
 				    <!-- End Header Table-->
-				    <div class="col-2 d-flex justify-content-center align-items-center">
-				      <a href="#" class="btn disabled" style="width:fit-content; height:fit-content;">
-				        <span>대여승인</span>
-				      </a>
-				    </div>
 				    <div class="col-12" style="overflow-x:auto;">
 				      <table class="tool-list invoice-list-table text-nowrap bg-white">
 				        <thead>
@@ -378,6 +444,7 @@
 	        });
 	    });
 	}
+	*/
 </script>
 </th:block>
 

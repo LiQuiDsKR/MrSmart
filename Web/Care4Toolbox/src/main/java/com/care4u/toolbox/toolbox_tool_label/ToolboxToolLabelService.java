@@ -60,11 +60,6 @@ public class ToolboxToolLabelService {
 		return new ToolboxToolLabelDto(item);
 	}
 
-	/**
-	 * 만약 없으면 addDummy로 만들어버림에 유의
-	 * @param toolboxToolLabelDto
-	 * @return
-	 */
 	@Transactional(readOnly = true)
 	public ToolboxToolLabelDto get(long toolId, long toolboxId){
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
@@ -166,7 +161,7 @@ public class ToolboxToolLabelService {
 			.tool(tool)
 			.toolbox(toolbox)
 			.location(toolbox.getName())
-			.qrcode(toolbox.getId()+""+tool.getId())
+			.qrcode(toolbox.getId()+"_"+tool.getId())
 			.build();
 		return repository.save(label);
 	}

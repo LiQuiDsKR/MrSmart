@@ -1,5 +1,7 @@
 package com.care4u.toolbox.tag;
 
+import java.util.List;
+
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 import com.care4u.toolbox.tool.ToolDto;
@@ -31,12 +33,20 @@ public class TagDto {
 		this.rentalToolDto = rentalToolDto;
 	}
 	
+	public TagDto(Tag tag, List<Tag> rentalToolTagList) {
+		this.id = tag.getId();
+		this.macaddress = tag.getMacaddress();
+		this.toolboxDto = new ToolboxDto(tag.getToolbox());
+		this.toolDto = new ToolDto(tag.getTool());
+		this.rentalToolDto = tag.getRentalTool()==null?null:new RentalToolDto(tag.getRentalTool(),rentalToolTagList);
+	}
+	
 	public TagDto(Tag tag) {
 		this.id = tag.getId();
 		this.macaddress = tag.getMacaddress();
 		this.toolboxDto = new ToolboxDto(tag.getToolbox());
 		this.toolDto = new ToolDto(tag.getTool());
-		this.rentalToolDto = new RentalToolDto(tag.getRentalTool());
+		this.rentalToolDto = null;
 	}
 	
 }

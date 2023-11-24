@@ -1,4 +1,4 @@
-package com.care4u.toolbox.sheet.rental.rental_request_sheet;
+package com.care4u.toolbox.sheet.rental.rental_sheet;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,29 +29,13 @@ import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
 @RequestMapping("/rental")
-public class RentalRequestSheetController {
+public class RentalSheetController {
 	
-	private static final Logger logger = Logger.getLogger(RentalRequestSheetController.class);
+	private static final Logger logger = Logger.getLogger(RentalSheetController.class);
 	
-	@Autowired
-	private ToolboxService toolboxService;
-	
-	@Autowired
-	private RentalRequestSheetService rentalRequestSheetService;
-	
-    @GetMapping(value = "request_sheet/create")
-    public String createRequestSheet(Model model){
-    	
-    	List<ToolboxDto> toolboxList = toolboxService.list();
-    	
-    	model.addAttribute("toolboxList",toolboxList);
-
-        return "rental/request_sheet_create";
-    }
-    
-    @GetMapping(value = "request_sheet/approve")
-    public String showRequestSheet(Model model){
-    	return "rental/request_sheet_approve";
+    @GetMapping(value = "sheet")
+    public String rentalSheet(Model model){
+        return "rental/sheet";
     }
     
 }

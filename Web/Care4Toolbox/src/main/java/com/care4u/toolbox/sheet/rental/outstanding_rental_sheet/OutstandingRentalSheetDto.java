@@ -1,7 +1,11 @@
 package com.care4u.toolbox.sheet.rental.outstanding_rental_sheet;
 
+import java.util.List;
+
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_tool.RentalTool;
+import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,16 +24,16 @@ public class OutstandingRentalSheetDto {
 	private int totalOutstandingCount;
 	
 	@Builder
-	public OutstandingRentalSheetDto(long id, RentalSheet rentalSheet, int totalCount, int totalOutstandingCount) {
+	public OutstandingRentalSheetDto(long id, RentalSheet rentalSheet, List<RentalToolDto> rentalToolList, int totalCount, int totalOutstandingCount) {
 		this.id = id;
-		this.rentalSheetDto = new RentalSheetDto(rentalSheet);
+		this.rentalSheetDto = new RentalSheetDto(rentalSheet,rentalToolList);
 		this.totalCount = totalCount;
 		this.totalOutstandingCount = totalOutstandingCount;
 	}
 	
-	public OutstandingRentalSheetDto(OutstandingRentalSheet outstandingRentalSheet) {
+	public OutstandingRentalSheetDto(OutstandingRentalSheet outstandingRentalSheet, List<RentalToolDto> rentalToolList) {
 		this.id = outstandingRentalSheet.getId();
-		this.rentalSheetDto = new RentalSheetDto(outstandingRentalSheet.getRentalSheet());
+		this.rentalSheetDto = new RentalSheetDto(outstandingRentalSheet.getRentalSheet(),rentalToolList);
 		this.totalCount = outstandingRentalSheet.getTotalCount();
 		this.totalOutstandingCount = outstandingRentalSheet.getTotalOutstandingCount();
 	}

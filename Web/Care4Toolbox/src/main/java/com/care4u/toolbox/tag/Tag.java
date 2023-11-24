@@ -52,13 +52,14 @@ public class Tag extends BaseEntity {
 		this.macaddress = macaddress;
 		this.toolbox = toolbox;
 		this.tool = tool;
+		this.rentalTool = null;
 	}
 	
-	public void update(Toolbox toolbox) {
+	public void updateToolbox(Toolbox toolbox) {
 		this.toolbox = toolbox;
 	}
 	
-	public void update(RentalTool rentalTool) {
+	public void updateRentalTool(RentalTool rentalTool) {
 		this.rentalTool = rentalTool;
 	}
 }

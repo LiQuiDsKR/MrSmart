@@ -37,6 +37,8 @@ public class RentalRequestSheetDto {
 	
 	private List<RentalRequestToolDto> toolList;
 	
+	public RentalRequestSheetDto() {
+	}
 	@Builder
 	public RentalRequestSheetDto(long id, Membership worker, Membership leader, Toolbox toolbox, SheetState status, LocalDateTime eventTimestamp, List<RentalRequestToolDto> toolList) {
 		this.id = id;

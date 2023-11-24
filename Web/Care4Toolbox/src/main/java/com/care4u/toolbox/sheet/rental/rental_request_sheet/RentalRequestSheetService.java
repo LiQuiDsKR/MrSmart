@@ -76,7 +76,7 @@ public class RentalRequestSheetService {
 	}
 
 	@Transactional(readOnly=true)
-	public Page<RentalRequestSheetDto> getPage( SheetState status, Long toolboxId, Pageable pageable){
+	public Page<RentalRequestSheetDto> getPage(SheetState status, Long toolboxId, Pageable pageable){
 		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
 		return page.map(e->convertToDto(e));
 	}
@@ -138,27 +138,76 @@ public class RentalRequestSheetService {
 		Optional<Membership> worker = membershipRepository.findById(sheetDto.getWorkerDto().getId());
 		Optional<Membership> leader = membershipRepository.findById(sheetDto.getLeaderDto().getId());
 		Optional<Toolbox> toolbox = toolboxRepository.findById(sheetDto.getToolboxDto().getId());
-		if (rentalRequestSheetOptional.isEmpty()) {
-			logger.debug("sheet not found");
-			return null;
-		} 
-		if (worker.isEmpty()) {
-			logger.debug("worker : " + worker);
-			return null;
-		}
-		if (leader.isEmpty()) {
-			logger.debug("leader :" + leader);
-			return null;
-		}
-		if (toolbox.isEmpty()) {
-			logger.debug("toolbox : " + toolbox);
-			return null;
-		}
+
+	    if (rentalRequestSheetOptional.isEmpty()) {
+	        logger.error("Sheet not found");
+	        throw new IllegalArgumentException("Sheet not found");
+	    }
+
+	    if (worker.isEmpty()) {
+	        logger.error("Worker not found");
+	        throw new IllegalArgumentException("Worker not found");
+	    }
+
+	    if (leader.isEmpty()) {
+	        logger.error("Leader not found");
+	        throw new IllegalArgumentException("Leader not found");
+	    }
+
+	    if (toolbox.isEmpty()) {
+	        logger.error("Toolbox not found");
+	        throw new IllegalArgumentException("Toolbox not found");
+	    }
 		
 		rentalRequestSheet=rentalRequestSheetOptional.get();
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), sheetDto.getStatus(), sheetDto.getEventTimestamp());
 		
 		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
 	}
-	
+	@Transactional
+	public RentalRequestSheetDto update(RentalRequestSheetDto sheetDto, SheetState status) {
+		RentalRequestSheet rentalRequestSheet;
+		
+		Optional<RentalRequestSheet> rentalRequestSheetOptional = repository.findById(sheetDto.getId());
+		Optional<Membership> worker = membershipRepository.findById(sheetDto.getWorkerDto().getId());
+		Optional<Membership> leader = membershipRepository.findById(sheetDto.getLeaderDto().getId());
+		Optional<Toolbox> toolbox = toolboxRepository.findById(sheetDto.getToolboxDto().getId());
+
+	    if (rentalRequestSheetOptional.isEmpty()) {
+	        logger.error("Sheet not found");
+	        throw new IllegalArgumentException("Sheet not found");
+	    }
+
+	    if (worker.isEmpty()) {
+	        logger.error("Worker not found");
+	        throw new IllegalArgumentException("Worker not found");
+	    }
+
+	    if (leader.isEmpty()) {
+	        logger.error("Leader not found");
+	        throw new IllegalArgumentException("Leader not found");
+	    }
+
+	    if (toolbox.isEmpty()) {
+	        logger.error("Toolbox not found");
+	        throw new IllegalArgumentException("Toolbox not found");
+	    }
+		
+		rentalRequestSheet=rentalRequestSheetOptional.get();
+		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, sheetDto.getEventTimestamp());
+		
+		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
+	}
+	@Transactional
+	public RentalRequestSheetDto cancel(long sheetId) {
+		RentalRequestSheet sheet;
+		Optional<RentalRequestSheet> rentalRequestSheetOptional = repository.findById(sheetId);
+		if (rentalRequestSheetOptional.isEmpty()) {
+	        logger.error("Sheet not found");
+	        throw new IllegalArgumentException("Sheet not found");
+	    }
+		sheet=rentalRequestSheetOptional.get();
+		sheet.update(sheet.getWorker(), sheet.getLeader(), sheet.getToolbox(), SheetState.CANCEL, sheet.getEventTimestamp());
+		return convertToDto(repository.save(sheet));
+	}
 }

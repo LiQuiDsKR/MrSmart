@@ -64,7 +64,7 @@ public class StockStatusService {
 		return new StockStatusDto(status);
 	}
 	
-	@Scheduled(cron = "30 5 0 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "1 0 0 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();
@@ -96,7 +96,7 @@ public class StockStatusService {
 	
 	private boolean isCorrect(StockStatus stockStatus) {
 		//그날 있었던 Rental과 Return 전부 조회 후 개수 비교 및 합산.
-		//구현해놓으세요.
+		//자정 업데이트간 사용하는 검증절차.
 		return true;
 	}
 	
