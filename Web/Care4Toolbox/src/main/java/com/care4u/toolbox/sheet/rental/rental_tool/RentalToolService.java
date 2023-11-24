@@ -16,8 +16,12 @@ import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetRepository;
+import com.care4u.toolbox.stock_status.StockStatus;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
+import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolRepository;
 
@@ -34,6 +38,9 @@ public class RentalToolService {
 	private final ToolRepository toolRepository;
 	private final RentalRequestSheetRepository rentalRequestSheetRepository;
 	private final TagRepository tagRepository;
+	
+	private final TagService tagService;
+	private final StockStatusService stockStatusService;
 	
 	@Transactional(readOnly = true)
 	public RentalToolDto get(long id){
@@ -59,6 +66,13 @@ public class RentalToolService {
 		return dtoList;
 	}
 	
+	/**
+	 * RentalSheetService에서 호출됩니다.
+	 * Tag를 생성하고, StockStatus를 변경합니다.
+	 * @param requestDto
+	 * @param sheet
+	 * @return
+	 */
 	@Transactional
 	public RentalTool addNew(RentalRequestToolDto requestDto, RentalSheet sheet) {
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
@@ -75,6 +89,19 @@ public class RentalToolService {
 				.rentalRequestSheet(rentalRequestSheetRepository.findById(Long.parseLong("522522")).get())
 				.build();
 		
-		return repository.save(rentalTool);
+		RentalTool savedRentalTool=repository.save(rentalTool);
+		
+		if (requestDto.getTags() != null && requestDto.getTags().length() > 0) {
+			String[] tags = requestDto.getTags().split(",");
+			for (String tagString : tags) {
+				Tag tag = tagService.addNew(tagString);
+				tag.updateRentalTool(savedRentalTool);
+			}
+		}
+		
+		StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
+		stockStatusService.rentItems(stockDto.getId(), savedRentalTool.getCount());
+		
+		return savedRentalTool;
 	}
 }

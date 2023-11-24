@@ -126,7 +126,7 @@ public class TagService {
 		return convertToDto(repository.save(tag));
 	}
 	@Transactional
-	public TagDto addNew(String macAddress) {
+	public Tag addNew(String macAddress) {
         if (repository.findByMacaddress(macAddress)!=null) {
         	logger.error("Already Exists : "+macAddress);
         	return null;
@@ -162,11 +162,11 @@ public class TagService {
 		.tool(tool.get())
 		.toolbox(toolbox.get())
 		.build();
-		return convertToDto(repository.save(tag));
+		return repository.save(tag);
 	}
 	
 	@Transactional
-	public TagDto addNew(Tool tool, Toolbox toolbox) {
+	public Tag addNew(Tool tool, Toolbox toolbox) {
 		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(tool.getId(), toolbox.getId(), LocalDate.now());
 		if (stock == null) {
 			logger.error("stock not found");
@@ -182,7 +182,7 @@ public class TagService {
 		.toolbox(toolbox)
 		.macaddress(toolbox.getId()+"_"+tool.getId()+"_"+tagCount)
 		.build();
-		return convertToDto(repository.save(tag));
+		return repository.save(tag);
 	}
 	/**
 	 * 초기 모의 데이터 생성용입니다. > Care4UManager에서 1회 사용 후 폐기
@@ -197,8 +197,8 @@ public class TagService {
 		for (StockStatus stock : stocks) {
 			if (random.nextInt(stocks.size())<stocks.size()*0.4) {
 				for (int i = random.nextInt(stock.getTotalCount());i>=0;i--) {
-					TagDto dto = addNew(stock.getTool(),stock.getToolbox());
-					logger.info("item "+debugCount + " added. / " +stock.getToolbox().getId()+"_"+stock.getTool().getId()+"_"+i +" / " +dto.getMacaddress());
+					Tag tag = addNew(stock.getTool(),stock.getToolbox());
+					logger.info("item "+debugCount + " added. / " +stock.getToolbox().getId()+"_"+stock.getTool().getId()+"_"+i +" / " +tag.getMacaddress());
 					debugCount++;
 				}
 			}

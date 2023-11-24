@@ -73,6 +73,7 @@ public class RentalSheetService {
 	
 	/**
 	 * RentalSheet, RentalTool, OutstandingRentalSheet를 전부 생성합니다.
+	 * RentalTool 생성 시 Tags가 생성되며, StockStatus가 변경됩니다.
 	 * @param requestSheetDto
 	 * @param approverId
 	 * @return rentalSheetDto

@@ -48,7 +48,7 @@ public class StockStatusService {
 	public StockStatusDto get(long id){
 		Optional<StockStatus> item = repository.findById(id);
 		if (item == null) {
-			logger.error("Invalid id : " + id);
+			logger.error("Invalid StockStatus id : " + id);
 			return null;
 		}
 		
@@ -60,8 +60,36 @@ public class StockStatusService {
 		LocalDate date = LocalDate.now();
 		
 		StockStatus status= repository.findByToolIdAndToolboxIdAndCurrentDay(toolId, toolboxId, date);
+		if (status==null) {
+			logger.error("Invalid StockStatus id : "+toolId+","+toolboxId);
+		}
 	
 		return new StockStatusDto(status);
+	}
+	
+	@Transactional
+	public StockStatusDto rentItems(long id, int count) {
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		if (count>stock.getGoodCount()) {
+			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
+			return null;
+		}
+		stock.rentUpdate(count);
+		return new StockStatusDto(repository.save(stock));
+	}
+	@Transactional
+	public StockStatusDto returnItems(long id, int goodCount, int faultCount, int damageCount, int discardCount, int lossCount) {
+		return null;
+	}
+	@Transactional
+	public StockStatusDto buyItems(long id, int count) {
+		return null;
 	}
 	
 	@Scheduled(cron = "1 0 0 * * ?") // 매일 자정에 실행
