@@ -79,6 +79,7 @@ public class MembershipController {
      * 
      * @param model
      * @return
+     * 
 
     @GetMapping(value = "/new")
     public String newForm(Model model){
@@ -89,8 +90,10 @@ public class MembershipController {
         		.partDtoId(null).build());
         return "membership/newForm";
     }
-
-    @PostMapping(value = "/new")
+    
+     */
+    
+    @PostMapping(value = "/register")
     public String addNew(@Valid MembershipFormDto membershipFormDto, BindingResult bindingResult, Model model){
 
         if(bindingResult.hasErrors()){
@@ -112,7 +115,7 @@ public class MembershipController {
 
     @GetMapping(value = "/login")
     public String login(){
-        return "/membership/loginForm";
+        return "membership/loginForm";
     }
 
     @GetMapping(value = "/login/error")
@@ -121,6 +124,6 @@ public class MembershipController {
         return "/membership/loginForm";
     }
     
-         */
+       /*  */
     
 }

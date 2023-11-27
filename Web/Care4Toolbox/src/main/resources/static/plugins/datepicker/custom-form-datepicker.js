@@ -13,6 +13,9 @@ $(function () {
 	'use strict';
 
 	$(document).ready(function () {
+		
+		
+		
 		/* --- Form - Datepicker -- */
 		//Default Date
 		$('#default-date').datepicker({

@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/layout1}">
+    xmlns:th="http://www.thymeleaf.org">
 
-    <!-- 사용자 CSS 추가 -->
-    <th:block layout:fragment="css">
         <style>
             .content {
                 background: linear-gradient(45deg, #94bbe9 20%, #eeaeca 90%);
@@ -19,9 +15,7 @@
                 color: #bd2130;
             }
         </style>
-    </th:block>
 
-    <div class="main-content"layout:fragment="content">
         <div class="login_bg">
             <div class="login_wrap">
                 <!-- 타이틀 -->
@@ -74,5 +68,4 @@
 
             </div>
         </div>
-    </div>
 </html>
