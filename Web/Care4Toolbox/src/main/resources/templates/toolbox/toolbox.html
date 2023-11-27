@@ -209,27 +209,40 @@
 <th:block layout:fragment="script">
 <script th:inline="javascript"> 	
 	document.getElementById("addFormBtn").addEventListener("click",e=>{
-		post(
-			"toolbox/new",
-			{
-				id:0,
-				name:document.getElementById("addFormName").value,
-				managerDtoCode:"100001"
-			},
-			"toolbox"
-		);
+		submitFormBtn('add');
 	});
 	document.getElementById("editFormBtn").addEventListener("click",e=>{
-		post(
-			"toolbox/edit",
-			{
-				id:document.getElementById("editFormId").value,
-				name:document.getElementById("editFormName").value,
-				managerDtoCode:"100001"
-			},
-			"toolbox"
-		);
+		submitFormBtn('edit');
 	});
+	
+	function submitFormBtn(mode){
+		if (mode==='add' || mode==='edit'){
+			abcHttp.post(
+				`/toolbox/${mode==='add'?'new':mode}`,
+				{
+					id:mode==='add'?0:document.getElementById(`${mode}FormId`).value,
+					name:document.getElementById(`${mode}FormName`).value,
+					managerDtoCode:"100001"
+				}
+			)
+			.then(response=>{
+				Swal.fire({
+					type:"success",
+					title:"저장됨",
+					text:"정상적으로 저장되었습니다.",
+				})
+				.then(result=>{
+					location.href='toolbox';
+				});
+				setTimeout(() => {
+					$("#contactAddModal").modal("hide");
+					$("#contactEditModal").modal("hide");
+				}, 0);
+			});
+		}else{
+			console.log("choose add or edit. you've selected " + mode);
+		}
+	}
 	document.querySelectorAll("table .contact-edit").forEach(element=>{
 		element.addEventListener("click",e=>{
 			const parentTable=element.closest("table");
@@ -237,30 +250,6 @@
 			document.getElementById("editFormName").value=parentTable.querySelector('td:nth-child(2)').textContent.trim();
 		});
 	});
-	function post(url,paramData,redirection){
-		fetch(url, {
-		  method:"POST",
-		  headers:{
-			  //'header': document.querySelector('meta[name="_csrf"]').content,
-              "Content-Type": "application/json",
-              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
-		  },
-		  body: JSON.stringify(paramData),
-		})
-		  .then(response => {
-		    if (!response.ok) {
-		      throw new Error(`HTTP error! Status: ${response.status}`);
-		    }
-		    return JSON.stringify(response);
-		  })
-		  .then(data => {
-			debugger;
-			location.href=redirection;
-		  })
-		  .catch(error => {
-		    console.error('Error:', error);
-		  });
-	}
 
 </script>
 </th:block>

@@ -1,13 +1,16 @@
 package com.care4u.hr.main_part;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +36,12 @@ public class MainPartRestController {
 	private SubPartService subPartService;
 	
     @PostMapping(value="/main_part/new")
-    public ResponseEntity<String> newMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto){
+    public ResponseEntity<String> newMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
     	
     	Gson gson = new Gson();
     	try {
@@ -55,7 +63,12 @@ public class MainPartRestController {
     }
 
     @PostMapping(value="/main_part/edit")
-    public ResponseEntity<String> editMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto){
+    public ResponseEntity<String> editMainPart(@Valid @RequestBody MainPartFormDto mainPartFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
     	Gson gson = new Gson();
 
     	try {

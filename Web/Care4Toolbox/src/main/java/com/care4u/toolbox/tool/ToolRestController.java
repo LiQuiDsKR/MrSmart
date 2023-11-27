@@ -2,16 +2,19 @@ package com.care4u.toolbox.tool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,9 +44,15 @@ public class ToolRestController {
 	private SubGroupService subGroupService;
 	
     @PostMapping(value="/tool/new")
-    public ResponseEntity<String> newTool(@Valid @RequestBody ToolFormDto toolFormDto){
-
-		Gson gson = new Gson();
+    public ResponseEntity<String> newTool(@Valid @RequestBody ToolFormDto toolFormDto, BindingResult bindingResult){
+    	if (bindingResult.hasErrors()) {
+    		List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+    	}
+    	
+    	Gson gson = new Gson();
     	try {
     		SubGroupDto subGroupDto = subGroupService.get(toolFormDto.getSubGroupDtoId());
     		toolService.addNew(
@@ -68,7 +77,14 @@ public class ToolRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping(value="/tool/edit")
-    public ResponseEntity<String> editTool(@Valid @RequestBody ToolFormDto toolFormDto){
+    public ResponseEntity<String> editTool(@Valid @RequestBody ToolFormDto toolFormDto, BindingResult bindingResult){
+    	if (bindingResult.hasErrors()) {
+    		List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+    	}
+    	
     	Gson gson = new Gson();
     	try {
     		SubGroupDto subGroupDto = subGroupService.get(toolFormDto.getSubGroupDtoId());
@@ -125,9 +141,16 @@ public class ToolRestController {
     public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(@RequestBody ToolForRentalPostFormDto data){
 
     	logger.info("page=" + data.page + ", size=" + data.size);
+    	
+    	List<Long> subGroupId;
+    	if (data.getSubGroupId().isEmpty()) {
+    		subGroupId=subGroupService.list().stream().map(SubGroupDto::getId).collect(Collectors.toList());
+    	} else {
+    		subGroupId=data.getSubGroupId();
+    	}
     		
         Pageable pageable = PageRequest.of(data.page,data.size);
-        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalDtoPage(pageable, data.toolboxId, data.name, data.subGroupId);
+        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalDtoPage(pageable, data.toolboxId, data.name, subGroupId);
         
         for (ToolForRentalDto item : toolForRentalDtoPage.getContent()) {
         	logger.info(item.toString());

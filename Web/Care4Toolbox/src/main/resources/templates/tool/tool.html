@@ -569,46 +569,57 @@
 	});
 	$("#addFormBtn").click(e=>{
 		e.preventDefault();
-		post(
-			"tool/new",
-			{
-                name: document.getElementById('addFormName').value,
-                engName: document.getElementById('addFormEngName').value,
-                code: document.getElementById('addFormCode').value,
-                buyCode: document.getElementById('addFormBuyCode').value,
-                spec: document.getElementById('addFormSpec').value,
-                unit: document.getElementById('addFormUnit').value,
-                price: document.getElementById('addFormPrice').value,
-                replacementCycle: document.getElementById('addFormReplacementCycle').value,
-                subGroupDtoId: parseInt(document.getElementById('addFormSubGroupSelect').value),
-            },
-			"tool"
-		);
+		submitFormBtn('add');
 	});
 	$("#editFormBtn").click(e=>{
 		e.preventDefault();
-		post(
-			"tool/edit",
-			{
-                name: document.getElementById('editFormName').value,
-                engName: document.getElementById('editFormEngName').value,
-                code: document.getElementById('editFormCode').value,
-                buyCode: document.getElementById('editFormBuyCode').value,
-                spec: document.getElementById('editFormSpec').value,
-                unit: document.getElementById('editFormUnit').value,
-                price: document.getElementById('editFormPrice').value,
-                replacementCycle: document.getElementById('editFormReplacementCycle').value,
-                subGroupDtoId: parseInt(document.getElementById('editFormSubGroupSelect').value),
-			},
-			"tool"
-		);
+		submitFormBtn('edit');
 	});
+	function submitFormBtn(mode){
+		if (mode==='add' || mode==='edit'){
+			abcHttp.post(
+				`tool/${mode ==='add' ? 'new' : mode }`,
+				{
+				    name: document.getElementById(`${mode}FormName`).value,
+				    engName: document.getElementById(`${mode}FormEngName`).value,
+				    code: document.getElementById(`${mode}FormCode`).value,
+				    buyCode: document.getElementById(`${mode}FormBuyCode`).value,
+				    spec: document.getElementById(`${mode}FormSpec`).value,
+				    unit: document.getElementById(`${mode}FormUnit`).value,
+				    price: document.getElementById(`${mode}FormPrice`).value,
+				    replacementCycle: document.getElementById(`${mode}FormReplacementCycle`).value,
+				    subGroupDtoId: parseInt(document.getElementById(`${mode}FormSubGroupSelect`).value),
+				}
+			)
+			.then(response=>{
+				Swal.fire({
+					type:"success",
+					title:"저장됨",
+					text:"정상적으로 저장되었습니다.",
+				})
+				.then(result=>{
+					location.href='tool';
+				});
+				setTimeout(() => {
+					$("#contactAddModal").modal("hide");
+					$("#contactEditModal").modal("hide");
+				}, 0);
+			});
+		}else{
+			console.log("choose add or edit. you've selected " + mode);
+		}
+	}
+	
 	
 	function loadSubGroups(mainGroupId) {
 		return new Promise((resolved, rejected)=>{
-	    fetch('/sub_group/get?mainGroupId=' + mainGroupId)
-	        .then(response => response.json())
-	        .then(data => {
+	        abcHttp.get(
+				'/sub_group/get',
+				{
+					mainGroupId:mainGroupId
+				}
+			)
+			.then(data => {
 	            var subGroupList = '';
 	            data.forEach(function (subGroup) {
 					subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
@@ -617,45 +628,9 @@
 	            resolved();
 	        })
 	        .catch(error => {
-	            console.error('subgroup 목록을 불러오는 중 오류가 발생했습니다.');
 	            rejected();
 	        });
 	    });
-	}
-
-	function post(url,paramData,redirection){
-		fetch(url, {
-		  method:"POST",
-		  headers:{
-			  //'header': document.querySelector('meta[name="_csrf"]').content,
-              "Content-Type": "application/json",
-              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
-		  },
-		  body: JSON.stringify(paramData),
-		})
-		  .then(response => {
-		    if (!response.ok) {
-		      throw new Error(`HTTP error! Status: ${response.status}`);
-		    }
-		    return response.json();
-		  })
-		  .then(data => {
-			  debugger;
-			location.href=redirection;
-		  })
-		  .catch(error => {
-		    console.error('Error:', error);
-			Swal.fire({
-			  type: "error",
-			  title: "Error!",
-			  text: error,
-			});
-			setTimeout(_=>{
-			$("#contactAddModal").modal("hide");
-			$("#contactEditModal").modal("hide");
-			},0);
-			return ;
-		  });
 	}
 </script>
 </th:block>

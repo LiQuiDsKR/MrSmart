@@ -374,205 +374,129 @@
 <script th:inline="javascript"> 	
 	function loadSubParts(mainPartId, withTrRatherThanOptions) {
 		return new Promise((resolved, rejected)=>{
-	    fetch('/sub_part/get?mainPartId=' + mainPartId)
-	        .then(response => response.json())
-	        .then(data => {
-	            var subPartList = '';
+	    	abcHttp.get(
+				'/sub_part/get',
+				{
+					mainPartId:mainPartId
+				}
+			)
+			.then(data=>{
+				var subPartList = '';
 	            data.forEach(function (subPart) {
-					if (withTrRatherThanOptions){
 	                subPartList += 
-						'<tr class="selectable" style="cursor:pointer;">'+
-							'<td hidden>'+subPart.id+'</td>'+
-							'<td>'+subPart.name+'</td>'+
-							'<td class="td_btn">'+
-								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="sub_part" style="cursor:pointer;">' +
-									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;" />' +
-								'</span>'
-							'</td>'+
-						'</tr>'
-					}else{
-						subPartList += '<option value="' + subPart.id + '">' + subPart.name + '</option>';
-					}
+						`
+					    <tr class="selectable" style="cursor:pointer;">
+					        <td hidden>${subPart.id}</td>
+					        <td>${subPart.name}</td>
+					        <td class="td_btn">
+					            <span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="sub_part" style="cursor:pointer;">
+					                <img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;" />
+					            </span>
+					        </td>
+					    </tr>
+						`;
 	            });
 	            this.innerHTML = subPartList;
 	            resolved();
-	        })
+			})
 	        .catch(error => {
-	            console.error('subpart 목록을 불러오는 중 오류가 발생했습니다.');
 	            rejected();
 	        });
 	    });
 	}
 	function loadParts(subPartId,withTrRatherThanOptions){
 		return new Promise((resolved, rejected)=>{
-		fetch('/part/get?subPartId=' + subPartId)
-	        .then(response => response.json())
-	        .then(data => {
-	            var partList = '';
+		    abcHttp.get(
+				'/part/get',
+				{
+					subPartId:subPartId
+				}
+			)
+			.then(data=>{
+				var partList = '';
 	            data.forEach(function (part) {
-					if (withTrRatherThanOptions){
-	                partList += 
-		                '<tr class="selectable">'+
-							'<td hidden>'+part.id+'</td>'+
-							'<td>'+part.name+'</td>'+
-							'<td class="td_btn">'+
-								'<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="part" style="cursor:pointer;">' +
-									'<img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;"/>' +
-								'</span>'
-							'</td>'+
-						'</tr>'
-					}else{
-						partList += '<option value="' + part.id + '">' + part.name + '</option>';
-					}
+	                partList += `
+					    <tr class="selectable">
+					        <td hidden>${part.id}</td>
+					        <td>${part.name}</td>
+					        <td class="td_btn">
+					            <span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" data-part-type="part" style="cursor:pointer;">
+					                <img src="/img/svg/c-edit.svg" alt="" class="svg" style="border-radius:0%;" />
+					            </span>
+					        </td>
+					    </tr>
+					`;
 	            });
 	            this.innerHTML = partList;
 	            resolved();
 	        })
 	        .catch(error => {
-	            console.error('part 목록을 불러오는 중 오류가 발생했습니다.');
 	            rejected();
 	        });
-	    });
+        });
 	}
 	
-	
-	document.querySelectorAll(".btn-circle").forEach(element=>{
-		element.addEventListener("click",e=>{
-			const pt=element.getAttribute("data-part-type")
-			document.getElementById("addFormBtn").setAttribute("data-part-type",pt);
-			const data = {
-						id:null,
-						name:null,
-						partType:{
-							key:null, // "main_part" / "sub_part" / "part"
-							display:null, // 한글, 표시용
-						},
-						parentPart:{
-							id:null, // id
-							display:null, // 표시용
-						},
-					};
-			       
-			        switch(pt){
-						case "main_part":
-							data.partType.key="main_part";
-							data.partType.display="메인 부서";
-							data.parentPart.id=0;
-							data.parentPart.display="/";
-							break;
-						case "sub_part":
-							data.partType.key="sub_part";
-							data.partType.display="중간 부서";
-							data.parentPart.id=selectStates["mainPartTable"]?.id;
-							data.parentPart.display=selectStates["mainPartTable"]?.name+"/";
-							break;
-						case "part":
-							data.partType.key="part";
-							data.partType.display="부서";
-							data.parentPart.id=selectStates["subPartTable"]?.id;
-							data.parentPart.display=
-								selectStates["mainPartTable"]?.name+"/"+
-								selectStates["subPartTable"]?.name+"/";
-							break;
-						default:
-					}
-					if (data.parentPart?.id==null) {
-						Swal.fire({
-						  type: "warning",
-						  title: "선택된 상위 부서 없음",
-						  text: "왼쪽 박스에서 상위 부서를 먼저 선택해주세요!",
-						});
-						setTimeout(_=>{
-						$("#contactAddModal").modal("hide");},10);
-						return ;
-					}
-					document.getElementById("addFormTitle").textContent=data.partType.display+" 정보 추가"
-					document.getElementById("addFormNameAddOn").textContent=data.parentPart.display;
-		});
-	});
 	document.getElementById("addFormBtn").addEventListener("click",e=>{
-		const pt=document.getElementById("addFormBtn").getAttribute("data-part-type");
-		post(
-			pt+"/new",
-			pt==="main_part"?
-			{
-				id:0,
-				name: document.getElementById('addFormName').value
-			}:
-			pt==="sub_part"?
-			{
-				id:0,
-				name: document.getElementById('addFormName').value,
-				mainPartDtoId:selectStates["mainPartTable"].id
-			}:
-			pt==="part"?
-			{
-				id:0,
-				name: document.getElementById('addFormName').value,
-				subPartDtoId:selectStates["subPartTable"].id
-			}:
-			null,
-			"parts"
-		);
+		e.preventDefault();
+		formBtnClickHandler('add');
 	});
 	document.getElementById("editFormBtn").addEventListener("click",e=>{
 		e.preventDefault();
-		const pt=document.getElementById("editFormBtn").getAttribute("data-part-type");
-		post(
-			pt+"/edit",
-			pt==="main_part"?
-			{
-				id:document.getElementById('editFormId').value,
-				name: document.getElementById('editFormName').value
-			}:
-			pt==="sub_part"?
-			{
-				id:document.getElementById('editFormId').value,
-				name: document.getElementById('editFormName').value,
-				mainPartDtoId:selectStates["mainPartTable"].id
-			}:
-			pt==="part"?
-			{
-				id:document.getElementById('editFormId').value,
-				name: document.getElementById('editFormName').value,
-				subPartDtoId:selectStates["subPartTable"].id
-			}:
-			null,
-			"parts"
-		);
+		formBtnClickHandler('edit');
 	});
-	function post(url,paramData,redirection){
-		debugger;
-		fetch(url, {
-		  method:"POST",
-		  headers:{
-			  //'header': document.querySelector('meta[name="_csrf"]').content,
-              "Content-Type": "application/json",
-              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
-		  },
-		  body: JSON.stringify(paramData),
-		})
-		  .then(response => {
-		    if (!response.ok) {
-		      throw new Error(`HTTP error! Status: ${response.status}`);
-		    }
-			console.log(response.data);
-		    return response.data;
-		  })
-		  .then(data => {
-			location.href=redirection;
-		  })
-		  .catch(error => {
-		    console.error('Error:', error);
-		  });
+	
+	// addForm, editForm Modal의 submitBtn clickEventHandler.
+	// mode : add / edit
+	function formBtnClickHandler(mode){
+		if (mode === "add" || mode === "edit") {
+		    const pt = document.getElementById(`${mode}FormBtn`).getAttribute("data-part-type");
+		    abcHttp.post(
+		        `${pt}/${mode === 'add' ? 'new' : mode}`,
+				pt === "main_part" ?
+			    {
+			        id: mode === 'add' ? 0 : document.getElementById(`${mode}FormId`).value,
+			        name: document.getElementById(`${mode}FormName`).value
+			    } :
+			    pt === "sub_part" ?
+		        {
+		            id: mode === 'add' ? 0 : document.getElementById(`${mode}FormId`).value,
+		            name: document.getElementById(`${mode}FormName`).value,
+		            mainPartDtoId: selectStates["mainPartTable"].id
+		        } :
+		        pt === "part" ?
+	            {
+	                id: mode === 'add' ? 0 : document.getElementById(`${mode}FormId`).value,
+	                name: document.getElementById(`${mode}FormName`).value,
+	                subPartDtoId: selectStates["subPartTable"].id
+	            } :
+	            null,
+		    )
+		    .then(response => {
+		        Swal.fire({
+		            type: "success",
+		            title: "저장됨",
+		            text: "정상적으로 저장되었습니다.",
+		        })
+		        .then(result => {
+		            location.href = 'parts';
+		        });
+		        setTimeout(() => {
+		            $(`#contactAddModal`).modal("hide");
+		            $(`#contactEditModal`).modal("hide");
+		        }, 0);
+		    });
+		} else {
+		    console.log(`choose add or edit. you've selected ${mode}`);
+		}
 	}
 
-
+	// 현재 어떤 상위 목록이 선택되어 있는지 저장하는 변수.
 	const selectStates = {
 		mainPartTable: null,
 		subPartTable: null,
 	};
 
+	// 상위 목록 선택 후, 새로 생성된 하위 목록 element 중 버튼들에 이벤트 핸들러 걸어줌.
     function addClickHandler(tableId) {
         const table = document.getElementById(tableId);
         const selectableRows = table.querySelectorAll('.selectable');
@@ -636,6 +560,7 @@
         });
     }
     
+	// 선택된 상위 목록 없을 시, 하위 목록 지우기
     function clearAndAddMessage(tableId) {
         const table = document.getElementById(tableId);
         const tbody = table.querySelector('tbody');
@@ -643,51 +568,44 @@
             tbody.innerHTML = '<tr><td colspan="999"><span>왼쪽 박스에서 상위 부서 항목을 선택해주세요.</span></td></tr>';
         }
     }
+    
+    
+	// open addFormModal
+    document.querySelectorAll(".btn-circle").forEach(element=>{
+		element.addEventListener("click",e=>{
+			const pt=element.getAttribute("data-part-type")
+			document.getElementById("addFormBtn").setAttribute("data-part-type",pt);
+		
+			const data = setFormModalData(pt);
+
+			if (data.parentPart?.id==null) {
+				Swal.fire({
+				  type: "warning",
+				  title: "선택된 상위 부서 없음",
+				  text: "왼쪽 박스에서 상위 부서를 먼저 선택해주세요!",
+				});
+				setTimeout(_=>{
+				$("#contactAddModal").modal("hide");},10);
+				return ;
+			}
+			document.getElementById("addFormTitle").textContent=data.partType.display+" 정보 추가"
+			document.getElementById("addFormNameAddOn").textContent=data.parentPart.display;
+		});
+	});
+	// open editFormModal
+	// addFormBtn과 달리 새로 생겼다 지워졌다를 반복함에 유의.
     function addEditFormModalEventListener(){
 	    document.querySelectorAll("table .contact-edit").forEach(element=>{
 			if (!element.classList.contains("listener-added")) {
 		        element.classList.add("listener-added");
 				element.addEventListener("click",event=>{
-					const data = {
-						id:null,
-						name:null,
-						partType:{
-							key:null, // "main_part" / "sub_part" / "part"
-							display:null, // 한글, 표시용
-						},
-						parentPart:{
-							id:null, // id
-							display:null, // 표시용
-						},
-					};
 			        const parentTr = element.closest('tr');
 			        const parentTable = element.closest('table');
 			        
+			        const data = setFormModalData(parentTable.id);
+			        
 			        data.id = parseInt(parentTr.querySelector('td:nth-child(1)').textContent);
 			        data.name = parentTr.querySelector('td:nth-child(2)').textContent;
-			        switch(parentTable.id){
-						case "mainPartTable":
-							data.partType.key="main_part";
-							data.partType.display="메인 부서";
-							data.parentPart.id=0;
-							data.parentPart.display="/";
-							break;
-						case "subPartTable":
-							data.partType.key="sub_part";
-							data.partType.display="중간 부서";
-							data.parentPart.id=selectStates["mainPartTable"].id;
-							data.parentPart.display=selectStates["mainPartTable"].name+"/";
-							break;
-						case "partTable":
-							data.partType.key="part";
-							data.partType.display="부서";
-							data.parentPart.id=selectStates["subPartTable"].id;
-							data.parentPart.display=
-								selectStates["mainPartTable"].name+"/"+
-								selectStates["subPartTable"].name+"/";
-							break;
-						default:
-					}
 					document.getElementById("editFormTitle").textContent=data.partType.display+" 정보 수정"
 					document.getElementById("editFormNameAddOn").textContent=data.parentPart.display;
 					document.getElementById("editFormName").value=data.name;
@@ -697,6 +615,49 @@
 			}
 		});
 	}
+	// 모달을 열기 전 모달에 기본값을 전달하는 용도.
+	function setFormModalData(part){
+		const data = {
+			id:null,
+			name:null,
+			partType:{
+				key:null, // "main_part" / "sub_part" / "part"
+				display:null, // 한글, 표시용
+			},
+			parentPart:{
+				id:null, // id
+				display:null, // 표시용
+			},
+		};
+		switch(part){
+			case "mainPartTable":
+			case "main_part":
+				data.partType.key="main_part";
+				data.partType.display="메인 부서";
+				data.parentPart.id=0;
+				data.parentPart.display="/";
+				break;
+			case "subPartTable":
+			case "sub_part":
+				data.partType.key="sub_part";
+				data.partType.display="중간 부서";
+				data.parentPart.id=selectStates["mainPartTable"]?.id;
+				data.parentPart.display=selectStates["mainPartTable"]?.name+"/";
+				break;
+			case "partTable":
+			case "part":
+				data.partType.key="part";
+				data.partType.display="부서";
+				data.parentPart.id=selectStates["subPartTable"]?.id;
+				data.parentPart.display=
+					selectStates["mainPartTable"]?.name+"/"+
+					selectStates["subPartTable"]?.name+"/";
+				break;
+			default:
+		}
+		return data;
+	}
+
 
 	addEditFormModalEventListener();
     addClickHandler('mainPartTable');

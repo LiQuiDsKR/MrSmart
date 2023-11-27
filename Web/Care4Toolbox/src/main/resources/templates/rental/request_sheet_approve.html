@@ -92,8 +92,13 @@
 
 			const toolboxId = 5222; // 로그인 구현 후 사용자 정보를 불러와서 수정하기
 
-			post(
-				`/rental/request_sheet/getpage?page=0&size=10&toolboxId=${toolboxId}`
+			abcHttp.get(
+				`/rental/request_sheet/getpage`,
+				{
+					page:0,
+					size:10,
+					toolboxId:toolboxId
+				}
 			).then(data => {
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML = '';
@@ -304,9 +309,11 @@
 							if (result.value == true) {
 								const sheet = row.closest(".sheet");
 								sheet.parentNode.removeChild(sheet);
-								post(
-									`/rental/request_sheet/cancel?sheetId=${data.id}`,
-									null,
+								abcHttp.post(
+									`/rental/request_sheet/cancel`,
+									{
+										sheetId:data.id
+									}
 								).then(data => {
 									Swal.fire({
 										type: "success",
@@ -345,7 +352,7 @@
 		function addListenerApproveBtn(data) {
 			document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
 				element.addEventListener("click", function () {
-					post(
+					abcHttp.post(
 						`/rental/request_sheet/approve`,
 						{
 							rentalRequestSheetDto: data,
@@ -358,7 +365,7 @@
 							text: "대여 승인이 정상적으로 처리되었습니다",
 						})
 							.then(result => {
-								location.href = "/rental/request_sheet/admin";
+								location.href = "/rental/request_sheet/approve";
 							});
 					});
 				});
@@ -377,44 +384,6 @@
 			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
 
 			return formattedDate;
-		}
-
-		function post(url, paramData, redirection) {
-			return new Promise((resolve, reject) => {
-				fetch(url, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(paramData),
-				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(`HTTP error! Status: ${response.status}`);
-						}
-						return response.json();
-					})
-					.then(data => {
-						if (redirection != null) {
-							location.href = redirection;
-						} else {
-							resolve(data);
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						Swal.fire({
-							type: "error",
-							title: "Error!",
-							text: error,
-						});
-						setTimeout(() => {
-							$("#contactAddModal").modal("hide");
-							$("#contactEditModal").modal("hide");
-						}, 0);
-						reject(error);
-					});
-			});
 		}
 	</script>
 </th:block>

@@ -2,16 +2,19 @@ package com.care4u.hr.membership;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,7 +48,12 @@ public class MembershipRestController {
 	private PartService partService;
     
     @PostMapping(value="/membership/new")
-    public ResponseEntity<String> newMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
+    public ResponseEntity<String> newMembership(@Valid @RequestBody MembershipFormDto memberFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
     	Gson gson = new Gson();
     	try {
     		PartDto partDto=partService.get(memberFormDto.getPartDtoId());
@@ -69,7 +77,12 @@ public class MembershipRestController {
     }
 
     @PostMapping(value="/membership/edit")
-    public ResponseEntity<String> editMembership(@Valid @RequestBody MembershipFormDto memberFormDto){
+    public ResponseEntity<String> editMembership(@Valid @RequestBody MembershipFormDto memberFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
     	Gson gson = new Gson();
     	try {
     		PartDto partDto=partService.get(memberFormDto.getPartDtoId());

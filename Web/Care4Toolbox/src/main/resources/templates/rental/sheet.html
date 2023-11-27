@@ -136,7 +136,7 @@
 
 		//fetch
 		function load() {
-			post(
+			abcHttp.post(
 				`/rental/sheet/getpage`,
 				{
 					membershipId: 19,//로그인한 사용자로 변경해야 함. 일단 기본값 박철민 씨
@@ -225,10 +225,10 @@
 					containerDiv.appendChild(outerDiv);
 					const dataObj = JSON.parse(JSON.stringify(element));
 
-					addListenerApproveBtn(dataObj);
-					addListenerDeleteBtn(dataObj);
+					//addListenerApproveBtn(dataObj);
+					//addListenerDeleteBtn(dataObj);
 				});
-				activateCheckbox();
+				//activateCheckbox();
 			});
 		}
 		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
@@ -288,7 +288,7 @@
 		function addListenerApproveBtn(data) {
 			document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
 				element.addEventListener("click", function () {
-					post(
+					abcHttp.post(
 						`/rental/request_sheet/approve?approverId=${100001}`,
 						data,
 					).then(data => {
@@ -312,43 +312,6 @@
 			return formattedDate;
 		}
 
-		function post(url, paramData, redirection) {
-			return new Promise((resolve, reject) => {
-				fetch(url, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(paramData),
-				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(`HTTP error! Status: ${response.status}`);
-						}
-						return response.json();
-					})
-					.then(data => {
-						if (redirection != null) {
-							location.href = redirection;
-						} else {
-							resolve(data);
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						Swal.fire({
-							type: "error",
-							title: "Error!",
-							text: error,
-						});
-						setTimeout(() => {
-							$("#contactAddModal").modal("hide");
-							$("#contactEditModal").modal("hide");
-						}, 0);
-						reject(error);
-					});
-			});
-		}
 	</script>
 </th:block>
 

@@ -22,6 +22,7 @@ import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
@@ -49,6 +50,7 @@ public class RentalSheetService {
 	private final TagRepository tagRepository;
 	private final RentalToolService rentalToolService;
 	private final OutstandingRentalSheetService outstandingRentalSheetService;
+	private final RentalRequestSheetService rentalRequestSheetService;
 	
 	@Transactional(readOnly = true)
 	public RentalSheetDto get(long id){
@@ -141,5 +143,20 @@ public class RentalSheetService {
 		
 		return result;
 	}
-
+	
+	/**
+	 * Controller에서 RentalRequestSheet update()와 RentalSheet addNew()를 따로 호출했을 때 생긴 문제를 방지하기 위해
+	 * 하나의 transaction으로 묶어주기 위한 함수입니다.
+	 * @param sheetDto
+	 * @param approverId
+	 * @return RentalSheetDto를 반환합니다.
+	 */
+	@Transactional
+	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetDto sheetDto, long approverId) {
+		// 1. RequestSheet를 Update
+		rentalRequestSheetService.update(sheetDto,SheetState.APPROVE);
+		// 2. RentalSheet를 addNew
+		return addNew(sheetDto,approverId);
+	}
+	
 }

@@ -1,13 +1,16 @@
 package com.care4u.hr.part;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +22,7 @@ import com.care4u.hr.membership.MembershipDto;
 import com.care4u.hr.membership.MembershipFormDto;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.google.gson.Gson;
 
 /**
  * 2023-11-02 박경수
@@ -42,8 +46,14 @@ public class PartRestController {
         return partList;
     }
     @PostMapping(value="/part/new")
-    public ResponseEntity<String> newPart(@Valid @RequestBody PartFormDto partFormDto){
-    	try {
+    public ResponseEntity<String> newPart(@Valid @RequestBody PartFormDto partFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
+		Gson gson = new Gson();
+		try {
     		SubPartDto subPartDto = subPartService.get(partFormDto.getSubPartDtoId());
     		partService.addNew(
     				partFormDto.getSubPartDtoId(),
@@ -54,21 +64,21 @@ public class PartRestController {
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + partFormDto.getName()
-		    		+ ", subpartid=" + partFormDto.getSubPartDtoId()
-		    		;
+    		String response = gson.toJson(partFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-		String response = "서버에서 받은 데이터:"
-				+ "이름=" + partFormDto.getName()
-	    		+ ", subpartid=" + partFormDto.getSubPartDtoId()
-	    		;
+		String response = gson.toJson(partFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(value="/part/edit")
-    public ResponseEntity<String> editMembership(@Valid @RequestBody PartFormDto partFormDto){
+    public ResponseEntity<String> editMembership(@Valid @RequestBody PartFormDto partFormDto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			List<String> errors = bindingResult.getAllErrors().stream()
+					.map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+		}
+		Gson gson = new Gson();
     	try {
     		SubPartDto subPartDto = subPartService.get(partFormDto.getSubPartDtoId());
     		partService.update(
@@ -79,16 +89,10 @@ public class PartRestController {
     				.build()
     				);
     	}catch(IllegalStateException e) {
-    		String response = "서버에서 받은 데이터:"
-    				+ "이름=" + partFormDto.getName()
-		    		+ ", subpartid=" + partFormDto.getSubPartDtoId()
-		    		;
+    		String response = gson.toJson(partFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);
     	}
-		String response = "서버에서 받은 데이터:"
-				+ "이름=" + partFormDto.getName()
-	    		+ ", subpartid=" + partFormDto.getSubPartDtoId()
-	    		;
+		String response = gson.toJson(partFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -27,7 +27,7 @@ public class ToolForRentalPostFormDto {
 	@NotNull
 	Long toolboxId;
 	
-	@NotEmpty
+	@NotNull
 	List<Long> subGroupId;
 
 }

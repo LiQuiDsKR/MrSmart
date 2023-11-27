@@ -386,8 +386,7 @@
 							"size": d.length,
 							"name": $("#searchInput").val(),
 							"toolboxId": parseInt($("#toolboxSelect").val()),
-							"subGroupId": [71, 73, 75, 81, 86, 100, 102, 104, 113, 128, 159, 166, 185, 189, 191, 196, 200, 204, 206, 227, 229, 239, 255, 308, 543, 879, 882, 887, 909, 1253, 1255, 1257, 1264, 1274, 1277, 1283, 1285, 1287, 1344, 1352, 1443, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 1459, 1460, 1461, 1462, 1463, 1464, 1465, 1466, 1467, 1468],
-							//subGroupId 선택에 관한 로직 재설정 필요..
+							"subGroupId": []
 
 
 							//"order": columnsDefine[d.order[0].column].column,
@@ -739,61 +738,58 @@
 		//fetch
 		function loadSubGroups(mainGroupId) {
 			return new Promise((resolved, rejected) => {
-				fetch('/sub_group/get?mainGroupId=' + mainGroupId)
-					.then(response => response.json())
-					.then(data => {
-						var subGroupList = '';
-						data.forEach(function (subGroup) {
-							subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
-						});
-						this.innerHTML = subGroupList;
-						resolved();
-					})
-					.catch(error => {
-						console.error('subgroup 목록을 불러오는 중 오류가 발생했습니다.');
-						rejected();
+				abcHttp.get(
+					'/sub_group/get',
+					{
+						mainGroupId:mainGroupId
+					}
+				)
+				.then(data => {
+					var subGroupList = '';
+					data.forEach(function (subGroup) {
+						subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
 					});
+					this.innerHTML = subGroupList;
+					resolved();
+				})
+				.catch(error => {
+					rejected();
+				});
 			});
 		}
 		//fetch
 		function getToolDtoById(id) {
 			return new Promise((resolve, reject) => {
-				fetch(`/tool/get?id=${id}`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
+				abcHttp.get(
+					'/tool/get',
+					{
+						id:id
 					}
+				)
+				.then(data => {
+					resolve(data);
 				})
-					.then(response => {
-						if (response.ok) {
-							return response.json();
-						}
-						throw new Error('서버 오류 발생');
-					})
-					.then(data => {
-						resolve(data);
-					})
-					.catch(error => {
-						reject(error);
-					});
+				.catch(error => {
+					reject(error);
+				});
 			});
 		}
 		//fetch
 		function getStockDtoByToolAndToolboxId(toolId, toolboxId) {
 			return new Promise((resolve, reject) => {
-				fetch(`/stock_status/get?toolId=${toolId}&toolboxId=${toolboxId}`)
-					.then(response => {
-						if (response.ok) {
-							return response.json();
-						}
-						throw new Error('서버 오류 발생');
-					})
-					.then(data => {
-						resolve(data);
-					})
-					.catch(error => {
-						reject(error);
-					});
+				abcHttp.get(
+					'/stock_status/get',
+					{
+						toolId:toolId,
+						toolboxId:toolboxId
+					}
+				)
+				.then(data => {
+					resolve(data);
+				})
+				.catch(error => {
+					reject(error);
+				});
 			});
 		}
 		//ctrl+z -> undo();
@@ -815,11 +811,11 @@
 				"name": "선강정비1실"
 			},
 			"worker": {
-				"id": null,
+				"id": 0,
 				"name": ""
 			},
 			"leader": {
-				"id": null,
+				"id": 0,
 				"name": ""
 			}
 		}
@@ -993,47 +989,37 @@
 		//fetch
 		function getMembershipById(id) {
 			return new Promise((resolve, reject) => {
-				fetch(`/membership/get?id=${id}`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
+				abcHttp.get(
+					'/membership/get',
+					{
+						id:id
 					}
+				)
+				.then(data => {
+					resolve(data);
 				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error('서버 오류 발생');
-						}
-						return response.json();
-					})
-					.then(data => {
-						resolve(data);
-					})
-					.catch(error => {
-						reject(error);
-					});
+				.catch(error => {
+					reject(error);
+				});
 			});
 		}
 		//fetch
 		function getMembershipPageByName(name) {
 			return new Promise((resolve, reject) => {
-				fetch(`/membership/getpage?page=0&size=50&name=${name}`, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page:0,
+						size:50,
+						name:name
 					}
+				)
+				.then(data => {
+					resolve(data);
 				})
-					.then(response => {
-						if (response.ok) {
-							return response.json();
-						}
-						throw new Error('서버 오류 발생');
-					})
-					.then(data => {
-						resolve(data);
-					})
-					.catch(error => {
-						reject(error);
-					});
+				.catch(error => {
+					reject(error);
+				});
 			});
 		}
 
@@ -1051,7 +1037,7 @@
 				buttonStyling: false,
 			}).then(result => {
 				if (result.value == true) {
-					post(
+					abcHttp.post(
 						"/rental/request_sheet/apply",
 						{
 							workName: mainData.workName.name,
@@ -1061,25 +1047,23 @@
 							toolList: list.map(item => ({toolDtoId: item.id, count: item.count}))
 						}
 					)
-						.then(data => {
-							Swal.fire({
-								type: "success",
-								title: "대여 신청 완료",
-								text: "공기구 대여 목록을 정상적으로 신청하였습니다",
-							});
-						})
-						.then(result2 => {
-							if (result2) {
-								location.href = '/rental/request_sheet'
-							}
-						})
-						.catch(error => {
-							Swal.fire({
-								type: "error",
-								title: "대여 신청 실패",
-								text: error,
-							})
-						})
+					.then(data => {
+						Swal.fire({
+							type: "success",
+							title: "대여 신청 완료",
+							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
+						});
+					})
+					.then(result2 => {
+						location.href = '/rental/request_sheet';
+					})
+					.catch(error => {
+						Swal.fire({
+							type: "error",
+							title: "대여 신청 실패",
+							text: error,
+						});
+					});
 				} else {
 					return;
 				}
@@ -1093,46 +1077,6 @@
 				result += "품명:" + list[i]["name"] + ",수량:" + list[i]["count"] + "<br/>";
 			}
 			return result;
-		}
-
-		// =============== ▼ post ===============
-
-		function post(url, paramData, redirection) {
-			return new Promise((resolve, reject) => {
-				fetch(url, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(paramData),
-				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(`HTTP error! Status: ${response.status}`);
-						}
-						return response.json();
-					})
-					.then(data => {
-						if (redirection != null) {
-							location.href = redirection;
-						} else {
-							resolve(data);
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						Swal.fire({
-							type: "error",
-							title: "Error!",
-							text: error,
-						});
-						setTimeout(() => {
-							$("#contactAddModal").modal("hide");
-							$("#contactEditModal").modal("hide");
-						}, 0);
-						reject(error);
-					});
-			});
 		}
 
 	</script>
