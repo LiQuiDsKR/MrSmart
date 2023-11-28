@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+</style>
+</th:block>
+
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<input id="in">
+		<button id="btn" >asdf</button>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script  th:inline="javascript">
+document.getElementById("btn").addEventListener("click",function(){
+	//const mainData = JSON.parse(document.getElementById("in").value);
+		myHttp.post(
+			`/rental/request_sheet/getpage?page=0&size=10&toolboxId=${5222}`
+		)
+				.then(data=>{
+					console.log(data);
+				})
+				.catch(error=>{
+					Swal.fire({
+						type: "error",
+						title: "대여 신청 실패",
+						text: error,
+					})
+				})
+
+
+})
+
+
+
+
+</script>
+</th:block>
+</html>

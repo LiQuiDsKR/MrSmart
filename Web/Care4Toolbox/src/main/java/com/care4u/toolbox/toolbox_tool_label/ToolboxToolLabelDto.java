@@ -1,4 +1,4 @@
-package com.care4u.toolbox.label;
+package com.care4u.toolbox.toolbox_tool_label;
 
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.tool.ToolDto;
@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class ToolboxLabelDto {
+public class ToolboxToolLabelDto {
 	
 	private long id;
 	
@@ -19,15 +19,17 @@ public class ToolboxLabelDto {
 	
 	private ToolDto toolDto;
 	
+	private String qrcode;
+	
 	@Builder
-	public ToolboxLabelDto(long id, ToolboxDto toolboxDto, String location, ToolDto toolDto) {
+	public ToolboxToolLabelDto(long id, ToolboxDto toolboxDto, String location, ToolDto toolDto) {
 		this.id = id;
 		this.toolboxDto = toolboxDto;
 		this.location = location;
 		this.toolDto = toolDto;
 	}
 	
-	public ToolboxLabelDto(ToolboxLabel toolboxTool) {
+	public ToolboxToolLabelDto(ToolboxToolLabel toolboxTool) {
 		this.id = toolboxTool.getId();
 		this.toolboxDto = new ToolboxDto(toolboxTool.getToolbox());
 		this.location = toolboxTool.getLocation();

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout3}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+	</style>
+</th:block>
+
+<!-- Page Content-->
+<div class="page-content" layout:fragment="content">
+	<div class="container-fluid">
+		<!-- Page-Title -->
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="page-title-box">
+					<div class="float-right">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">Web</a>
+							</li>
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">Ecommerce</a>
+							</li>
+							<li class="breadcrumb-item active">Tool List</li>
+						</ol>
+					</div>
+					<h4 class="page-title">Tool List</h4>
+				</div>
+				<!--end page-title-box-->
+			</div>
+			<!--end col-->
+		</div>
+		<!-- end page title end breadcrumb -->
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="d-flex">
+							<input type="text" id="datepickerFrom" placeholder="From Date">
+							<input type="text" id="datepickerTo" placeholder="To Date">
+							<input type="text" id="searchInput" placeholder="Search..." class="form-control" />
+							<button id="searchButton" class="btn btn-primary">Search</button>
+						</div>
+						<table
+							id="datatable"
+							class="table table-bordered dt-responsive nowrap"
+							style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+							<thead>
+								<tr>
+									<th>Tool Name</th>
+									<th>Code</th>
+									<th>Spec</th>
+									<th>Unit</th>
+									<th>Price</th>
+									<th>Avai.Color</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+
+							<tbody>
+							
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- end col -->
+		</div>
+		<!-- end row -->
+	</div>
+	<!-- container -->
+</div>
+<!-- end page content -->
+
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<!-- Required datatable js -->
+	<script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+	<script th:src="@{/plugins/datatables/dataTables.bootstrap4.min.js}"></script>
+
+	<script>
+	$(document).ready(function() {
+		var table = $('#datatable').DataTable({
+			"paging": true,          // 페이지네이션 사용
+			"pageLength": 10, 		// 페이지당 항목 수
+			"lengthChange": true,   // 페이지 크기 변경 기능 비활성화
+			"searching": false,       // 검색 기능 사용
+			"ordering": true,        // 정렬 기능 사용
+			"info": false,            // 정보 표시
+			"autoWidth": false,      // 너비 자동 조정 비활성화
+			"serverSide": true,
+			"processing": true,
+			"ajax": {
+				"url": "/api/tool_list", // 데이터를 가져올 엔드포인트 URL
+				"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (data) {
+					// 페이지 번호와 페이지 크기 추가
+					var currentPage = Math.floor(data.start / data.length); // 페이지 번호
+					var pageSize = data.length; // 페이지 크기
+					
+					// 페이지 번호가 NaN인 경우 0으로 설정
+					data.page = isNaN(currentPage) ? 0 : currentPage;
+					data.size = pageSize; // 페이지 크기 설정
+					
+					data.ordering = true;
+					data.orderColumn = data.columns[data.order[0].column].data; // 현재 정렬된 열의 데이터 속성을 가져옴
+					data.orderDir = data.order[0].dir;
+					
+					// 검색어 추가
+					data.search = $('#searchInput').val();
+					data.fromDate = fromDate;
+					data.toDate = toDate;
+				}
+			},
+			"columns": [
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+					    // 제품 정보 표시
+					    return '<img src="/images/products/img-2.png" alt="" height="52" />' +
+					        '<p class="d-inline-block align-middle mb-0">' +
+					        '<a href="" class="d-inline-block align-middle mb-0 product-name">' + data.name + '</a><br />' +
+					        '<span class="text-muted font-13">' + data.id + '</span></p>';
+					}, 
+					"orderable": false
+                },
+				{"data": "code"},
+				{"data": "spec", "orderable": false},
+				{"data": "unit", "orderable": false},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 상태 뱃지 표시
+						return '<span class="badge badge-md badge-soft-warning">Stock</span>';
+					}, 
+					"orderable": false
+				},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 색상 아이콘 표시
+						return '<ul class="list-inline mb-0">' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-success"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-danger"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-info"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle"></i></li>' +
+							'<li class="list-inline-item align-middle"><i class="fas fa-circle text-warning"></i></li></ul>';
+					}, 
+					"orderable": false
+				},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 편집 및 삭제 액션 버튼 표시
+						return '<a href="#"><i class="far fa-edit text-info mr-1"></i></a>' 
+							+ '<a href="#"><i class="far fa-trash-alt text-danger"></i></a>';
+					}, 
+					"orderable": false
+				}
+			]
+		});
+		
+		var fromDate, toDate;
+
+		// datepicker 초기화
+		$("#datepickerFrom, #datepickerTo").datepicker({
+			dateFormat: 'yy-mm-dd',
+			onSelect: function(dateText, inst) {
+				// 선택한 날짜를 변수에 저장
+				if (inst.id === "datepickerFrom") {
+					fromDate = dateText;
+				} else if (inst.id === "datepickerTo") {
+					toDate = dateText;
+				}
+			}
+		});
+
+		
+		// 검색 버튼 클릭 이벤트 처리
+		$('#searchButton').on('click', function() {			
+			// DataTable 다시 그리기
+			table.draw();
+		});
+	});
+	</script>
+
+</th:block>
+
+</html>

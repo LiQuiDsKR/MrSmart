@@ -61,11 +61,21 @@ public class MainGroupService {
 		return update(mainGroupDto);
 	}
 	
-	public MainGroupDto update(MainGroupDto mainGroupDto) {
-		MainGroup mainGroup = repository.findByName(mainGroupDto.getName());
-		if (mainGroup == null) {
-			mainGroup = new MainGroup();
+	public MainGroupDto update(MainGroupDto mainGroupDto) throws IllegalStateException {
+		MainGroup findItem = repository.findByName(mainGroupDto.getName());
+		if(findItem != null){
+			logger.error("이미 등옥된 이름입니다. : " + mainGroupDto.getName());
+			throw new IllegalStateException("이미 등옥된 이름입니다.");
 		}
+		
+		MainGroup mainGroup;
+		Optional<MainGroup>optionalMainGroup = repository.findById(mainGroupDto.getId());
+		if(optionalMainGroup.isEmpty()) {
+			mainGroup=new MainGroup(mainGroupDto.getName());
+		}else {
+			mainGroup=optionalMainGroup.get();
+		}
+		
 		mainGroup.update(mainGroupDto.getName());
 		
 		return new MainGroupDto(repository.save(mainGroup));

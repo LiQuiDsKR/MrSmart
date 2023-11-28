@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+	
+	.selectable:hover{
+		box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+	}
+</style>
+</th:block>
+
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid mb-4 mb-md-0">
+		<div class="row">
+			<!-- Card -->
+			<div class="col-12" style="height: auto;">
+				<nav class="chat_aside bg-white" style="width:auto;">
+					<!-- Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white border-bottom" >
+						<!-- Btn -->
+						<div class="col-1 d-flex align-items-center justify-content-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn-circle"
+									data-toggle="modal"
+									data-target="#contactAddModal"
+									data-part-type="main_part">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+								</a>
+							</div>
+						</div>
+						<!-- title -->
+						<div class="col-10 d-flex flex-column align-items-start justify-content-center">
+							<h4 class="font-20">
+								정비실 등록
+							</h4>	
+						</div>
+					</div>
+					
+					<!-- Content -->
+					<div class="aside-body ps" data-trigger="scrollbar">
+						<div class="tab-content">
+							<div >
+								<div class="table-responsive">
+									<!-- Invoice List Table -->
+									<table id="mainPartTable" class="text-nowrap bg-white">
+										<thead>
+											<tr>
+												<th hidden>
+													Id
+												</th>
+												<th>
+													이름
+												</th>
+												<th class="th_btn">수정</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="toolbox : ${toolboxList}">
+												<td th:text="${toolbox.id}" hidden></td>
+												<td th:text="${toolbox.name}"></td>
+												<td class="td_btn">
+													<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg"/>
+													</span>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<!-- End Contact List Table -->
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End Content -->
+				</nav>
+			</div>
+			<!-- End Card-->
+		</div>
+	</div>
+				<!-- Contact Add New PopUp -->
+				<div id="contactAddModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 id="addFormTitle" class="mb-4">정비실 정보 추가</h1>
+											<input id="addFormId" hidden></input>				
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="addFormName"
+													>이름</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="addFormName"
+														class="theme-input-style"
+														placeholder="이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="form-group mb-4" hidden>
+												<label class="bold black mb-2" for="addFormManagerName"
+													>정비실장</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="addFormManagerName"
+														class="theme-input-style"
+														placeholder="직원 이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="addFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Add New PopUp -->
+
+				<!-- Contact Edit PopUp -->
+				<div id="contactEditModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 id="editFormTitle" class="mb-4">정비실 정보 수정</h1>
+											<input id="editFormId" hidden></input>				
+											<div class="form-group mb-4">
+												<label class="bold black mb-2" for="editFormName"
+													>이름</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="editFormName"
+														class="theme-input-style"
+														placeholder="이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="form-group mb-4" hidden>
+												<label class="bold black mb-2" for="editFormManagerName"
+													>정비실장</label>
+												<div class="input-group addon" style="flex-wrap:nowrap;">
+													<input
+														type="text"
+														id="editFormManagerName"
+														class="theme-input-style"
+														placeholder="직원 이름을 입력하세요"
+														required />
+												</div>
+											</div>
+											<div class="mb-4">
+												<button id="editFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Edit PopUp -->
+				
+
+</div>
+<!-- End Main Content -->
+
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript"> 	
+	document.getElementById("addFormBtn").addEventListener("click",e=>{
+		submitFormBtn('add');
+	});
+	document.getElementById("editFormBtn").addEventListener("click",e=>{
+		submitFormBtn('edit');
+	});
+	
+	function submitFormBtn(mode){
+		if (mode==='add' || mode==='edit'){
+			abcHttp.post(
+				`/toolbox/${mode==='add'?'new':mode}`,
+				{
+					id:mode==='add'?0:document.getElementById(`${mode}FormId`).value,
+					name:document.getElementById(`${mode}FormName`).value,
+					managerDtoCode:"100001"
+				}
+			)
+			.then(response=>{
+				Swal.fire({
+					type:"success",
+					title:"저장됨",
+					text:"정상적으로 저장되었습니다.",
+				})
+				.then(result=>{
+					location.href='toolbox';
+				});
+				setTimeout(() => {
+					$("#contactAddModal").modal("hide");
+					$("#contactEditModal").modal("hide");
+				}, 0);
+			});
+		}else{
+			console.log("choose add or edit. you've selected " + mode);
+		}
+	}
+	document.querySelectorAll("table .contact-edit").forEach(element=>{
+		element.addEventListener("click",e=>{
+			const parentTable=element.closest("table");
+			document.getElementById("editFormId").value = parseInt(parentTable.querySelector('td:nth-child(1)').textContent.trim());
+			document.getElementById("editFormName").value=parentTable.querySelector('td:nth-child(2)').textContent.trim();
+		});
+	});
+
+</script>
+</th:block>
+
+</html>

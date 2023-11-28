@@ -5,7 +5,6 @@
 
 package com.care4u.hr.membership;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -17,7 +16,6 @@ import org.thymeleaf.util.StringUtils;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
-import com.care4u.hr.part.PartDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,12 +33,18 @@ public class MembershipRepositoryCustomImpl  implements MembershipRepositoryCust
     }
     
     private BooleanExpression searchEmploymentStateEquals(EmploymentState searchEmploymentState){
-        return searchEmploymentState == null ? null : QMembership.membership.employmentState.eq(searchEmploymentState);
+        return searchEmploymentState == null ? null : QMembership.membership.employmentStatus.eq(searchEmploymentState);
+    }
+    public BooleanExpression searchPartIn(List<Long> ids) {
+    	return ids == null || ids.isEmpty() ? null : QMembership.membership.part.id.in(ids);
     }
     
     private BooleanExpression searchByLike(String searchBy, String searchQuery){
-
-        if(StringUtils.equals("id", searchBy)){
+    	if(StringUtils.equals("all", searchBy)) {
+    		return  QMembership.membership.id.like("%" + searchQuery + "%")
+    				.or(QMembership.membership.name.like("%" + searchQuery + "%"))
+    				.or(QMembership.membership.code.like("%" + searchQuery + "%"));
+    	}else if(StringUtils.equals("id", searchBy)){
             return QMembership.membership.id.like("%" + searchQuery + "%");
         } else if(StringUtils.equals("name", searchBy)){
             return QMembership.membership.name.like("%" + searchQuery + "%");
@@ -56,8 +60,9 @@ public class MembershipRepositoryCustomImpl  implements MembershipRepositoryCust
 
         List<Membership> content = queryFactory
                 .selectFrom(QMembership.membership)
-                .where(//searchRoleEquals(membershipSearchDto.getSearchRole()),
-                		//searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentState()),
+                .where(searchPartIn(membershipSearchDto.getIds()),
+                		searchRoleEquals(membershipSearchDto.getSearchRole()),
+                		searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentStatus()),
                         searchByLike(membershipSearchDto.getSearchBy(),
                                 membershipSearchDto.getSearchQuery()))
                 .orderBy(QMembership.membership.id.desc())

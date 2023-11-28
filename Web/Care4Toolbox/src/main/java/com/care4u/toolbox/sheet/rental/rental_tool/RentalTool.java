@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import com.care4u.entity.BaseEntity;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.tool.Tool;
 
@@ -34,6 +35,9 @@ public class RentalTool extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private RentalSheet rentalSheet;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	private RentalRequestSheet rentalRequestSheet;
+	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Tool tool;
@@ -42,14 +46,12 @@ public class RentalTool extends BaseEntity {
 	
 	private int outstandingCount;
 	
-	private String Tags;
-	
 	@Builder
-	public RentalTool(RentalSheet rentalSheet, Tool tool, int count, int outstandingCount, String Tags) {
+	public RentalTool(RentalSheet rentalSheet, Tool tool, int count, int outstandingCount, String Tags, RentalRequestSheet rentalRequestSheet) {
 		this.rentalSheet = rentalSheet;
 		this.tool = tool;
 		this.count = count;
 		this.outstandingCount = outstandingCount;
-		this.Tags = Tags;
+		this.rentalRequestSheet = rentalRequestSheet;
 	}
 }

@@ -41,6 +41,7 @@ public class MainPart extends BaseEntity {
 	}
 	
 	public void update(MainPartDto mainGroupDto) {
+		this.name = mainGroupDto.getName();
 		this.latitude = mainGroupDto.getLatitude();
 		this.longitude = mainGroupDto.getLongitude();
 		this.mapScale = mainGroupDto.getMapScale();

@@ -62,10 +62,20 @@ public class MainPartService {
 	}
 	
 	public MainPartDto update(MainPartDto mainPartDto) {
-		MainPart mainPart = repository.findByName(mainPartDto.getName());
-		if (mainPart == null) {
-			mainPart = new MainPart(mainPartDto.getName());
+		MainPart findItem = repository.findByName(mainPartDto.getName());
+		if(findItem != null){
+			logger.error("이미 등옥된 이름입니다. : " + mainPartDto.getName());
+			throw new IllegalStateException("이미 등옥된 이름입니다.");
 		}
+		
+		MainPart mainPart;
+		Optional<MainPart> optionalMainPart = repository.findById(mainPartDto.getId());
+		if (optionalMainPart.isEmpty()) {
+			mainPart = new MainPart(mainPartDto.getName());
+		} else {
+			mainPart = optionalMainPart.get();
+		}
+		
 		mainPart.update(mainPartDto);
 		
 		return new MainPartDto(repository.save(mainPart));

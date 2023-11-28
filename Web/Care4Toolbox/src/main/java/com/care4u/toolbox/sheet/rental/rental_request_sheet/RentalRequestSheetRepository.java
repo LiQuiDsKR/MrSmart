@@ -8,11 +8,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.care4u.constant.SheetState;
+
 public interface RentalRequestSheetRepository extends JpaRepository<RentalRequestSheet, Long> {
 	
-	Page<RentalRequestSheet> findAllByEventTimestampBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	Page<RentalRequestSheet> findAllByStatusAndToolboxIdOrderByEventTimestampAsc(SheetState stauts, long toolboxId, Pageable pageable);
+	
+	Page<RentalRequestSheet> findAllByStatusAndToolboxIdAndEventTimestampBetweenOrderByEventTimestampAsc(SheetState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
 	Page<RentalRequestSheet> findAllByToolboxIdAndEventTimestampBetween(long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	
+	Page<RentalRequestSheet> findAllByToolboxId(long toolboxId, Pageable pageable);
 	
 	@Query(value = "SELECT * FROM RentalRequestSheet WHERE (worker_id = :id1 OR leader_id = :id2) " +
             "AND event_timestamp BETWEEN :startDate AND :endDate", nativeQuery = true)

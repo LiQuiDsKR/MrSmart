@@ -74,4 +74,37 @@ public class StockStatus extends BaseEntity {
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
 	}
+	
+	public void update(Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
+			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+		this.toolbox = toolbox;
+		this.tool = tool;
+		this.currentDay = currentDay;
+		this.totalCount = totalCount;
+		this.rentalCount = rentalCount;
+		this.buyCount = buyCount;
+		this.goodCount = goodCount;
+		this.faultCount = faultCount;
+		this.damageCount = damageCount;
+		this.lossCount = lossCount;
+		this.discardCount = discardCount;
+	}
+	
+	public void rentUpdate(int count) {
+		this.goodCount-=count;
+		this.rentalCount+=count;
+	}
+	public void returnUpdate(int goodCount, int faultCount, int damageCount, int discardCount, int lossCount) {
+		this.goodCount+=goodCount;
+		this.faultCount+=faultCount;
+		this.damageCount+=damageCount;
+		this.discardCount+=discardCount;
+		this.lossCount+=lossCount;
+		this.rentalCount-=(goodCount+faultCount+damageCount+discardCount+lossCount);
+		this.totalCount-=(discardCount+lossCount);
+	}
+	public void buyUpdate(int count) {
+		this.buyCount+=count;
+		this.totalCount+=count;
+	}
 }

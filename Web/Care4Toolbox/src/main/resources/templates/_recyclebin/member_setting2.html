@@ -241,7 +241,7 @@
 									<td th:text="${membershipDto.code}"></td>
 									<td th:text="${membershipDto.part.name}"></td>
 									<td th:text="${membershipDto.role}"></td>
-									<td th:text="${membershipDto.employmentState}"></td>
+									<td th:text="${membershipDto.employmentStatus}"></td>
 									<td th:text="${membershipDto.password}"></td>
 									<td class="actions">
 										<span
@@ -295,47 +295,42 @@
 						<div class="modal-content">
 							<!-- Modal Body -->
 							<div class="modal-body">
-								<form th:action="@{membership_setting/new}" role="form" method="post" th:object="${memberFormDto}">
+								<form>
 									<div class="media flex-column flex-sm-row">
 										<div class="contact-account-setting media-body">
 											<h1 class="mb-4">직원 정보 추가</h1>											
 											<div class="form-group mb-4">
-												<label class="bold black mb-2" for="as_name"
+												<label class="bold black mb-2" for="addFormName"
 													>이름</label>
 												<input
 													type="text"
-													th:field="*{name}"
-													id="as_name"
+													id="addFormName"
 													class="theme-input-style"
 													placeholder="이름을 입력하세요"
 													required />
 											</div>
 											<div class="form-group mb-4">
-												<label for="numberInput1" class="mb-2 black bold"
+												<label for="addFormCode" class="mb-2 black bold"
 													>사원번호</label
 												>
 												<input
 													type="number"
 													class="theme-input-style"
-													id="code"
-													th:field="*{code}"
+													id="addFormCode"
 													placeholder="사원번호를 입력하세요" 
 													required />
 											</div>
 											<div class="mb-4">
-												<label class="bold black mb-2" for="as_pw"
+												<label class="bold black mb-2" for="addFormPassword"
 													>비밀번호</label
 												>
 												<input
 													type="text"
-													th:field="*{password}"
-													id="as_pw"
+													id="addFormPassword"
 													class="theme-input-style"
 													placeholder="비밀번호를 입력하세요"
 													required />
 											</div>
-											<input type="hidden" th:field="*{id}" />
-											<input type="hidden" th:field="*{role}" />
 											<div class="form-group mb-4">
 												<div class="row">
 													<div class="col-4">
@@ -364,13 +359,14 @@
 													</div>
 												</div>
 											</div>
-											<div class="form-group mb-4">
-												<label class="mb-3 font-14 bold">재직 상태</label>
-												<div class="d-flex align-items-center mb-3">
+											<div id="addFormRadios" class="form-group mb-4">
+												<label for="addFormRadios"class="mb-3 font-14 bold">재직 상태</label>
+												
+												<div class="row">
+												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio9" name="radio-group" checked=""
-															th:field="*{employmentState}" value="EMPLOYMENT">
+														<input type="radio" id="radio9" name="radio-group" checked="" value="EMPLOYMENT">
 														<label for="radio9"></label>
 													</div>
 													<!-- End Custom Radio -->
@@ -378,11 +374,10 @@
 													<label for="radio9">재직</label>
 												</div>
 	
-												<div class="d-flex align-items-center mb-3">
+												<div class="col-3 d-flex align-items-center mb-3">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio8" name="radio-group"
-															th:field="*{employmentState}" value="LEAVE_OF_ABSENCE">
+														<input type="radio" id="radio8" name="radio-group" value="LEAVE_OF_ABSENCE">
 														<label for="radio8"></label>
 													</div>
 													<!-- End Custom Radio -->
@@ -390,20 +385,20 @@
 													<label for="radio8">휴직</label>
 												</div>
 	
-												<div class="d-flex align-items-center">
+												<div class="col-3 d-flex align-items-center">
 													<!-- Custom Radio -->
 													<div class="custom-radio mr-3">
-														<input type="radio" id="radio7" name="radio-group"
-															th:field="*{employmentState}" value="RESIGNATION">
+														<input type="radio" id="radio7" name="radio-group" value="RESIGNATION">
 														<label for="radio7"></label>
 													</div>
 													<!-- End Custom Radio -->
 	
 													<label for="radio7" class="c4">퇴사</label>
 												</div>
+												</div>
 											</div>
 											<div class="mb-4">
-												<button id="addFormBtn" class="btn mr-4" type="submit">저장</button>
+												<button id="addFormBtn" class="btn mr-4" type="button">저장</button>
 												<a
 													href="#"
 													class="cancel font-14 bold"
@@ -606,8 +601,9 @@
         var searchBy = $("#searchBy").val();
         var searchQuery = $("#searchQuery").val();
 
-        location.href="/setting/membership_setting2/" + page // + "?searchRole=" + searchRole
-       // + "&searchEmploymentState=" + searchEmploymentState
+        location.href="/setting/membership_setting2/" + page
+        // + "?searchRole=" + searchRole
+        // + "&searchEmploymentState=" + searchEmploymentState
         + "?searchBy=" + searchBy
         + "&searchQuery=" + searchQuery;
     }
@@ -647,25 +643,36 @@
 	
 	$("#addFormBtn").click(e=>{
 		console.log(e);
+		e.preventDefault();
 		post(
 			"/setting/membership_setting2/new",
-			"membershipFormPartDtoId",
-			parseInt($("#addFormPartSelect").val()),
+			{
+                name: document.getElementById('addFormName').value,
+                code: document.getElementById('addFormCode').value,
+                
+                password: document.getElementById('addFormPassword').value,
+                partDtoId: (document.getElementById('addFormPartSelect').value) //parseint는 걍 controller에서 하기로
+                //employmentState: document.getElementById('addFormRadios').value,
+            },
 			"/setting/membership_setting2");
 	})
 	
 		
-	function post(url,requestParamName,paramData,redirection){
-		const data = new FormData();
-		data.append(requestParamName, paramData);
+	function post(url,paramData,redirection){
 		fetch(url, {
 		  method:"POST",
-		  body: data,
+		  headers:{
+			  //'header': document.querySelector('meta[name="_csrf"]').content,
+              "Content-Type": "application/json",
+              //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
+		  },
+		  body: JSON.stringify(paramData),
 		})
 		  .then(response => {
 		    if (!response.ok) {
 		      throw new Error(`HTTP error! Status: ${response.status}`);
 		    }
+			location.href=redirection;
 		    return response.json();
 		  })
 		  .then(data => {

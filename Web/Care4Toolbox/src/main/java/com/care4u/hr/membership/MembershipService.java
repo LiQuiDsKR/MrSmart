@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.care4u.constant.Role;
 import com.care4u.hr.part.Part;
 import com.care4u.hr.part.PartRepository;
+import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolDto;
 
 @Service
 @Transactional
@@ -56,13 +58,17 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		return new MembershipDto(repository.save(membership));
 	}
 
-	public Membership loadUserByCode(String code) {
-		Membership member = repository.findByCode(code);                        
-		return member;
+	public MembershipDto loadUserByCode(String code) {
+		Membership membership = repository.findByCode(code);
+		if (membership==null) {
+			logger.error("Invalid code : " + code);
+			return null;
+		}
+		return new MembershipDto(membership);
 	}
 	
 	/**
-     * 10/19 16:25 박경수 추가
+     * 2023-10-19 박경수 추가
      * MembershipDto list 뽑아가려고 했는데 메서드가 만들어진 게 없어서 만들어봤습니다
      */
     @Transactional(readOnly = true)
@@ -82,10 +88,30 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 	/**
 	 * 2023-10-25 박경수
 	 * search & paging 기능 테스트를 위해 추가했습니다
+	 * 2023-10-31 박경수
+	 * return을 Page<dto>로 변환했습니다
 	 */
 	@Transactional(readOnly = true)
-    public Page<Membership> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
-        return repository.getMembershipPage(membershipSearchDto, pageable);
+    public Page<MembershipDto> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
+		Page<Membership> membershipPage = repository.findAll(pageable);
+		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
+		return membershipPage.map(MembershipDto::new);
     }
 	
+	@Transactional(readOnly = true)
+	public Page<MembershipDto> getMembershipPageByName(Pageable pageable, String name){
+		Page<Membership> membershipPage = repository.findByNameContaining(pageable, name);
+		return membershipPage.map(MembershipDto::new);
+	}
+	
+	@Transactional(readOnly=true)
+	public MembershipDto getMembershipById(Long id) {
+		Optional<Membership> membership = repository.findById(id);
+		if (membership.isEmpty()) {
+			logger.error("Invalid id : "+id);
+			return null;
+		}else {
+			return new MembershipDto(membership.get());
+		}
+	}
 }

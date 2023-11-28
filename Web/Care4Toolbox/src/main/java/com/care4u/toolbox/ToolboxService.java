@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.hr.main_part.MainPart;
+import com.care4u.hr.main_part.MainPartDto;
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipRepository;
 
@@ -56,6 +58,15 @@ public class ToolboxService {
 		return dtoList;
 	}
 	
+	public ToolboxDto addNew(ToolboxDto toolboxDto) throws IllegalStateException {
+		Toolbox findItem = repository.findByName(toolboxDto.getName());
+		if(findItem != null){
+			logger.error("이미 등옥된 이름입니다. : " + toolboxDto.getName());
+			throw new IllegalStateException("이미 등옥된 이름입니다.");
+		}
+		return update(toolboxDto);
+	}
+	
 	public ToolboxDto update(ToolboxDto toolboxDto) {
 		Membership manager = membershiprepository.findByCode(toolboxDto.getManagerDto().getCode());
 		if (manager == null) {
@@ -63,10 +74,20 @@ public class ToolboxService {
 			return null;
 		}
 		
-		Toolbox toolbox = repository.findByName(toolboxDto.getName());
-		if (toolbox == null) {
-			toolbox = new Toolbox();
+		Toolbox findItem = repository.findByName(toolboxDto.getName());
+		if(findItem != null){
+			logger.error("이미 등옥된 이름입니다. : " + toolboxDto.getName());
+			throw new IllegalStateException("이미 등옥된 이름입니다.");
 		}
+		
+		Toolbox toolbox;
+		Optional<Toolbox> optionalToolbox = repository.findById(toolboxDto.getId());
+		if (optionalToolbox.isEmpty()) {
+			toolbox = new Toolbox(toolboxDto.getName(), manager, toolboxDto.isSystemOperability());
+		} else {
+			toolbox=optionalToolbox.get();
+		}
+		
 		toolbox.update(toolboxDto.getName(), manager, toolboxDto.isSystemOperability());
 		
 		return new ToolboxDto(repository.save(toolbox));

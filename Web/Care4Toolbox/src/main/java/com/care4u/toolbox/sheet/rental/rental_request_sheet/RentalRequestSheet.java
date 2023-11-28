@@ -3,6 +3,8 @@ package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -45,7 +47,7 @@ public class RentalRequestSheet extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Toolbox toolbox;
 	
-	@NotNull
+    @Enumerated(EnumType.STRING)
 	private SheetState status;
 	
 	@NotNull
@@ -59,4 +61,13 @@ public class RentalRequestSheet extends BaseEntity {
 		this.toolbox = toolbox;
 		this.eventTimestamp = eventTimestamp;
 	}
+	
+	public void update(Membership worker, Membership leader, Toolbox toolbox, SheetState status, LocalDateTime eventTimestamp) {
+		this.worker = worker;
+		this.leader = leader;
+		this.status = status;
+		this.toolbox = toolbox;
+		this.eventTimestamp = eventTimestamp;
+	}
+	
 }

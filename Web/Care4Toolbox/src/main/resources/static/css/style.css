@@ -4482,8 +4482,8 @@ a.text-dark:hover {
 	border: none;
 	text-transform: capitalize;
 	outline: 0 !important;
-	-webkit-box-shadow: 0 5px 10px rgba(4, 0, 252, 0.2) !important;
-	box-shadow: 0 5px 10px rgba(4, 0, 252, 0.2) !important;
+	-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) !important;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .btn svg,
@@ -4881,7 +4881,8 @@ table tr:not(:last-child) td {
 
 table th,
 table td {
-	padding: 16px;
+	font-size: 16px;
+	padding: 12px 20px;
 }
 
 table thead th {
@@ -5148,7 +5149,7 @@ table.invoice-list td .star {
 table.invoice-list-table thead th,
 table.contact-list-table thead th,
 table.invoice-list thead th {
-	padding-top: 40px;
+	/*padding-top: 40px;*/
 }
 
 table.invoice-list-table thead th .custom-checkbox,
@@ -5164,8 +5165,8 @@ table.invoice-list thead th .custom-checkbox {
 table.invoice-list-table tbody td,
 table.contact-list-table tbody td,
 table.invoice-list tbody td {
-	font-size: 15px;
-	padding: 20px 15px;
+	font-size: 16px;
+	padding: 12px 20px;
 }
 
 table.invoice-list-table tbody tr:hover,
@@ -5178,7 +5179,7 @@ table.invoice-list tbody tr:hover {
 table.invoice-list-table tbody tr.selected,
 table.contact-list-table tbody tr.selected,
 table.invoice-list tbody tr.selected {
-	background-color: #f0f0f0;
+	background-color: #dedede;
 }
 
 table.invoice-list-table.style-two,
@@ -8346,8 +8347,6 @@ body.sidebar-folded .main-content {
 	position: relative;
 	width: 375px;
 	height: auto;
-	margin-right: 15px;
-	margin-left: 15px;
 }
 
 @media only screen and (min-width: 0px) and (max-width: 1200px) {
@@ -8433,7 +8432,7 @@ body.sidebar-folded .main-content {
 
 .chat_aside .aside-body {
 	padding: 0px;
-	height: calc(100vh - 335px);
+	height: calc(100vh - 240px);
 	position: relative;
 	top: 0px;
 }
@@ -10473,8 +10472,7 @@ body.sidebar-folded .main-content {
 	padding-right: 10px;
 }
 
-#contactAddModal .modal-dialog,
-#contactEditModal .modal-dialog {
+.modal-dialog {
 	max-width: 750px;
 }
 
