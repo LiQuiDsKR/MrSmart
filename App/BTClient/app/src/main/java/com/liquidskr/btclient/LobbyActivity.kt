@@ -7,10 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
-import com.liquidskr.fragment.MembershipFindFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
-import com.mrsmart.standard.membership.MembershipSQLite
 
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton

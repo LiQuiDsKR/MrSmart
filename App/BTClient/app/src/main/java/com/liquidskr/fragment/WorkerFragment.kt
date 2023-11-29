@@ -2,15 +2,16 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
@@ -29,6 +30,13 @@ class WorkerFragment : Fragment() {
         // loginBtn을 레이아웃에서 찾아서 초기화
         loginBtn = view.findViewById(R.id.LoginBtn)
         idTextField = view.findViewById(R.id.IDtextField)
+        idTextField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                idTextField.requestFocus()
+                //showSoftKeyboard(requireContext(), idTextField)
+                //val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE)
+            }
+        }
         try {
             loginBtn.setOnClickListener {
                 var code = idTextField.text.toString()
@@ -51,7 +59,10 @@ class WorkerFragment : Fragment() {
             return WorkerFragment()
         }
     }
-
+    fun showSoftKeyboard(context: Context, view: View) {
+        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
     fun popBackStack() {
         val fragmentManager = childFragmentManager
         if (fragmentManager.backStackEntryCount > 0) {
