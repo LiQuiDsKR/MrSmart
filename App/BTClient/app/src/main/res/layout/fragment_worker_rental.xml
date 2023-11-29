@@ -82,16 +82,23 @@
                 android:background="#0ADB86"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/imageView8"
+                <EditText
+                    android:id="@+id/QR_EditText"
                     android:layout_width="134dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_rental_middletext" />
+                    android:background="#00FFFFFF"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:inputType="text"
+                    android:lines="1"
+                    android:linksClickable="false"
+                    android:longClickable="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
 
                 <ImageButton
-                    android:id="@+id/imageButton7"
+                    android:id="@+id/QRcodeBtn"
                     android:layout_width="110dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -107,6 +114,7 @@
                     android:backgroundTint="#00FFFFFF"
                     android:scaleType="centerCrop"
                     app:srcCompat="@drawable/worker_rental_addtoolbtn" />
+
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
