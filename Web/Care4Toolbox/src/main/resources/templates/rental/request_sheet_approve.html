@@ -195,8 +195,11 @@
 					var outerDiv = document.createElement('div');
 					outerDiv.innerHTML = htmlString;
 					containerDiv.appendChild(outerDiv);
+					
+					// 서버 전송용 객체 복제. RentalRequestSheetDto.
 					const dataObj = JSON.parse(JSON.stringify(element));
-
+					
+					// dataObj를 Sheet별로 바인딩. (call by ref)
 					addListenerApproveBtn(dataObj);
 					addListenerDeleteBtn(dataObj);
 				});
@@ -214,7 +217,8 @@
 					.parents('.checkbox-wrap')
 					.siblings('.valid-feedback, .invalid-feedback')
 					.show();
-				$('.custom-checkbox input[type="checkbox"]').on('click', function (e) {
+				//tbody checkbox
+				$('tbody .custom-checkbox input[type="checkbox"]').on('click', function (e) {
 					e.stopPropagation();
 
 					if ($(this).prop('checked') == true) {
@@ -240,14 +244,19 @@
 							.siblings('.invalid-feedback')
 							.show();
 					}
-					activateApproveBtn.apply(this);
+					const theadChkbox = $(
+							'.invoice-list-table thead, .invoice-list thead, .contact-list-table thead'
+						).find('.custom-checkbox input[type=checkbox]');
+					theadChkbox.prop('checked',Array.from(this.closest("div.sheet").querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected")));
+					activateApproveBtn(this);
 				});
 			}
-			let invoiceTbodyCheckbox = $(
+			//thead Checkbox
+			let theadCheckbox = $(
 				'.invoice-list-table thead, .invoice-list thead, .contact-list-table thead'
 			).find('.custom-checkbox input[type=checkbox]');
-			if (invoiceTbodyCheckbox.length) {
-				invoiceTbodyCheckbox.on('click', function () {
+			if (theadCheckbox.length) {
+				theadCheckbox.on('click', function () {
 					if ($(this).prop('checked') == true) {
 						$(this)
 							.parents()
@@ -275,13 +284,13 @@
 							.find('tr')
 							.removeClass('selected');
 					}
-					activateApproveBtn.apply(this);
+					activateApproveBtn(this);
 				});
 			}
 		}
 		//sheet단위 카드의 "대여 승인" 버튼 disabled 상태 관리
-		function activateApproveBtn() {
-			const sheet = this.closest("div.sheet");
+		function activateApproveBtn(tableElement) {
+			const sheet = tableElement.closest("div.sheet");
 			const btn = sheet.querySelector("a.btn");
 			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected"));
 			btn.classList.toggle("disabled", !condition);
@@ -371,6 +380,10 @@
 				});
 				element.classList.add("listener-added");
 			});
+		}
+		//Tag정보가 입력될 시 호출합니다.
+		function tagAdd(){
+			
 		}
 
 		function formatDate(inputDate) {

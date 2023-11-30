@@ -552,14 +552,16 @@
 						newRowString += tmpdata;
 						newRowString += "</td>";
 					});
-					newRowString += '<td class="d-flex justify-content-between align-item-center">' +
-						'<a href="#" class="btn bg-success increaseBtn p-2">' +
-						'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
-						'</a>' +
-						'<p class="d-flex align-items-center toolCount mb-0">' + list[list.length - 1].count + '</p>' +
-						'<a href="#" class="btn bg-danger decreaseBtn p-2">' +
-						'<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
-						'</a>';
+					newRowString += 
+						'<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn bg-success increaseBtn p-2">' +
+								'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
+							'</a>' +
+							'<p class="d-flex align-items-center toolCount mb-0">' + list[list.length - 1].count + '</p>' +
+							'<a href="#" class="btn bg-danger decreaseBtn p-2">' +
+								'<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
+							'</a>'+
+						'</td>';
 
 					const newRow = document.createElement("tr");
 					newRow.innerHTML = newRowString;
@@ -630,7 +632,7 @@
 		function increaseCount(index) {
 			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
 				.then(stockData => {
-					if (stockData.totalCount <= list[index].count) {
+					if (stockData.goodCount <= list[index].count) {
 						Swal.fire({
 							type: "info",
 							title: "재고 부족",

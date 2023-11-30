@@ -136,14 +136,14 @@
 
 		//fetch
 		function load() {
-			abcHttp.post(
+			abcHttp.get(
 				`/rental/sheet/getpage`,
 				{
 					membershipId: 19,//로그인한 사용자로 변경해야 함. 일단 기본값 박철민 씨
 					page: 0,
 					size: 10,
-					startDate: new Date($('#start-date').val()).toISOString(),
-					endDate: new Date($('#end-date').val()).toISOString(),
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
 				}
 			).then(data => {
 				const containerDiv = document.getElementById("containerdiv");

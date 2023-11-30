@@ -37,9 +37,23 @@ document.getElementById("btn").addEventListener("click",function(){
 						text: error,
 					})
 				})
-
-
 })
+
+
+var socket = new SockJS('/care4u_websocket');
+var stompClient = Stomp.over(socket);
+
+stompClient.connect({}, function(frame) {
+    console.log('웹 소켓에 연결되었습니다.');
+
+    // 서버로 메시지 전송 예시
+    //stompClient.send("/care4u/send-message", {}, "안녕하세요!");
+    
+	stompClient.subscribe('/topic/greetings', function(response) {
+	    console.log('서버에서 받은 메시지:', response.body);
+	    // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	});
+});
 
 
 

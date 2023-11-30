@@ -6320,14 +6320,14 @@ textarea.form-control {
 	height: auto;
 	color: #67cf94;
 	padding: 0px 30px 0px 12px;
-	background: #dbf7e8 url(../img/svg/select-down.svg) no-repeat right 0.75rem
+	background: #dbf7e8 url(/img/svg/select-down.svg) no-repeat right 0.75rem
 		center/10px 10px;
 }
 
 .custom-select.style--two {
 	max-width: 235px;
 	padding: 0;
-	background: #f0f0f0 url(../img/svg/simple-down.svg) no-repeat right 0.75rem
+	background: #f0f0f0 url(/img/svg/simple-down.svg) no-repeat right 0.75rem
 		center/16px 14px;
 }
 
@@ -6357,7 +6357,7 @@ textarea.form-control {
 }
 
 .custom-select.style--two.disable {
-	background-image: url(../img/svg/simple-down2.svg);
+	background-image: url(/img/svg/simple-down2.svg);
 }
 
 select.multiple {
@@ -7998,7 +7998,7 @@ body.sidebar-folded.open-sidebar-folded .header .main-header {
 .sidebar .sidebar-body li.has-sub-item:after {
 	position: absolute;
 	content: '';
-	background-image: url(../img/svg/plus.svg);
+	background-image: url(/img/svg/plus.svg);
 	width: 12px;
 	height: 12px;
 	right: 0;
@@ -8009,7 +8009,7 @@ body.sidebar-folded.open-sidebar-folded .header .main-header {
 .sidebar .sidebar-body li.has-sub-item.sub-menu-opened:after {
 	height: 2px;
 	top: 15px;
-	background-image: url(../img/minus.png);
+	background-image: url(/img/minus.png);
 }
 
 .sidebar .sidebar-body li.active i,
@@ -8311,11 +8311,11 @@ body.sidebar-folded .main-content {
 	-ms-transform: translateY(-50%);
 	transform: translateY(-50%);
 	content: '';
-	background-image: url(../img/svg/minus.svg);
+	background-image: url(/img/svg/minus.svg);
 }
 
 .aside-body li.less.collapsed:after {
-	background-image: url(../img/svg/plus.svg);
+	background-image: url(/img/svg/plus.svg);
 	height: 12px;
 }
 
@@ -10245,11 +10245,11 @@ body.sidebar-folded .main-content {
 }
 
 .invoice-left .list-invoice li.location:before {
-	content: url('../../assets/img/svg/location-icon.svg');
+	content: url('/img/svg/location-icon.svg');
 }
 
 .invoice-left .list-invoice li.call:before {
-	content: url('../../assets/img/svg/call-icon.svg');
+	content: url('/img/svg/call-icon.svg');
 }
 
 .invoice-right .status-list li:not(:last-child) {
@@ -10318,21 +10318,21 @@ body.sidebar-folded .main-content {
 .list-invoice li.mail:before,
 .list-invoice li.user:before {
 	position: absolute;
-	content: url('../../assets/img/svg/location-icon1.svg');
+	content: url('/img/svg/location-icon1.svg');
 	left: 0;
 	top: 2px;
 }
 
 .list-invoice li.call:before {
-	content: url('../../assets/img/svg/call-icon1.svg');
+	content: url('/img/svg/call-icon1.svg');
 }
 
 .list-invoice li.user:before {
-	content: url('../../assets/img/svg/user-icon.svg');
+	content: url('/img/svg/user-icon.svg');
 }
 
 .list-invoice li.mail:before {
-	content: url('../../assets/img/svg/mail-icon.svg');
+	content: url('/img/svg/mail-icon.svg');
 }
 
 .invoice.edit input {
@@ -13504,7 +13504,7 @@ table.table-contextual .details-btn:hover .chip .chip-content i.img,
 
 .timeline .event:after {
 	left: -43px;
-	content: url(../img/png-icon/time.png);
+	content: url(/img/png-icon/time.png);
 }
 
 @media only screen and (max-width: 767px) {
