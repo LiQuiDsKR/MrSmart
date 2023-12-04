@@ -70,7 +70,6 @@ public class ReturnSheetRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 	
-	/*
     @GetMapping(value="/return/sheet/getpage")
     public ResponseEntity<Page<ReturnSheetDto>> getReturnSheetPage(
     		@RequestParam(name="membershipId") long membershipId,
@@ -85,12 +84,11 @@ public class ReturnSheetRestController {
         LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<RentalSheetDto> rentalSheetPage = returnSheetService.getPage(membershipId, startLocalDate, endLocalDate, pageable);
+        Page<ReturnSheetDto> returnSheetPage = returnSheetService.getPage(membershipId, startLocalDate, endLocalDate, pageable);
         
-        for (RentalSheetDto item : rentalSheetPage.getContent()) {
+        for (ReturnSheetDto item : returnSheetPage.getContent()) {
         	logger.info(item.toString());
         }
-        return ResponseEntity.ok(rentalSheetPage);
+        return ResponseEntity.ok(returnSheetPage);
     }
-    */
 }

@@ -1,6 +1,8 @@
 package com.care4u.toolbox.sheet.return_sheet;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -143,5 +147,16 @@ public class ReturnSheetService {
 		outstandingRentalSheetService.update(resultDto);
 		
 		return resultDto;
+	}
+
+	public Page<ReturnSheetDto> getPage(long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		if(membershipOptional.isEmpty()) {
+			logger.error("invalid membership id : "+membershipId);
+			return null;
+		}
+		Membership member = membershipOptional.get();
+		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e->convertToDto(e));
 	}
 }

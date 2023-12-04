@@ -10,15 +10,6 @@
 	.th_btn{
 		text-align: end;
 	}
-		.selected td {
-			background-color: #67CF94;
-			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
-			color: white;
-			font-weight: 600;
-			-webkit-transition: 0.2s ease;
-			-o-transition: 0.2s ease;
-			transition: 0.2s ease;
-		}
 	</style>
 </th:block>
 <!-- Main Content -->
@@ -136,16 +127,17 @@
 
 		//fetch
 		function load() {
-			abcHttp.post(
-				`/rental/sheet/getpage`,
+			abcHttp.get(
+				`/return/sheet/getpage`,
 				{
 					membershipId: 19,//로그인한 사용자로 변경해야 함. 일단 기본값 박철민 씨
 					page: 0,
 					size: 10,
-					startDate: new Date($('#start-date').val()).toISOString(),
-					endDate: new Date($('#end-date').val()).toISOString(),
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
 				}
 			).then(data => {
+				console.log(data);
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML='';
 				let htmlString = ``
@@ -159,33 +151,36 @@
 					<!-- Sheet -->
 					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
 						<!-- Header Table -->
-						<div class="col-10" style="overflow-x:auto;">
+						<div class="col-12" style="overflow-x:auto;">
 							<table class="text-nowrap bg-white">
 								<thead>
 									<tr>
 										<th>대여승인시간</th>
-										<th>정비실</th>
-										<th>작업자</th>
+										<th>반납시간</th>
+										<th>대여정비실</th>
+										<th>반납정비실</th>
+										<th>대여작업자</th>
+										<th>반납작업자</th>
 										<th>리더</th>
-										<th>승인자</th>
+										<th>대여승인자</th>
+										<th>반납승인자</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr>
+										<td class="rentaltime">${formatDate(element.rentalSheetDto.eventTimestamp)}</td>
 										<td class="time">${formatDate(element.eventTimestamp)}</td>
+										<td class="rentaltoolbox">${element.rentalSheetDto.toolboxDto.name}</td>
 										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="rentalworker">${element.rentalSheetDto.workerDto.name}</td>
 										<td class="worker">${element.workerDto.name}</td>
 										<td class="leader">${element.leaderDto.name}</td>
+										<td class="rentalapprover">${element.rentalSheetDto.approverDto.name}</td>
 										<td class="approver">${element.approverDto.name}</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
-						<div class="col-2 d-flex justify-content-center align-items-center">
-					      <a href="#" class="return btn disabled" style="width:fit-content; height:fit-content;">
-					        <span>반납완료</span>
-					      </a>
-					    </div>
 						<!-- End Header Table-->
 						<div class="col-12" style="overflow-x:auto;">
 							<table class="tool-list invoice-list-table text-nowrap bg-white">
@@ -194,8 +189,14 @@
 										<th>정비실명</th>
 										<th>이름</th>
 										<th>규격</th>
-										<th>신청수량</th>
-										<th>미반납수량</th>
+										<th>대여신청수량</th>
+										<th hidden>미반납수량</th>
+										<th>총반납수량</th>
+										<th>양호수량</th>
+										<th>고장수량</th>
+										<th>파손수량</th>
+										<th>망실수량</th>
+										<th>폐기수량</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -206,10 +207,16 @@
 							`
 									<tr>
 										<td class="toolbox">${element.toolboxDto.name}</td>
-										<td class="name">${tool.toolDto.name}</td>
-										<td class="spec">${tool.toolDto.spec}</td>
-										<td class="count">${tool.count}</td>
-										<td class="outstandingcount">${tool.outstandingCount}</td>
+										<td class="name">${tool.rentalToolDto.toolDto.name}</td>
+										<td class="spec">${tool.rentalToolDto.toolDto.spec}</td>
+										<td class="rentalcount">${tool.rentalToolDto.count <1?'':tool.rentalToolDto.count}</td>
+										<td class="outstandingcount" hidden>${tool.rentalToolDto.outstandingCount<1?'':tool.rentalToolDto.outstandingCount}</td>
+										<td class="count">${tool.count<1?'':tool.count}</td>
+										<td class="goodcount">${tool.goodCount<1?'':tool.goodCount}</td>
+										<td class="faultcount">${tool.faultCount<1?'':tool.faultCount}</td>
+										<td class="damagecount">${tool.damageCount<1?'':tool.damageCount}</td>
+										<td class="losscount">${tool.lossCount<1?'':tool.lossCount}</td>
+										<td class="discardcount">${tool.discardCount<1?'':tool.discardCount}</td>
 									</tr>
 					`;
 					}

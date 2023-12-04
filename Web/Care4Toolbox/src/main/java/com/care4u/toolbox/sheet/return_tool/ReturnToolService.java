@@ -76,6 +76,7 @@ public class ReturnToolService {
 				.damageCount(status.equals(ToolState.DAMAGE)?count:0)
 				.lossCount(status.equals(ToolState.LOSS)?count:0)
 				.discardCount(status.equals(ToolState.DISCARD)?count:0)
+				.count(count)
 				.Tags(toolDto.getTags())
 				.build();
 		
