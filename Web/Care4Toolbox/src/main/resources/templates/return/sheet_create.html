@@ -10,15 +10,52 @@
 	.th_btn{
 		text-align: end;
 	}
-		.selected td {
-			background-color: #67CF94;
-			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
-			color: white;
-			font-weight: 600;
-			-webkit-transition: 0.2s ease;
-			-o-transition: 0.2s ease;
-			transition: 0.2s ease;
-		}
+	.selected{
+		-webkit-transition: 0.2s ease;
+		-o-transition: 0.2s ease;
+		transition: 0.2s ease;
+	}
+	.selected .selected-danger td {
+		background-color: #FFE2E6;
+		/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+		color: white;
+		font-weight: 600;
+	}
+	.selected .selected-danger .custom-select{
+		background-color: #FC7383;
+		color:white;
+	}
+	.selected .selected-warning td {
+		background-color: #FFF4E6;
+		/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+		color: white;
+		font-weight: 600;
+	}
+	.selected .selected-warning .custom-select{
+		background-color: #FFB959;
+		color:white;
+	}
+	.selected .selected-success td {
+		background-color: #DBF7E8;
+		/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+		color: white;
+		font-weight: 600;
+	}
+	.selected .selected-success .custom-select{
+		background-color: #67CF94;
+		color:white;
+	}
+	.selected .selected-primary td {
+		background-color: #E9E7FF;
+		/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+		color: white;
+		font-weight: 600;
+	}
+	.selected .selected-primary .custom-select{
+		background-color: #8280FD;
+		color:white;
+	}
+		
 	</style>
 </th:block>
 <!-- Main Content -->
@@ -146,6 +183,7 @@
 					endDate: $('#end-date').val(),
 				}
 			).then(data => {
+				console.log(data);
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML='';
 				let htmlString = ``
@@ -240,7 +278,7 @@
 					    </div>
 					    <div class="col-12 d-flex justify-content-end mt-3 pr-3">
 						    <div class="">
-						      <a href="#" class="mr-3 btn disabled" style="width:fit-content; height:fit-content;">
+						      <a href="#" class="mr-3 approveBtn btn disabled" style="width:fit-content; height:fit-content;">
 						        <span style="width:100%;">반납승인</span>
 						      </a>
 						    </div>
@@ -254,15 +292,16 @@
 					
 					// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
 					const dataObj = {
+						rentalSheetId:element.id,
 						workerId:element.workerDto.id,
 						leaderId:element.leaderDto.id,
-						approverId:100001, //로그인하면 바꾸기...
+						approverId:113, //로그인하면 바꾸기...
 						toolboxId:5222, //얘도 로그인하면 바구기...
 						toolList:element.toolList.map(e=>{
 							return {
 								rentalToolId:e.id,
 								toolId:e.toolDto.id,
-								count:e.count,
+								count:0,
 								//goodCount:0,
 								//faultCount:0,
 								//damageCount:0,
@@ -277,7 +316,31 @@
 					
 					//addListenerApproveBtn(dataObj);
 					//addListenerDeleteBtn(dataObj);
+					document.querySelectorAll(".increaseBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							increaseCount.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							decreaseCount.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".toolstate select:not(.listener-added)").forEach(element => {
+						element.addEventListener("change", function () {
+							toolStateChangeHandler.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
 					
+					document.querySelectorAll(".approveBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							approveBtnClickHandler.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
 				});
 				//activateCheckbox();
 			});
@@ -329,24 +392,79 @@
 		
 		function activateApproveBtn(tableElement) {
 			const sheet = tableElement.closest("div.sheet");
-			const btn = sheet.querySelector("a.btn");
-			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected"));
-			btn.classList.toggle("disabled", !condition);
+			const btn = sheet.querySelector("a.approveBtn");
+			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => !e.classList.contains("selected"));
+			btn.classList.toggle("disabled", condition);
+		}
+		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
+		//sheet단위 카드의 "반납 승인" 버튼 클릭 이벤트리스너 설정
+		function approveBtnClickHandler(dataObj) {
+			abcHttp.post(
+				`/return/sheet/approve`,
+				dataObj,
+			).then(data => {
+				Swal.fire({
+					type: "success",
+					title: "반납 승인됨",
+					text: "반납 승인이 정상적으로 처리되었습니다",
+				})
+					.then(result => {
+						location.href = `/return/sheet/create`;
+					});
+			});
 		}
 		
 		//반납 수량을 +1
 		function increaseCount(dataObj) {
-			
+			const row = this.closest("tr");
+			const count = row.querySelector(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			if (outstandingCount <= dataObj.toolList[index].count ) {
+				/*
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "반납 예정 수량이 대여한 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
+				});
+				*/
+				return;
+			} else {
+				dataObj.toolList[index].count ++;
+				count.textContent = dataObj.toolList[index].count;
+			}
+			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			activateApproveBtn(this);
 		}
 		//반납 수량을 -1.
 		function decreaseCount(dataObj) {
-			
+			const row = this.closest("tr");
+			const count = row.querySelector(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			if (0 >= dataObj.toolList[index].count ) {
+				/*
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "0 이하의 수량을 선택할 수 없습니다.",
+				});
+				*/
+				return;
+			} else {
+				dataObj.toolList[index].count --;
+				count.textContent = dataObj.toolList[index].count;
+			}
+			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			activateApproveBtn(this);
 		}
 		//공기구 상태 드롭다운 선택 시.
 		function toolStateChangeHandler(dataObj) {
-			
+			const row = this.closest("tr");
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			dataObj.toolList[index].status=this.value;
+			console.log(dataObj.toolList[index].status);
 		}
-		
 		
 		
 		function formatDate(inputDate) {

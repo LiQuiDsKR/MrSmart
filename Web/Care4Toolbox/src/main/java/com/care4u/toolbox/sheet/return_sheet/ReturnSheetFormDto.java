@@ -26,11 +26,11 @@ public class ReturnSheetFormDto {
 	@NotNull
 	private Long rentalSheetId;
 	@NotNull(message="작업자 정보는 필수 입력값입니다.")
-	private Long workerDtoId;
+	private Long workerId;
 	@NotNull(message="승인자 정보는 필수 입력값입니다.")
-	private Long approverDtoId;
+	private Long approverId;
 	@NotNull(message="정비실 정보는 필수 입력값입니다.")
-	private Long toolboxDtoId;
+	private Long toolboxId;
 	@NotEmpty(message="공기구 목록은 필수 입력값입니다.")
 	private List<ReturnToolFormDto> toolList;
 	

@@ -17,6 +17,9 @@
 		<input id="in">
 		<button id="btn" >asdf</button>
 	</div>
+	<div class="contentdiv">
+		
+	</div>
 </div>
 <!-- End Main Content -->
 <!-- 사용자 script 추가 -->
@@ -24,7 +27,7 @@
 <script  th:inline="javascript">
 document.getElementById("btn").addEventListener("click",function(){
 	//const mainData = JSON.parse(document.getElementById("in").value);
-		myHttp.post(
+		abcHttp.post(
 			`/rental/request_sheet/getpage?page=0&size=10&toolboxId=${5222}`
 		)
 				.then(data=>{
@@ -38,6 +41,20 @@ document.getElementById("btn").addEventListener("click",function(){
 					})
 				})
 })
+abcHttp.get(
+	`/outstanding_rental_sheet/getpage`,
+	{
+		toolboxId: 5222,//로그인한 관리자 담당 정비실로 변경해야 함. 일단 기본값 정비1실
+		page: 0,
+		size: 10,
+		startDate:'2023-01-01',
+		endDate: '2023-12-31',
+	}
+).then(data => {
+	document.querySelector(".contentdiv").innerHTML=JSON.stringify(data);
+});
+
+
 
 
 var socket = new SockJS('/care4u_websocket');

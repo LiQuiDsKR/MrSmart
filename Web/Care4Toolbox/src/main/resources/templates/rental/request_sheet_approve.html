@@ -9,15 +9,50 @@
 		.th_btn {
 			text-align: end;
 		}
-
-		.selected td {
-			background-color: #67CF94;
-			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
-			color: white;
-			font-weight: 600;
+		.selected{
 			-webkit-transition: 0.2s ease;
 			-o-transition: 0.2s ease;
 			transition: 0.2s ease;
+		}
+		.selected .selected-danger td {
+			background-color: #FFE2E6;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+		.selected .selected-danger .custom-select{
+			background-color: #FC7383;
+			color:white;
+		}
+		.selected .selected-warning td {
+			background-color: #FFF4E6;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+		.selected .selected-warning .custom-select{
+			background-color: #FFB959;
+			color:white;
+		}
+		.selected .selected-success td {
+			background-color: #DBF7E8;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+		.selected .selected-success .custom-select{
+			background-color: #67CF94;
+			color:white;
+		}
+		.selected .selected-primary td {
+			background-color: #E9E7FF;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+		.selected .selected-primary .custom-select{
+			background-color: #8280FD;
+			color:white;
 		}
 	</style>
 </th:block>
@@ -206,8 +241,22 @@
 					const dataObj = JSON.parse(JSON.stringify(element));
 					
 					// dataObj를 Sheet별로 바인딩. (call by ref)
-					addListenerApproveBtn(dataObj);
-					addListenerDeleteBtn(dataObj);
+					//addListenerApproveBtn(dataObj);
+					//addListenerDeleteBtn(dataObj);
+					
+					
+					document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click",function(){
+							approveBtnClickHandler.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".delete span:not(.listener-added)").forEach(element => {
+						element.addEventListener("click",function(){
+							deleteBtnClickHandler.call(this,dataObj);
+						});
+						element.classList.add("listener-added");
+					});
 				});
 				activateCheckbox();
 			});
@@ -303,88 +352,81 @@
 		}
 		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
 		//sheet카드의 table 내의 "X" 버튼 클릭 이벤트리스너 설정
-		function addListenerDeleteBtn(data) {
-			document.querySelectorAll(".delete span:not(.listener-added)").forEach(element => {
-				element.addEventListener("click", function () {
-					const row = this.closest("tr");
-					const pString = row.querySelector(".name").textContent + ", " + row.querySelector(".count").textContent;
-					const sheet = this.closest("div.sheet");
-					const btn = sheet.querySelector("a.btn");
+		function deleteBtnClickHandler(data) {
+			const row = this.closest("tr");
+			const pString = row.querySelector(".name").textContent + ", " + row.querySelector(".count").textContent;
+			const sheet = this.closest("div.sheet");
+			const btn = sheet.querySelector("a.btn");
 
-					if (data.toolList.length <= 1) {
-						Swal.fire({
-							type: 'question',
-							title: '삭제하시겠습니까?',
-							html: '<p><br/>' + pString + '</p><p><br/> 위 항목과 함께 해당 신청 목록이 삭제됩니다. 삭제한 목록은 다시 불러올 수 없습니다. </p>',
-							showCancelButton: true,
-							confirmButtonText: '예',
-							cancelButtonText: '아니오',
-							buttonStyling: false,
-						}).then(result => {
-							if (result.value == true) {
-								const sheet = row.closest(".sheet");
-								sheet.parentNode.removeChild(sheet);
-								abcHttp.post(
-									`/rental/request_sheet/cancel`,
-									{
-										sheetId:data.id
-									}
-								).then(data => {
-									Swal.fire({
-										type: "success",
-										title: "승인 취소됨",
-										text: "정상적으로 대여 신청 목록이 삭제되었습니다.",
-									})
-										.then(result => {
-											location.href = "/rental/request_sheet/admin";
-										});
+			//sheet 전체를 삭제. (마지막 남은 row 삭제)
+			if (data.toolList.length <= 1) {
+				Swal.fire({
+					type: 'question',
+					title: '삭제하시겠습니까?',
+					html: '<p><br/>' + pString + '</p><p><br/> 위 항목과 함께 해당 신청 목록이 삭제됩니다. 삭제한 목록은 다시 불러올 수 없습니다. </p>',
+					showCancelButton: true,
+					confirmButtonText: '예',
+					cancelButtonText: '아니오',
+					buttonStyling: false,
+				}).then(result => {
+					if (result.value == true) {
+						const sheet = row.closest(".sheet");
+						sheet.parentNode.removeChild(sheet);
+						abcHttp.post(
+							`/rental/request_sheet/cancel`,
+							{
+								sheetId:data.id
+							}
+						).then(data => {
+							Swal.fire({
+								type: "success",
+								title: "승인 취소됨",
+								text: "정상적으로 대여 신청 목록이 삭제되었습니다.",
+							})
+								.then(result => {
+									location.href = "/rental/request_sheet/admin";
 								});
-							}
-						});
-					} else {
-						Swal.fire({
-							type: 'question',
-							title: '삭제하시겠습니까?',
-							html: '<p><br/>' + pString + '</p><p><br/> 위 항목이 삭제됩니다.</p>',
-							showCancelButton: true,
-							confirmButtonText: '예',
-							cancelButtonText: '아니오',
-							buttonStyling: false,
-						}).then(result => {
-							if (result.value == true) {
-								var index = Array.from(row.parentNode.children).indexOf(row);
-								data.toolList.splice(index, 1);
-								row.parentNode.removeChild(row);
-							}
 						});
 					}
 				});
-				element.classList.add("listener-added");
-			});
+				
+			// row 삭제.
+			} else {
+				Swal.fire({
+					type: 'question',
+					title: '삭제하시겠습니까?',
+					html: '<p><br/>' + pString + '</p><p><br/> 위 항목이 삭제됩니다.</p>',
+					showCancelButton: true,
+					confirmButtonText: '예',
+					cancelButtonText: '아니오',
+					buttonStyling: false,
+				}).then(result => {
+					if (result.value == true) {
+						var index = Array.from(row.parentNode.children).indexOf(row);
+						data.toolList.splice(index, 1);
+						row.parentNode.removeChild(row);
+					}
+				});
+			}
 		}
 		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
 		//sheet단위 카드의 "대여 승인" 버튼 클릭 이벤트리스너 설정
-		function addListenerApproveBtn(data) {
-			document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
-				element.addEventListener("click", function () {
-					abcHttp.post(
-						`/rental/request_sheet/approve`,
-						{
-							rentalRequestSheetDto: data,
-							approverId: 113
-						},
-					).then(data => {
-						Swal.fire({
-							type: "success",
-							title: "대여 승인됨",
-							text: "대여 승인이 정상적으로 처리되었습니다",
-						})
-							.then(result => {
-								location.href = "/rental/request_sheet/approve";
-							});
+		function approveBtnClickHandler(data) {
+			abcHttp.post(
+				`/rental/request_sheet/approve`,
+				{
+					rentalRequestSheetDto: data,
+					approverId: 113
+				},
+			).then(data => {
+				Swal.fire({
+					type: "success",
+					title: "대여 승인됨",
+					text: "대여 승인이 정상적으로 처리되었습니다",
+				})
+					.then(result => {
+						location.href = "/rental/request_sheet/approve";
 					});
-				});
-				element.classList.add("listener-added");
 			});
 		}
 		//Tag정보가 입력될 시 호출합니다.

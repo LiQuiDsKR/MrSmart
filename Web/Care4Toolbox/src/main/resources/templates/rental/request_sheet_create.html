@@ -351,7 +351,7 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-
+		//datatable 초기화 전 전역 선언.
 		var table = {draw: function () {console.log('not initialized yet')}};
 		$(document).ready(function () {
 
@@ -466,7 +466,8 @@
 						"data": null,
 						"render": function (data, type, row) {
 							if (type === "display") {
-								return '<a href="#" class="btn addRentalToolBtn p-2 ' + (!list.every(e => e.id !== data.id) ? 'disabled' : '') + '">' +
+								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.stockDto.goodCount<1)
+								return '<a href="#" class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
 									'<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
 									'</a>';
 							}
@@ -477,7 +478,7 @@
 			});
 			table.on('click', '.addRentalToolBtn', function () {
 				var data = table.row($(this).parents('tr')).data();
-				addTool.apply(this, [data.toolDto.id]);
+				addTool.call(this, data.toolDto.id);
 			});
 
 			//검색
@@ -1057,7 +1058,7 @@
 						});
 					})
 					.then(result2 => {
-						location.href = '/rental/request_sheet';
+						location.href = '/rental/request_sheet/create';
 					})
 					.catch(error => {
 						Swal.fire({
