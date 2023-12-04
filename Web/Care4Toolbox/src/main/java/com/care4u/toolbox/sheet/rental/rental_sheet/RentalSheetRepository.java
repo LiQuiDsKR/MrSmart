@@ -22,7 +22,7 @@ public interface RentalSheetRepository extends JpaRepository<RentalSheet, Long> 
 	
 	@Query("SELECT r FROM RentalSheet r "
 			+ "WHERE (r.worker = :member OR r.leader = :member OR r.approver = :member) "
-			+ "AND r.eventTimestamp BETWEEN :startDate AND :endDate")
+			+ "AND r.eventTimestamp BETWEEN :startDate AND :endDate ORDER BY r.eventTimestamp DESC")
 	Page<RentalSheet> findByMemberAndEventTimestampBetween(
 			@Param("member") Membership member,
 			@Param("startDate") LocalDateTime startDate,

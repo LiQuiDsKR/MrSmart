@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+		.selected td {
+			background-color: #67CF94;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+			-webkit-transition: 0.2s ease;
+			-o-transition: 0.2s ease;
+			transition: 0.2s ease;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div id="mainCard" class="card bg-transparent">
+					<!-- Contact Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-4">
+
+						<h4 class="font-30 m-3">공기구 반납</h4>
+						<!-- Btn header -->
+						<div class="col-12 col-sm-2 d-flex align-items-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a href="#" class="btn" data-toggle="modal" data-target="#contactAddModal" hidden>
+									<img th:src="@{/img/svg/plus_white.svg}" alt="" class="svg" />
+									<span>추가</span>
+								</a>
+							</div>
+							<!-- End Add New Contact Btn -->
+						</div>
+						<!-- Search header -->
+						<form
+							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0">
+							<!-- layer 1 -->
+							<div class="row" style="width:100%; box-sizing: content-box;">
+
+
+								<!-- Form Group -->
+								<div class="form-group m-2">
+									<label class="mb-2 font-14 bold">시작 날짜</label>
+
+									<!-- Date Picker -->
+									<div class="dashboard-date style--four">
+										<span id="start-date-btn" class="input-group-addon">
+											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+										</span>
+
+										<input type="text" id="start-date" placeholder="Select Date" />
+									</div>
+									<!-- End Date Picker -->
+								</div>
+								<!-- End Form Group -->
+
+								<!-- Form Group -->
+								<div class="form-group m-2 mr-4">
+									<label class="mb-2 font-14 bold">종료 날짜</label>
+
+									<!-- Date Picker -->
+									<div class="dashboard-date style--four">
+										<span id="end-date-btn" class="input-group-addon">
+											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+										</span>
+
+										<input type="text" id="end-date" placeholder="Select Date" />
+									</div>
+									<!-- End Date Picker -->
+								</div>
+								<!-- End Form Group -->
+
+
+
+
+								<!-- Search Form -->
+								<div class="search-form d-flex align-items-center"
+									style="width:50%; box-sizing: content-box;" hidden>
+									<div class="theme-input-group style--two" hidden>
+										<input id="searchInput" type="text" class="theme-input-style"
+											placeholder="검색" />
+										<button id="searchBtn" type="submit">
+											<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+										</button>
+									</div>
+								</div>
+								<!-- End Search Form -->
+
+
+
+								<!-- 새로고침 / 알림? 등등 -->
+
+							</div>
+
+							<!-- layer 2 -->
+							<!-- Search Condition header -->
+
+							<!-- End Search Condition -->
+					</div>
+					<!-- End Contact Header -->
+
+
+					<div id="containerdiv"></div>
+
+
+
+				</div>
+				<!-- End Card -->
+
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+
+		$(document).ready(function () {
+			initializeDatepicker();
+			load();
+		});
+
+		//fetch
+		function load() {
+			abcHttp.get(
+				`/outstanding_rental_sheet/getpage`,
+				{
+					toolboxId: 5222,//로그인한 관리자 담당 정비실로 변경해야 함. 일단 기본값 정비1실
+					page: 0,
+					size: 10,
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
+				}
+			).then(data => {
+				const containerDiv = document.getElementById("containerdiv");
+				containerDiv.innerHTML='';
+				let htmlString = ``
+				if (data.empty) {
+					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">반납 대기 중인 대여 목록이 없습니다.</div>`
+					containerDiv.innerHTML = htmlString;
+				}
+				data.content.forEach(sheet => {
+					const element = sheet.rentalSheetDto;
+					htmlString = `
+					<!-- Sheet -->
+					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+						<!-- Header Table -->
+						<div class="col-12" style="overflow-x:auto;">
+							<table class="text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>대여승인시간</th>
+										<th>정비실</th>
+										<th>작업자</th>
+										<th>리더</th>
+										<th>승인자</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="time">${formatDate(element.eventTimestamp)}</td>
+										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="worker">${element.workerDto.name}</td>
+										<td class="leader">${element.leaderDto.name}</td>
+										<td class="approver">${element.approverDto.name}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- End Header Table-->
+						<div class="col-12" style="overflow-x:auto;">
+							<table class="tool-list invoice-list-table text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>정비실명</th>
+										<th>이름</th>
+										<th>규격</th>
+										<th>신청수량</th>
+										<th>미반납수량</th>
+										<th>반납수량</th>
+										<th>QR코드</th>
+										<th>공기구상태</th>
+									</tr>
+								</thead>
+								<tbody>
+				   `;
+
+					for (let tool of element.toolList) {
+						htmlString +=
+							`
+									<tr>
+										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="name">${tool.toolDto.name}</td>
+										<td class="spec">${tool.toolDto.spec}</td>
+										<td class="retnalcount">${tool.count}</td>
+										<td class="outstandingcount">${tool.outstandingCount}</td>
+										<td class="returncount">
+											<div class="d-flex justify-content-between align-item-center">
+										        <a href="#" class="btn bg-success increaseBtn p-2">
+										            <img src="/img/svg/plus_white.svg" alt="" class="svg "/>
+										        </a>
+										        <p class="d-flex align-items-center toolCount mb-0">0</p>
+										        <a href="#" class="btn bg-danger decreaseBtn p-2">
+										            <img src="/img/svg/minus_white.svg" alt="" class="svg "/>
+										        </a>
+										    </div>
+										</td>
+										<td class="qrcode"></td>
+										<td class="toolstate">
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style">
+													<option value="GOOD">양호</option>									
+													<option value="FAULT">고장</option>
+													<option value="DAMAGE">파손</option>
+													<option value="LOSS">망실</option>
+													<option value="DISCARD">폐기</option>
+												</select>
+											</div>
+										</td>
+									</tr>
+					`;
+					}
+					htmlString += `
+					        </tbody>
+						  </table>
+					    </div>
+					    <div class="col-12 d-flex justify-content-end mt-3 pr-3">
+						    <div class="">
+						      <a href="#" class="mr-3 btn disabled" style="width:fit-content; height:fit-content;">
+						        <span style="width:100%;">반납승인</span>
+						      </a>
+						    </div>
+					    </div>
+					  </div>
+					  <!-- End Sheet -->`;
+
+					var outerDiv = document.createElement('div');
+					outerDiv.innerHTML=htmlString;
+					containerDiv.appendChild(outerDiv);
+					
+					// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
+					const dataObj = {
+						workerId:element.workerDto.id,
+						leaderId:element.leaderDto.id,
+						approverId:100001, //로그인하면 바꾸기...
+						toolboxId:5222, //얘도 로그인하면 바구기...
+						toolList:element.toolList.map(e=>{
+							return {
+								rentalToolId:e.id,
+								toolId:e.toolDto.id,
+								count:e.count,
+								//goodCount:0,
+								//faultCount:0,
+								//damageCount:0,
+								//lossCount:0,
+								//discardCount:0,
+								status:"GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
+								tags:"",
+							}
+						}),
+					}
+					console.log(dataObj);
+					
+					//addListenerApproveBtn(dataObj);
+					//addListenerDeleteBtn(dataObj);
+					
+				});
+				//activateCheckbox();
+			});
+		}
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		function initializeDatepicker(){
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = today.getMonth() + 1;
+			const day = today.getDate();
+			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+			const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
+			$('#start-date').val(formattedLastMonthDate);
+			$('#end-date').val(formattedTodayDate);
+
+			$('#start-date').on('change', function () {
+				load();
+				console.log('start changed')
+			});
+			$('#end-date').on('change', function () {
+				load();
+				console.log('end changed')
+			})
+
+			$('#start-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					load();
+					console.log('start changed')
+				}
+			});
+			$('#start-date-btn').on('click', function () {
+				$('#start-date').datepicker('show');
+			});
+			$('#end-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					load();
+					console.log('end changed')
+				}
+			});
+			$('#end-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+		}
+		
+		
+		function activateApproveBtn(tableElement) {
+			const sheet = tableElement.closest("div.sheet");
+			const btn = sheet.querySelector("a.btn");
+			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected"));
+			btn.classList.toggle("disabled", !condition);
+		}
+		
+		//반납 수량을 +1
+		function increaseCount(dataObj) {
+			
+		}
+		//반납 수량을 -1.
+		function decreaseCount(dataObj) {
+			
+		}
+		//공기구 상태 드롭다운 선택 시.
+		function toolStateChangeHandler(dataObj) {
+			
+		}
+		
+		
+		
+		function formatDate(inputDate) {
+			const dateObject = new Date(inputDate);
+			const year = dateObject.getFullYear();
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const hours = dateObject.getHours().toString().padStart(2, '0');
+			const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+			return formattedDate;
+		}
+
+	</script>
+</th:block>
+
+</html>

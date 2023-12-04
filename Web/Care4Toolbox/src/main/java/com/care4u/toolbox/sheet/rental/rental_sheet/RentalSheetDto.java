@@ -31,9 +31,7 @@ public class RentalSheetDto {
 	private LocalDateTime eventTimestamp;
 	
 	private List<RentalToolDto> toolList; 
-	
-	private List<Tag> tagList;
-	
+		
 	@Builder
 	public RentalSheetDto(long id, Membership worker, Membership leader, Membership approver, Toolbox toolbox, LocalDateTime eventTimestamp, List<RentalToolDto> toolList) {
 		this.id = id;

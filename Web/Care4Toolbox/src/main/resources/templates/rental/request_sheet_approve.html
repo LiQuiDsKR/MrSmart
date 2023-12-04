@@ -87,7 +87,11 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-
+		
+		//전체 데이터를 저장해두는 곳
+		//tag입력을 받은 후 tag를 찾기 위해 사용합니다.
+		var mainTempData;
+		
 		$(document).ready(function () {
 
 			const toolboxId = 5222; // 로그인 구현 후 사용자 정보를 불러와서 수정하기
@@ -100,6 +104,8 @@
 					toolboxId:toolboxId
 				}
 			).then(data => {
+				mainTempData={data:data,toolboxId:toolboxId};
+				
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML = '';
 				let htmlString = ``
@@ -382,9 +388,46 @@
 			});
 		}
 		//Tag정보가 입력될 시 호출합니다.
-		function tagAdd(){
-			
+		function addTag(tag){
+			getListByTag(tag)
+			.then(data=>{
+				console.log(data);
+			});
 		}
+		
+		function getTag(macAddress){
+			return new Promise((resolved, rejected)=>{
+				abcHttp.get(
+					'/tag/get',
+					{
+						macAddress:macAddress
+					}
+				)
+				.then(data=>{
+					resolved(data);
+				})
+				.catch(error=>{
+					rejected(error);
+				});
+			});
+		}
+		function getListByTag(tagMacAddress){
+			return new Promise((resolved, rejected)=>{
+				abcHttp.get(
+					'/rental/request_sheet/list_by_tag',
+					{
+						macAddress:macAddress
+					}
+				)
+				.then(data=>{
+					resolved(data);
+				})
+				.catch(error=>{
+					rejected(error);
+				});
+			});
+		}
+		
 
 		function formatDate(inputDate) {
 			const dateObject = new Date(inputDate);

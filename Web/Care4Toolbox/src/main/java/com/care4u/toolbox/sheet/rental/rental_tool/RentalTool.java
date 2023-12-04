@@ -54,4 +54,8 @@ public class RentalTool extends BaseEntity {
 		this.outstandingCount = outstandingCount;
 		this.rentalRequestSheet = rentalRequestSheet;
 	}
+	
+	public void returnUpdate(int returnedCount) {
+		this.outstandingCount-=returnedCount;
+	}
 }

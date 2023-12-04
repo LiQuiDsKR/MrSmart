@@ -1,5 +1,7 @@
 package com.care4u.toolbox.sheet.rental.rental_request_tool;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -35,6 +37,11 @@ public class RentalRequestToolService {
 		}
 		
 		return new RentalRequestToolDto(item.get());
+	}
+	
+	@Transactional(readOnly = true)
+	public List<RentalRequestTool> list(long toolId){
+		return repository.findAllByToolId(toolId);
 	}
 	
 	@Transactional

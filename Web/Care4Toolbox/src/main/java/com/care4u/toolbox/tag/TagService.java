@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,10 @@ public class TagService {
 	private TagDto convertToDto(Tag tag) {
 		if (tag.getRentalTool()!=null) {
 			List<Tag> tagList = repository.findAllByRentalToolId(tag.getRentalTool().getId());
-			return new TagDto(tag, tagList);
+			String tags = tagList.stream()
+			.map(t -> t.getMacaddress())
+			.collect(Collectors.joining(","));
+			return new TagDto(tag, tags);
 		}else {
 			return new TagDto(tag);
 		}

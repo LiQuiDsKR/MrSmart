@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,13 +76,16 @@ public class RentalSheetService {
 		return page.map(e->convertToDto(e));
 	}
 	
-	@Transactional
-	private RentalSheetDto convertToDto(RentalSheet rentalSheet) {
+	@Transactional(readOnly = true)
+	public RentalSheetDto convertToDto(RentalSheet rentalSheet) {
 		List<RentalToolDto> dtoList = new ArrayList<RentalToolDto>();
 		List<RentalTool> toolList = rentalToolRepository.findAllByRentalSheetId(rentalSheet.getId());
 		for (RentalTool tool : toolList) {
 			List<Tag> tagList = tagRepository.findAllByRentalToolId(tool.getId());
-			dtoList.add(new RentalToolDto(tool,tagList));
+			String tags = tagList.stream()
+					.map(tag -> tag.getMacaddress())
+					.collect(Collectors.joining(","));
+			dtoList.add(new RentalToolDto(tool,tags));
 		}
 		return new RentalSheetDto(rentalSheet,dtoList);
 	}

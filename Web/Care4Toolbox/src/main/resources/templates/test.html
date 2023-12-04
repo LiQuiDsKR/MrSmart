@@ -54,9 +54,66 @@ stompClient.connect({}, function(frame) {
 	    // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
 	});
 });
+/*
+1. SockJs 의존성 추가, SockJs 스크립트 추가
+2. StompJs 스크립트 추가
+3. WebSocketConfig Class 생성 : WebSocketMessageBrokerConfigurer 상속
+	@Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topicName"); // 클라이언트에게 메시지 전달을 위한 브로커 구성
+        config.setApplicationDestinationPrefixes("/appName"); // 클라이언트에서 메시지를 수신하기 위한 엔드포인트 prefix 설정
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/endpoint").withSockJS(); // 클라이언트가 웹 소켓에 연결할 때 사용할 엔드포인트 설정
+    }
+4. WebSocketController Class 생성
+	@MessageMapping("/") // 클라이언트가 /your-app-prefix/your-message-path로 메시지를 보낼 때 호출되는 메소드
+	@SendTo("/your-topic-prefix/receive-message") // 해당 주제로 메시지를 브로드캐스팅
+	public String yourMethodName(String message) {
+	    return "서버에서 받은 메시지: " + message;
+	}
+	
+	or 
+	
+	@GetMapping("/send-message")
+    public void sendMessage() {
+        String message = "안녕하세요!";
+        messagingTemplate.convertAndSend("/topic/greetings", message); // 서버 -> 클라이언트 주소
+    }
+5. js
+	var socket = new SockJS('/your-websocket-endpoint');
+	var stompClient = Stomp.over(socket);
+	
+	stompClient.connect({}, function(frame) {
+	    console.log('웹 소켓에 연결되었습니다.');
+	
+	    // 서버로 메시지 전송 예시
+	    stompClient.send("/your-app-prefix/your-message-path", {}, "안녕하세요!");
+	});
+	
+	stompClient.subscribe('/your-topic-prefix/receive-message', function(response) {
+	    console.log('서버에서 받은 메시지:', response.body);
+	    // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	});
 
 
-
+ 	or
+ 	
+	var socket = new SockJS('/websocket-example');
+	var stompClient = Stomp.over(socket);
+	
+	stompClient.connect({}, function(frame) {
+	    console.log('웹 소켓에 연결되었습니다.');
+	
+	    stompClient.subscribe('/topic/greetings', function(response) {
+	        var message = response.body;
+	        console.log('서버에서 받은 메시지:', message);
+	        // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	    });
+	});
+*/
 
 </script>
 </th:block>

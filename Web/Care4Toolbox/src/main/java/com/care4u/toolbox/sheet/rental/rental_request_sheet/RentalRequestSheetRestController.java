@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.care4u.constant.SheetState;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
+import com.care4u.toolbox.tag.TagDto;
+import com.care4u.toolbox.tag.TagService;
 import com.google.gson.Gson;
 
 @RestController
@@ -36,6 +38,7 @@ public class RentalRequestSheetRestController {
 	
 	@Autowired
 	private RentalSheetService rentalSheetService;
+	
 	
     @PostMapping(value="/rental/request_sheet/apply")
     public ResponseEntity<String> applyRentalRequestSheet(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto, BindingResult bindingResult){
@@ -72,6 +75,20 @@ public class RentalRequestSheetRestController {
         	logger.info(item.toString());
         }
         return ResponseEntity.ok(rentalRequestSheetPage);
+    }
+    
+    //tag를 찍고 난 후 List<sheet>를 쿼리합니다.
+    @GetMapping(value="/rental/request_sheet/list_by_tag")
+    public ResponseEntity<List<RentalRequestSheetDto>> getRentalRequestSheetListByTag(
+    		@RequestParam(name="tagMacAddress") String tagMacAddress
+    		){
+    	List<RentalRequestSheetDto> list = rentalRequestSheetService.listByTag(tagMacAddress);
+
+    	logger.info("list size : " + list.size());
+        for (RentalRequestSheetDto item : list) {
+        	logger.info(item.toString());
+        }
+    	return ResponseEntity.ok(list);
     }
     
     @PostMapping(value="/rental/request_sheet/approve")

@@ -2,6 +2,7 @@ package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,8 @@ import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolService;
+import com.care4u.toolbox.tag.TagDto;
+import com.care4u.toolbox.tag.TagService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +50,9 @@ public class RentalRequestSheetService {
 	
 	@Autowired
 	private RentalRequestToolService rentalRequestToolService;
+	
+	@Autowired
+	private TagService tagService;
 	
 	
 	@Transactional(readOnly = true)
@@ -81,6 +87,17 @@ public class RentalRequestSheetService {
 		return page.map(e->convertToDto(e));
 	}
 	
+	@Transactional(readOnly = true)
+	public List<RentalRequestSheetDto> listByTag(String tagMacAddress){
+		TagDto tagDto = tagService.get(tagMacAddress);
+		List<RentalRequestTool> toolList = rentalRequestToolService.list(tagDto.getToolDto().getId());
+		List<RentalRequestSheetDto> sheetList = new ArrayList<RentalRequestSheetDto>();
+		for (RentalRequestTool tool : toolList) {
+			sheetList.add(convertToDto(tool.getRentalRequestSheet()));
+		}
+		return sheetList;
+	}
+
 	private RentalRequestSheetDto convertToDto(RentalRequestSheet rentalRequestSheet) {
 		List<RentalRequestToolDto> dtoList = new ArrayList<RentalRequestToolDto>();
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(rentalRequestSheet.getId());

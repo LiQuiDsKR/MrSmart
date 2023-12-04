@@ -3,6 +3,7 @@ package com.care4u.toolbox.sheet.rental.rental_tool;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,11 @@ public class RentalToolService {
 		}
 		
 		List<Tag> tagList = tagRepository.findAllByRentalToolId(id);
+		String tags = tagList.stream()
+				.map(tag -> tag.getMacaddress())
+				.collect(Collectors.joining(","));
 		
-		return new RentalToolDto(item.get(),tagList);
+		return new RentalToolDto(item.get(),tags);
 	}
 	
 	@Transactional(readOnly=true)
@@ -61,7 +65,10 @@ public class RentalToolService {
 		List<RentalToolDto> dtoList = new ArrayList<RentalToolDto>();
 		for (RentalTool tool : toolList) {
 			List<Tag> tagList = tagRepository.findAllByRentalToolId(tool.getId());
-			dtoList.add(new RentalToolDto(tool,tagList));
+			String tags = tagList.stream()
+					.map(tag -> tag.getMacaddress())
+					.collect(Collectors.joining(","));
+			dtoList.add(new RentalToolDto(tool,tags));
 		}
 		return dtoList;
 	}
@@ -103,5 +110,14 @@ public class RentalToolService {
 		stockStatusService.rentItems(stockDto.getId(), savedRentalTool.getCount());
 		
 		return savedRentalTool;
+	}
+
+	public RentalToolDto returnUpdate(RentalTool tool, int returnedCount) {
+		tool.returnUpdate(returnedCount);
+		List<Tag> tagList = tagRepository.findAllByRentalToolId(tool.getId());
+		String tags = tagList.stream()
+				.map(tag -> tag.getMacaddress())
+				.collect(Collectors.joining(","));
+		return new RentalToolDto(repository.save(tool),tags);
 	}
 }

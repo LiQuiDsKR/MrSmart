@@ -10,4 +10,5 @@ public interface RentalRequestToolRepository extends JpaRepository<RentalRequest
 	
 	List<RentalRequestTool> findAllByRentalRequestSheetId(long RentalRequestSheetId);
 	
+	List<RentalRequestTool> findAllByToolId(long toolId);
 }

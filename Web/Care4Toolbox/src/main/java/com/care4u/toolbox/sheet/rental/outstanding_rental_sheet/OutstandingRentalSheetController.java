@@ -28,7 +28,7 @@ import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
-@RequestMapping("/rental")
+@RequestMapping("/return")
 public class OutstandingRentalSheetController {
 	
 	private static final Logger logger = Logger.getLogger(OutstandingRentalSheetController.class);
@@ -39,14 +39,14 @@ public class OutstandingRentalSheetController {
 	@Autowired
 	private OutstandingRentalSheetService outstandingRentalSheetService;
 	
-    @GetMapping(value = "return/sheet_apply")
+    @GetMapping(value = "sheet/create")
     public String createRequestSheet(Model model){
     	
     	List<ToolboxDto> toolboxList = toolboxService.list();
     	
     	model.addAttribute("toolboxList",toolboxList);
 
-        return "return/sheet_apply";
+        return "return/sheet_create";
     }
     
 }

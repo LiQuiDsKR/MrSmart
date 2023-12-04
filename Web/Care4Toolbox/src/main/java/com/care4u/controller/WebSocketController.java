@@ -22,7 +22,7 @@ public class WebSocketController {
     }
     
     @GetMapping("/send-message")
-    @Scheduled(fixedRate = 5000) 
+    //@Scheduled(fixedRate = 5000) //그냥 5초마다 한번씩
     public void sendMessage() {
         String message = "webSocket Test Message";
         logger.info(message);

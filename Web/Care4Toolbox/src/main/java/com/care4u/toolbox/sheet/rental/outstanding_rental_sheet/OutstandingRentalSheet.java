@@ -43,4 +43,8 @@ public class OutstandingRentalSheet extends BaseEntity {
 		this.totalCount = totalCount;
 		this.totalOutstandingCount = totalOutstandingCount;
 	}
+	
+	public void updateOutstandingCount(int totalOutstandingCount) {
+		this.totalOutstandingCount = totalOutstandingCount;
+	}
 }

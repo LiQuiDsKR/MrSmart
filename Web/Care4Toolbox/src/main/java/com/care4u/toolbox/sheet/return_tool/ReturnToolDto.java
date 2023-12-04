@@ -15,8 +15,6 @@ public class ReturnToolDto {
 	
 	private long id;
 	
-	private ReturnSheetDto returnSheetDto;
-	
 	private RentalToolDto rentalToolDto;
 	
 	private String Tags;
@@ -34,11 +32,10 @@ public class ReturnToolDto {
 	private int discardCount;
 	
 	@Builder
-	public ReturnToolDto(long id, ReturnSheet returnSheet, RentalTool rentalTool, String Tags,
-			int count, int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+	public ReturnToolDto(long id, RentalTool rentalTool, String Tags,
+			int count, int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String rentalTags) {
 		this.id = id;
-		this.returnSheetDto = new ReturnSheetDto(returnSheet);
-		this.rentalToolDto = new RentalToolDto(rentalTool);
+		this.rentalToolDto = new RentalToolDto(rentalTool,rentalTags);
 		this.Tags = Tags;
 		this.count = count;
 		this.goodCount = goodCount;
@@ -48,17 +45,16 @@ public class ReturnToolDto {
 		this.discardCount = discardCount;
 	}
 	
-	public ReturnToolDto(ReturnTool rentalTool) {
-		this.id = rentalTool.getId();
-		this.returnSheetDto = new ReturnSheetDto(rentalTool.getReturnSheet());
-		this.rentalToolDto = new RentalToolDto(rentalTool.getRentalTool());
-		this.Tags = rentalTool.getTags();
-		this.count = rentalTool.getCount();
-		this.goodCount = rentalTool.getGoodCount();
-		this.faultCount = rentalTool.getFaultCount();
-		this.damageCount = rentalTool.getDamageCount();
-		this.lossCount = rentalTool.getLossCount();
-		this.discardCount = rentalTool.getDiscardCount();
+	public ReturnToolDto(ReturnTool returnTool, String rentalTags) {
+		this.id = returnTool.getId();
+		this.rentalToolDto = new RentalToolDto(returnTool.getRentalTool(),rentalTags);
+		this.Tags = returnTool.getTags();
+		this.count = returnTool.getCount();
+		this.goodCount = returnTool.getGoodCount();
+		this.faultCount = returnTool.getFaultCount();
+		this.damageCount = returnTool.getDamageCount();
+		this.lossCount = returnTool.getLossCount();
+		this.discardCount = returnTool.getDiscardCount();
 	}
 	
 }

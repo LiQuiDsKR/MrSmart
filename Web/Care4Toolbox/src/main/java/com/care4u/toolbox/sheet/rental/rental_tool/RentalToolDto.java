@@ -22,23 +22,23 @@ public class RentalToolDto {
 	
 	private int outstandingCount;
 	
-	private List<Tag> tagList;
+	private String tags;
 	
 	@Builder
-	public RentalToolDto(long id, Tool tool, int count, int outstandingCount, List<Tag> tagList) {
+	public RentalToolDto(long id, Tool tool, int count, int outstandingCount, String tags) {
 		this.id = id;
 		this.toolDto = new ToolDto(tool);
 		this.count = count;
 		this.outstandingCount = outstandingCount;
-		this.tagList = tagList;
+		this.tags = tags;
 	}
 	
-	public RentalToolDto(RentalTool rentalTool, List<Tag> tagList) {
+	public RentalToolDto(RentalTool rentalTool, String tags) {
 		this.id = rentalTool.getId();
 		this.toolDto = new ToolDto(rentalTool.getTool());
 		this.count = rentalTool.getCount();
 		this.outstandingCount = rentalTool.getOutstandingCount();
-		this.tagList = tagList;
+		this.tags = tags;
 	}
 	
 }

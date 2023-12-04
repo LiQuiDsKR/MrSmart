@@ -33,12 +33,12 @@ public class TagDto {
 		this.rentalToolDto = rentalToolDto;
 	}
 	
-	public TagDto(Tag tag, List<Tag> rentalToolTagList) {
+	public TagDto(Tag tag, String rentalToolTags) {
 		this.id = tag.getId();
 		this.macaddress = tag.getMacaddress();
 		this.toolboxDto = new ToolboxDto(tag.getToolbox());
 		this.toolDto = new ToolDto(tag.getTool());
-		this.rentalToolDto = tag.getRentalTool()==null?null:new RentalToolDto(tag.getRentalTool(),rentalToolTagList);
+		this.rentalToolDto = tag.getRentalTool()==null?null:new RentalToolDto(tag.getRentalTool(),rentalToolTags);
 	}
 	
 	public TagDto(Tag tag) {

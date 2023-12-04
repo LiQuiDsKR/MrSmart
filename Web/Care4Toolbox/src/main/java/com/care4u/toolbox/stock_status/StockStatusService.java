@@ -85,14 +85,22 @@ public class StockStatusService {
 	}
 	@Transactional
 	public StockStatusDto returnItems(long id, int goodCount, int faultCount, int damageCount, int discardCount, int lossCount) {
-		return null;
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		stock.returnUpdate(goodCount, faultCount, damageCount, discardCount, lossCount);
+		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
 	public StockStatusDto buyItems(long id, int count) {
 		return null;
 	}
 	
-	@Scheduled(cron = "1 42 10 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "1 51 12 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();
