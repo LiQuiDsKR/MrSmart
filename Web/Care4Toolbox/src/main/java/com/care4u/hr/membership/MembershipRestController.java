@@ -174,4 +174,11 @@ public class MembershipRestController {
     	MembershipDto membershipDto = membershipService.getMembershipById(id);
     	return ResponseEntity.ok(membershipDto);
     }
+    @GetMapping(value="/membership/getbycode")
+    public ResponseEntity<MembershipDto> getMembershipByCode(
+    		@RequestParam(name="code") String code
+    		){
+    	MembershipDto membershipDto = membershipService.getMembershipByCode(code);
+    	return ResponseEntity.ok(membershipDto);
+    }
 }

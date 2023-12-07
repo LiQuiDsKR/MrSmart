@@ -50,7 +50,7 @@ public class ToolboxRestController {
     				ToolboxDto.builder()
     				.id(0)
     				.name(toolboxFormDto.getName())
-    				.managerDto(membershipService.loadUserByCode(toolboxFormDto.getManagerDtoCode()))
+    				.managerDto(membershipService.getMembershipByCode(toolboxFormDto.getManagerDtoCode()))
     				.build()
     				);
     	}catch(IllegalStateException e) {
@@ -74,7 +74,7 @@ public class ToolboxRestController {
     				ToolboxDto.builder()
     				.id(toolboxFormDto.getId())
     				.name(toolboxFormDto.getName())
-    				.managerDto(membershipService.loadUserByCode(toolboxFormDto.getManagerDtoCode()))
+    				.managerDto(membershipService.getMembershipByCode(toolboxFormDto.getManagerDtoCode()))
     				.build()
     				);
     	}catch(IllegalStateException e) {

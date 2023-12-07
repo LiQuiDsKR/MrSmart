@@ -66,7 +66,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		return new MembershipDto(repository.save(membership));
 	}
 
-	public MembershipDto loadUserByCode(String code) {
+	public MembershipDto getMembershipByCode(String code) {
 		Membership membership = repository.findByCode(code);
 		if (membership==null) {
 			logger.error("Invalid code : " + code);

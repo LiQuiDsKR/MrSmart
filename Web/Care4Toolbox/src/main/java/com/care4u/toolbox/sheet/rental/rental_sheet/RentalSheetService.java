@@ -135,7 +135,7 @@ public class RentalSheetService {
 		
 		List<RentalTool> toolList = new ArrayList<RentalTool>();
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
-			RentalTool newTool = rentalToolService.addNew(tool, savedRentalSheet);
+			RentalTool newTool = rentalToolService.addNew(tool, savedRentalSheet, requestSheetDto);
 			if (newTool.getTool().getSubGroup().getMainGroup().getName().equals("소모자재")) {
 				logger.info("must be added to supplySheet, not rentalSheet.");
 			}

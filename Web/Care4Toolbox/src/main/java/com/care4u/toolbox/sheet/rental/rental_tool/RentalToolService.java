@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -81,19 +82,25 @@ public class RentalToolService {
 	 * @return
 	 */
 	@Transactional
-	public RentalTool addNew(RentalRequestToolDto requestDto, RentalSheet sheet) {
+	public RentalTool addNew(RentalRequestToolDto requestDto, RentalSheet sheet, RentalRequestSheetDto requestSheetDto) {
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
 			return null;
 		}
+		Optional<RentalRequestSheet> requestSheet = rentalRequestSheetRepository.findById(requestSheetDto.getId());
+		if (requestSheet.isEmpty()){
+			logger.error("requestSheet not found");
+			return null;
+		}
+		
 		
 		RentalTool rentalTool = RentalTool.builder()
 				.rentalSheet(sheet)
 				.tool(tool.get())
 				.count(requestDto.getCount())
 				.outstandingCount(requestDto.getCount())
-				.rentalRequestSheet(rentalRequestSheetRepository.findById(Long.parseLong("522522")).get())
+				.rentalRequestSheet(requestSheet.get())
 				.build();
 		
 		RentalTool savedRentalTool=repository.save(rentalTool);
