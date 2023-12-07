@@ -1,12 +1,13 @@
 var abcHttp = (function() {
 	function post(url, paramData, redirection) {
 		return new Promise((resolve, reject) => {
+			console.log(document.querySelector('meta[name="_csrf"]').content);
 			fetch(url, {
 				method: "POST",
 				headers: {
-					//'header': document.querySelector('meta[name="_csrf"]').content,
+					'header': document.querySelector('meta[name="_csrf_header"]').content,
 		            "Content-Type": "application/json",
-		            //'X-CSRF-Token': document.querySelector('meta[name="_csrf_header"]').content
+		            'X-CSRF-Token': document.querySelector('meta[name="_csrf"]').content
 				},
 				body: JSON.stringify(paramData),
 			})

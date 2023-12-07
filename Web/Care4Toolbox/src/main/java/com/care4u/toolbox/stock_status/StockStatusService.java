@@ -100,7 +100,7 @@ public class StockStatusService {
 		return null;
 	}
 	
-	@Scheduled(cron = "1 51 12 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "1 37 13 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();
@@ -134,6 +134,18 @@ public class StockStatusService {
 		//그날 있었던 Rental과 Return 전부 조회 후 개수 비교 및 합산.
 		//자정 업데이트간 사용하는 검증절차.
 		return true;
+	}
+	
+	
+	@Transactional(readOnly=true)
+	public List<StockStatusTimeChartDto> getTimeChart(LocalDate startDate, LocalDate endDate){
+		for (LocalDate currentDate = startDate; !currentDate.isAfter(endDate); currentDate = currentDate.plusDays(1)) {
+			List<StockStatus> currentList = repository.findAllByCurrentDay(currentDate);
+			for (StockStatus stock : currentList) {
+				
+			}
+		}
+		
 	}
 	
 	/**

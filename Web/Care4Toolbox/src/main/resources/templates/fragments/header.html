@@ -90,7 +90,7 @@
 							<li class="d-none d-lg-flex">
 								<!-- Main Header Button -->
 								<div class="main-header-btn ml-md-1">
-									<a href="#" class="btn">로그아웃</a>
+									<a href="/membership/logout" class="btn">로그아웃</a>
 								</div>
 								<!-- End Main Header Button -->
 							</li>
@@ -98,6 +98,12 @@
 					</div>
 					<!-- End Header Right -->
 				</div>
+				
+				<!-- csrfToken -->
+				<form>
+				    <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				</form>
+				<!-- csrfToken End -->
 			</div>
 		</div>
 	</div>

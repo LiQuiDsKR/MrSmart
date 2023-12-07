@@ -8,8 +8,15 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +29,13 @@ import com.care4u.toolbox.tool.ToolDto;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MembershipService {
+public class MembershipService implements UserDetailsService{
 	
 private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 
 	private final MembershipRepository repository;
 	private final PartRepository partRepository;
+	
 
 	public void addNew(Membership item) {
 		
@@ -114,4 +122,42 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 			return new MembershipDto(membership.get());
 		}
 	}
+
+	//spring security에서 사용자 정보 저장.
+	@Override
+	public UserDetails loadUserByUsername(String code) throws UsernameNotFoundException {
+		Membership membership = repository.findByCode(code);
+		if (membership == null) {
+			throw new UsernameNotFoundException(code);
+		}
+		return User.builder()
+				.username(code)
+				.password(membership.getPassword())
+				.roles(membership.getRole().name())
+				.build();
+	}
+	
+	
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    /**spring security db bcrypt
+     * @deprecated
+     */
+    @Transactional
+    public void updatePasswords() {
+        List<Membership> memberships = repository.findAll();
+
+        for (Membership member : memberships) {
+            String plainPassword = member.getPassword();
+
+            // Hash the plain password using BCrypt
+            String hashedPassword = passwordEncoder.encode(plainPassword);
+            
+            member.updatePassword(hashedPassword);
+            // Update the user's password in the database
+            
+            logger.info(member.getCode()+","+member.getName()+" 회원의 비밀번호가 ["+hashedPassword+"]로 정상 변경되었습니다.");
+            repository.save(member);
+        }
+    }
 }

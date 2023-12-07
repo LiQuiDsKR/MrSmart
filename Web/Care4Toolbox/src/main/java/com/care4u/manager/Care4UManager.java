@@ -76,6 +76,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
+		//membershipService.updatePasswords();
 		
 		logger.info("Care4UManager  afterPropertiesSet... ");
 	}

@@ -374,9 +374,7 @@
 						sheet.parentNode.removeChild(sheet);
 						abcHttp.post(
 							`/rental/request_sheet/cancel`,
-							{
-								sheetId:data.id
-							}
+							data.id
 						).then(data => {
 							Swal.fire({
 								type: "success",
@@ -384,7 +382,7 @@
 								text: "정상적으로 대여 신청 목록이 삭제되었습니다.",
 							})
 								.then(result => {
-									location.href = "/rental/request_sheet/admin";
+									location.href = "/rental/request_sheet/approve";
 								});
 						});
 					}

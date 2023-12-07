@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div id="mainCard" class="card bg-transparent">
+
+				</div>
+				<!-- End Card -->
+
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+	/*
+	serverUrl = window.location.protocol + '//' + window.location.host + '/api/yearly_production';
+	console.log(serverUrl)
+	$.ajax({
+		url: serverUrl,
+		type: 'GET',
+		success: function(data) {
+			const chartData = data.map(item => ({
+				x: new Date(item.timestamp).getTime(),
+				y: item.value
+			}));
+	
+			// ApexCharts 설정
+			const options = {
+				series: [{
+					name: 'Production',
+					data: chartData
+				}],
+				chart: {
+					id: 'area-datetime',
+					type: 'area',
+					height: 425,
+					zoom: {
+					    autoScaleYaxis: true
+					},
+					toolbar: {
+					    show: false
+					},
+				},
+				dataLabels: {
+					enabled: false
+				},
+				markers: {
+					size: 0,
+					style: 'hollow',
+				},
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						datetimeFormatter: {
+							year: 'yyyy',
+							month: 'yyyy-MM',
+							day: 'yyyy-MM-dd'
+						}
+					},
+					min: new Date('2023-09-01').getTime(),
+					tickAmount: 6,
+					axisTicks: {
+						show: false,
+					},
+					axisBorder: {
+						show: false
+					},
+				},
+				tooltip: {
+					x: {
+						format: 'yyyy-MM-dd'
+					},
+				},
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shadeIntensity: 1,
+						opacityFrom: 0.7,
+						opacityTo: 0.9,
+						stops: [0, 100]
+					}
+				},
+				
+
+				colors: [vihoAdminConfig.primary],
+			};			
+
+			// ApexCharts 그리기
+			var charttimeline = new ApexCharts(document.querySelector("#chart-timeline-dashbord"), options);
+			charttimeline.render();	
+		},
+		error: function(error) {
+			console.error('Error fetching data:', error);
+		}
+	});
+	*/
+	abcHttp.get(
+		
+	).then(data=>{
+		
+			const chartData = data.map(item => ({
+				x: new Date(item.timestamp).getTime(),
+				y: item.value
+			}));
+	
+			// ApexCharts 설정
+			const options = {
+				series: [{
+					name: 'Production',
+					data: chartData
+				}],
+				chart: {
+					id: 'area-datetime',
+					type: 'area',
+					height: 425,
+					zoom: {
+					    autoScaleYaxis: true
+					},
+					toolbar: {
+					    show: false
+					},
+				},
+				dataLabels: {
+					enabled: false
+				},
+				markers: {
+					size: 0,
+					style: 'hollow',
+				},
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						datetimeFormatter: {
+							year: 'yyyy',
+							month: 'yyyy-MM',
+							day: 'yyyy-MM-dd'
+						}
+					},
+					min: new Date('2023-09-01').getTime(),
+					tickAmount: 6,
+					axisTicks: {
+						show: false,
+					},
+					axisBorder: {
+						show: false
+					},
+				},
+				tooltip: {
+					x: {
+						format: 'yyyy-MM-dd'
+					},
+				},
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shadeIntensity: 1,
+						opacityFrom: 0.7,
+						opacityTo: 0.9,
+						stops: [0, 100]
+					}
+				},
+				
+
+				colors: [vihoAdminConfig.primary],
+			};			
+	})
+
+	</script>
+</th:block>
+
+</html>
