@@ -1,13 +1,15 @@
 package com.liquidskr.btclient
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.rental.RentalRequestToolDto
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
+
 
 class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequestSheetDto>) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
@@ -16,7 +18,7 @@ class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequ
         var workerName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
         var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
-        var recyclerView: RecyclerView = itemView.findViewById(R.id.RentalRequestSheet_RecyclerView)
+        var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RentalRequestSheetViewHolder {
@@ -29,14 +31,14 @@ class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequ
         val currentRentalRequestSheet = rentalRequestSheets[position]
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
-        holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp
-        val layoutManager = LinearLayoutManager(holder.itemView.context)
-        holder.recyclerView.layoutManager = layoutManager
-        holder.recyclerView.adapter = RentalRequestToolAdapter(currentRentalRequestSheet.toolList)
-        Log.d("test", currentRentalRequestSheet.toolList.toString())
-        holder.itemView.setOnClickListener {
-
+        holder.timeStamp.text = LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        var toolListString = ""
+        for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
+            val toolName: String = tool.toolDto.name
+            val toolCount: String = tool.count.toString()
+            toolListString = toolListString.plus("$toolName($toolCount)  ")
         }
+        holder.toolListTextView.text = toolListString
     }
 
     override fun getItemCount(): Int {

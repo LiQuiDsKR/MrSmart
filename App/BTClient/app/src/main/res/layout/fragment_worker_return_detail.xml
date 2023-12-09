@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="43dp"
                 android:scaleType="fitXY"
-                app:srcCompat="@drawable/manager_return_topview" />
+                app:srcCompat="@drawable/worker_return_topview" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -120,7 +120,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="#4C96F1"
+                android:background="#0ADB86"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal">
 
@@ -131,7 +131,7 @@
                     android:layout_weight="0"
                     android:backgroundTint="#00FFFFFF"
                     android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_rental_confirmbtn" />
+                    app:srcCompat="@drawable/worker_rental_confirmbtn" />
             </LinearLayout>
         </LinearLayout>
 

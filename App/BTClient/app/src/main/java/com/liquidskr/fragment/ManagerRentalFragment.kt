@@ -105,7 +105,7 @@ class ManagerRentalFragment() : Fragment() {
                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(tool.id, toolCount))
                     }
-                    // Log.d("test",  gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222,rentalRequestToolFormDtoList.toList())))
+                    Log.d("test",  gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222,rentalRequestToolFormDtoList.toList())))
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
@@ -121,12 +121,12 @@ class ManagerRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.toolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.toolList)
+            sharedViewModel.rentalRequestToolList.clear()
+            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
             recyclerView.adapter = adapter
         }
 
-        val adapter = RentalToolAdapter(sharedViewModel.toolList)
+        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
         recyclerView.adapter = adapter
 
         return view

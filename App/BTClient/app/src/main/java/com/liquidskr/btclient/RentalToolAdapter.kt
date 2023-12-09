@@ -11,7 +11,6 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class RentalToolAdapter(val tools: List<ToolDtoSQLite>) :
     RecyclerView.Adapter<RentalToolAdapter.RentalToolViewHolder>() {
-    val selectedTools: MutableList<ToolDtoSQLite> = mutableListOf()
     val selectedToolsToRental: MutableList<ToolDtoSQLite> = mutableListOf()
 
     class RentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

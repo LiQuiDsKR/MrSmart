@@ -55,6 +55,16 @@
                 android:scaleY="1.5"
                 app:srcCompat="@drawable/lobby_db_sync" />
 
+            <ImageButton
+                android:id="@+id/SettingBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:backgroundTint="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                app:srcCompat="@drawable/lobby_settings" />
+
         </LinearLayout>
 
         <LinearLayout

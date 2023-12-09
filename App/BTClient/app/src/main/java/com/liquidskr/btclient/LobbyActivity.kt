@@ -16,6 +16,7 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var dbSyncBtn: ImageButton
     lateinit var testSendBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
+    lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
     lateinit var managerRentalFragment: ManagerRentalFragment
     lateinit var managerReturnFragment: ManagerReturnFragment
@@ -28,7 +29,6 @@ class LobbyActivity  : AppCompatActivity() {
         bluetoothManager = BluetoothManager(this, this)
         managerRentalFragment = ManagerRentalFragment()
         managerReturnFragment = ManagerReturnFragment()
-
         workerRentalFragment = WorkerRentalFragment()
 
         workerBtn = findViewById(R.id.workerBtn)
@@ -36,6 +36,7 @@ class LobbyActivity  : AppCompatActivity() {
         dbSyncBtn = findViewById(R.id.DBSyncBtn)
         testSendBtn = findViewById(R.id.testSendBtn)
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
+        settingBtn = findViewById(R.id.SettingBtn)
 
         workerBtn.setOnClickListener {
             val fragment = WorkerFragment.newInstance()
@@ -53,13 +54,16 @@ class LobbyActivity  : AppCompatActivity() {
         }
         dbSyncBtn.setOnClickListener {
             bluetoothManager.stopThread = false // 스레드 시작 시 변수 초기화
-            bluetoothManager.BackgroundThread()
+            bluetoothManager.dataReceiveSingleAndInsertDB()
         }
         testSendBtn.setOnClickListener {
             bluetoothManager.dataSend("REQUEST_StandardDB")
         }
         bluetoothBtn.setOnClickListener {
             bluetoothManager.bluetoothOpen()
+        }
+        settingBtn.setOnClickListener {
+
         }
 
     }

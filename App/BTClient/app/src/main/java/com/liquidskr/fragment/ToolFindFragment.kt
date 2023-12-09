@@ -15,9 +15,7 @@ import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolAdapter
-import com.mrsmart.standard.rental.ToolForRentalRequest
 import com.mrsmart.standard.tool.ToolDtoSQLite
-import kotlin.math.ceil
 
 
 class ToolFindFragment() : Fragment() {
@@ -32,6 +30,7 @@ class ToolFindFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        bluetoothManager = BluetoothManager(requireContext(), requireActivity())
         val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_list, container, false)
 
@@ -39,15 +38,16 @@ class ToolFindFragment() : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
 
-
+        /* 아래는 블루투스로 각 정비실의 공구 리스트 불러오는 과정
         bluetoothManager.dataSend("Request_ToolForRentalCount_" + sharedViewModel.toolBoxId.toString())
         val toolForRentalCnt = bluetoothManager.dataReceiveSingle().toInt()
         val toolForRentalSize = 10
         for (i in 1..ceil(toolForRentalCnt.toDouble() / toolForRentalSize.toDouble()).toInt()) {
             val toolForRental = gson.toJson(ToolForRentalRequest(toolForRentalSize, i, sharedViewModel.toolBoxId, "", emptyList<Long>()))
             bluetoothManager.dataSend(toolForRental)
-
         }
+        //받게 되는 것 : 해당 정비실의 공구 리스트 (미구현)
+        */
 
 
         val databaseHelper = DatabaseHelper(requireContext())
@@ -60,7 +60,7 @@ class ToolFindFragment() : Fragment() {
             for (tool: ToolDtoSQLite in adapter.getSelectedTools()) {
                 toolList.add(tool) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
             }
-            sharedViewModel.toolList.addAll(toolList)
+            sharedViewModel.rentalRequestToolList.addAll(toolList)
 
             requireActivity().supportFragmentManager.popBackStack()
         }
