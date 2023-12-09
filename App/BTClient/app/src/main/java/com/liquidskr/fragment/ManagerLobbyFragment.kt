@@ -29,7 +29,7 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
     lateinit var standbyBtn: ImageButton
     lateinit var recyclerView: RecyclerView
     val manager = manager;
-    val gson= Gson()
+    val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 
     lateinit var welcomeMessage: TextView

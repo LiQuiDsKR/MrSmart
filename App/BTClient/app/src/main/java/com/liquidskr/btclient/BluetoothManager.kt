@@ -49,7 +49,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var totalPercentage: Int = 0
 
     val backgroundThread = Thread { // 쓰레드, 백그라운드 실행
-        dataReceiveToWriteDB()
+        dataReceiveSingleAndInsertDB()
     }
     var stopThread = false // 쓰레드 종료 Flag
 
@@ -88,7 +88,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     fun BackgroundThread() {
         inputStream = bluetoothSocket.inputStream
         backgroundThread.start()
-
     }
     fun stopBackgroundThread() {
         stopThread = true // 스레드 중지를 요청
@@ -103,17 +102,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             timeout = false // Timeout Flag 초기화
             if (inputStream.available() > 0) {
                 when (dataCheckStep) {
-                    0 -> { // 0단계, 전체 데이터의 크기를 미리 받고 체크하는 단계
-                        val size = inputStream.available()
-                        val buffer = ByteArray(size)
-                        val readData = inputStream.read(buffer)
-                        val receivedMessage = String(buffer, 0, readData)
-                        dataSend(receivedMessage)
-                        dataCheckStep = 1 // 받은 데이터의 크기를 그대로 반송하며 1단계 진입
-                        dataCheckSize = receivedMessage.toInt()// 받은 데이터 저장
-                    }
-
-                    1 -> { // 1단계, 실제 데이터를 받는 단계
+                    0 -> { // 1단계, 실제 데이터를 받는 단계
                         timeoutHandler.postDelayed(
                             timeoutRunnable,
                             10000
@@ -234,6 +223,16 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         val readData = inputStream.read(buffer)
         val receivedByte = buffer.copyOf(readData)
         return String(receivedByte)
+    }
+    fun dataReceiveSingleAndInsertDB() {
+        inputStream = bluetoothSocket.inputStream
+        val size = inputStream.available()
+        while (size > 0) {
+            val buffer = ByteArray(size)
+            val readData = inputStream.read(buffer)
+            val receivedByte = buffer.copyOf(readData)
+            insertData(String(receivedByte)) // 받은 모든 메세지를 DB에 저장 (InsertData)
+        }
     }
 
     fun combineByteArrays(byteArrays: List<ByteArray>): ByteArray {

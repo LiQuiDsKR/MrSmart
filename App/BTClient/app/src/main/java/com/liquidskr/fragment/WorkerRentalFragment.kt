@@ -101,7 +101,7 @@ class WorkerRentalFragment() : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val toolId = fixCode(qrEditText.text.toString().replace("\n", ""))
                 try {
-                    sharedViewModel.toolList.add(dbHelper.getToolByCode(toolId))
+                    sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByCode(toolId))
                     recyclerViewUpdate()
                 } catch (e: UninitializedPropertyAccessException) {
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -159,8 +159,8 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.toolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.toolList)
+            sharedViewModel.rentalRequestToolList.clear()
+            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
             recyclerView.adapter = adapter
         }
         recyclerViewUpdate()
@@ -187,7 +187,7 @@ class WorkerRentalFragment() : Fragment() {
         return correctedText.toString()
     }
     fun recyclerViewUpdate() {
-        val adapter = RentalToolAdapter(sharedViewModel.toolList)
+        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
         recyclerView.adapter = adapter
     }
     companion object {

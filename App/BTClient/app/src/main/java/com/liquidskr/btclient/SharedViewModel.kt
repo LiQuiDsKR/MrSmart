@@ -1,10 +1,9 @@
-import androidx.lifecycle.MutableLiveData
+
 import androidx.lifecycle.ViewModel
 import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.rental.RentalRequestToolFormDto
+import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
-import kotlin.properties.Delegates
 
 class SharedViewModel : ViewModel() {
     var toolBoxId: Long = 5222
@@ -16,7 +15,9 @@ class SharedViewModel : ViewModel() {
     var loginWorker = MembershipSQLite(0,"","","","","","","", "" )
     var loginManager = MembershipSQLite(0,"","","","","","","", "" )
 
-    val toolList: MutableList<ToolDtoSQLite> = mutableListOf()
+    val rentalRequestToolList: MutableList<ToolDtoSQLite> = mutableListOf()
+    val outstandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
+    val outstandingRentalToolList: MutableList<RentalToolDto> = mutableListOf()
 
     /*
     fun ToolDto2RentalRequestToolFormDto (): List<RentalRequestToolFormDto> {
