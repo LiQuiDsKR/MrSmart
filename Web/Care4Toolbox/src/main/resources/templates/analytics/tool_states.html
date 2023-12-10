@@ -39,7 +39,7 @@
 			
 			
 			
-			<div class="col-5">
+			<div class="col-4">
 				<!-- Card -->
 				<div class="card mb-30 progress_3 bg-white mr-0">
 					<div class="card-body">
@@ -101,7 +101,21 @@
 				<!-- End Card -->
 			</div>
 			
-			<div class="col-7">
+			<div class="col-4">
+				<div class="card mb-30">
+					<div class="card-body pb-1">
+						<h3>공기구 상태 현황</h3>
+						<p class="progress-title mb-1 date-today">2023-12-10</p>
+					</div>
+					<div class="p-2">
+						<div
+							id="multiple-color-donut-chart"
+							style="height: 300px"></div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-4">
 				
 				<!-- Card -->
 				<div class="card mb-30 bg-white"style="overflow-x:auto;">
@@ -232,7 +246,8 @@
 		
 	var toolboxId=5222;
 	initializeDatepicker();
-	var chart1=initializeChart();
+	var chart1=initializeChart1();
+	var chart4=initializeChart4();
 	abcHttp.get(
 		'/membership/getbycode',
 		{
@@ -269,10 +284,11 @@
 		loadChart1.apply(chart1,[toolboxId]);
 		loadChart2(toolboxId);
 		loadChart3(toolboxId);
+		loadChart4.apply(chart4,[toolboxId]);
 	});
 		
-		
-	function initializeChart(){
+	//apex initialize
+	function initializeChart1(){
 		
 			/*
 			const chartData2 = data.map(item => ({
@@ -348,7 +364,7 @@
 			chart.render();	
 			return chart;
 	}
-	//apex
+	//apex update
 	function loadChart1(toolboxId){
 		
 		abcHttp.get(
@@ -378,6 +394,72 @@
 			});
 		});
 	}
+	function initializeChart4(){
+		return new Morris.Donut({
+			element: 'multiple-color-donut-chart',
+			data: [
+				{
+					value: 35,
+					label: '대여',
+				},
+				{
+					value: 25,
+					label: '양호',
+				},
+				{
+					value: 15,
+					label: '고장',
+				},
+				{
+					value: 15,
+					label: '파손',
+				},
+				{
+					value: 10,
+					label: '망실',
+				},
+				{
+					value: 10,
+					label: '폐기',
+				},
+			],
+			backgroundColor: '#fff',
+			labelColor: '#060',
+			startAngle: 180,
+			colors: [
+				'#8280FD',
+				'#67CF94',
+				'#09D1DE',
+				'#FFB959',
+				'#FC7383',
+				'#727272',
+				'#727272',
+			],
+			formatter: function (x) {
+				return x + '%';
+			},
+		});
+	}
+	function loadChart4(toolboxId){
+		abcHttp.get(
+			'/stock_status/get/analytics',
+			{
+				toolboxId:toolboxId,
+				currentDate:formatDate(new Date())
+			}
+		).then(data=>{
+			var newData = [
+		        { label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
+		        { label: '양호', value: Math.floor(data.goodCount/ data.totalCount * 100)},
+		        { label: '고장', value: Math.floor(data.faultCount/ data.totalCount * 100)},
+		        { label: '파손', value: Math.floor(data.damageCount/ data.totalCount * 100)},
+		        { label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
+		        { label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
+		    ];
+		    this.setData(newData);
+	    });	
+	}
+	
 	//대여/반납현황
 	function loadChart2(toolboxId){
 		abcHttp.get(
@@ -466,6 +548,7 @@
 			loadChart1.apply(chart1,[toolboxId]);
 			loadChart2(toolboxId);
 			loadChart3(toolboxId);
+			loadChart4.apply(chart4,[toolboxId]);
 		}
 	
 	//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
