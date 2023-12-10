@@ -425,7 +425,6 @@
 			],
 			backgroundColor: '#fff',
 			labelColor: '#060',
-			startAngle: 180,
 			colors: [
 				'#8280FD',
 				'#67CF94',
@@ -563,11 +562,11 @@
 		$('#end-date').val(formattedTodayDate);
 
 		$('#start-date').on('change', function () {
-			loadChart1(toolboxId);
+			loadChart1.apply(chart1,[toolboxId]);
 			console.log('start changed');
 		});
 		$('#end-date').on('change', function () {
-			loadChart1(toolboxId);
+			loadChart1.apply(chart1,[toolboxId]);
 			console.log('end changed');
 		})
 
@@ -575,7 +574,7 @@
 			language: 'en',
 			dateFormat: 'yyyy-mm-dd',
 			onSelect: function () {
-				loadChart1(toolboxId);
+				loadChart1.apply(chart1,[toolboxId]);
 				console.log('start changed');
 			}
 		});
@@ -586,7 +585,7 @@
 			language: 'en',
 			dateFormat: 'yyyy-mm-dd',
 			onSelect: function () {
-				loadChart1(toolboxId);
+				loadChart1.apply(chart1,[toolboxId]);
 				console.log('end changed');
 			}
 		});
