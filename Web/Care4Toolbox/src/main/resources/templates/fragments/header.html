@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
-
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- Page Header Start-->
 <!-- Header -->
@@ -44,12 +43,6 @@
 										<h4 class="user-email">똑똑한공기구관리시스템</p>
 									</div>
 									<!-- End Header Info -->
-									<!-- User Info -->
-									<div>
-										<h2 class="user-name">asdf</h2>
-										<h4 class="user-email">asdf</h4>
-									</div>
-									<!-- End User Info -->
 								</div>
 							</a>
 						</div>
@@ -72,18 +65,9 @@
 						<ul class="nav">
 							<li class="ml-0">
 							</li>
-							<li class="ml-0 d-none d-lg-flex">
-								<!-- Main Header Print -->
-								<div class="main-header-print">
-									<a href="#">
-										<img th:src="@{/img/svg/print-icon.svg}" alt="" />
-									</a>
-								</div>
-								<!-- End Main Header Print -->
-							</li>
-							<li class="d-none d-lg-flex">
+							<li class="d-none d-lg-flex mr-3">
 								<!-- Main Header Time -->
-								<div class="main-header-date-time text-right">
+								<div class="main-header-date-time text-right" hidden>
 									<h3 class="time">
 										<span id="hours">21</span>
 										<span id="point">:</span>
@@ -94,6 +78,29 @@
 									>
 								</div>
 								<!-- End Main Header Time -->
+							</li>
+							<li class="ml-0 d-none d-lg-flex mr-3">
+								<!-- Main Header Print -->
+								<div class="main-header-print" hidden>
+									<a href="#">
+										<img th:src="@{/img/svg/print-icon.svg}" alt="" />
+									</a>
+								</div>
+								<!-- End Main Header Print -->
+								
+								<!-- User Info -->
+								<div class="d-flex align-items-end flex-column" sec:authorize="isAuthenticated()">
+									<h3 class="user-name" id="user-name">Name</h3>
+									<div class="d-flex flex-row">
+										<div id="user-code" class="mr-2" sec:authentication="name"></div>
+										<div sec:authorize="hasRole('USER')">User</div>
+										<div sec:authorize="hasRole('ADMIN')">Admin</div>
+									</div>
+										<div id="user-more-info">//</div>									
+								</div>
+								
+								<!-- End User Info -->
+								
 							</li>
 							<li class="d-none d-lg-flex">
 								<!-- Main Header Button -->
@@ -116,6 +123,7 @@
 		</div>
 	</div>
 	<!-- End Main Header -->
+	
 </header>
 <!-- End Header -->
 <!-- Page Header Ends  -->

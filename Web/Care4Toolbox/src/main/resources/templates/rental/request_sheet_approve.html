@@ -128,137 +128,166 @@
 		var mainTempData;
 		
 		$(document).ready(function () {
-
-			const toolboxId = 5222; // 로그인 구현 후 사용자 정보를 불러와서 수정하기
-
 			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code:parseInt( document.getElementById("user-code").textContent)
+				}
+			)
+			.then(data=>{
+				return new Promise((resolved,rejected)=>{
+					abcHttp.get(
+						'/toolbox/getbyname',
+						{
+							name:data.partDto.subPartDto.mainPartDto.name
+						}
+					)
+					.then(toolboxData=>{
+						if (toolboxData==null){
+							throw error("no toolbox");
+						} else{
+							resolved(toolboxData.id);
+						}
+					})
+					.catch(error=>{
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(()=>{rejected();});
+					});
+				});
+			})
+			.then(toolboxId=>{
+				abcHttp.get(
 				`/rental/request_sheet/getpage`,
 				{
 					page:0,
 					size:10,
 					toolboxId:toolboxId
 				}
-			).then(data => {
-				mainTempData={data:data,toolboxId:toolboxId};
-				
-				const containerDiv = document.getElementById("containerdiv");
-				containerDiv.innerHTML = '';
-				let htmlString = ``
-				if (data.empty) {
-					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">처리할 신청 목록이 없습니다.</div>`
-					containerDiv.innerHTML = htmlString;
-				}
-				data.content.forEach(element => {
-					const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
-					htmlString = `
-				  <!-- Sheet -->
-				  <div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
-				    <!-- Header Table -->
-				    <div class="col-10" style="overflow-x:auto;">
-				      <table class="text-nowrap bg-white">
-				        <thead>
-				          <tr>
-				            <th>대여신청시간</th>
-				            <th>정비실</th>
-				            <th>작업자</th>
-				            <th>리더</th>
-				            <th>상태</th>
-				          </tr>
-				        </thead>
-				        <tbody>
-				          <tr>
-				            <td class="time">${formatDate(element.eventTimestamp)}</td>
-				            <td class="toolbox">${element.toolboxDto.name}</td>
-				            <td class="worker">${element.workerDto.name}</td>
-				            <td class="leader">${element.leaderDto.name}</td>
-				            <td class="sheetstate">${sheetState}</td>
-				          </tr>
-				        </tbody>
-				      </table>
-				    </div>
-				    <!-- End Header Table-->
-				    <div class="col-2 d-flex justify-content-center align-items-center">
-				      <a href="#" class="btn disabled" style="width:fit-content; height:fit-content;">
-				        <span>대여승인</span>
-				      </a>
-				    </div>
-				    <div class="col-12" style="overflow-x:auto;">
-				      <table class="tool-list invoice-list-table text-nowrap bg-white">
-				        <thead>
-				          <tr>
-				            <th>
-				              <label class="custom-checkbox">
-				                <input type="checkbox">
-				                <span class="checkmark"></span>
-				              </label>
-				            </th>
-				            <th>정비실명</th>
-				            <th>이름</th>
-				            <th>규격</th>
-				            <th>신청수량</th>
-				            <th>QR정보</th>
-				            <th class="th_btn">삭제</th>
-				          </tr>
-				        </thead>
-				        <tbody>
-				   `;
-
-					for (let tool of element.toolList) {
-						htmlString +=
-							`
-				          <tr>
-				            <td>
-				              <label class="custom-checkbox">
-				                <input type="checkbox">
-				                <span class="checkmark"></span>
-				              </label>
-				            </td>
-				            <td class="toolbox">${element.toolboxDto.name}</td>
-				            <td class="name">${tool.toolDto.name}</td>
-				            <td class="spec">${tool.toolDto.spec}</td>
-				            <td class="count">${tool.count}</td>
-				            <td class="qrcode"></td>
-				            <td class="delete td_btn">
-				              <span style="cursor:pointer;">
-				                <img src="/img/svg/c-close.svg" alt="" class="svg">
-				              </span>
-				            </td>
-				          </tr>
-					`;
+				).then(data => {
+					mainTempData={data:data,toolboxId:toolboxId};
+					
+					const containerDiv = document.getElementById("containerdiv");
+					containerDiv.innerHTML = '';
+					let htmlString = ``
+					if (data.empty) {
+						htmlString = `<div class="row m-0 pt-3 pb-3 font-20">처리할 신청 목록이 없습니다.</div>`
+						containerDiv.innerHTML = htmlString;
 					}
-					htmlString += `
-				        </tbody>
-					  </table>
-				    </div>
-				  </div>
-				  <!-- End Sheet -->`;
-
-					var outerDiv = document.createElement('div');
-					outerDiv.innerHTML = htmlString;
-					containerDiv.appendChild(outerDiv);
-					
-					// 서버 전송용 객체 복제. RentalRequestSheetDto.
-					const dataObj = JSON.parse(JSON.stringify(element));
-					
-					// dataObj를 Sheet별로 바인딩. (call by ref)
-					//addListenerApproveBtn(dataObj);
-					//addListenerDeleteBtn(dataObj);
-					
-					
-					document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
-						element.addEventListener("click",function(){
-							approveBtnClickHandler.call(this,dataObj);
+					data.content.forEach(element => {
+						const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
+						htmlString = `
+					  <!-- Sheet -->
+					  <div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+					    <!-- Header Table -->
+					    <div class="col-10" style="overflow-x:auto;">
+					      <table class="text-nowrap bg-white">
+					        <thead>
+					          <tr>
+					            <th>대여신청시간</th>
+					            <th>정비실</th>
+					            <th>작업자</th>
+					            <th>리더</th>
+					            <th>상태</th>
+					          </tr>
+					        </thead>
+					        <tbody>
+					          <tr>
+					            <td class="time">${formatDate(element.eventTimestamp)}</td>
+					            <td class="toolbox">${element.toolboxDto.name}</td>
+					            <td class="worker">${element.workerDto.name}</td>
+					            <td class="leader">${element.leaderDto.name}</td>
+					            <td class="sheetstate">${sheetState}</td>
+					          </tr>
+					        </tbody>
+					      </table>
+					    </div>
+					    <!-- End Header Table-->
+					    <div class="col-2 d-flex justify-content-center align-items-center">
+					      <a href="#" class="btn disabled" style="width:fit-content; height:fit-content;">
+					        <span>대여승인</span>
+					      </a>
+					    </div>
+					    <div class="col-12" style="overflow-x:auto;">
+					      <table class="tool-list invoice-list-table text-nowrap bg-white">
+					        <thead>
+					          <tr>
+					            <th>
+					              <label class="custom-checkbox">
+					                <input type="checkbox">
+					                <span class="checkmark"></span>
+					              </label>
+					            </th>
+					            <th>정비실명</th>
+					            <th>이름</th>
+					            <th>규격</th>
+					            <th>신청수량</th>
+					            <th>QR정보</th>
+					            <th class="th_btn">삭제</th>
+					          </tr>
+					        </thead>
+					        <tbody>
+					   `;
+	
+						for (let tool of element.toolList) {
+							htmlString +=
+								`
+					          <tr>
+					            <td>
+					              <label class="custom-checkbox">
+					                <input type="checkbox">
+					                <span class="checkmark"></span>
+					              </label>
+					            </td>
+					            <td class="toolbox">${element.toolboxDto.name}</td>
+					            <td class="name">${tool.toolDto.name}</td>
+					            <td class="spec">${tool.toolDto.spec}</td>
+					            <td class="count">${tool.count}</td>
+					            <td class="qrcode"></td>
+					            <td class="delete td_btn">
+					              <span style="cursor:pointer;">
+					                <img src="/img/svg/c-close.svg" alt="" class="svg">
+					              </span>
+					            </td>
+					          </tr>
+						`;
+						}
+						htmlString += `
+					        </tbody>
+						  </table>
+					    </div>
+					  </div>
+					  <!-- End Sheet -->`;
+	
+						var outerDiv = document.createElement('div');
+						outerDiv.innerHTML = htmlString;
+						containerDiv.appendChild(outerDiv);
+						
+						// 서버 전송용 객체 복제. RentalRequestSheetDto.
+						const dataObj = JSON.parse(JSON.stringify(element));
+						
+						// dataObj를 Sheet별로 바인딩. (call by ref)
+						//addListenerApproveBtn(dataObj);
+						//addListenerDeleteBtn(dataObj);
+						
+						
+						document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
+							element.addEventListener("click",function(){
+								approveBtnClickHandler.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
-					});
-					document.querySelectorAll(".delete span:not(.listener-added)").forEach(element => {
-						element.addEventListener("click",function(){
-							deleteBtnClickHandler.call(this,dataObj);
+						document.querySelectorAll(".delete span:not(.listener-added)").forEach(element => {
+							element.addEventListener("click",function(){
+								deleteBtnClickHandler.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
 					});
+					activateCheckbox();
 				});
-				activateCheckbox();
 			});
 		});
 

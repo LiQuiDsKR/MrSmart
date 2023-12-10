@@ -111,5 +111,20 @@
 <th:block layout:fragment="script"></th:block>
 <script th:inline="javascript">
         //abcHttp.multiplyFontSize(1.5);
+        
+		abcHttp.get(
+			'/membership/getbycode',
+			{
+				code:parseInt( document.getElementById("user-code").textContent)
+			}
+		)
+		.then(data=>{
+			console.log(data);
+			document.getElementById("user-name").textContent=data.name;
+			document.getElementById("user-more-info").textContent=
+				data.partDto.subPartDto.mainPartDto.name + "/" +
+				data.partDto.subPartDto.name + "/" +
+				data.partDto.name;
+		});
 	</script>
 </html>

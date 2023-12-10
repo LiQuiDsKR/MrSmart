@@ -166,184 +166,220 @@
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
 
+		var toolboxId=5222;
 		$(document).ready(function () {
 			initializeDatepicker();
-			load();
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code:parseInt( document.getElementById("user-code").textContent)
+				}
+			)
+			.then(data=>{
+				return new Promise((resolved,rejected)=>{
+					abcHttp.get(
+						'/toolbox/getbyname',
+						{
+							name:data.partDto.subPartDto.mainPartDto.name
+						}
+					)
+					.then(toolboxData=>{
+						if (toolboxData==null){
+							throw error("no toolbox");
+						} else{
+							toolboxId=toolboxData.id;
+							resolved(toolboxData.id);
+						}
+					})
+					.catch(error=>{
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(()=>{rejected();});
+					});
+				});
+			})
+			.then(toolboxId=>{
+				load(toolboxId);
+			})
 		});
 
 		//fetch
-		function load() {
-			abcHttp.get(
-				`/outstanding_rental_sheet/getpage`,
-				{
-					toolboxId: 5222,//로그인한 관리자 담당 정비실로 변경해야 함. 일단 기본값 정비1실
-					page: 0,
-					size: 10,
-					startDate: $('#start-date').val(),
-					endDate: $('#end-date').val(),
-				}
-			).then(data => {
-				console.log(data);
-				const containerDiv = document.getElementById("containerdiv");
-				containerDiv.innerHTML='';
-				let htmlString = ``
-				if (data.empty) {
-					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">반납 대기 중인 대여 목록이 없습니다.</div>`
-					containerDiv.innerHTML = htmlString;
-				}
-				data.content.forEach(sheet => {
-					const element = sheet.rentalSheetDto;
-					htmlString = `
-					<!-- Sheet -->
-					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
-						<!-- Header Table -->
-						<div class="col-12" style="overflow-x:auto;">
-							<table class="text-nowrap bg-white">
-								<thead>
-									<tr>
-										<th>대여승인시간</th>
-										<th>정비실</th>
-										<th>작업자</th>
-										<th>리더</th>
-										<th>승인자</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td class="time">${formatDate(element.eventTimestamp)}</td>
-										<td class="toolbox">${element.toolboxDto.name}</td>
-										<td class="worker">${element.workerDto.name}</td>
-										<td class="leader">${element.leaderDto.name}</td>
-										<td class="approver">${element.approverDto.name}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<!-- End Header Table-->
-						<div class="col-12" style="overflow-x:auto;">
-							<table class="tool-list invoice-list-table text-nowrap bg-white">
-								<thead>
-									<tr>
-										<th>정비실명</th>
-										<th>이름</th>
-										<th>규격</th>
-										<th>신청수량</th>
-										<th>미반납수량</th>
-										<th>반납수량</th>
-										<th>QR코드</th>
-										<th>공기구상태</th>
-									</tr>
-								</thead>
-								<tbody>
-				   `;
-
-					for (let tool of element.toolList) {
-						htmlString +=
-							`
-									<tr>
-										<td class="toolbox">${element.toolboxDto.name}</td>
-										<td class="name">${tool.toolDto.name}</td>
-										<td class="spec">${tool.toolDto.spec}</td>
-										<td class="retnalcount">${tool.count}</td>
-										<td class="outstandingcount">${tool.outstandingCount}</td>
-										<td class="returncount">
-											<div class="d-flex justify-content-between align-item-center">
-										        <a href="#" class="btn bg-success increaseBtn p-2">
-										            <img src="/img/svg/plus_white.svg" alt="" class="svg "/>
-										        </a>
-										        <p class="d-flex align-items-center toolCount mb-0">0</p>
-										        <a href="#" class="btn bg-danger decreaseBtn p-2">
-										            <img src="/img/svg/minus_white.svg" alt="" class="svg "/>
-										        </a>
-										    </div>
-										</td>
-										<td class="qrcode"></td>
-										<td class="toolstate">
-											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style">
-													<option value="GOOD">양호</option>									
-													<option value="FAULT">고장</option>
-													<option value="DAMAGE">파손</option>
-													<option value="LOSS">망실</option>
-													<option value="DISCARD">폐기</option>
-												</select>
-											</div>
-										</td>
-									</tr>
-					`;
+		function load(toolboxId) {
+						
+				abcHttp.get(
+					`/outstanding_rental_sheet/getpage`,
+					{
+						toolboxId: toolboxId,
+						page: 0,
+						size: 10,
+						startDate: $('#start-date').val(),
+						endDate: $('#end-date').val(),
 					}
-					htmlString += `
-					        </tbody>
-						  </table>
-					    </div>
-					    <div class="col-12 d-flex justify-content-end mt-3 pr-3">
-						    <div class="">
-						      <a href="#" class="mr-3 approveBtn btn disabled" style="width:fit-content; height:fit-content;">
-						        <span style="width:100%;">반납승인</span>
-						      </a>
+				).then(data => {
+					console.log(data);
+					const containerDiv = document.getElementById("containerdiv");
+					containerDiv.innerHTML='';
+					let htmlString = ``
+					if (data.empty) {
+						htmlString = `<div class="row m-0 pt-3 pb-3 font-20">반납 대기 중인 대여 목록이 없습니다.</div>`
+						containerDiv.innerHTML = htmlString;
+					}
+					data.content.forEach(sheet => {
+						const element = sheet.rentalSheetDto;
+						htmlString = `
+						<!-- Sheet -->
+						<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+							<!-- Header Table -->
+							<div class="col-12" style="overflow-x:auto;">
+								<table class="text-nowrap bg-white">
+									<thead>
+										<tr>
+											<th>대여승인시간</th>
+											<th>정비실</th>
+											<th>작업자</th>
+											<th>리더</th>
+											<th>승인자</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="time">${formatDate(element.eventTimestamp)}</td>
+											<td class="toolbox">${element.toolboxDto.name}</td>
+											<td class="worker">${element.workerDto.name}</td>
+											<td class="leader">${element.leaderDto.name}</td>
+											<td class="approver">${element.approverDto.name}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- End Header Table-->
+							<div class="col-12" style="overflow-x:auto;">
+								<table class="tool-list invoice-list-table text-nowrap bg-white">
+									<thead>
+										<tr>
+											<th>정비실명</th>
+											<th>이름</th>
+											<th>규격</th>
+											<th>신청수량</th>
+											<th>미반납수량</th>
+											<th>반납수량</th>
+											<th>QR코드</th>
+											<th>공기구상태</th>
+										</tr>
+									</thead>
+									<tbody>
+					   `;
+	
+						for (let tool of element.toolList) {
+							htmlString +=
+								`
+										<tr>
+											<td class="toolbox">${element.toolboxDto.name}</td>
+											<td class="name">${tool.toolDto.name}</td>
+											<td class="spec">${tool.toolDto.spec}</td>
+											<td class="retnalcount">${tool.count}</td>
+											<td class="outstandingcount">${tool.outstandingCount}</td>
+											<td class="returncount">
+												<div class="d-flex justify-content-between align-item-center">
+											        <a href="#" class="btn bg-success increaseBtn p-2">
+											            <img src="/img/svg/plus_white.svg" alt="" class="svg "/>
+											        </a>
+											        <p class="d-flex align-items-center toolCount mb-0">0</p>
+											        <a href="#" class="btn bg-danger decreaseBtn p-2">
+											            <img src="/img/svg/minus_white.svg" alt="" class="svg "/>
+											        </a>
+											    </div>
+											</td>
+											<td class="qrcode"></td>
+											<td class="toolstate">
+												<div class="custom-select style--two" style="max-width:none">
+													<select class="theme-input-style">
+														<option value="GOOD">양호</option>									
+														<option value="FAULT">고장</option>
+														<option value="DAMAGE">파손</option>
+														<option value="LOSS">망실</option>
+														<option value="DISCARD">폐기</option>
+													</select>
+												</div>
+											</td>
+										</tr>
+						`;
+						}
+						htmlString += `
+						        </tbody>
+							  </table>
 						    </div>
-					    </div>
-					  </div>
-					  <!-- End Sheet -->`;
-
-					var outerDiv = document.createElement('div');
-					outerDiv.innerHTML=htmlString;
-					containerDiv.appendChild(outerDiv);
-					
-					// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
-					const dataObj = {
-						rentalSheetId:element.id,
-						workerId:element.workerDto.id,
-						leaderId:element.leaderDto.id,
-						approverId:113, //로그인하면 바꾸기...
-						toolboxId:5222, //얘도 로그인하면 바구기...
-						toolList:element.toolList.map(e=>{
-							return {
-								rentalToolId:e.id,
-								toolId:e.toolDto.id,
-								count:0,
-								//goodCount:0,
-								//faultCount:0,
-								//damageCount:0,
-								//lossCount:0,
-								//discardCount:0,
-								status:"GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
-								tags:"",
-							}
-						}),
-					}
-					console.log(dataObj);
-					
-					//addListenerApproveBtn(dataObj);
-					//addListenerDeleteBtn(dataObj);
-					document.querySelectorAll(".increaseBtn:not(.listener-added)").forEach(element => {
-						element.addEventListener("click", function () {
-							increaseCount.call(this,dataObj);
+						    <div class="col-12 d-flex justify-content-end mt-3 pr-3">
+							    <div class="">
+							      <a href="#" class="mr-3 approveBtn btn disabled" style="width:fit-content; height:fit-content;">
+							        <span style="width:100%;">반납승인</span>
+							      </a>
+							    </div>
+						    </div>
+						  </div>
+						  <!-- End Sheet -->`;
+	
+						var outerDiv = document.createElement('div');
+						outerDiv.innerHTML=htmlString;
+						containerDiv.appendChild(outerDiv);
+						
+						// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
+						const dataObj = {
+							rentalSheetId:element.id,
+							workerId:element.workerDto.id,
+							leaderId:element.leaderDto.id,
+							approverId:113, //로그인하면 바꾸기...
+							toolboxId:5222, //얘도 로그인하면 바구기...
+							toolList:element.toolList.map(e=>{
+								return {
+									rentalToolId:e.id,
+									toolId:e.toolDto.id,
+									count:0,
+									//goodCount:0,
+									//faultCount:0,
+									//damageCount:0,
+									//lossCount:0,
+									//discardCount:0,
+									status:"GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
+									tags:"",
+								}
+							}),
+						}
+						console.log(dataObj);
+						
+						//addListenerApproveBtn(dataObj);
+						//addListenerDeleteBtn(dataObj);
+						document.querySelectorAll(".increaseBtn:not(.listener-added)").forEach(element => {
+							element.addEventListener("click", function () {
+								increaseCount.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
-					});
-					document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
-						element.addEventListener("click", function () {
-							decreaseCount.call(this,dataObj);
+						document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
+							element.addEventListener("click", function () {
+								decreaseCount.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
-					});
-					document.querySelectorAll(".toolstate select:not(.listener-added)").forEach(element => {
-						element.addEventListener("change", function () {
-							toolStateChangeHandler.call(this,dataObj);
+						document.querySelectorAll(".toolstate select:not(.listener-added)").forEach(element => {
+							element.addEventListener("change", function () {
+								toolStateChangeHandler.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
-					});
-					
-					document.querySelectorAll(".approveBtn:not(.listener-added)").forEach(element => {
-						element.addEventListener("click", function () {
-							approveBtnClickHandler.call(this,dataObj);
+						
+						document.querySelectorAll(".approveBtn:not(.listener-added)").forEach(element => {
+							element.addEventListener("click", function () {
+								approveBtnClickHandler.call(this,dataObj);
+							});
+							element.classList.add("listener-added");
 						});
-						element.classList.add("listener-added");
 					});
+					//activateCheckbox();
 				});
-				//activateCheckbox();
-			});
+			//})
 		}
 		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
 		function initializeDatepicker(){
@@ -357,11 +393,11 @@
 			$('#end-date').val(formattedTodayDate);
 
 			$('#start-date').on('change', function () {
-				load();
+				load(toolboxId);
 				console.log('start changed')
 			});
 			$('#end-date').on('change', function () {
-				load();
+				load(toolboxId);
 				console.log('end changed')
 			})
 
@@ -369,7 +405,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load();
+					load(toolboxId);
 					console.log('start changed')
 				}
 			});
@@ -380,7 +416,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load();
+					load(toolboxId);
 					console.log('end changed')
 				}
 			});

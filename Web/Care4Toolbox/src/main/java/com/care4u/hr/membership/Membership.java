@@ -65,10 +65,6 @@ public class Membership extends BaseEntity {
 		this.employmentStatus = membershipDto.getEmploymentStatus();
 	}
     
-    /**spring security db비밀번호 전부 bcrypt해야해서 만든 일회성 함수
-     * @deprecated
-     * @param password
-     */
     public void updatePassword(String password) {
     	this.password=password;
     }

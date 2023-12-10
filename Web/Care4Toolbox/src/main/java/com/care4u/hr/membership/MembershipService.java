@@ -35,7 +35,8 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 
 	private final MembershipRepository repository;
 	private final PartRepository partRepository;
-	
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	public void addNew(Membership item) {
 		
@@ -62,6 +63,12 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 			membership = new Membership(membershipDto.getCode());
 		}
 		membership.update(part.get(), membershipDto);
+		
+		// Hash the plain password using BCrypt
+		String plainPassword = membership.getPassword();
+        String hashedPassword = passwordEncoder.encode(plainPassword);
+        membership.updatePassword(hashedPassword);
+        logger.info(membership.getCode()+","+membership.getName()+" 회원의 비밀번호가 ["+hashedPassword+"]로 정상 변경되었습니다.");
 
 		return new MembershipDto(repository.save(membership));
 	}
@@ -137,9 +144,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 				.build();
 	}
 	
-	
 
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     /**spring security db bcrypt
      * @deprecated
      */

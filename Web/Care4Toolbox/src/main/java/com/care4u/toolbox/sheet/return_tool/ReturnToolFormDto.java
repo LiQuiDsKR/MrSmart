@@ -18,7 +18,7 @@ import lombok.ToString;
 public class ReturnToolFormDto {
 	
 	@NotNull
-	private Long rentalToolId;
+	private Long rentalToolDtoId;
 	@NotNull
 	private Long toolDtoId;
 	@Min(value=1, message="수량은 1 이상이어야 합니다")

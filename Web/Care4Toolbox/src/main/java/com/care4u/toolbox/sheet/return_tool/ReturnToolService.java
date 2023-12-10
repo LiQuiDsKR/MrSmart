@@ -59,7 +59,7 @@ public class ReturnToolService {
 	
 	@Transactional
 	public ReturnTool addNew(ReturnToolFormDto toolDto, ReturnSheet savedReturnSheet) {
-		Optional<RentalTool> rentalTool = rentalToolRepository.findById(toolDto.getRentalToolId());
+		Optional<RentalTool> rentalTool = rentalToolRepository.findById(toolDto.getRentalToolDtoId());
 		if (rentalTool.isEmpty()){
 			logger.error("rentalTool not found");
 			return null;

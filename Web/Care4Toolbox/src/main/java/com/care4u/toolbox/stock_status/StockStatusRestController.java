@@ -1,5 +1,7 @@
 package com.care4u.toolbox.stock_status;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,5 +50,30 @@ public class StockStatusRestController {
     		){
     	StockStatusDto stockDto=stockStatusService.get(toolId,toolboxId);
     	return ResponseEntity.ok(stockDto);
+    }
+    
+    @GetMapping(value="/stock_status/get/analytics")
+    public ResponseEntity<StockStatusSummaryDto> getStockStatusSummary(
+    		@RequestParam(name="toolboxId") Long toolboxId,
+    		@RequestParam(name="currentDate") String currentDate
+    		){
+    	
+    	LocalDate currentLocalDate = LocalDate.parse(currentDate, DateTimeFormatter.ISO_DATE);
+    	
+    	StockStatusSummaryDto summaryDto=stockStatusService.getSummary(toolboxId, currentLocalDate);
+    	return ResponseEntity.ok(summaryDto);
+    }
+    @GetMapping(value="/stock_status/get/analytics/list")
+    public ResponseEntity<List<StockStatusSummaryDto>> getStockStatusSummaryList(
+    		@RequestParam(name="toolboxId") Long toolboxId,
+    		@RequestParam(name="startDate") String startDate,
+    		@RequestParam(name="endDate") String endDate
+    		){
+    	
+    	LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+    	LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+    	
+    	List<StockStatusSummaryDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
+    	return ResponseEntity.ok(summaryDto);
     }
 }

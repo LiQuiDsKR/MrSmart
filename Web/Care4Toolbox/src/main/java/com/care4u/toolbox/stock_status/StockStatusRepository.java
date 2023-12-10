@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface StockStatusRepository extends JpaRepository<StockStatus, Long> {
+public interface StockStatusRepository extends JpaRepository<StockStatus, Long>, StockStatusRepositoryCustom {
 	
 	List<StockStatus> findAllByCurrentDay( LocalDate date);
 	

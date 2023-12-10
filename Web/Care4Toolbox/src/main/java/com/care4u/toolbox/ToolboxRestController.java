@@ -84,4 +84,11 @@ public class ToolboxRestController {
     	String response = gson.toJson(toolboxFormDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @GetMapping(value="/toolbox/getbyname")
+    public ResponseEntity<ToolboxDto> getToolboxByName(
+    		@RequestParam(name="name") String name
+    		){
+    	ToolboxDto toolboxDto = toolboxService.get(name);
+    	return ResponseEntity.ok(toolboxDto);
+    }
 }

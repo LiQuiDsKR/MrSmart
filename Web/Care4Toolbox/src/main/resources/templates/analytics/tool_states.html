@@ -19,7 +19,48 @@
 			<div class="col-12">
 				<!-- Card -->
 				<div id="mainCard" class="card bg-transparent">
+					
+					<div class="col-6 bg-white">
+					
+					<!-- Form Group -->
+					<div class="form-group m-2">
+						<label class="mb-2 font-14 bold">시작 날짜</label>
 
+						<!-- Date Picker -->
+						<div class="dashboard-date style--four">
+							<span id="start-date-btn" class="input-group-addon">
+								<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+							</span>
+
+							<input type="text" id="start-date" placeholder="Select Date" />
+						</div>
+						<!-- End Date Picker -->
+					</div>
+					<!-- End Form Group -->
+
+					<!-- Form Group -->
+					<div class="form-group m-2 mr-4">
+						<label class="mb-2 font-14 bold">종료 날짜</label>
+
+						<!-- Date Picker -->
+						<div class="dashboard-date style--four">
+							<span id="end-date-btn" class="input-group-addon">
+								<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+							</span>
+
+							<input type="text" id="end-date" placeholder="Select Date" />
+						</div>
+						<!-- End Date Picker -->
+					</div>
+					<!-- End Form Group -->
+					
+					<div id="sector1">
+						
+					</div>
+					
+					</div>
+					
+					
 				</div>
 				<!-- End Card -->
 
@@ -113,21 +154,66 @@
 		}
 	});
 	*/
+	
+	initializeDatepicker();
+	var chart1=initializeChart();
+	
+	var toolboxId=5222;
+	
 	abcHttp.get(
+		'/membership/getbycode',
+		{
+			code:parseInt( document.getElementById("user-code").textContent)
+		}
+	)
+	.then(data=>{
+		return new Promise((resolved,rejected)=>{
+			abcHttp.get(
+				'/toolbox/getbyname',
+				{
+					name:data.partDto.subPartDto.mainPartDto.name
+				}
+			)
+			.then(toolboxData=>{
+				if (toolboxData==null){
+					throw error("no toolbox");
+				} else{
+					toolboxId=toolboxData.id;
+					resolved(toolboxData.id);
+				}
+			})
+			.catch(error=>{
+				Swal.fire({
+					type: 'error',
+					title: '정비실 없음',
+					text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+				}).then(()=>{rejected();});
+			});
+		});
+	})
+	.then(toolboxId=>{
+		load(chart1,toolboxId);
+	});
+	
+	
+	
+	function initializeChart(){
 		
-	).then(data=>{
-		
-			const chartData = data.map(item => ({
-				x: new Date(item.timestamp).getTime(),
-				y: item.value
+			/*
+			const chartData2 = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.totalCount
 			}));
+			*/
 	
 			// ApexCharts 설정
 			const options = {
-				series: [{
-					name: 'Production',
-					data: chartData
-				}],
+				series: [
+				{
+					name: 'rental',
+					data: [0]
+				}
+				],
 				chart: {
 					id: 'area-datetime',
 					type: 'area',
@@ -155,7 +241,8 @@
 							day: 'yyyy-MM-dd'
 						}
 					},
-					min: new Date('2023-09-01').getTime(),
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
 					tickAmount: 6,
 					axisTicks: {
 						show: false,
@@ -180,9 +267,101 @@
 				},
 				
 
-				colors: [vihoAdminConfig.primary],
-			};			
-	})
+				//colors: [],
+			};
+			var chart = new ApexCharts(document.querySelector("#sector1"), options);
+			chart.render();	
+			return chart;
+	}
+	
+	function load(chart,toolboxId){
+		
+		abcHttp.get(
+			'/stock_status/get/analytics/list',
+			{
+				toolboxId:toolboxId,
+				startDate: $('#start-date').val(),
+				endDate: $('#end-date').val(),
+			}
+		).then(data=>{
+			console.log(data);
+			const chartData = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.rentalCount
+			}));
+			chart.updateOptions({
+				series:[
+				{
+					name:'rental',
+					data:chartData
+				}
+				],
+				xaxis:{
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
+				}
+			});
+		});
+		
+	}
+	
+	//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+	function initializeDatepicker(){
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+		const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
+		$('#start-date').val(formattedLastMonthDate);
+		$('#end-date').val(formattedTodayDate);
+
+		$('#start-date').on('change', function () {
+			load(chart1,toolboxId);
+			console.log('start changed')
+		});
+		$('#end-date').on('change', function () {
+			load(chart1,toolboxId);
+			console.log('end changed')
+		})
+
+		$('#start-date').datepicker({
+			language: 'en',
+			dateFormat: 'yyyy-mm-dd',
+			onSelect: function () {
+				load(chart1,toolboxId);
+				console.log('start changed')
+			}
+		});
+		$('#start-date-btn').on('click', function () {
+			$('#start-date').datepicker('show');
+		});
+		$('#end-date').datepicker({
+			language: 'en',
+			dateFormat: 'yyyy-mm-dd',
+			onSelect: function () {
+				load(chart1,toolboxId);
+				console.log('end changed')
+			}
+		});
+		$('#end-date-btn').on('click', function () {
+			$('#end-date').datepicker('show');
+		});
+	}
+
+
+	function formatDateTime(inputDate) {
+		const dateObject = new Date(inputDate);
+		const year = dateObject.getFullYear();
+		const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+		const day = dateObject.getDate().toString().padStart(2, '0');
+		const hours = dateObject.getHours().toString().padStart(2, '0');
+		const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+		const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+		return formattedDate;
+	}
 
 	</script>
 </th:block>

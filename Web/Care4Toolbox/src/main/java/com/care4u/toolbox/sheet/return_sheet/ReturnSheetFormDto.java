@@ -24,13 +24,13 @@ import lombok.ToString;
 @ToString
 public class ReturnSheetFormDto {
 	@NotNull
-	private Long rentalSheetId;
+	private Long rentalSheetDtoId;
 	@NotNull(message="작업자 정보는 필수 입력값입니다.")
-	private Long workerId;
+	private Long workerDtoId;
 	@NotNull(message="승인자 정보는 필수 입력값입니다.")
-	private Long approverId;
+	private Long approverDtoId;
 	@NotNull(message="정비실 정보는 필수 입력값입니다.")
-	private Long toolboxId;
+	private Long toolboxDtoId;
 	@NotEmpty(message="공기구 목록은 필수 입력값입니다.")
 	private List<ReturnToolFormDto> toolList;
 	

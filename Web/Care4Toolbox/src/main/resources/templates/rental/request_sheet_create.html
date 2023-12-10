@@ -355,15 +355,33 @@
 		//datatable 초기화 전 전역 선언.
 		var table = {draw: function () {console.log('not initialized yet')}};
 		$(document).ready(function () {
-
-			//231025 검색 기능
-			/*
-			 $("#searchBtn").on("click",function(e) {
-				 e.preventDefault();
-				 page(0);
-			 });
-			 */
-			 
+			
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code:parseInt( document.getElementById("user-code").textContent)
+				}
+			)
+			.then(data=>{
+				mainData["worker"].id = data.id;
+				mainData["worker"].name = data.name;
+				document.getElementById("worker").textContent = mainData["worker"].name;
+				
+				abcHttp.get(
+					'/toolbox/getbyname',
+					{
+						name:data.partDto.subPartDto.mainPartDto.name
+					}
+				)
+				.then(toolboxData=>{
+					if (toolboxData==null){
+						return;
+					}
+					document.getElementById("toolboxSelect").value=toolboxData.id;
+				});
+			});
+			
+			// =============== ▼ table ===============
 			var csrfToken = document.querySelector('meta[name="_csrf"]').content;
 			
 			table = $('#datatable').DataTable({
@@ -392,7 +410,7 @@
 							"page": parseInt(d.start / d.length),
 							"size": d.length,
 							"name": $("#searchInput").val(),
-							"toolboxId": parseInt($("#toolboxSelect").val()),
+							"toolboxId": parseInt(document.getElementById("toolboxSelect").value),
 							"subGroupId": [],
 							//"order": columnsDefine[d.order[0].column].column,
 							//"search": 'tagid',
@@ -491,6 +509,9 @@
 				e.preventDefault();
 				table.draw();
 			});
+			
+			//toolboxSelect동기화
+			setTimeout(_=>{table.draw();},100);
 		});
 
 		/*

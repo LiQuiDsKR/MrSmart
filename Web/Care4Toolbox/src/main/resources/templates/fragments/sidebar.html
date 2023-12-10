@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- Sidebar -->
 <nav class="sidebar" data-trigger="scrollbar" th:fragment="sidebar">
@@ -17,32 +18,32 @@
 	<div class="sidebar-body">
 		<!-- Nav -->
 		<ul class="nav">
-			<li class="nav-category">기준정보</li>
-			<li class="">
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">기준정보</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/parts}">
 					<i class="icofont-navigation-menu"></i>
 					<span class="link-title">조직 정보</span>
 				</a>
 			</li>
-			<li class="">
+			<li class="" >
 				<a th:href="@{/membership}">
 					<i class="icofont-ui-user"></i>
 					<span class="link-title">인원 정보</span>
 				</a>
 			</li>
-			<li class="">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/toolbox}">
 					<i class="icofont-database"></i>
 					<span class="link-title">정비실 정보</span>
 				</a>
 			</li>
-			<li class="">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/groups}">
 					<i class="icofont-automation"></i>
 					<span class="link-title">공기구 분류 정보</span>
 				</a>
 			</li>
-			<li class="">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/tool}">
 					<i class="icofont-automation"></i>
 					<span class="link-title">공기구 정보</span>
@@ -52,43 +53,50 @@
 			<li class="">
 				<a th:href="@{/rental/request_sheet/create}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">공기구 대여 리스트 생성</span>
+					<span class="link-title">리스트 생성</span>
 				</a>
 			</li>
-			<li class="">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/rental/request_sheet/approve}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">공기구 대여(관리자)</span>
+					<span class="link-title">승인</span>
 				</a>
 			</li>
 			<li class="">
 				<a th:href="@{/rental/sheet}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">공기구 대여 기록 조회</span>
+					<span class="link-title">기록 조회</span>
 				</a>
 			</li>
 			<li class="nav-category">공기구 반납</li>
-			<li class="">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/return/sheet/create}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">공기구 반납(관리자)</span>
+					<span class="link-title">승인</span>
 				</a>
 			</li>
 			<li class="">
 				<a th:href="@{/return/sheet}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">공기구 반납 기록 조회</span>
+					<span class="link-title">기록 조회</span>
+				</a>
+			</li>
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">분석 현황</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/analytics/tool_states}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">대여 / 반납 현황</span>
 				</a>
 			</li>
 			<!-- 원본 -->
-			<li class="nav-category">Markets</li>
-			<li class="">
+			<li class="nav-category" hidden>Markets</li>
+			<li class="" hidden>
 				<a href="index.html">
 					<i class="icofont-pie-chart"></i>
 					<span class="link-title">Dashboard</span>
 				</a>
 			</li>
-			<li>
+			<li hidden>
 				<a href="#">
 					<i class="icofont-shopping-cart"></i>
 					<span class="link-title">Ecommerce</span>
@@ -117,7 +125,7 @@
 				</ul>
 				<!-- End Sub Menu -->
 			</li>
-			<li>
+			<li hidden>
 				<a href="pages/social-media.html">
 					<i class="icofont-chart-histogram"></i>
 					<span class="link-title">Social Media Analytics</span>

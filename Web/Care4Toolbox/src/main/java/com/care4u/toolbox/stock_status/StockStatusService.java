@@ -100,7 +100,7 @@ public class StockStatusService {
 		return null;
 	}
 	
-	@Scheduled(cron = "1 37 13 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "10 17 08 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();
@@ -136,7 +136,7 @@ public class StockStatusService {
 		return true;
 	}
 	
-	
+	/*
 	@Transactional(readOnly=true)
 	public List<StockStatusTimeChartDto> getTimeChart(LocalDate startDate, LocalDate endDate){
 		for (LocalDate currentDate = startDate; !currentDate.isAfter(endDate); currentDate = currentDate.plusDays(1)) {
@@ -146,6 +146,16 @@ public class StockStatusService {
 			}
 		}
 		
+	}
+	*/
+	
+	@Transactional(readOnly=true)
+	public StockStatusSummaryDto getSummary(long toolboxId, LocalDate currentDate) {
+		return repository.getStockStatusSummary(toolboxId, currentDate);
+	}
+	@Transactional(readOnly=true)
+	public List<StockStatusSummaryDto> getSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
+		return repository.getStockStatusSummary(toolboxId, startDate, endDate);
 	}
 	
 	/**
@@ -160,15 +170,15 @@ public class StockStatusService {
 		int toolboxSize= toolboxList.size();
 		int minValue = 1;
         int maxValue = 20;
-        
+        int debugCount = 0;
 		for (Tool tool : toolList) {
-	        int randomCount = random.nextInt(maxValue - minValue + 1) + minValue;
 	        int randomI = random.nextInt(toolboxSize);
 	        List<Toolbox> copiedList = new ArrayList<Toolbox>(toolboxList);
 	        for (int i = 0 ; i < randomI ; i++) {
 	        	copiedList.remove(random.nextInt(copiedList.size()));
 	        }
 	        for (Toolbox toolbox : copiedList) {
+		        int randomCount = random.nextInt(maxValue - minValue + 1) + minValue;
 				new StockStatus();
 				StockStatus newStatus = StockStatus.builder()
 						.currentDay(LocalDate.now())
@@ -185,7 +195,10 @@ public class StockStatusService {
 						.build()
 						;
 				repository.save(newStatus);
+				logger.info(debugCount + " : " + newStatus.toString());
+				debugCount++;
 	        }
 		}
+		logger.info("Complete, total " + debugCount +" items added");
 	}
 }

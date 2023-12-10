@@ -103,10 +103,10 @@ public class ReturnSheetService {
 	 */
 	@Transactional
 	public ReturnSheetDto addNew(ReturnSheetFormDto formDto) {
-		Optional<RentalSheet> rentalSheet = rentalSheetRepository.findById(formDto.getRentalSheetId());
-		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerId());
-		Optional<Membership> approver = membershipRepository.findById(formDto.getApproverId());
-		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxId());
+		Optional<RentalSheet> rentalSheet = rentalSheetRepository.findById(formDto.getRentalSheetDtoId());
+		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerDtoId());
+		Optional<Membership> approver = membershipRepository.findById(formDto.getApproverDtoId());
+		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxDtoId());
 		
 	    if (rentalSheet.isEmpty()) {
 	        logger.debug("RentalSheet not found");
