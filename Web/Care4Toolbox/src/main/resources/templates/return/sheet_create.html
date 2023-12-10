@@ -74,7 +74,7 @@
 							<!-- Add New Contact Btn -->
 							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
 							<div class="add-new-contact">
-								<a href="#" class="btn" data-toggle="modal" data-target="#contactAddModal" hidden>
+								<a class="btn" data-toggle="modal" data-target="#contactAddModal" hidden>
 									<img th:src="@{/img/svg/plus_white.svg}" alt="" class="svg" />
 									<span>추가</span>
 								</a>
@@ -165,7 +165,8 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-
+	
+		var membershipId=1;
 		var toolboxId=5222;
 		$(document).ready(function () {
 			initializeDatepicker();
@@ -176,6 +177,7 @@
 				}
 			)
 			.then(data=>{
+				membershipId=data.id;
 				return new Promise((resolved,rejected)=>{
 					abcHttp.get(
 						'/toolbox/getbyname',
@@ -283,11 +285,11 @@
 											<td class="outstandingcount">${tool.outstandingCount}</td>
 											<td class="returncount">
 												<div class="d-flex justify-content-between align-item-center">
-											        <a href="#" class="btn bg-success increaseBtn p-2">
+											        <a  class="btn bg-success increaseBtn p-2">
 											            <img src="/img/svg/plus_white.svg" alt="" class="svg "/>
 											        </a>
 											        <p class="d-flex align-items-center toolCount mb-0">0</p>
-											        <a href="#" class="btn bg-danger decreaseBtn p-2">
+											        <a  class="btn bg-danger decreaseBtn p-2">
 											            <img src="/img/svg/minus_white.svg" alt="" class="svg "/>
 											        </a>
 											    </div>
@@ -327,14 +329,14 @@
 						
 						// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
 						const dataObj = {
-							rentalSheetId:element.id,
-							workerId:element.workerDto.id,
-							leaderId:element.leaderDto.id,
-							approverId:113, //로그인하면 바꾸기...
-							toolboxId:5222, //얘도 로그인하면 바구기...
+							rentalSheetDtoId:element.id,
+							workerDtoId:element.workerDto.id,
+							leaderDtoId:element.leaderDto.id,
+							approverDtoId:membershipId, 
+							toolboxDtoId:toolboxId, 
 							toolList:element.toolList.map(e=>{
 								return {
-									rentalToolId:e.id,
+									rentalToolDtoId:e.id,
 									toolId:e.toolDto.id,
 									count:0,
 									//goodCount:0,

@@ -490,7 +490,7 @@
 						"render": function (data, type, row) {
 							if (type === "display") {
 								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.stockDto.goodCount<1)
-								return '<a href="#" class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
+								return '<a  class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
 									'<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
 									'</a>';
 							}
@@ -581,11 +581,11 @@
 					});
 					newRowString += 
 						'<td class="d-flex justify-content-between align-item-center">' +
-							'<a href="#" class="btn bg-success increaseBtn p-2">' +
+							'<a  class="btn bg-success increaseBtn p-2">' +
 								'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
 							'</a>' +
 							'<p class="d-flex align-items-center toolCount mb-0">' + list[list.length - 1].count + '</p>' +
-							'<a href="#" class="btn bg-danger decreaseBtn p-2">' +
+							'<a  class="btn bg-danger decreaseBtn p-2">' +
 								'<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
 							'</a>'+
 						'</td>';

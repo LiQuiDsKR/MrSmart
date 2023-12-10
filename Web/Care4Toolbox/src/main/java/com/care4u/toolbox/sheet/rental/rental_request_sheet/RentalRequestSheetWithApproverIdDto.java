@@ -14,7 +14,7 @@ import lombok.ToString;
 public class RentalRequestSheetWithApproverIdDto {
 	@Valid
 	private RentalRequestSheetDto rentalRequestSheetDto;
-	
+	@Valid
 	private long approverId;
 	
 	@Builder

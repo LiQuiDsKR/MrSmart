@@ -35,10 +35,12 @@ public class StockStatusController {
 	
 	@Autowired
 	private StockStatusService stockStatusSheetService;
+	@Autowired
+	private ToolboxService toolboxService;
 	
     @GetMapping(value = "tool_states")
     public String toolState(Model model){
-    	
+    	model.addAttribute("toolboxList",toolboxService.list());
         return "analytics/tool_states";
     }
     
