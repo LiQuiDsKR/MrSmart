@@ -246,9 +246,9 @@ class MembershipFindFragment : Fragment(){
             }
 
             // 새로운 Fragment 생성 (Fragment 백스택)
-            val fragment = ManagerRentalFragment.newInstance()
+            val fragment = ManagerSelfRentalFragment.newInstance()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
+                .replace(R.id.fragmentContainerView, fragment)
                 .commit()
         }
 

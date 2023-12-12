@@ -34,7 +34,7 @@ class ManagerReturnFragment() : Fragment() {
 
         searchTypeSpinner = view.findViewById(R.id.SearchTypeSpinner)
 
-        recyclerView = view.findViewById(R.id.ManagerLobby_RecyclerView)
+        recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val category1Data = arrayOf("리더명", "대여자명", "공기구명")
@@ -46,7 +46,7 @@ class ManagerReturnFragment() : Fragment() {
         val adapter = OutstandingRentalSheetAdapter(getOutstandingRentalSheetList()) { outstandingRentalSheet ->
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
+                .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
                 .commit()
         }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
+import com.liquidskr.fragment.ManagerSelfRentalFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
 
@@ -18,6 +19,7 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
+    lateinit var managerSelfRentalFragment: ManagerSelfRentalFragment
     lateinit var managerRentalFragment: ManagerRentalFragment
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerRentalFragment: WorkerRentalFragment

@@ -55,7 +55,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="90dp"
                 android:background="#CDE2FB"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -88,20 +88,11 @@
                     app:srcCompat="@drawable/manager_lobby_holdbtn" />
             </LinearLayout>
 
-            <LinearLayout
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentContainerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/ManagerLobby_RecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:listitem="@layout/fragment_rentalrequestsheet" />
-            </LinearLayout>
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="match_parent"

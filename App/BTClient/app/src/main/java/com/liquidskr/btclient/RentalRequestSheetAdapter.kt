@@ -11,7 +11,7 @@ import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
 
-class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequestSheetDto>) :
+class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
 
     class RentalRequestSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -39,6 +39,9 @@ class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequ
             toolListString = toolListString.plus("$toolName($toolCount)  ")
         }
         holder.toolListTextView.text = toolListString
+        holder.itemView.setOnClickListener {
+            onItemClick(currentRentalRequestSheet)
+        }
     }
 
     override fun getItemCount(): Int {
