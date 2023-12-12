@@ -2,7 +2,6 @@ package com.care4u.hr.membership;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -12,7 +11,6 @@ import com.care4u.hr.part.PartDto;
 
 @Getter @Setter
 @ToString
-@NoArgsConstructor
 public class MembershipDto {
 
 	private Long id;

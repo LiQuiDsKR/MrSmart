@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:clickable="true">
+
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView5"
+                android:layout_width="match_parent"
+                android:layout_height="43dp"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/worker_rental_topview" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/worker_rental_workerfieldpng">
+
+                    <TextView
+                        android:id="@+id/BorrowerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="#0ADB86"
+                        android:textSize="20sp"
+                        android:translationY="-2dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/worker_rental_leaderfield">
+
+                    <ImageButton
+                        android:id="@+id/LeaderSearchBtn"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="right|center_vertical"
+                        android:layout_marginRight="15dp"
+                        android:background="#00FFFFFF"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/worker_rental_searchbtn" />
+
+                    <TextView
+                        android:id="@+id/LeaderName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="#0ADB86"
+                        android:textSize="20sp"
+                        android:translationY="-2dp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#0ADB86"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/QR_EditText"
+                    android:layout_width="134dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00FFFFFF"
+                    android:ems="10"
+                    android:gravity="center"
+                    android:inputType="text"
+                    android:lines="1"
+                    android:linksClickable="false"
+                    android:longClickable="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+
+                <ImageButton
+                    android:id="@+id/QRcodeBtn"
+                    android:layout_width="110dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/worker_rental_qrscan" />
+
+                <ImageButton
+                    android:id="@+id/AddToolBtn"
+                    android:layout_width="110dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/worker_rental_addtoolbtn" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ManagerLobby_RecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                tools:listitem="@layout/fragment_rentaltool" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#0ADB86"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/SelectAllBtn"
+                    android:layout_width="95dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/worker_rental_selectallbtn" />
+
+                <ImageButton
+                    android:id="@+id/ConfirmBtn"
+                    android:layout_width="95dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/worker_rental_confirmbtn" />
+
+                <ImageButton
+                    android:id="@+id/ClearBtn"
+                    android:layout_width="95dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/worker_rental_clearbtn" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

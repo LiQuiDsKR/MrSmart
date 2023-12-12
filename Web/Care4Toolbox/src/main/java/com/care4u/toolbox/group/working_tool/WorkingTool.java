@@ -31,7 +31,7 @@ public class WorkingTool extends BaseEntity {
 	private long id;
 
 	@NotNull
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private WorkingToolbox workingToolbox;
 	
 	@NotNull
