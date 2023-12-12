@@ -51,7 +51,7 @@
 					<div class="aside-body" data-trigger="scrollbar">
 						<div class="table-responsive">
 							<!-- Invoice List Table -->
-							<table class="contact-list-table text-nowrap bg-white"id="myTable">
+							<table class="contact-list-table text-nowrap bg-white">
 								<thead>
 									<tr>
 										<th class="hidden-column"> 
@@ -68,37 +68,6 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr class="table-row">
-										<td  class="hidden-column" id="id">1</td>
-										<td>
-											<div class="d-flex align-items-center">
-												<div class="img mr-20">
-													<img
-														th:src="@{/img/avatar/m16.png}"
-														class="img-40"
-														alt="" />
-												</div>
-												<div class="name bold">Arden Spencer</div>
-											</div>
-										</td>
-										<td class="actions">
-											<span
-												class="contact-edit"
-												data-toggle="modal"
-												data-target="#contactEditModal">
-												<img
-													th:src="@{/img/svg/c-edit.svg}"
-													alt=""
-													class="svg" />
-											</span>
-											<span class="contact-close">
-												<img
-													th:src="@{/img/svg/c-close.svg}"
-													alt=""
-													class="svg" />
-											</span>
-										</td>
-									</tr>		
 									<tr class="table-row">
 										<td  class="hidden-column" id="id">1</td>
 										<td>
@@ -409,24 +378,20 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 <script th:inline="javascript">
-  // 테이블 요소 가져오기
-  var table = document.getElementById("myTable");
-  
-  // 모든 행에 클릭 이벤트 리스너 추가
-  var rows = table.getElementsByTagName("tr");
-  for (var i = 0; i < rows.length; i++) {
-    rows[i].addEventListener("click", function() {
-      // 클릭된 행의 배경색 변경
-      this.style.backgroundColor = "lightblue";
-      
-      // 다른 행들의 배경색 초기화
-      for (var j = 0; j < rows.length; j++) {
-        if (rows[j] !== this) {
-          rows[j].style.backgroundColor = "";
-        }
-      }
+    // JavaScript로 클릭 이벤트를 처리
+    const tableRows = document.querySelectorAll(".table-row");
+
+    tableRows.forEach(row => {
+        row.addEventListener("click", () => {
+            // 모든 행의 클래스를 제거
+            tableRows.forEach(row => {
+                row.classList.remove("selected");
+            });
+
+            // 클릭한 행에만 클래스를 추가하여 배경색 변경
+            row.classList.add("selected");
+        });
     });
-  } 
 </script>
 </th:block>
 

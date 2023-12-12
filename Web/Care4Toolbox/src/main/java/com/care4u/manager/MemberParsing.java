@@ -53,7 +53,7 @@ public class MemberParsing {
 									.code(datas[3].trim())
 									.password("123")
 									.role(Role.USER)
-									.employmentState(EmploymentState.EMPLOYMENT)
+									.employmentStatus(EmploymentState.EMPLOYMENT)
 									.partDto(partDto)
 									.build();
 					logger.info(count + " : " + memberDto.toString());                	

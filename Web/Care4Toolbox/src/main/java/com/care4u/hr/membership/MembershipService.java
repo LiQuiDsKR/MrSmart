@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 	public MembershipDto addNew(MembershipDto memberDto) throws IllegalStateException {
 		Membership findMember = repository.findByCode(memberDto.getCode());
 		if(findMember != null){
-			logger.error("이미 등록된 코드입니다. : " + memberDto.getName());
+			logger.error("이미 등옥된 코드입니다. : " + memberDto.getName());
 			throw new IllegalStateException("이미 가입된 사원번호입니다.");
 		}
 		return update(memberDto.getPartDto().getId(), memberDto);
@@ -60,7 +59,6 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		Membership member = repository.findByCode(code);                        
 		return member;
 	}
-	
 	/**
      * 10/19 16:25 박경수 추가
      * MembershipDto list 뽑아가려고 했는데 메서드가 만들어진 게 없어서 만들어봤습니다
@@ -78,14 +76,5 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		}
 		return dtoList;
 	}
-	
-	/**
-	 * 2023-10-25 박경수
-	 * search & paging 기능 테스트를 위해 추가했습니다
-	 */
-	@Transactional(readOnly = true)
-    public Page<Membership> getMembershipPage(MembershipSearchDto membershipSearchDto, Pageable pageable){
-        return repository.getMembershipPage(membershipSearchDto, pageable);
-    }
-	
+
 }

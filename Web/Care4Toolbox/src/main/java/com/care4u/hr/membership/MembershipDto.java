@@ -2,18 +2,15 @@ package com.care4u.hr.membership;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.hr.part.PartDto;
-import com.querydsl.core.annotations.QueryProjection;
 
 @Getter @Setter
 @ToString
-@NoArgsConstructor
 public class MembershipDto {
 
 	private Long id;
@@ -28,17 +25,17 @@ public class MembershipDto {
 	
 	private Role role;
 	
-	private EmploymentState employmentState;
+	private EmploymentState employmentStatus;
 
 	@Builder
-	public MembershipDto(long id, String name, String code, String password, PartDto partDto, Role role, EmploymentState employmentState) {
+	public MembershipDto(long id, String name, String code, String password, PartDto partDto, Role role, EmploymentState employmentStatus) {
 		this.id = id;
 		this.name = name;
 		this.code = code;
 		this.password = password;
 		this.partDto = partDto;
 		this.role = role;
-		this.employmentState = employmentState;
+		this.employmentStatus = employmentStatus;
 	}
 	
 	public MembershipDto(Membership membership) {
@@ -48,6 +45,6 @@ public class MembershipDto {
 		this.password = membership.getPassword();
 		this.partDto = new PartDto(membership.getPart());
 		this.role = membership.getRole();
-		this.employmentState = membership.getEmploymentState();
+		this.employmentStatus = membership.getEmploymentStatus();
 	}
 }

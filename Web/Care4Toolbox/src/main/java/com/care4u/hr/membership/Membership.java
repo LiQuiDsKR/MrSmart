@@ -43,7 +43,7 @@ public class Membership extends BaseEntity {
     private Role role;
     
     @Enumerated(EnumType.STRING)
-    private EmploymentState employmentState;
+    private EmploymentState employmentStatus;
     
     public Membership(String code) {
     	this.code = code;
@@ -62,7 +62,7 @@ public class Membership extends BaseEntity {
 		this.password = membershipDto.getPassword();
 		this.part = part;
 		this.role = membershipDto.getRole();
-		this.employmentState = membershipDto.getEmploymentState();
+		this.employmentStatus = membershipDto.getEmploymentStatus();
 	}
 
 }

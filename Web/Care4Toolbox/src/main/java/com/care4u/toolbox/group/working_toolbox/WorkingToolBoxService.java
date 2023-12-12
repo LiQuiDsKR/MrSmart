@@ -14,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WorkingToolBoxService {
+public class WorkingToolboxService {
 
-	private final Logger logger = LoggerFactory.getLogger(WorkingToolBoxService.class);
+	private final Logger logger = LoggerFactory.getLogger(WorkingToolboxService.class);
 	
 	private final WorkingToolboxRepository repository;
 	

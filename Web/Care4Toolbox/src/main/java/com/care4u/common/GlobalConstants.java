@@ -48,4 +48,10 @@ public class GlobalConstants {
     
 	public static final String APP_NAME = "Care4U SpringBoot v0.1";
 	
+	
+	public static final int REQUEST_MEMBER_LIST = 1;
+	public static final int REQUEST_TOOL_LIST = 2;
+
+	
+	
 }
