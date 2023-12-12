@@ -19,112 +19,55 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/imageView5"
-                android:layout_width="match_parent"
-                android:layout_height="43dp"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/manager_rental_topview" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <FrameLayout
+                <Spinner
+                    android:id="@+id/SearchTypeSpinner"
+                    android:layout_width="83dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/manager_return_spinner" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/manager_rental_lenderfield">
+                    android:layout_height="50dp"
+                    android:background="@drawable/manager_return_searchfield"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editTextText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:ems="10"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:text="" />
 
                     <ImageButton
-                        android:id="@+id/BorrowerSearchBtn"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="right|center_vertical"
-                        android:layout_marginRight="15dp"
-                        android:background="#00FFFFFF"
+                        android:id="@+id/imageButton2"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_gravity="center_vertical"
+                        android:backgroundTint="#00FFFFFF"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/manager_rental_searchbtn" />
+                        android:scaleX="1.8"
+                        android:scaleY="1.8"
+                        android:src="@drawable/manager_return_searchbtn" />
+                </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/BorrowerName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:textColor="#4C96F1"
-                        android:textSize="20sp"
-                        android:translationY="-2dp" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/manager_rental_leaderfield">
-
-                    <ImageButton
-                        android:id="@+id/LeaderSearchBtn"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="right|center_vertical"
-                        android:layout_marginRight="15dp"
-                        android:background="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/manager_rental_searchbtn" />
-
-                    <TextView
-                        android:id="@+id/LeaderName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:textColor="#4C96F1"
-                        android:textSize="20sp"
-                        android:translationY="-2dp" />
-                </FrameLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="#4C96F1"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imageView8"
-                    android:layout_width="154dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_rental_middletext" />
-
-                <ImageButton
-                    android:id="@+id/QRcodeBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/manager_rental_favoritebtn" />
-
-                <ImageButton
-                    android:id="@+id/AddToolBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/manager_rental_addtoolbtn" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/ManagerLobby_RecyclerView"
+                android:id="@+id/Manager_Rental_RecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                tools:listitem="@layout/fragment_rentaltool" />
+                tools:listitem="@layout/fragment_rentalrequestsheet" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -134,32 +77,13 @@
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/SelectAllBtn"
-                    android:layout_width="95dp"
-                    android:layout_height="50dp"
+                    android:id="@+id/Manager_SelfRentalBtn"
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="0"
                     android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_rental_selectallbtn" />
-
-                <ImageButton
-                    android:id="@+id/ConfirmBtn"
-                    android:layout_width="95dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_rental_confirmbtn" />
-
-                <ImageButton
-                    android:id="@+id/ClearBtn"
-                    android:layout_width="95dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_rental_clearbtn" />
-
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/manager_lobby_rental" />
             </LinearLayout>
 
         </LinearLayout>

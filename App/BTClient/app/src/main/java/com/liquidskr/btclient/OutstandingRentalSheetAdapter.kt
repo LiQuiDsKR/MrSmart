@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
@@ -33,7 +32,6 @@ class OutstandingRentalSheetAdapter(private val outstandingRentalSheets: List<Ou
         holder.workerName.text = currentOutstandingRentalSheet.rentalSheetDto.workerDto.name
         holder.leaderName.text = currentOutstandingRentalSheet.rentalSheetDto.leaderDto.name
         holder.timeStamp.text = LocalDateTime.parse(currentOutstandingRentalSheet.rentalSheetDto.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        val layoutManager = LinearLayoutManager(holder.itemView.context)
         var toolListString = ""
         for (tool: RentalToolDto in currentOutstandingRentalSheet.rentalSheetDto.toolList) {
             val toolName: String = tool.toolDto.name
