@@ -5,6 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.care4u.common.GlobalConstants;
+import com.care4u.domain.Message;
 
+import groovyjarjarpicocli.CommandLine.Command;
 import net.wimpi.modbus.util.ModbusUtil;
 
 public class BluetoothConnectHandler extends Thread implements InitializingBean, DisposableBean {
@@ -28,6 +32,7 @@ public class BluetoothConnectHandler extends Thread implements InitializingBean,
     private StreamConnection streamConnection;
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
+    
     private long sendingSeconds;
     private boolean stopNow;
     
@@ -89,7 +94,7 @@ public class BluetoothConnectHandler extends Thread implements InitializingBean,
             	if (size > 0) {
             		byte[] readDatas = new byte[size];
             		dataInputStream.read(readDatas, 0, size);
-            		
+    				//logger.info("Received (BluetoothConnectHandler.java): " + new String(readDatas)); // debug
             		sendingSeconds = 0;        		
             		logger.debug("received datas : " + ModbusUtil.toHex(readDatas));
             		if (listener != null) listener.onDataArrived(readDatas);
@@ -114,11 +119,11 @@ public class BluetoothConnectHandler extends Thread implements InitializingBean,
 			}
 		}		
 	}
-
+	
 	public boolean sendData(byte[] datas){		
 		try{
-        	dataOutputStream.write(datas);
-        	dataOutputStream.flush();
+			dataOutputStream.write(datas);
+			dataOutputStream.flush();
         	sendingSeconds++;
         	logger.debug("sent datas : " + ModbusUtil.toHex(datas));
         	return true;
