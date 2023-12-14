@@ -22,6 +22,7 @@ import com.care4u.common.GlobalConstants;
 import com.care4u.common.GsonUtils;
 import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
 import com.care4u.constant.EmploymentState;
+import com.care4u.constant.RequestType;
 import com.care4u.constant.Role;
 import com.care4u.domain.Message;
 import com.care4u.hr.main_part.MainPartService;
@@ -114,10 +115,22 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		public void onDataArrived(BluetoothCommunicationHandler handler, int size, String data) {
 			// TODO Auto-generated method stub
 			logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
+			
+			RequestType type = RequestType.valueOf(data);
+			switch(type) {
+			case MEMBERSHIP_ALL:
+				handler.sendData(gson.toJson(membershipService.list()));
+				break;
+			case TOOL_ALL:
+				handler.sendData(gson.toJson(toolService.list()));
+				break;
+			}
 		}
 		
 		@Override
 		public void onConnected(BluetoothCommunicationHandler handler) {
+			logger.info(handler.toString());
+			
 			// TODO Auto-generated method stub
 			/*
 			workersPool.add(handler);

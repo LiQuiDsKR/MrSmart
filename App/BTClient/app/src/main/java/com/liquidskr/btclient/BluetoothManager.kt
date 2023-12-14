@@ -14,12 +14,13 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
 import com.mrsmart.standard.membership.Membership
-import com.mrsmart.standard.message.Message
-import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.tool.ToolDto
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.reflect.Type
+import java.nio.ByteBuffer
 import java.util.UUID
 
 
@@ -30,30 +31,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
-    private lateinit var progressBar: ProgressBar
-    private var progressStatus = 0
-    private lateinit var dataSet: String
-
     private var timeoutHandler: Handler = Handler(Looper.getMainLooper())
-    var dataEndFlag = false
 
     var gson = Gson()
-    var dataCheckStep = 0
-    var dataCheckSize = 0
     var timeout = false
-    var totalMessage = ""
-
-    var totalByteList = ArrayList<ByteArray>()
-
-    var currentPercentage: Int = 0
-    var totalPercentage: Int = 0
-
-    val backgroundThread = Thread { // 쓰레드, 백그라운드 실행
-        dataReceiveSingleAndInsertDB()
-    }
-    var stopThread = false // 쓰레드 종료 Flag
-
-    val isCommunicating = false
 
     fun bluetoothOpen() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -63,7 +44,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         val pairedDevices = bluetoothAdapter.bondedDevices
         if (pairedDevices.size > 0) {
             for (device in pairedDevices) {
-                if (device.name == "LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
+                if (device.name == "DESKTOP-0E0EKMO" || device.name=="LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
                     bluetoothDevice = device
                     break
                 }
@@ -84,128 +65,76 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     fun bluetoothClose() {
         bluetoothSocket.close()
     }
-
-    fun BackgroundThread() {
-        inputStream = bluetoothSocket.inputStream
-        backgroundThread.start()
+    interface RequestCallback {
+        fun onSuccess(result: Any, type: Type)
+        fun onError(e: Exception)
     }
-    fun stopBackgroundThread() {
-        stopThread = true // 스레드 중지를 요청
-    }
+    fun requestData(type:RequestType,callback:RequestCallback){
+        val gson = Gson()
+        try {
+            //앱에서 서버로 type 전송.
+            outputStream = bluetoothSocket.outputStream
+            outputStream.write(type.name.toByteArray(Charsets.UTF_8))
+            outputStream.flush()
+            Log.d("SEND", type.name)
+        }catch (e: Exception) {
+            //전송 중 에러
+            callback.onError(e)
+        }
 
-    fun dataReceiveToWriteDB() {
-        val timeoutRunnable = Runnable { // 예상된 데이터보다 적은 데이터를 받아 Loop를 돌다 Timeout이 일어난 경우
+
+        val timeoutRunnable = Runnable { //타이머
             timeout = true
             dataSend("TIMEOUT")
         }
-        while (!stopThread) {
-            timeout = false // Timeout Flag 초기화
-            if (inputStream.available() > 0) {
-                when (dataCheckStep) {
-                    0 -> { // 1단계, 실제 데이터를 받는 단계
-                        timeoutHandler.postDelayed(
-                            timeoutRunnable,
-                            10000
-                        ) // 예상한 데이터 크기보다 적게들어올 경우 Timeout 처리
-                        totalByteList.clear()
-                        while (true) {
-                            val size = inputStream.available()
-                            val buffer = ByteArray(size)
-                            val readData = inputStream.read(buffer)
-                            val receivedByte = buffer.copyOf(readData)
-                            totalByteList.add(receivedByte) // 받은 내용 누적
-
-                            val byteListSize = String(combineByteArrays(totalByteList),Charsets.UTF_8).toByteArray().size
-                            if (byteListSize == dataCheckSize) { // 예상된 데이터와 현재 받은 데이터의 크기가 일치한다면
-                                dataSend("DATASIZE_OK") // 데이터 수신 정상, 사이클 종료
-                                dataCheckStep = 0
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                totalMessage = String(combineByteArrays(totalByteList),Charsets.UTF_8)
-                                insertData(totalMessage) // 받은 모든 메세지를 DB에 저장 (InsertData)
-                                break
-                            } else if (byteListSize > dataCheckSize) { // 아직 Timeout 전이지만 예상된 데이터보다 많이 받았을 경우
-                                dataSend("DATASIZE_OVERFLOW") // 데이터 과수신, 2단계로 재진입 (정보 수신대기)
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                dataCheckStep = 1
-                                break
-                            } else if (byteListSize < dataCheckSize) {
-                                dataSend("DATASIZE_UNDERFLOW")
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                dataCheckStep = 1
-                                break
-                            }
-                            if (timeout) {
-                                break
-                            }
-                        }
-                        dataCheckStep = 0
-                    }
-                }
-            }
+        //receive loop를 돌리는 thread 선언
+        val thread = Thread {
+            timeoutHandler.postDelayed(
+                timeoutRunnable,
+                10000
+            )
             try {
-                Thread.sleep(1000) // 100ms
-            } catch (e: InterruptedException) {
+                inputStream = bluetoothSocket.inputStream
 
-            }
-        }
-    }
-    fun dataReceive(): String {
-        val timeoutRunnable = Runnable { // 예상된 데이터보다 적은 데이터를 받아 Loop를 돌다 Timeout이 일어난 경우
-            timeout = true
-            dataSend("TIMEOUT")
-        }
-        while (!stopThread) {
-            timeout = false // Timeout Flag 초기화
-            if (inputStream.available() > 0) {
-                when (dataCheckStep) {
-                    0 -> { // 0단계, 전체 데이터의 크기를 미리 받고 체크하는 단계
-                        val size = inputStream.available()
-                        val buffer = ByteArray(size)
-                        val readData = inputStream.read(buffer)
-                        val receivedMessage = String(buffer, 0, readData)
-                        dataSend(receivedMessage)
-                        dataCheckStep = 1 // 받은 데이터의 크기를 그대로 반송하며 1단계 진입
-                        dataCheckSize = receivedMessage.toInt()// 받은 데이터 저장
+                val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
+                inputStream.read(lengthBuffer,0,4)
+                val dataSize= ByteBuffer.wrap(lengthBuffer).int
+
+                val dataBuffer = ByteArray(1024) //한 번에 받을 byteArray단위
+                val byteStream = ByteArrayOutputStream() //최종 byteStream
+                var bytesRead: Int = 0
+
+                while (bytesRead < dataSize) {
+                    val result = inputStream.read(dataBuffer, 0, 1024)
+                    if (result <= -1) {
+                        break
                     }
+                    byteStream.write(dataBuffer, 0, result) // 이 부분 추가
+                    bytesRead += result
+                }
 
-                    1 -> { // 1단계, 실제 데이터를 받는 단계
-                        timeoutHandler.postDelayed(
-                            timeoutRunnable,
-                            10000
-                        ) // 예상한 데이터 크기보다 적게들어올 경우 Timeout 처리
-                        totalByteList.clear()
-                        while (true) {
-                            val size = inputStream.available()
-                            val buffer = ByteArray(size)
-                            val readData = inputStream.read(buffer)
-                            val receivedByte = buffer.copyOf(readData)
-                            totalByteList.add(receivedByte) // 받은 내용 누적
+                val byteArray = byteStream. toByteArray()
 
-                            val byteListSize = String(combineByteArrays(totalByteList),Charsets.UTF_8).toByteArray().size
-                            if (byteListSize == dataCheckSize) { // 예상된 데이터와 현재 받은 데이터의 크기가 일치한다면
-                                dataSend("DATASIZE_OK") // 데이터 수신 정상, 사이클 종료
-                                dataCheckStep = 0
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                totalMessage = String(combineByteArrays(totalByteList),Charsets.UTF_8)
-                                break
-                            } else if (byteListSize > dataCheckSize) { // 아직 Timeout 전이지만 예상된 데이터보다 많이 받았을 경우
-                                dataSend("DATASIZE_OVERFLOW") // 데이터 과수신, 2단계로 재진입 (정보 수신대기)
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                dataCheckStep = 1
-                                break
-                            } else if (byteListSize < dataCheckSize) {
-                                dataSend("DATASIZE_UNDERFLOW")
-                                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                                dataCheckStep = 1
-                                break
-                            }
-                            if (timeout) {
-                                break
-                            }
+                //정상적으로 데이터를 받았다면
+                if (byteArray.isNotEmpty()) {
+                    val jsonString = String(byteArray, Charsets.UTF_8)
+
+                    //RequestType별로 인스턴스 생성
+                    when (type) {
+                        RequestType.MEMBERSHIP_ALL -> {
+                            val listType: Type = object : TypeToken<List<Membership>>() {}.type
+                            callback.onSuccess(jsonString,listType)
                         }
-                        dataCheckStep = 0
+
+                        RequestType.TOOL_ALL -> {
+                            val listType: Type = object : TypeToken<List<ToolDto>>() {}.type
+                            callback.onSuccess(gson.fromJson(jsonString, listType), listType)
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                //수신 중 에러
+                callback.onError(e)
             }
             try {
                 Thread.sleep(1000) // 100ms
@@ -214,92 +143,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
         }
 
-        return totalMessage
-    }
-
-    fun dataReceiveSingle(): String {
-        val size = inputStream.available()
-        val buffer = ByteArray(size)
-        val readData = inputStream.read(buffer)
-        val receivedByte = buffer.copyOf(readData)
-        return String(receivedByte)
-    }
-    fun dataReceiveSingleAndInsertDB() {
-        inputStream = bluetoothSocket.inputStream
-        val size = inputStream.available()
-        while (size > 0) {
-            val buffer = ByteArray(size)
-            val readData = inputStream.read(buffer)
-            val receivedByte = buffer.copyOf(readData)
-            insertData(String(receivedByte)) // 받은 모든 메세지를 DB에 저장 (InsertData)
-        }
-    }
-
-    fun combineByteArrays(byteArrays: List<ByteArray>): ByteArray {
-        var totalLength = 0
-        for (byteArray in byteArrays) {
-            totalLength += byteArray.size
-        }
-        val resultByteArray = ByteArray(totalLength)
-        var currentIndex = 0
-        for (byteArray in byteArrays) {
-            System.arraycopy(byteArray, 0, resultByteArray, currentIndex, byteArray.size)
-            currentIndex += byteArray.size
-        }
-
-        return resultByteArray
-    }
-    private fun insertData(dataSet: String) {
-        val dbHelper = DatabaseHelper(context)
-        Log.d("test", dataSet)
-        val message: Message = gson.fromJson(dataSet, Message::class.java)
-        Log.d("INSERT_MEMBERSHIP", "TYPE : " + message.type)
-        when (message.type) {
-            1 -> { // if type == 1, REQUEST_MEMBER_LIST
-                val pagedata: Page = gson.fromJson(gson.toJson(message.page), Page::class.java)
-                val listMembershipType = object : TypeToken<List<Membership>>(){}.type
-                val membershipList: List<Membership> = gson.fromJson(gson.toJson(pagedata.content), listMembershipType)
-                for (member in membershipList) {
-                    val id = member.id
-                    val code = member.code
-                    val password = member.password
-                    val name = member.name
-                    val part = member.partDto.name
-                    val subPart = member.partDto.subPartDto.name
-                    val mainPart = member.partDto.subPartDto.mainPartDto.name
-                    val role = member.role.toString()
-                    val employmentStatus = member.employmentStatus.toString()
-                    dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                    Log.d("INSERT_MEMBERSHIP", "INSERT_MEMBERSHIP OK")
-                }
-            }
-            2 -> { // if type == 2, REQUEST_TOOL_LIST
-                val pagedata: Page = gson.fromJson(gson.toJson(message.page), Page::class.java)
-                val listToolType = object : TypeToken<List<ToolDto>>(){}.type
-                val toolList: List<ToolDto> = gson.fromJson(gson.toJson(pagedata.content), listToolType)
-
-                for (tool in toolList) {
-                    val id = tool.id
-                    val mainGroup = tool.subGroupDto.mainGroupDto.name
-                    val subGroup = tool.subGroupDto.name
-                    val code = tool.code
-                    val krName = tool.name
-                    val engName = tool.engName
-                    val spec = tool.spec
-                    val unit = tool.unit
-                    val price = tool.price
-                    val replacementCycle = tool.replacementCycle
-                    //val buyCode = tool.buyCode
-                    dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle)
-                    //dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                    Log.d("INSERT_TOOL", "INSERT_TOOL OK")
-                }
-            }
-            else -> {
-                Log.d("Error_UnexpectedType", "예정되지 않은 type입니다.")
-            }
-        }
-        dbHelper.close()
+        thread.start()
     }
 
     fun updateTool(dataSet: String) {
@@ -328,10 +172,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     }
 
     fun dataSend(sendingData: String) {
-        outputStream = bluetoothSocket.outputStream
-        outputStream.write(sendingData.toByteArray())
-        outputStream.flush()
-        Log.d("SEND", sendingData)
+        try {
+            outputStream = bluetoothSocket.outputStream
+            outputStream.write(sendingData.toByteArray())
+            outputStream.flush()
+            Log.d("SEND", sendingData)
+        } catch (e: Exception) {
+            Log.d("mDataOuputStream Error", e.toString())
+        }
     }
 
     // 이 아래는 QR Camera 중 권한 요청 처리입니다.

@@ -1,5 +1,9 @@
 package com.care4u.communication.bluetooth;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import javax.microedition.io.StreamConnection;
 
 import org.slf4j.Logger;
@@ -61,7 +65,7 @@ public class BluetoothCommunicationHandler {
 		public void onException(BluetoothCommunicationHandler handler, String message);
 		public void onDisconnected(BluetoothCommunicationHandler handler);
 		
-		//public void onRequestSheetArrived(BluetoothCommunicationHandler handler, RentalSheet rentalSheet);
+		//public void onRequestedMembershipAll(BluetoothCommunicationHandler handler);
 	}
 	private Listener listener;
 	
@@ -76,7 +80,19 @@ public class BluetoothCommunicationHandler {
 	
 	public void sendData(String message){
 		logger.info("send message : " + message);
-		connectorHandler.sendData(message.getBytes());
+	    byte[] data = message.getBytes();
+	    ByteBuffer buffer = ByteBuffer.allocate(4); // int는 4바이트
+	    buffer.putInt(data.length);
+	    byte[] sizeByte = buffer.array();
+	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	    try {
+	    	outputStream.write(sizeByte);
+	        outputStream.write(data);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    byte[] finalData = outputStream.toByteArray();
+	    connectorHandler.sendData(finalData);
 	}
 	
 	public void destroy(){

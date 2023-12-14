@@ -2,6 +2,7 @@ package com.liquidskr.btclient
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import com.liquidskr.fragment.ManagerFragment
@@ -10,6 +11,7 @@ import com.liquidskr.fragment.ManagerReturnFragment
 import com.liquidskr.fragment.ManagerSelfRentalFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
+import java.lang.reflect.Type
 
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
@@ -55,8 +57,45 @@ class LobbyActivity  : AppCompatActivity() {
                 .commit()
         }
         dbSyncBtn.setOnClickListener {
-            bluetoothManager.stopThread = false // 스레드 시작 시 변수 초기화
-            bluetoothManager.dataReceiveSingleAndInsertDB()
+            //bluetoothManager.stopThread = false // 스레드 시작 시 변수 초기화
+            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: Any, listType: Type) {
+
+                }
+
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+            bluetoothManager.requestData(RequestType.TOOL_ALL,object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: Any, type: Type) {
+                    val dbHelper = DatabaseHelper(context)
+
+                    for (row in rows) {
+                        val columns = row.split(",")
+                        if (columns.size == 11) {
+                            val toolId = columns[0].trim().toLong()
+                            val toolMaingroup = columns[1].trim()
+                            val toolSubgroup = columns[2].trim()
+                            val toolCode = columns[3].trim()
+                            val toolKrName = columns[4].trim()
+                            val toolEngName = columns[5].trim()
+                            val toolSpec = columns[6].trim()
+                            val toolUnit = columns[7].trim()
+                            val toolPrice = columns[8].trim().toInt()
+                            val toolReplacementCycle = columns[9].trim().toInt()
+                            val toolBuyCode = columns[10].trim()
+                            dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle)
+                            //dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle, toolBuyCode)
+                        }
+                    }
+                    dbHelper.close()
+                }
+
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
         }
         testSendBtn.setOnClickListener {
             bluetoothManager.dataSend("REQUEST_StandardDB")
