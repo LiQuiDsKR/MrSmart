@@ -21,13 +21,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
+import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import java.lang.reflect.Type
 import java.util.Locale
 
 class WorkerRentalFragment() : Fragment() {
@@ -55,6 +58,8 @@ class WorkerRentalFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_rental, container, false)
         var dbHelper = DatabaseHelper(requireContext())
+
+        val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
 
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
         qrEditText = view.findViewById((R.id.QR_EditText))
@@ -143,7 +148,17 @@ class WorkerRentalFragment() : Fragment() {
                     }
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
-                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222 ,rentalRequestToolFormDtoList.toList()))
+                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
+                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                                BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                }
+
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
                             sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                             sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
                             requireActivity().supportFragmentManager.popBackStack()

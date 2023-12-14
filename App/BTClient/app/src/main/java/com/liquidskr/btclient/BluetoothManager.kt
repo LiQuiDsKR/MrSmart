@@ -14,6 +14,8 @@ import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
 import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
+import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.tool.ToolDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -158,6 +160,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
                         RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ->{
                             val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+                        RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX ->{
+                            val pageType: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+                        RequestType.RENTAL_REQUEST_SHEET_FORM ->{
+                            val pageType: Type = object : TypeToken<RentalRequestSheetFormDto>() {}.type
                             callback.onSuccess(jsonString, pageType)
                         }
                     }
