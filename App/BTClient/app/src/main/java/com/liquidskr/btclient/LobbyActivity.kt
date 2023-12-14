@@ -16,6 +16,7 @@ import com.liquidskr.fragment.WorkerRentalFragment
 import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.tool.ToolDto
+import com.mrsmart.standard.tool.ToolDtoSQLite
 import java.lang.reflect.Type
 
 class LobbyActivity  : AppCompatActivity() {
@@ -109,9 +110,9 @@ class LobbyActivity  : AppCompatActivity() {
                         val unit = tool.unit
                         val price = tool.price
                         val replacementCycle = tool.replacementCycle
-                        val buyCode = tool.buyCode
+                        val buyCode = ""
                         dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                        Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
+                        Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
                     }
                     dbHelper.close()
                 }
