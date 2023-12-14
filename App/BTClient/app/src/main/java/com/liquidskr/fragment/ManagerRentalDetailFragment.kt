@@ -2,29 +2,29 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RentalToolAdapter
-import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.liquidskr.btclient.RequestType
+import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import java.lang.reflect.Type
 
 class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -37,6 +37,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private lateinit var timeStamp: TextView
 
     private lateinit var confirmBtn: ImageButton
+    private lateinit var bluetoothManager: BluetoothManager
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -44,7 +45,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
-
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
@@ -54,7 +55,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
 
         workerName.text = "대여자: " + rentalRequestSheet.workerDto.name
         leaderName.text = "리더: " + rentalRequestSheet.leaderDto.name
-        timeStamp.text = "신청일시: " + LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        timeStamp.text = "신청일시: " + rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         val adapter = RentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
@@ -69,6 +70,17 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(tool.id, toolCount))
                         val temp = RentalRequestSheetFormDto("DefaultWorkName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id,sharedViewModel.toolBoxId, rentalRequestToolFormDtoList)
+                        val rentalRequestSheetApprove = RentalRequestSheetApprove(rentalRequestSheet, sharedViewModel.loginManager.id)
+                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
+                            BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                Toast.makeText(requireContext(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                            }
+
+                            override fun onError(e: Exception) {
+                                e.printStackTrace()
+                            }
+                        })
                         requireActivity().supportFragmentManager.popBackStack()
                     }
                 }
@@ -76,25 +88,5 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         }
 
         return view
-    }
-
-    fun getOutstandingRentalSheetList(): List<OutstandingRentalSheetDto> {
-        /*
-        bluetoothManager.dataSend("REQUEST_RentalRequestSheetList")
-        if (bluetoothManager.dataReceiveSingle().equals("Ready")) {
-            val sendMessage =
-                gson.toJson(RentalRequestSheetCall(SheetStatus.REQUEST, sharedViewModel.toolBoxId))
-            bluetoothManager.dataSend(sendMessage)
-        }*/
-
-        //val rentalrequestSheetListPageString = bluetoothManager.dataReceive()
-        val outstandingRentalSheetListPageString = ""
-        Log.d("Debug", "JSON String: $outstandingRentalSheetListPageString")
-        val pagedata: Page = gson.fromJson(outstandingRentalSheetListPageString, Page::class.java)
-        val listOutstandingRentalSheetDto = object : TypeToken<List<OutstandingRentalSheetDto>>(){}.type
-        Log.d("Debug", "TypeToken: $listOutstandingRentalSheetDto")
-        val outstandingRentalSheetDtoList: List<OutstandingRentalSheetDto> = gson.fromJson(gson.toJson(pagedata.content), listOutstandingRentalSheetDto)
-        Log.d("Debug", "OutstandingRentalSheetDto List: $outstandingRentalSheetDtoList")
-        return outstandingRentalSheetDtoList
     }
 }

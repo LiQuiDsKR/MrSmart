@@ -7,8 +7,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 
 
 class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
@@ -31,7 +29,7 @@ class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequ
         val currentRentalRequestSheet = rentalRequestSheets[position]
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
-        holder.timeStamp.text = LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp //LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         var toolListString = ""
         for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
             val toolName: String = tool.toolDto.name
