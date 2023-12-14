@@ -5,11 +5,11 @@
 <!-- Page Header Start-->
 <!-- Header -->
 <header th:fragment="header" 
-	class="header white-bg fixed-top d-flex align-content-center flex-wrap">
+	class="header white-bg fixed-top d-flex align-content-center flex-wrap" style="height:120px;">
 	<!-- Logo -->
-	<div class="logo">
+	<div class="logo bg-white d-flex justify-content-center">
 		<a href="/" class="default-logo"
-			><img th:src="@{/img/logo.png}" alt=""
+			><img  style="height:120px;" th:src="@{/img/logo.png}" alt=""
 		/></a>
 		<a href="/" class="mobile-logo"
 			><img th:src="@{/img/mobile-logo.png}" alt=""
@@ -18,7 +18,7 @@
 	<!-- End Logo -->
 
 	<!-- Main Header -->
-	<div class="main-header">
+	<div class="main-header" style="height:120px;">
 		<div class="container-fluid">
 			<div class="row justify-content-between">
 				<div class="col-3 col-lg-1 col-xl-4">
@@ -40,10 +40,11 @@
 									<!-- Header Info -->
 									<div class="user-info">
 										<h2 class="user-name">똑똑이</h2>
-										<h4 class="user-email">똑똑한공기구관리시스템</p>
 									</div>
+									
 									<!-- End Header Info -->
 								</div>
+								<h4 class="">똑똑한공기구관리시스템</p>
 							</a>
 						</div>
 						<!-- End Main Header User -->

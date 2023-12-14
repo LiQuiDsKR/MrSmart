@@ -102,7 +102,7 @@
 	<div class="mn-vh-100 d-flex align-items-center">
 		<div class="container">
 			<!-- Card -->
-			<div class="card justify-content-center auth-card">
+			<div class="card justify-content-center auth-card" >
 				<div class="row justify-content-center">
 					<div class="col-xl-9 col-lg-11">
 						<div class="d-flex flex-direction-row align-items-center mb-2">
@@ -112,11 +112,10 @@
 							</div>
 							<!-- End User Avatar -->
 							<h1 class="mr-3">똑똑이</h1>
-							<h4 class="font-20">통합공기구관리시스템</h4>
 
-							<div class="default-logo ml-auto" style="width:190px"><img th:src="@{/img/logo.png}" alt="" /></div>
+							<div class="default-logo ml-auto" style="width:120px"><img th:src="@{/img/logo.png}" alt="" /></div>
 						</div>
-						<div class="mb-3"><span>회원 서비스 이용을 위해 로그인 해주세요.</span></div>
+						<div style="margin-bottom:70px;"><span style="font-size:19px;">통합공기구관리시스템</span></div>
 
 						<form role="form" method="post" action="/membership/login">
 							<!-- Form Group -->
@@ -127,7 +126,7 @@
 							<!-- End Form Group -->
 
 							<!-- Form Group -->
-							<div class="form-group mb-20">
+							<div class="form-group" style="margin-bottom:60px;">
 								<label for="password" class="mb-2 font-20 bold black">비밀번호</label>
 								<input type="password" name="password" id="password" class="theme-input-style" placeholder="********" />
 							</div>
