@@ -153,7 +153,7 @@ public class ToolService {
 			Toolbox toolbox = stock.getToolbox();
 			ToolboxToolLabel label = toolboxToolLabelRepository.findByToolIdAndToolboxId(tool.getId(), toolbox.getId());
 			if (label==null) {
-				label = toolboxToolLabelService.addNew(tool, toolbox);
+				logger.error("no label");
 			}
 			ToolDto toolDto = new ToolDto(tool);
 			ToolboxToolLabelDto labelDto = new ToolboxToolLabelDto(label);

@@ -94,6 +94,11 @@ public class ToolboxToolLabelService {
 	}
 	
 	public ToolboxToolLabelDto update(ToolboxToolLabelDto toolboxToolLabelDto) {
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId());
+		if(toolboxToolLabel == null){
+			return addNew(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId(), toolboxToolLabelDto.getQrcode());
+		}
+		
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxToolLabelDto.getToolboxDto().getId());
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxToolLabelDto.getToolboxDto().getId());
@@ -105,14 +110,10 @@ public class ToolboxToolLabelService {
 			logger.error("Invalid toolId : " + toolboxToolLabelDto.getToolDto().getId());
 			return null;
 		}
-		
-		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId());
-		if (toolboxToolLabel == null) {
-			return null;
-		}
 		toolboxToolLabel.update(toolbox.get(), toolboxToolLabelDto.getLocation(), tool.get(), toolboxToolLabelDto.getQrcode());
 		
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
+		
 	}
 	
 	
@@ -155,15 +156,27 @@ public class ToolboxToolLabelService {
 	 * @return
 	 */
 	@Transactional
-	public ToolboxToolLabel addNew(Tool tool, Toolbox toolbox) {
-		Random random = new Random();
+	public ToolboxToolLabelDto addNew(long toolId, long toolboxId, String qrcode) {		
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
 		ToolboxToolLabel label = ToolboxToolLabel.builder()
-			.tool(tool)
-			.toolbox(toolbox)
-			.location(toolbox.getName())
-			.qrcode(toolbox.getId()+"_"+tool.getId())
+			.tool(tool.get())
+			.toolbox(toolbox.get())
+			.location("")
+			.qrcode(qrcode)
 			.build();
-		return repository.save(label);
+		
+		return update(new ToolboxToolLabelDto(label));
 	}
 	
 	private List<ToolboxToolLabelDto> getDtoList(List<ToolboxToolLabel> list){
