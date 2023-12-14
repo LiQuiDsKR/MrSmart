@@ -63,7 +63,7 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
     fun getOutstandingRentalSheetList(): List<OutstandingRentalSheetDto> {
         var OutstandingRentalSheetDtoList = listOf<OutstandingRentalSheetDto>()
         val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP,object: // page, size, membershipid, startDate, endDate
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP,"",object: // page, size, membershipid, startDate, endDate
             BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 val pagedata: Page = gson.fromJson(result, Page::class.java)

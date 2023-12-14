@@ -112,7 +112,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
                 while (bytesRead < dataSize) {
                     val result = inputStream.read(dataBuffer, 0, 1024)
-                    if (result <= -1) {
+                    if (result <= 0) {
                         break
                     }
                     byteStream.write(dataBuffer, 0, result) // 이 부분 추가

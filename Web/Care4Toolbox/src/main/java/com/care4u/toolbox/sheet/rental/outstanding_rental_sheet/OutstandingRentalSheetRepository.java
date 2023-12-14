@@ -14,7 +14,7 @@ import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 
-public interface OutstandingRentalSheetRepository extends JpaRepository<OutstandingRentalSheet, Long> {
+public interface OutstandingRentalSheetRepository extends JpaRepository<OutstandingRentalSheet, Long>, OutstandingRentalSheetRepositoryCustom{
 	
 	List<OutstandingRentalSheet> findByRentalSheetLeaderId(long leaderId);
 	

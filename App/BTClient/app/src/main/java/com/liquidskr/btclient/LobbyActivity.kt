@@ -2,6 +2,7 @@ package com.liquidskr.btclient
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -13,6 +14,7 @@ import com.liquidskr.fragment.SettingsFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
 import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
@@ -63,7 +65,7 @@ class LobbyActivity  : AppCompatActivity() {
                 .commit()
         }
         dbSyncBtn.setOnClickListener {
-            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     val dbHelper = DatabaseHelper(context)
                     val MembershipListType = object : TypeToken<List<Membership>>(){}.type
@@ -79,6 +81,7 @@ class LobbyActivity  : AppCompatActivity() {
                         val role = member.role.toString()
                         val employmentStatus = member.employmentStatus.toString()
                         dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                        Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
                     }
                     dbHelper.close()
                 }
@@ -87,7 +90,10 @@ class LobbyActivity  : AppCompatActivity() {
                     e.printStackTrace()
                 }
             })
-            bluetoothManager.requestData(RequestType.TOOL_ALL,object:BluetoothManager.RequestCallback{
+
+        }
+        testSendBtn.setOnClickListener {
+            bluetoothManager.requestData(RequestType.TOOL_ALL,"",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     val dbHelper = DatabaseHelper(context)
                     val ToolListType = object : TypeToken<List<ToolDto>>(){}.type
@@ -105,6 +111,7 @@ class LobbyActivity  : AppCompatActivity() {
                         val replacementCycle = tool.replacementCycle
                         val buyCode = tool.buyCode
                         dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
+                        Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
                     }
                     dbHelper.close()
                 }
@@ -113,9 +120,6 @@ class LobbyActivity  : AppCompatActivity() {
                     e.printStackTrace()
                 }
             })
-        }
-        testSendBtn.setOnClickListener {
-            bluetoothManager.dataSend("REQUEST_StandardDB")
         }
         bluetoothBtn.setOnClickListener {
             bluetoothManager.bluetoothOpen()
