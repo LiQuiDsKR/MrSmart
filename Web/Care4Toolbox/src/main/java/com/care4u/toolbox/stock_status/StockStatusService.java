@@ -183,6 +183,8 @@ public class StockStatusService {
 		.currentDay(LocalDate.now())
 		.build();
 		
+		repository.save(stock);
+		
 		return new StockStatusDto(stock);
 	}
 	
