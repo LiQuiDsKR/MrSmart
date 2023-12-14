@@ -2,16 +2,18 @@ package com.liquidskr.btclient
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
-import com.liquidskr.fragment.ManagerSelfRentalFragment
 import com.liquidskr.fragment.SettingsFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
+import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
 class LobbyActivity  : AppCompatActivity() {
@@ -22,7 +24,6 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
-    lateinit var managerSelfRentalFragment: ManagerSelfRentalFragment
     lateinit var managerRentalFragment: ManagerRentalFragment
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerRentalFragment: WorkerRentalFragment
@@ -31,6 +32,10 @@ class LobbyActivity  : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
+
+        val gson = Gson()
+
+        val context = this
         bluetoothManager = BluetoothManager(this, this)
         managerRentalFragment = ManagerRentalFragment()
         managerReturnFragment = ManagerReturnFragment()
@@ -58,10 +63,24 @@ class LobbyActivity  : AppCompatActivity() {
                 .commit()
         }
         dbSyncBtn.setOnClickListener {
-            //bluetoothManager.stopThread = false // 스레드 시작 시 변수 초기화
             bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: Any, type: Type) {
-
+                override fun onSuccess(result: String, type: Type) {
+                    val dbHelper = DatabaseHelper(context)
+                    val MembershipListType = object : TypeToken<List<Membership>>(){}.type
+                    var membershipList: List<Membership> = gson.fromJson(result, MembershipListType)
+                    for (member in membershipList) {
+                        val id = member.id
+                        val code = member.code
+                        val password = member.password
+                        val name = member.name
+                        val part = member.partDto.name
+                        val subPart = member.partDto.subPartDto.name
+                        val mainPart = member.partDto.subPartDto.mainPartDto.name
+                        val role = member.role.toString()
+                        val employmentStatus = member.employmentStatus.toString()
+                        dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                    }
+                    dbHelper.close()
                 }
 
                 override fun onError(e: Exception) {
@@ -69,27 +88,23 @@ class LobbyActivity  : AppCompatActivity() {
                 }
             })
             bluetoothManager.requestData(RequestType.TOOL_ALL,object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: Any, type: Type) {
-
+                override fun onSuccess(result: String, type: Type) {
                     val dbHelper = DatabaseHelper(context)
-
-                    for (row in rows) {
-                        val columns = row.split(",")
-                        if (columns.size == 11) {
-                            val toolId = columns[0].trim().toLong()
-                            val toolMaingroup = columns[1].trim()
-                            val toolSubgroup = columns[2].trim()
-                            val toolCode = columns[3].trim()
-                            val toolKrName = columns[4].trim()
-                            val toolEngName = columns[5].trim()
-                            val toolSpec = columns[6].trim()
-                            val toolUnit = columns[7].trim()
-                            val toolPrice = columns[8].trim().toInt()
-                            val toolReplacementCycle = columns[9].trim().toInt()
-                            val toolBuyCode = columns[10].trim()
-                            dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle)
-                            //dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle, toolBuyCode)
-                        }
+                    val ToolListType = object : TypeToken<List<ToolDto>>(){}.type
+                    var toolList: List<ToolDto> = gson.fromJson(result, ToolListType)
+                    for (tool in toolList) {
+                        val id = tool.id
+                        val mainGroup = tool.subGroupDto.mainGroupDto.name
+                        val subGroup = tool.subGroupDto.name
+                        val code = tool.code
+                        val krName = tool.name
+                        val engName = tool.engName
+                        val spec = tool.spec
+                        val unit = tool.unit
+                        val price = tool.price
+                        val replacementCycle = tool.replacementCycle
+                        val buyCode = tool.buyCode
+                        dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
                     }
                     dbHelper.close()
                 }
