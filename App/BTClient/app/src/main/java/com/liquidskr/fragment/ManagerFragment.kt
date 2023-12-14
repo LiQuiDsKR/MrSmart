@@ -38,15 +38,19 @@ class ManagerFragment : Fragment() {
                 var dbHelper = DatabaseHelper(requireContext())
                 var password = dbHelper.getMembershipPasswordById(code)
                 var member = dbHelper.getMembershipByCode(code)
-                Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
-                if (pwTextField.text.toString().equals(password)) {
-                    sharedViewModel.loginManager = member
-                    val fragment = ManagerLobbyFragment(member.toMembership())
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, fragment)
-                        .addToBackStack(null)
-                        .commit()
+                if (member.role == "MANAGER") {
+                    if (pwTextField.text.toString().equals(password)) {
+                        sharedViewModel.loginManager = member
+                        val fragment = ManagerLobbyFragment(member.toMembership())
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainer, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "해당 직원은 관리자가 아닙니다.", Toast.LENGTH_SHORT).show()
                 }
+
             } catch (e: UninitializedPropertyAccessException) {
                 Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }

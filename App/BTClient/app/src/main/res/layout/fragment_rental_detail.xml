@@ -107,7 +107,7 @@
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/confirmBtn"
+                    android:id="@+id/rental_detail_confirmBtn"
                     android:layout_width="95dp"
                     android:layout_height="50dp"
                     android:layout_weight="0"

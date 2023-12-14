@@ -24,10 +24,13 @@ public interface MembershipRepository extends JpaRepository<Membership, Long>
 	public List<Membership> findAllByRoleOrderByNameAsc(Role role);
 	
 	public List<Membership> findAllByPartOrderByNameAsc(Part part);
-		
+
+	public List<Membership> findAll();
+	
 	public Membership findByCode(String code);
 	
 	public Page<Membership> findAll(Pageable pageable);
+	
 	
 	public Page<Membership> findByNameContaining(Pageable pageable, String name);
 

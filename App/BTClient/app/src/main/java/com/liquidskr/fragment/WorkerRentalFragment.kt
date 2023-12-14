@@ -68,7 +68,7 @@ class WorkerRentalFragment() : Fragment() {
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
-        confirmBtn = view.findViewById(R.id.ConfirmBtn)
+        confirmBtn = view.findViewById(R.id.worker_rental_confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
 
         workerName = view.findViewById(R.id.BorrowerName)
@@ -96,7 +96,6 @@ class WorkerRentalFragment() : Fragment() {
         qrcodeBtn.setOnClickListener {
             if (!qrEditText.isFocused) {
                 qrEditText.requestFocus()
-
             }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
@@ -193,14 +192,11 @@ class WorkerRentalFragment() : Fragment() {
             'ㄹ' to 'F',
             'ㅎ' to 'G'
         )
-
         val correctedText = StringBuilder()
-
         for (char in input) {
             val correctedChar = typoMap[char] ?: char
             correctedText.append(correctedChar)
         }
-
         return correctedText.toString()
     }
     fun recyclerViewUpdate() {

@@ -141,7 +141,7 @@
                     app:srcCompat="@drawable/worker_rental_selectallbtn" />
 
                 <ImageButton
-                    android:id="@+id/ConfirmBtn"
+                    android:id="@+id/worker_rental_confirmBtn"
                     android:layout_width="95dp"
                     android:layout_height="50dp"
                     android:layout_weight="0"

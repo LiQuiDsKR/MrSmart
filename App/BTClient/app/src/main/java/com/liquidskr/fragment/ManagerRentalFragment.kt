@@ -61,8 +61,7 @@ class ManagerRentalFragment() : Fragment() {
         searchTypeSpinner.adapter = adapter1
 
         getRentalRequestSheetList()
-        Thread.sleep(400)
-        Log.d("test", rentalRequestSheetDtoList.toString())
+        Thread.sleep(1000)
         val adapter = RentalRequestSheetAdapter(rentalRequestSheetDtoList) { rentalRequestSheet ->
             val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
             requireActivity().supportFragmentManager.beginTransaction()
