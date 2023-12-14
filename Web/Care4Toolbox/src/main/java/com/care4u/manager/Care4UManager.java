@@ -59,6 +59,7 @@ import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
+import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -108,6 +109,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	
 	@Autowired
 	private ReturnSheetService returnSheetService;
+	
+	@Autowired
+	private ToolboxToolLabelService toolboxToolLabelService;
 
 	@Autowired
 	private TagService tagService;
@@ -264,6 +268,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					handler.sendData(GsonUtils.toJson(sheetPage));
 				}
 				break;
+			case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolboxId = jsonObj.getLong("toolboxId");
+		    		String startDate = jsonObj.getString("startDate");
+					String endDate = jsonObj.getString("endDate");
+
+			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId, startLocalDate, endLocalDate);
+					handler.sendData(GsonUtils.toJson(sheetList));
+				}
+				break;
 			case RETURN_SHEET_FORM:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 			    	ReturnSheetFormDto formDto;
@@ -277,7 +295,19 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				}
 				break;
 			case TOOLBOX_TOOL_LABEL_FORM:
-				
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolId = jsonObj.getLong("toolId");
+					long toolboxId = jsonObj.getLong("toolboxId");
+					String qrcode = jsonObj.getString("qrcode");
+					int count = jsonObj.getInt("count");
+			    	try {
+						toolboxToolLabelService.register(toolId, toolboxId, qrcode, count);
+			    		handler.sendData("good");
+			    	}catch(Exception e) {
+			    		handler.sendData("bad");
+			    	}
+				}
 			}
 		}
 		

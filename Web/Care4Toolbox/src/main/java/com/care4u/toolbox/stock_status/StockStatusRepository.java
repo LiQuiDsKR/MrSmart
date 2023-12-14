@@ -12,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface StockStatusRepository extends JpaRepository<StockStatus, Long>, StockStatusRepositoryCustom {
 	
+	StockStatus findByToolIdAndToolboxId(long toolId, long toolboxId);
+	
 	List<StockStatus> findAllByCurrentDay( LocalDate date);
 	
 	Page<StockStatus> findAllByToolboxIdAndCurrentDayBetween(long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable);

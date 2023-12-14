@@ -149,6 +149,46 @@ public class StockStatusService {
 	}
 	*/
 	
+	/**
+	 * 반드시 매입 Or 초기화 때만 호출해야 함
+	 */
+	@Transactional
+	public StockStatusDto addNew(long toolId, long toolboxId, int count) {
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);		
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
+		StockStatus findStock=repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		if (findStock!=null) {
+			logger.error("already exists! : "+toolId+","+toolboxId);
+			return null;
+		}
+		
+		StockStatus stock = StockStatus.builder()
+		.toolbox(toolbox.get())
+		.tool(tool.get())
+		.buyCount(0)
+		.damageCount(0)
+		.discardCount(0)
+		.faultCount(0)
+		.goodCount(count)
+		.lossCount(0)
+		.rentalCount(0)
+		.totalCount(count)
+		.currentDay(LocalDate.now())
+		.build();
+		
+		return new StockStatusDto(stock);
+	}
+	
 	@Transactional(readOnly=true)
 	public StockStatusSummaryDto getSummary(long toolboxId, LocalDate currentDate) {
 		return repository.getStockStatusSummary(toolboxId, currentDate);
