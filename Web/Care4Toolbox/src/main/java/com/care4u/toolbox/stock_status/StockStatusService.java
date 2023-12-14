@@ -40,9 +40,6 @@ public class StockStatusService {
 	private final StockStatusRepository repository;
 	private final ToolboxRepository toolboxRepository;
 	private final ToolRepository toolRepository;
-	private final ToolboxToolLabelRepository toolboxToolLabelRepository;
-	
-	private final ToolboxToolLabelService toolboxToolLabelService;
 	
 	@Transactional(readOnly = true)
 	public StockStatusDto get(long id){
