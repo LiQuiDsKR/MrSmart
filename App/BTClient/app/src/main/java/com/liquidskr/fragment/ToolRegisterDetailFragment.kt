@@ -81,7 +81,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
         confirmBtn.setOnClickListener {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:${QR_context},toolCount:${toolCount.text.toString().toInt()}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:\"${QR_context}\",count:${toolCount.text.toString().toInt()}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
                 }
