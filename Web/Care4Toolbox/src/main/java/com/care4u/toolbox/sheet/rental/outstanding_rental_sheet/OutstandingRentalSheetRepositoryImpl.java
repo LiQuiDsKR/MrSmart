@@ -20,7 +20,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	    }
 
 	    
-	    
+	    /*
 	    @Override
 		public List<StockStatusSummaryDto> getStockStatusSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
 	    	QStockStatus stockStatus = QStockStatus.stockStatus;
@@ -48,8 +48,9 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	            )
 	            .groupBy(stockStatus.currentDay)
 	            .fetch();
-	    }
+	    }*/
 
+		/*
 		@Override
 	    public StockStatusSummaryDto getStockStatusSummary(long toolboxId, LocalDate currentDate) {
 	        QStockStatus stockStatus = QStockStatus.stockStatus;
@@ -76,13 +77,14 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	                .and(stockStatus.currentDay.eq(currentDate))
 	            )
 	            .fetchOne();
-	    }
+	    }*/
 
 
 
 		@Override
 		public Page<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(
 				long membershipId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+			/*
 			// QueryDSL 엔티티 인스턴스화
 			QOutstandingRentalSheet outstandingRentalSheet = QOutstandingRentalSheet.outstandingRentalSheet;
 
@@ -97,6 +99,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 			    .selectFrom(outstandingRentalSheet)
 			    .where(condition)
 			    .fetch();
+			    */
 
 			return null;
 		}
