@@ -1,6 +1,7 @@
 package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,8 @@ public interface RentalRequestSheetRepository extends JpaRepository<RentalReques
 	Page<RentalRequestSheet> findAllByToolboxIdAndEventTimestampBetween(long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
 	Page<RentalRequestSheet> findAllByToolboxId(long toolboxId, Pageable pageable);
+	
+	List<RentalRequestSheet> findAllByToolboxId(long toolboxId);
 	
 	@Query("SELECT r FROM RentalRequestSheet r " +
 	        "WHERE (r.worker.id = :id1 OR r.leader.id = :id2) " +

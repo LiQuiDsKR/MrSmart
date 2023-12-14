@@ -88,6 +88,17 @@ public class RentalRequestSheetService {
 	}
 	
 	@Transactional(readOnly = true)
+	public List<RentalRequestSheetDto> getList( Long toolboxId) {
+		List<RentalRequestSheet> list = repository.findAllByToolboxId(toolboxId);
+		List<RentalRequestSheetDto> dtoList = new ArrayList<RentalRequestSheetDto>();
+		for (RentalRequestSheet item : list) {
+			dtoList.add(convertToDto(item));
+		}
+		return dtoList;
+	}
+	
+	
+	@Transactional(readOnly = true)
 	public List<RentalRequestSheetDto> listByTag(String tagMacAddress){
 		TagDto tagDto = tagService.get(tagMacAddress);
 		List<RentalRequestTool> toolList = rentalRequestToolService.list(tagDto.getToolDto().getId());

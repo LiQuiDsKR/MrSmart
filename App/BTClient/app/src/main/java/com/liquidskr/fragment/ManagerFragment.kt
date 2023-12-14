@@ -38,7 +38,7 @@ class ManagerFragment : Fragment() {
                 var dbHelper = DatabaseHelper(requireContext())
                 var password = dbHelper.getMembershipPasswordById(code)
                 var member = dbHelper.getMembershipByCode(code)
-                //Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), member.toString(), Toast.LENGTH_SHORT).show()
                 if (pwTextField.text.toString().equals(password)) {
                     sharedViewModel.loginManager = member
                     val fragment = ManagerLobbyFragment(member.toMembership())

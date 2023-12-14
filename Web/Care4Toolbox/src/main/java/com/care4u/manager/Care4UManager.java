@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -47,6 +49,7 @@ import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.tool.ToolDto;
@@ -94,6 +97,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	@Autowired
 	private OutstandingRentalSheetService outstandingRentalSheetService;
 	
+	
 	@Autowired
 	private TagService tagService;
 	private BluetoothServer bluetoothServer;
@@ -132,6 +136,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		@Override
 		public void onDataArrived(BluetoothCommunicationHandler handler, int size, String data) {
 			// TODO Auto-generated method stub
+			Gson gson = new Gson();
+			
 			logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
 			String[] datas = data.split(",",2);
 			RequestType type = RequestType.valueOf(datas[0]);
@@ -156,6 +162,27 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
 					handler.sendData(gson.toJson(sheetPage));
+				}
+				break;
+			case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolboxId = jsonObj.getLong("toolboxId");
+
+			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(toolboxId);
+					handler.sendData(gson.toJson(sheetList));
+				}
+				break;
+			case RENTAL_REQUEST_SHEET_FORM:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					RentalRequestSheetFormDto formDto;
+			    	try {
+						formDto = gson.fromJson(paramJson, RentalRequestSheetFormDto.class);
+			    		rentalRequestSheetService.addNew(formDto);
+			    		handler.sendData("good");
+			    	}catch(IllegalStateException e) {
+			    		handler.sendData("bad");
+			    	}
 				}
 				break;
 			case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
@@ -236,6 +263,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		//membershipService.updatePasswords();
+		//membershipService.downdatePasswords();
 		
 		logger.info("Care4UManager  afterPropertiesSet... ");
 	}

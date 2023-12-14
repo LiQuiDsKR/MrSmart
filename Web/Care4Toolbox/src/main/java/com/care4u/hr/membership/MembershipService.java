@@ -165,4 +165,16 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
             repository.save(member);
         }
     }
+    @Transactional
+    public void downdatePasswords() {
+    	List<Membership> memberships = repository.findAll();
+
+        for (Membership member : memberships) {            
+            member.updatePassword("123");
+            // Update the user's password in the database
+            
+            logger.info(member.getCode()+","+member.getName()+" 회원의 비밀번호가 ["+member.getPassword()+"]로 정상 변경되었습니다.");
+            repository.save(member);
+        }
+    }
 }
