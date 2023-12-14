@@ -24,22 +24,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 		@Override
 		public Page<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(
 				long membershipId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-			/*
-			// QueryDSL 엔티티 인스턴스화
-			QOutstandingRentalSheet outstandingRentalSheet = QOutstandingRentalSheet..outstandingRentalSheet;
-
-			// 주어진 membershipId와 일치하는 workerId, approverId, 또는 leaderId를 찾는 조건
-			Long membershipId = // membershipId 설정
-			BooleanExpression condition = outstandingRentalSheet.workerId.eq(membershipId)
-			    .or(outstandingRentalSheet.approverId.eq(membershipId))
-			    .or(outstandingRentalSheet.leaderId.eq(membershipId));
-
-			// QueryDSL 쿼리 구성 및 실행
-			List<OutstandingRentalSheet> results = queryFactory
-			    .selectFrom(outstandingRentalSheet)
-			    .where(condition)
-			    .fetch();*/
-			
+					
 			QOutstandingRentalSheet outstandingRentalSheet = QOutstandingRentalSheet.outstandingRentalSheet;
 			
 			BooleanExpression condition = outstandingRentalSheet.rentalSheet.eventTimestamp.between(startDate, endDate)

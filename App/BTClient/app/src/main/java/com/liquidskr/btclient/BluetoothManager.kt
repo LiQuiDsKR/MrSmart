@@ -8,15 +8,12 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
 import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.RentalSheetDto
-import com.mrsmart.standard.returns.ReturnSheetDto
 import com.mrsmart.standard.tool.ToolDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -118,6 +115,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     byteStream.write(dataBuffer, 0, result) // 이 부분 추가
                     bytesRead += result
                 }
+                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
+                bluetoothClose()
 
                 val byteArray = byteStream. toByteArray()
 
