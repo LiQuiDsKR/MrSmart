@@ -51,6 +51,8 @@ class LobbyActivity  : AppCompatActivity() {
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
         settingBtn = findViewById(R.id.SettingBtn)
 
+        bluetoothManager.bluetoothOpen()
+
         workerBtn.setOnClickListener {
             val fragment = WorkerFragment.newInstance()
             supportFragmentManager.beginTransaction()

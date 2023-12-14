@@ -10,7 +10,6 @@ class SharedViewModel : ViewModel() {
 
     var worker = MembershipSQLite(0,"","","","","","","", "" )
     var leader = MembershipSQLite(0,"","","","","","","", "" )
-    lateinit var approver: MembershipSQLite
 
     var loginWorker = MembershipSQLite(0,"","","","","","","", "" )
     var loginManager = MembershipSQLite(0,"","","","","","","", "" )

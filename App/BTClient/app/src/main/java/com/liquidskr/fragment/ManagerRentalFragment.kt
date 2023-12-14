@@ -3,6 +3,7 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ class ManagerRentalFragment() : Fragment() {
     lateinit var recyclerView: RecyclerView
     lateinit var selfRentalBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
+    lateinit var rentalRequestSheetDtoList: List<RentalRequestSheetDto>
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -39,6 +41,9 @@ class ManagerRentalFragment() : Fragment() {
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         val layoutManager = LinearLayoutManager(requireContext())
+
+        rentalRequestSheetDtoList = emptyList()
+
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
             val fragment = ManagerSelfRentalFragment()
@@ -55,7 +60,10 @@ class ManagerRentalFragment() : Fragment() {
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         searchTypeSpinner.adapter = adapter1
 
-        val adapter = RentalRequestSheetAdapter(getRentalRequestSheetList()) { rentalRequestSheet ->
+        getRentalRequestSheetList()
+        Thread.sleep(400)
+        Log.d("test", rentalRequestSheetDtoList.toString())
+        val adapter = RentalRequestSheetAdapter(rentalRequestSheetDtoList) { rentalRequestSheet ->
             val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
@@ -66,18 +74,18 @@ class ManagerRentalFragment() : Fragment() {
         return view
     }
 
-    fun getRentalRequestSheetList(): List<RentalRequestSheetDto> {
-        var rentalRequestSheetDtoList = listOf<RentalRequestSheetDto>()
+    fun getRentalRequestSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{ // page, size, toolboxid
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
+                Log.d("asdf",result)
                 rentalRequestSheetDtoList = gson.fromJson(result, type)
+                Log.d("asdf",rentalRequestSheetDtoList.toString())
             }
 
             override fun onError(e: Exception) {
                 e.printStackTrace()
             }
         })
-        return rentalRequestSheetDtoList
     }
 }

@@ -183,6 +183,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             val type: Type = object : TypeToken<String>() {}.type
                             callback.onSuccess(jsonString, type)
                         }
+                        RequestType.RENTAL_REQUEST_SHEET_APPROVE ->{
+                            val pageType: Type = object : TypeToken<RentalRequestSheetDto>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
                     }
                 }
             } catch (e: Exception) {
