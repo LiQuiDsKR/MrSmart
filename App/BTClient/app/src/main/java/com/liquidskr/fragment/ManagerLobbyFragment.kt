@@ -20,6 +20,7 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
     lateinit var rentalBtn: ImageButton
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
+    lateinit var registerBtn: ImageButton
     val manager = manager;
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
@@ -36,6 +37,7 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
         standbyBtn = view.findViewById(R.id.StandbyBtn)
+        registerBtn = view.findViewById(R.id.RegisterBtn)
         bluetoothManager = BluetoothManager(requireContext(), requireActivity())
 
         welcomeMessage.text = manager.name + "님 환영합니다."
@@ -60,6 +62,14 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
                     .replace(R.id.fragmentContainerView, it)
                     .commit()
             }
+        }
+
+        registerBtn.setOnClickListener {
+            val fragment = ToolRegisterFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .addToBackStack(null)
+                .commit()
         }
 
         return view

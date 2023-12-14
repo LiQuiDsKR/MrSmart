@@ -88,7 +88,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
      */
     @Transactional(readOnly = true)
 	public List<MembershipDto> list(){
-		List<Membership> list = repository.findAllByRoleOrderByNameAsc(Role.USER);
+		List<Membership> list = repository.findAll();
 		return getDtoList(list);
 	}
 	

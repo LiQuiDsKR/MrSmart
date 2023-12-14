@@ -33,24 +33,26 @@ class WorkerFragment : Fragment() {
         idTextField.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 idTextField.requestFocus()
-                //showSoftKeyboard(requireContext(), idTextField)
-                //val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE)
             }
         }
-        try {
-            loginBtn.setOnClickListener {
+        loginBtn.setOnClickListener {
+            try {
                 var code = idTextField.text.toString()
                 var dbHelper = DatabaseHelper(requireContext())
                 var member = dbHelper.getMembershipByCode(code)
-                val fragment = WorkerLobbyFragment(member.toMembership())
-                sharedViewModel.loginWorker = member
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, fragment)
-                    .addToBackStack(null)
-                    .commit()
+                if (member.role == "USER") {
+                    val fragment = WorkerLobbyFragment(member.toMembership())
+                    sharedViewModel.loginWorker = member
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                } else {
+                    Toast.makeText(requireContext(), "해당 직원은 작업자가 아닙니다.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: UninitializedPropertyAccessException) {
+                Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: UninitializedPropertyAccessException) {
-            Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
         return view
     }

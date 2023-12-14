@@ -21,7 +21,6 @@ import com.liquidskr.btclient.RentalToolAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import java.lang.reflect.Type
@@ -49,7 +48,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
-        confirmBtn = view.findViewById(R.id.confirmBtn)
+        confirmBtn = view.findViewById(R.id.rental_detail_confirmBtn)
         recyclerView = view.findViewById(R.id.Manager_Rental_Detail_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -69,20 +68,19 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                         val holder = recyclerView.findViewHolderForAdapterPosition(adapter.rentalRequestTools.indexOf(tool)) as? RentalToolAdapter.RentalToolViewHolder
                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(tool.id, toolCount))
-                        val temp = RentalRequestSheetFormDto("DefaultWorkName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id,sharedViewModel.toolBoxId, rentalRequestToolFormDtoList)
-                        val rentalRequestSheetApprove = RentalRequestSheetApprove(rentalRequestSheet, sharedViewModel.loginManager.id)
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
-                            BluetoothManager.RequestCallback{
-                            override fun onSuccess(result: String, type: Type) {
-                                Toast.makeText(requireContext(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
-                            }
-
-                            override fun onError(e: Exception) {
-                                e.printStackTrace()
-                            }
-                        })
-                        requireActivity().supportFragmentManager.popBackStack()
                     }
+                    val rentalRequestSheetApprove = RentalRequestSheetApprove(rentalRequestSheet, sharedViewModel.loginManager.id)
+                    bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
+                        BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            Toast.makeText(requireContext(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onError(e: Exception) {
+                            e.printStackTrace()
+                        }
+                    })
+                    //requireActivity().supportFragmentManager.popBackStack()
                 }
             }
         }

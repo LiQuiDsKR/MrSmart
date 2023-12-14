@@ -15,11 +15,11 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.ToolAdapter
+import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.tool.ToolDtoSQLite
 
 
-class ToolFindFragment() : Fragment() {
+class ToolRegisterFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var confirmBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
@@ -36,7 +36,7 @@ class ToolFindFragment() : Fragment() {
     ): View? {
         bluetoothManager = BluetoothManager(requireContext(), requireActivity())
         val gson = Gson()
-        val view = inflater.inflate(R.layout.fragment_tool_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
 
         editTextName = view.findViewById(R.id.editTextName)
         searchBtn = view.findViewById(R.id.SearchBtn)
@@ -45,18 +45,13 @@ class ToolFindFragment() : Fragment() {
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
 
         val databaseHelper = DatabaseHelper(requireContext())
-        val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
-        val adapter = ToolAdapter(tools) {
-
-        }
-        confirmBtn.setOnClickListener {
-            val toolList: MutableList<ToolDtoSQLite> = mutableListOf()
-            for (tool: ToolDtoSQLite in adapter.getSelectedTools()) {
-                toolList.add(tool) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
-            }
-            sharedViewModel.rentalRequestToolList.addAll(toolList)
-
-            requireActivity().supportFragmentManager.popBackStack()
+        val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
+        val adapter = ToolRegisterAdapter(tools) { tool ->
+            val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .addToBackStack(null)
+                .commit()
         }
         searchBtn.setOnClickListener {
             filterByName(adapter, tools, editTextName.text.toString())
@@ -66,7 +61,7 @@ class ToolFindFragment() : Fragment() {
 
         return view
     }
-    fun filterByName(adapter: ToolAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
+    fun filterByName(adapter: ToolRegisterAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
         val newList: MutableList<ToolDtoSQLite> = mutableListOf()
         for (tool in tools) {
             if (keyword in tool.name) {

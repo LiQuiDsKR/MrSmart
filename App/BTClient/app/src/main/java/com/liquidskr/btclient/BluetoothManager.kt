@@ -16,7 +16,6 @@ import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.tool.ToolDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -184,7 +183,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             callback.onSuccess(jsonString, type)
                         }
                         RequestType.RENTAL_REQUEST_SHEET_APPROVE ->{
-                            val pageType: Type = object : TypeToken<RentalRequestSheetDto>() {}.type
+                            val pageType: Type = object : TypeToken<String>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+                        RequestType.TOOLBOX_TOOL_LABEL_FORM ->{
+                            val pageType: Type = object : TypeToken<String>() {}.type
                             callback.onSuccess(jsonString, pageType)
                         }
                     }
