@@ -66,7 +66,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         bluetoothSocket.close()
     }
     interface RequestCallback {
-        fun onSuccess(result: Any, type: Type)
+        fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
     fun requestData(type:RequestType,callback:RequestCallback){

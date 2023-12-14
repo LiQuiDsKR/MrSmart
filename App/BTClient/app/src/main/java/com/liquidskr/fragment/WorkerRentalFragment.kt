@@ -141,7 +141,6 @@ class WorkerRentalFragment() : Fragment() {
                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(tool.id, toolCount))
                     }
-                    // Log.d("test",  gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222,rentalRequestToolFormDtoList.toList())))
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222 ,rentalRequestToolFormDtoList.toList()))

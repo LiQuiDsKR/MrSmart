@@ -145,7 +145,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         toolUnit: String,
         toolPrice: Int,
         toolReplacementCycle: Int,
-        //toolBuyCode: String
+        toolBuyCode: String
     ): Long {
         val values = ContentValues()
         values.put(COLUMN_TOOL_ID, toolId)
@@ -158,7 +158,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_TOOL_UNIT, toolUnit)
         values.put(COLUMN_TOOL_PRICE, toolPrice)
         values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
-        //values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_TOOL_NAME, null, values)
@@ -254,7 +254,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     @SuppressLint("Range")
     fun getToolByCode(codeToFind: String): ToolDtoSQLite {
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
+        val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
         val selectionArgs = arrayOf(codeToFind)
         lateinit var toolDtoSQLite: ToolDtoSQLite
 
@@ -270,8 +270,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val unit = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_UNIT))
             val price = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_PRICE))
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
+            val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            toolDtoSQLite = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle)
+            toolDtoSQLite = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
         }
 
         cursor.close()
@@ -297,9 +298,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val unit = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_UNIT))
             val price = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_PRICE))
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
-            //val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
+            val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle)
+            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
             toolList.add(tool)
         }
 

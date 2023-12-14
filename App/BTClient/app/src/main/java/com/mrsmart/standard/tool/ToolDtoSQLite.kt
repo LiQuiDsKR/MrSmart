@@ -11,10 +11,10 @@ data class ToolDtoSQLite(
     val unit: String,
     val price: Int,
     val replacementCycle: Int,
-    //val buyCode: String
+    val buyCode: String
 ) {
     fun toToolDtoSQLite ():ToolDto {
         val subGroup = SubGroupDto(0, subGroupDto, MainGroupDto(0, mainGroupDto))
-        return ToolDto(id, subGroup, code, name, engName, spec, unit ,price, replacementCycle)
+        return ToolDto(id, subGroup, code, name, engName, spec, unit ,price, replacementCycle, buyCode)
     }
 }
