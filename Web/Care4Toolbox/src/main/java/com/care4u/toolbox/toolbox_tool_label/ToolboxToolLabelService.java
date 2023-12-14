@@ -177,7 +177,9 @@ public class ToolboxToolLabelService {
 				.qrcode(qrcode)
 				.build();
 		
-		return update(new ToolboxToolLabelDto(label));
+		repository.save(label);
+		
+		return new ToolboxToolLabelDto(label);
 	}
 	
 	
