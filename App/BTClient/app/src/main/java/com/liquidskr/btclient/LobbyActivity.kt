@@ -8,6 +8,7 @@ import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
 import com.liquidskr.fragment.ManagerSelfRentalFragment
+import com.liquidskr.fragment.SettingsFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
 
@@ -65,7 +66,11 @@ class LobbyActivity  : AppCompatActivity() {
             bluetoothManager.bluetoothOpen()
         }
         settingBtn.setOnClickListener {
-
+            val fragment = SettingsFragment()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
 
     }

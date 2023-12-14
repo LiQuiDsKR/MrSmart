@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.tool.ToolDtoSQLite
 
-class ToolAdapter(private val tools: List<ToolDtoSQLite>, private val onItemClick: (ToolDtoSQLite) -> Unit) :
+class ToolAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLite) -> Unit) :
     RecyclerView.Adapter<ToolAdapter.ToolViewHolder>() {
     private val selectedTools: MutableList<ToolDtoSQLite> = mutableListOf()
 
@@ -47,6 +47,8 @@ class ToolAdapter(private val tools: List<ToolDtoSQLite>, private val onItemClic
     override fun getItemCount(): Int {
         return tools.size
     }
-
-
+    fun updateList(newList: List<ToolDtoSQLite>) {
+        tools = newList
+        notifyDataSetChanged()
+    }
 }
