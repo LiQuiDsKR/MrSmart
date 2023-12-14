@@ -78,6 +78,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             outputStream = bluetoothSocket.outputStream
             outputStream.write(type.name.toByteArray(Charsets.UTF_8))
             if (!params.isNullOrEmpty()){
+                outputStream.write(",".toByteArray())
                 outputStream.write(params.toByteArray())
             }
             outputStream.flush()
@@ -118,7 +119,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     bytesRead += result
                 }
                 timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-                bluetoothClose()
 
                 val byteArray = byteStream. toByteArray()
 

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
 import com.liquidskr.btclient.RequestType
@@ -45,6 +46,7 @@ class WorkerRentalFragment() : Fragment() {
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var bluetoothManager: BluetoothManager
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
@@ -59,7 +61,7 @@ class WorkerRentalFragment() : Fragment() {
         val view = inflater.inflate(R.layout.fragment_worker_rental, container, false)
         var dbHelper = DatabaseHelper(requireContext())
 
-        val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
         qrEditText = view.findViewById((R.id.QR_EditText))
@@ -153,6 +155,7 @@ class WorkerRentalFragment() : Fragment() {
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                    Log.d("test", rentalRequestSheet)
                                 }
 
                                 override fun onError(e: Exception) {

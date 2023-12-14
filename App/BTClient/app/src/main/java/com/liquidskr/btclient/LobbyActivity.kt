@@ -157,4 +157,7 @@ class LobbyActivity  : AppCompatActivity() {
             }
         }
     }
+    fun getBluetoothManagerOnActivity(): BluetoothManager {
+        return bluetoothManager
+    }
 }

@@ -13,12 +13,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
@@ -62,9 +60,7 @@ class ManagerReturnFragment() : Fragment() {
         val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX,"",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
-                val pagedata: Page = gson.fromJson(result, Page::class.java)
-                val listOutstandingRentalSheetDto = object : TypeToken<List<OutstandingRentalSheetDto>>(){}.type
-                OutstandingRentalSheetDtoList = gson.fromJson(gson.toJson(pagedata.content), listOutstandingRentalSheetDto)
+                OutstandingRentalSheetDtoList = gson.fromJson(result, type)
             }
 
             override fun onError(e: Exception) {

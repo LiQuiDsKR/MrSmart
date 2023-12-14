@@ -14,12 +14,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
@@ -27,6 +26,7 @@ class ManagerRentalFragment() : Fragment() {
     lateinit var searchTypeSpinner: Spinner
     lateinit var recyclerView: RecyclerView
     lateinit var selfRentalBtn: ImageButton
+    private lateinit var bluetoothManager: BluetoothManager
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -68,12 +68,10 @@ class ManagerRentalFragment() : Fragment() {
 
     fun getRentalRequestSheetList(): List<RentalRequestSheetDto> {
         var rentalRequestSheetDtoList = listOf<RentalRequestSheetDto>()
-        val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{ // page, size, toolboxid
             override fun onSuccess(result: String, type: Type) {
-                val pagedata: Page = gson.fromJson(result, Page::class.java)
-                val listRentalRequestSheetDto = object : TypeToken<List<RentalRequestSheetDto>>(){}.type
-                rentalRequestSheetDtoList = gson.fromJson(gson.toJson(pagedata.content), listRentalRequestSheetDto)
+                rentalRequestSheetDtoList = gson.fromJson(result, type)
             }
 
             override fun onError(e: Exception) {
