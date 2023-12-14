@@ -51,9 +51,16 @@ import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRenta
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverIdDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
+import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import lombok.RequiredArgsConstructor;
@@ -63,7 +70,6 @@ import lombok.RequiredArgsConstructor;
 public class Care4UManager implements InitializingBean, DisposableBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Care4UManager.class);
-	private Gson gson = new Gson();
 	
 	private final LogWriterService mLogWriterService;
 	
@@ -97,7 +103,12 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	@Autowired
 	private OutstandingRentalSheetService outstandingRentalSheetService;
 	
+	@Autowired
+	private RentalSheetService rentalSheetService;
 	
+	@Autowired
+	private ReturnSheetService returnSheetService;
+
 	@Autowired
 	private TagService tagService;
 	private BluetoothServer bluetoothServer;
@@ -135,8 +146,6 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		
 		@Override
 		public void onDataArrived(BluetoothCommunicationHandler handler, int size, String data) {
-			// TODO Auto-generated method stub
-			Gson gson = new Gson();
 			
 			logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
 			String[] datas = data.split(",",2);
@@ -147,10 +156,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			switch(type) {
 			case MEMBERSHIP_ALL:
-				handler.sendData(gson.toJson(membershipService.list()));
+				handler.sendData(GsonUtils.toJson(membershipService.list()));
 				break;
 			case TOOL_ALL:
-				handler.sendData(gson.toJson(toolService.list()));
+				handler.sendData(GsonUtils.toJson(toolService.list()));
 				break;
 			case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
@@ -161,7 +170,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
-					handler.sendData(gson.toJson(sheetPage));
+					handler.sendData(GsonUtils.toJson(sheetPage));
 				}
 				break;
 			case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
@@ -170,18 +179,35 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long toolboxId = jsonObj.getLong("toolboxId");
 
 			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(toolboxId);
-					logger.info(gson.toJson(sheetList));
-					handler.sendData(gson.toJson(sheetList));
+					handler.sendData(GsonUtils.toJson(sheetList));
 				}
 				break;
 			case RENTAL_REQUEST_SHEET_FORM:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					RentalRequestSheetFormDto formDto;
 			    	try {
-						formDto = gson.fromJson(paramJson, RentalRequestSheetFormDto.class);
+						formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
 			    		rentalRequestSheetService.addNew(formDto);
 			    		handler.sendData("good");
+			    	}catch(Exception e) {
+			    		handler.sendData("bad");
+			    	}
+				}
+				break;
+			case RENTAL_REQUEST_SHEET_APPROVE:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					RentalRequestSheetWithApproverIdDto mainDto;
+			    	try {
+						mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverIdDto.class);
+						RentalRequestSheetDto sheetDto = mainDto.getRentalRequestSheetDto();
+						long approverId = mainDto.getApproverId();
+						
+			            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
+			            
+			    		handler.sendData("good");
 			    	}catch(IllegalStateException e) {
+			    		handler.sendData("bad");
+			    	}catch(Exception e) {
 			    		handler.sendData("bad");
 			    	}
 				}
@@ -202,9 +228,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
-					handler.sendData(gson.toJson(sheetPage));
+			        
+					handler.sendData(GsonUtils.toJson(sheetPage));
 				}
 				break;
+			case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long membershipId = jsonObj.getLong("membershipId");
+		    		String startDate = jsonObj.getString("startDate");
+					String endDate = jsonObj.getString("endDate");
+
+			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId, startLocalDate, endLocalDate);
+			        
+					handler.sendData(GsonUtils.toJson(sheetList));
+				}
+				break;	
 			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
@@ -219,9 +261,21 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
-					handler.sendData(gson.toJson(sheetPage));
+					handler.sendData(GsonUtils.toJson(sheetPage));
 				}
-				break;			
+				break;
+			case RETURN_SHEET_FORM:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+			    	ReturnSheetFormDto formDto;
+			    	try {
+						formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
+			    		returnSheetService.addNew(formDto);
+			    		handler.sendData("good");
+			    	}catch(Exception e) {
+			    		handler.sendData("bad");
+			    	}
+				}
+				break;
 			}
 		}
 		
@@ -315,16 +369,16 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	public String getMembership(BluetoothCommunicationHandler handler) {
 	    List<MembershipDto> memberDtoList = membershipService.list();
 	    Message message = new Message(GlobalConstants.REQUEST_MEMBER_LIST, memberDtoList);	  
-	    logger.info(gson.toJson(message));
-	    //handler.sendData(gson.toJson(message));
-	    return gson.toJson(message);
+	    logger.info(GsonUtils.toJson(message));
+	    //handler.sendData(GsonUtils.toJson(message));
+	    return GsonUtils.toJson(message);
 	}
 	public String getTool(BluetoothCommunicationHandler handler) {
 		List<ToolDto> toolDtoList = toolService.list();
 	    Message message = new Message(GlobalConstants.REQUEST_TOOL_LIST, toolDtoList);	 
-	    logger.info(gson.toJson(message));    
-	    //handler.sendData(gson.toJson(message));
-	    return gson.toJson(message);
+	    logger.info(GsonUtils.toJson(message));    
+	    //handler.sendData(GsonUtils.toJson(message));
+	    return GsonUtils.toJson(message);
 	}
 	public void sendSize(BluetoothCommunicationHandler handler, String sendingMessage) { // 쓸모없어서 삭제예정
 		int size = sendingMessage.getBytes().length;
