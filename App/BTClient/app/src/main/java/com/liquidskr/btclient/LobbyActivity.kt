@@ -60,7 +60,7 @@ class LobbyActivity  : AppCompatActivity() {
         dbSyncBtn.setOnClickListener {
             //bluetoothManager.stopThread = false // 스레드 시작 시 변수 초기화
             bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: Any, listType: Type) {
+                override fun onSuccess(result: Any, type: Type) {
 
                 }
 
@@ -70,6 +70,7 @@ class LobbyActivity  : AppCompatActivity() {
             })
             bluetoothManager.requestData(RequestType.TOOL_ALL,object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: Any, type: Type) {
+
                     val dbHelper = DatabaseHelper(context)
 
                     for (row in rows) {

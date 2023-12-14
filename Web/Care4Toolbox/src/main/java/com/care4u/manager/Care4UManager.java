@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -11,12 +13,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.microedition.io.StreamConnection;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.care4u.common.GlobalConstants;
 import com.care4u.common.GsonUtils;
@@ -24,6 +31,7 @@ import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.RequestType;
 import com.care4u.constant.Role;
+import com.care4u.constant.SheetState;
 import com.care4u.domain.Message;
 import com.care4u.hr.main_part.MainPartService;
 import com.care4u.hr.membership.MembershipDto;
@@ -36,6 +44,10 @@ import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.TagService;
+import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
+import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
@@ -77,6 +89,12 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	private StockStatusService stockStatusService;
 	
 	@Autowired
+	private RentalRequestSheetService rentalRequestSheetService;
+	
+	@Autowired
+	private OutstandingRentalSheetService outstandingRentalSheetService;
+	
+	@Autowired
 	private TagService tagService;
 	private BluetoothServer bluetoothServer;
 	private BluetoothServer.Listener bluetoothServerListener = new BluetoothServer.Listener() {
@@ -115,8 +133,12 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		public void onDataArrived(BluetoothCommunicationHandler handler, int size, String data) {
 			// TODO Auto-generated method stub
 			logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
-			
-			RequestType type = RequestType.valueOf(data);
+			String[] datas = data.split(",",2);
+			RequestType type = RequestType.valueOf(datas[0]);
+			String paramJson = null;
+			if (datas.length>1) {				
+				paramJson = datas[1];
+			}
 			switch(type) {
 			case MEMBERSHIP_ALL:
 				handler.sendData(gson.toJson(membershipService.list()));
@@ -124,6 +146,40 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			case TOOL_ALL:
 				handler.sendData(gson.toJson(toolService.list()));
 				break;
+			case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					long toolboxId = jsonObj.getLong("toolboxId");
+
+			        Pageable pageable = PageRequest.of(page,pageSize);
+			        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
+					handler.sendData(gson.toJson(sheetPage));
+				}
+				break;
+			case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
+				break;
+			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
+				
+				break;
+			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					long toolboxId = jsonObj.getLong("toolboxId");
+		    		String startDate = jsonObj.getString("startDate");
+					String endDate = jsonObj.getString("endDate");
+
+			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+			        Pageable pageable = PageRequest.of(page,pageSize);
+			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(toolboxId, startLocalDate, endLocalDate, pageable);
+					handler.sendData(gson.toJson(sheetPage));
+				}
+				break;			
 			}
 		}
 		

@@ -14,6 +14,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
 import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.page.Page
+import com.mrsmart.standard.rental.RentalSheetDto
+import com.mrsmart.standard.returns.ReturnSheetDto
 import com.mrsmart.standard.tool.ToolDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -66,15 +69,18 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         bluetoothSocket.close()
     }
     interface RequestCallback {
-        fun onSuccess(result: Any, type: Type)
+        fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
-    fun requestData(type:RequestType,callback:RequestCallback){
+    fun requestData(type:RequestType,params:String,callback:RequestCallback){
         val gson = Gson()
         try {
             //앱에서 서버로 type 전송.
             outputStream = bluetoothSocket.outputStream
             outputStream.write(type.name.toByteArray(Charsets.UTF_8))
+            if (!params.isNullOrEmpty()){
+                outputStream.write(params.toByteArray())
+            }
             outputStream.flush()
             Log.d("SEND", type.name)
         }catch (e: Exception) {
@@ -128,7 +134,32 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
                         RequestType.TOOL_ALL -> {
                             val listType: Type = object : TypeToken<List<ToolDto>>() {}.type
-                            callback.onSuccess(gson.fromJson(jsonString, listType), listType)
+                            callback.onSuccess(jsonString, listType)
+                        }
+
+                        RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX ->{
+                            val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+
+                        RequestType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP ->{
+                            val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+
+                        RequestType.RETURN_SHEET_PAGE_BY_MEMBERSHIP ->{
+                            val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+
+                        RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ->{
+                            val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
+                        }
+
+                        RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ->{
+                            val pageType: Type = object : TypeToken<Page>() {}.type
+                            callback.onSuccess(jsonString, pageType)
                         }
                     }
                 }
