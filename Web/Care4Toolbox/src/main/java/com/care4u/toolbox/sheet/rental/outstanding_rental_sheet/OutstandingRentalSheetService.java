@@ -73,9 +73,15 @@ public class OutstandingRentalSheetService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OutstandingRentalSheetDto> getPage(Long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+	public Page<OutstandingRentalSheetDto> getPageByToolboxId(Long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 		Page<OutstandingRentalSheet> page = repository
 				.findByRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPageByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+		Page<OutstandingRentalSheet> page = repository
+				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
 	@Transactional

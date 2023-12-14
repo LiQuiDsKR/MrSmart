@@ -161,7 +161,21 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
 				break;
 			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
-				
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					long membershipId = jsonObj.getLong("membershipId");
+		    		String startDate = jsonObj.getString("startDate");
+					String endDate = jsonObj.getString("endDate");
+
+			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+			        Pageable pageable = PageRequest.of(page,pageSize);
+			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
+					handler.sendData(gson.toJson(sheetPage));
+				}
 				break;
 			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
@@ -176,7 +190,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
-			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(toolboxId, startLocalDate, endLocalDate, pageable);
+			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
 					handler.sendData(gson.toJson(sheetPage));
 				}
 				break;			

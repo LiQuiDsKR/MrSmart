@@ -50,7 +50,7 @@ public class OutstandingRentalSheetRestController {
         LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(toolboxId, startLocalDate, endLocalDate, pageable);
+        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
         
         for (OutstandingRentalSheetDto item : sheetPage.getContent()) {
         	logger.info(item.toString());
