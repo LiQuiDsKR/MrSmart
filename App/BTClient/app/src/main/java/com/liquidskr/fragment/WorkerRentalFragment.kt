@@ -163,6 +163,7 @@ class WorkerRentalFragment() : Fragment() {
                             })
                             sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                             sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                            Thread.sleep(1000)
                             requireActivity().supportFragmentManager.popBackStack()
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
