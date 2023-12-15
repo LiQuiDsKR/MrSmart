@@ -32,7 +32,7 @@ class OutstandingRentalToolAdapter(private val outstandingRentalTools: List<Rent
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
         val currentOutstandingRentalTool = outstandingRentalTools[position]
         holder.toolName.text = currentOutstandingRentalTool.toolDto.name
-        holder.toolCount.text = currentOutstandingRentalTool.count.toString()
+        holder.toolCount.text = currentOutstandingRentalTool.outstandingCount.toString()
     }
 
     override fun getItemCount(): Int {

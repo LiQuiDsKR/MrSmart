@@ -47,4 +47,11 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 
 		    return new PageImpl<>(content, pageable, total);
 		}
+
+		@Override
+		public List<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(
+				long membershipId, LocalDateTime startDate, LocalDateTime endDate) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 }

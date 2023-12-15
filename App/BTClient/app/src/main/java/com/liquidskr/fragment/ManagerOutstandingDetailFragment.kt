@@ -8,22 +8,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
+import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.tool.ToolState
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import java.lang.reflect.Type
 
 class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -37,6 +40,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
     private lateinit var timeStamp: TextView
 
     private lateinit var confirmBtn: ImageButton
+    private lateinit var bluetoothManager: BluetoothManager
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -44,7 +48,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_return_detail, container, false)
-
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         returnerName = view.findViewById(R.id.returnerName)
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -54,7 +58,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         returnerName.text = "반납자: " + outstandingSheet.rentalSheetDto.workerDto.name
         workerName.text = "대여자: " + outstandingSheet.rentalSheetDto.workerDto.name
         leaderName.text = "리더: " + outstandingSheet.rentalSheetDto.leaderDto.name
-        timeStamp.text = "대여일시: " + LocalDateTime.parse(outstandingSheet.rentalSheetDto.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        timeStamp.text = "대여일시: " + outstandingSheet.rentalSheetDto.eventTimestamp
 
         confirmBtn.setOnClickListener {
             recyclerView.adapter?.let { adapter ->
@@ -65,9 +69,18 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
                         val count = holder?.toolCount?.text.toString().toInt()
                         outstandingRentalToolDtoList.add(ReturnToolFormDto(rentalTool.id, rentalTool.toolDto.id, count, ToolState.GOOD, ""))
                     }
-                    val temp = ReturnSheetFormDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto.id,outstandingSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, outstandingRentalToolDtoList)
-                    Log.d("asdf_",gson.toJson(temp))
-                    requireActivity().supportFragmentManager.popBackStack()
+                    val returnSheetForm = ReturnSheetFormDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto.id, outstandingSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, outstandingRentalToolDtoList)
+                    bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
+                        BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            Toast.makeText(requireContext(), "반납 승인 완료", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onError(e: Exception) {
+                            e.printStackTrace()
+                        }
+                    })
+                    //requireActivity().supportFragmentManager.popBackStack()
                 }
             }
         }

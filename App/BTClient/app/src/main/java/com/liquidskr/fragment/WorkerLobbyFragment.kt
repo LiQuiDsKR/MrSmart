@@ -1,5 +1,6 @@
 package com.liquidskr.fragment
 
+import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,17 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.Membership
-import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
@@ -27,6 +27,11 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
 
     val gson = Gson()
     private lateinit var recyclerView: RecyclerView
+    private lateinit var bluetoothManager: BluetoothManager
+    lateinit var outstandingRentalSheetDtoList: List<OutstandingRentalSheetDto>
+    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
+        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
@@ -35,7 +40,7 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
+        outstandingRentalSheetDtoList = emptyList()
         rentalBtn.setOnClickListener {
             val lobbyActivity = activity as? LobbyActivity
             val workerRentalFragment = lobbyActivity?.workerRentalFragment
@@ -48,8 +53,9 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
                     .commit()
             }
         }
-
-        val adapter = OutstandingRentalSheetAdapter(getOutstandingRentalSheetList()) { outstandingRentalSheet ->
+        getOutstandingRentalSheetList()
+        Thread.sleep(1000)
+        val adapter = OutstandingRentalSheetAdapter(outstandingRentalSheetDtoList) { outstandingRentalSheet ->
             val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -60,21 +66,16 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
 
         return view
     }
-    fun getOutstandingRentalSheetList(): List<OutstandingRentalSheetDto> {
-        var OutstandingRentalSheetDtoList = listOf<OutstandingRentalSheetDto>()
-        val bluetoothManager = BluetoothManager(requireContext(), requireActivity())
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP,"",object: // page, size, membershipid, startDate, endDate
-            BluetoothManager.RequestCallback{
+    fun getOutstandingRentalSheetList() {
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id},startDate:\"2020-01-01\",endDate:\"2023-12-15\"}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
-                val pagedata: Page = gson.fromJson(result, Page::class.java)
-                val listOutstandingRentalSheetDto = object : TypeToken<List<OutstandingRentalSheetDto>>(){}.type
-                OutstandingRentalSheetDtoList = gson.fromJson(gson.toJson(pagedata.content), listOutstandingRentalSheetDto)
+                outstandingRentalSheetDtoList = gson.fromJson(result, type)
             }
 
             override fun onError(e: Exception) {
                 e.printStackTrace()
             }
         })
-        return OutstandingRentalSheetDtoList
     }
 }
