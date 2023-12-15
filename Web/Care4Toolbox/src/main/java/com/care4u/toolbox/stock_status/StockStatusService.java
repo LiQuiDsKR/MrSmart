@@ -189,11 +189,11 @@ public class StockStatusService {
 	}
 	
 	@Transactional(readOnly=true)
-	public StockStatusSummaryDto getSummary(long toolboxId, LocalDate currentDate) {
-		return repository.getStockStatusSummary(toolboxId, currentDate);
+	public StockStatusSummaryByToolStateDto getSummary(long toolboxId, LocalDate currentDate) {
+		return repository.getStockStatusSummaryByToolStateDto(toolboxId, currentDate);
 	}
 	@Transactional(readOnly=true)
-	public List<StockStatusSummaryDto> getSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
+	public List<StockStatusSummaryByToolStateDto> getSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
 		return repository.getStockStatusSummary(toolboxId, startDate, endDate);
 	}
 	

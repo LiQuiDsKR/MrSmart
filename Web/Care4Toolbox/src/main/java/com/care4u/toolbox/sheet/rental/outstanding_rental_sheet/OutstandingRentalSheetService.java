@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
@@ -75,13 +76,13 @@ public class OutstandingRentalSheetService {
 	@Transactional(readOnly = true)
 	public Page<OutstandingRentalSheetDto> getPageByToolboxId(Long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 		Page<OutstandingRentalSheet> page = repository
-				.findByRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+				.findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState.REQUEST, toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
 	@Transactional(readOnly = true)
 	public List<OutstandingRentalSheetDto> getListByToolboxId(Long toolboxId, LocalDate startDate, LocalDate endDate) {
 		List<OutstandingRentalSheet> list = repository
-				.findByRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
+				.findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState.REQUEST, toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
 		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
 		for (OutstandingRentalSheet item : list) {
 			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
@@ -110,12 +111,18 @@ public class OutstandingRentalSheetService {
 		for (RentalTool tool : toolList) {
 			totalCount += tool.getCount();
 		}
-		OutstandingRentalSheet outstandingSheet = OutstandingRentalSheet.builder().rentalSheet(sheet)
-				.totalCount(totalCount).totalOutstandingCount(totalCount).build();
+		OutstandingRentalSheet outstandingSheet = OutstandingRentalSheet.builder()
+				.rentalSheet(sheet)
+				.totalCount(totalCount)
+				.totalOutstandingCount(totalCount)
+				.outstandingStatus(OutstandingState.READY)
+				.build();
 
 		return repository.save(outstandingSheet);
 	}
 	
+	
+	//반납 승인 후
 	@Transactional
 	public OutstandingRentalSheetDto update(ReturnSheetDto returnSheetDto) {
 		OutstandingRentalSheet sheet = repository.findByRentalSheetId(returnSheetDto.getRentalSheetDto().getId());
@@ -130,6 +137,7 @@ public class OutstandingRentalSheetService {
 		for (RentalToolDto tool : toolList) {
 			totalOutstandingCount += tool.getOutstandingCount();
 		}
+		sheet.updateOutstandingState(OutstandingState.READY);
 		
 		if (totalOutstandingCount == 0) {
 			repository.deleteById(sheet.getId());
@@ -138,5 +146,21 @@ public class OutstandingRentalSheetService {
 			sheet.updateOutstandingCount(totalOutstandingCount);
 			return new OutstandingRentalSheetDto(repository.save(sheet), toolList);
 		}
+	}
+	
+	
+	//반납 신청 시 outstandingState를 Request로 바꿉니다.
+	@Transactional
+	public String requestOutstandingState(long id) {
+		Optional<OutstandingRentalSheet> sheetOptional = repository.findById(id);
+		if (sheetOptional.isEmpty()) {
+			logger.error("outstandingSheet not found!");
+			return null;
+		}
+		OutstandingRentalSheet sheet = sheetOptional.get();
+		sheet.updateOutstandingState(OutstandingState.REQUEST);
+		repository.save(sheet);
+		
+		return "Good";
 	}
 }

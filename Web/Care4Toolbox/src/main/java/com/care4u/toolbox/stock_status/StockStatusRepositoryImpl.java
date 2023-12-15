@@ -16,13 +16,13 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	    }
 
 	    @Override
-		public List<StockStatusSummaryDto> getStockStatusSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
+		public List<StockStatusSummaryByToolStateDto> getStockStatusSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
 	    	QStockStatus stockStatus = QStockStatus.stockStatus;
 
 	        return queryFactory
 	            .select(
 	                Projections.constructor(
-	                    StockStatusSummaryDto.class,
+	                    StockStatusSummaryByToolStateDto.class,
 	                    stockStatus.toolbox.name,
 	                    stockStatus.currentDay,
 	                    stockStatus.totalCount.sum(),
@@ -45,13 +45,13 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	    }
 
 		@Override
-	    public StockStatusSummaryDto getStockStatusSummary(long toolboxId, LocalDate currentDate) {
+	    public StockStatusSummaryByToolStateDto getStockStatusSummaryByToolStateDto(long toolboxId, LocalDate currentDate) {
 	        QStockStatus stockStatus = QStockStatus.stockStatus;
 
 	        return queryFactory
 	            .select(
 	                Projections.constructor(
-	                    StockStatusSummaryDto.class,
+	                    StockStatusSummaryByToolStateDto.class,
 	                    stockStatus.toolbox.name,
 	                    stockStatus.currentDay,
 	                    stockStatus.totalCount.sum(),
@@ -71,4 +71,11 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	            )
 	            .fetchOne();
 	    }
+
+		@Override
+		public StockStatusSummaryByMainGroupDto getStockStatusSummaryByMainGroupDto(long toolboxId,
+				LocalDate currentDate) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 }

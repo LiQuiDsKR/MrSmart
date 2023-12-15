@@ -53,18 +53,18 @@ public class StockStatusRestController {
     }
     
     @GetMapping(value="/stock_status/get/analytics")
-    public ResponseEntity<StockStatusSummaryDto> getStockStatusSummary(
+    public ResponseEntity<StockStatusSummaryByToolStateDto> getStockStatusSummary(
     		@RequestParam(name="toolboxId") Long toolboxId,
     		@RequestParam(name="currentDate") String currentDate
     		){
     	
     	LocalDate currentLocalDate = LocalDate.parse(currentDate, DateTimeFormatter.ISO_DATE);
     	
-    	StockStatusSummaryDto summaryDto=stockStatusService.getSummary(toolboxId, currentLocalDate);
+    	StockStatusSummaryByToolStateDto summaryDto=stockStatusService.getSummary(toolboxId, currentLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
     @GetMapping(value="/stock_status/get/analytics/list")
-    public ResponseEntity<List<StockStatusSummaryDto>> getStockStatusSummaryList(
+    public ResponseEntity<List<StockStatusSummaryByToolStateDto>> getStockStatusSummaryList(
     		@RequestParam(name="toolboxId") Long toolboxId,
     		@RequestParam(name="startDate") String startDate,
     		@RequestParam(name="endDate") String endDate
@@ -73,7 +73,7 @@ public class StockStatusRestController {
     	LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
     	LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     	
-    	List<StockStatusSummaryDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
+    	List<StockStatusSummaryByToolStateDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
 }
