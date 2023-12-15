@@ -63,6 +63,28 @@ public class OutstandingRentalSheetRestController {
         return ResponseEntity.ok(sheetPage);
     }
 	
+	@GetMapping(value="/outstanding_rental_sheet/getpage/by_membership")
+	 public ResponseEntity<Page<OutstandingRentalSheetDto>> getOutstandingRentalSheetPageByMembership(
+	    		@RequestParam(name="membershipId") long membershipId,
+	    		@RequestParam(name="page") int page,
+	    		@RequestParam(name="size") int size,
+	    		@RequestParam(name="startDate") String startDate,
+	    		@RequestParam(name="endDate") String endDate
+	            ){
+	    	logger.info("page=" + page + ", size=" + size);
+
+	        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+	        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+	    		
+	        Pageable pageable = PageRequest.of(page,size);
+	        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
+	        
+	        for (OutstandingRentalSheetDto item : sheetPage.getContent()) {
+	        	logger.info(item.toString());
+	        }
+	        return ResponseEntity.ok(sheetPage);
+	    }
+	
 	@GetMapping(value="/outstanding_rental_sheet/get_by_tag")
 	public ResponseEntity<OutstandingRentalSheetDto> getOutstandingRentalSheetByTag(
 			@RequestParam(name="macAddress") String macAddress
@@ -73,7 +95,7 @@ public class OutstandingRentalSheetRestController {
         return ResponseEntity.ok(sheet);
 	}
 	
-	@PostMapping(value="/outstanding_rental_sheet/apply")
+	@PostMapping(value="/outstanding_rental_sheet/request")
 	public ResponseEntity<String> applyOutstandingRentalSheet(@Valid @RequestBody Long outstandingRentalSheetId , BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			List<String> errors = bindingResult.getAllErrors().stream()
@@ -81,6 +103,9 @@ public class OutstandingRentalSheetRestController {
 			return ResponseEntity.badRequest().body(String.join(" / ", errors));
 		}
 		Gson gson = new Gson();
+		
+		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
+		
 		String response = gson.toJson(outstandingRentalSheetId);
         return new ResponseEntity<>(response, HttpStatus.OK);
 	}

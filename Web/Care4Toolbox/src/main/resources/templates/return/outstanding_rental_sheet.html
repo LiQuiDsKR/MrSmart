@@ -153,7 +153,7 @@
 		//fetch
 		function load(membershipId) {
 			abcHttp.get(
-				`/rental/sheet/getpage`,
+				`/outstanding_rental_sheet/getpage/by_membership`,
 				{
 					membershipId: membershipId,
 					page: 0,
@@ -170,7 +170,7 @@
 					containerDiv.innerHTML = htmlString;
 				}
 				data.content.forEach(element => {
-					const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
+					const rentalSheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.rentalSheetDto.status];
 					htmlString = `
 					<!-- Sheet -->
 					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
@@ -188,18 +188,18 @@
 								</thead>
 								<tbody>
 									<tr>
-										<td class="time">${formatDate(element.eventTimestamp)}</td>
-										<td class="toolbox">${element.toolboxDto.name}</td>
-										<td class="worker">${element.workerDto.name}</td>
-										<td class="leader">${element.leaderDto.name}</td>
-										<td class="approver">${element.approverDto.name}</td>
+										<td class="time">${formatDate(element.rentalSheetDto.eventTimestamp)}</td>
+										<td class="toolbox">${element.rentalSheetDto.toolboxDto.name}</td>
+										<td class="worker">${element.rentalSheetDto.workerDto.name}</td>
+										<td class="leader">${element.rentalSheetDto.leaderDto.name}</td>
+										<td class="approver">${element.rentalSheetDto.approverDto.name}</td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 						<div class="col-2 d-flex justify-content-center align-items-center">
-					      <a href="#" class="return btn disabled" style="width:fit-content; height:fit-content;">
-					        <span>반납완료</span>
+					      <a href="#" class="return btn ${element.outstandingStatus=="READY"? "" : "disabled"}" style="width:fit-content; height:fit-content;">
+					        <span>${element.outstandingStatus=="READY"? "반납 신청" : "신청 중" }</span>
 					      </a>
 					    </div>
 						<!-- End Header Table-->
@@ -217,11 +217,11 @@
 								<tbody>
 				   `;
 
-					for (let tool of element.toolList) {
+					for (let tool of element.rentalSheetDto.toolList) {
 						htmlString +=
 							`
 									<tr>
-										<td class="toolbox">${element.toolboxDto.name}</td>
+										<td class="toolbox">${element.rentalSheetDto.toolboxDto.name}</td>
 										<td class="name">${tool.toolDto.name}</td>
 										<td class="spec">${tool.toolDto.spec}</td>
 										<td class="count">${tool.count}</td>
@@ -241,7 +241,7 @@
 					containerDiv.appendChild(outerDiv);
 					const dataObj = JSON.parse(JSON.stringify(element));
 
-					//addListenerApproveBtn(dataObj);
+					addListenerApproveBtn(dataObj);
 					//addListenerDeleteBtn(dataObj);
 				});
 				//activateCheckbox();
@@ -292,24 +292,30 @@
 		}
 		
 		
-		//아직 생각 안했는데 이미 반납된거면 반납 신청 버튼을 '반납됨'으로 바꾸고 disabled할거임
-		function activateApproveBtn() {
-			const sheet = this.closest("div.sheet");
-			const btn = sheet.querySelector("a.btn");
-			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected"));
-			btn.classList.toggle("disabled", !condition);
-		}
-		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
-		//아직 생각 안했는데 반납신청 누르면 반납 페이지로 넘길거임
 		function addListenerApproveBtn(data) {
-			document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
+			document.querySelectorAll(".return.btn:not(.listener-added)").forEach(element => {
 				element.addEventListener("click", function () {
 					abcHttp.post(
-						`/rental/request_sheet/approve?approverId=${100001}`,
-						data,
-					).then(data => {
-
+						'/outstanding_rental_sheet/request',
+						data.id
+					).then(data=>{
+						Swal.fire({
+							type: "success",
+							title: "반납 신청 완료",
+							text: "공기구 반납 목록을 정상적으로 신청하였습니다",
+						})
+						.then(result2 => {
+						location.href = '/return/outstanding_rental_sheet';
+						});
 					})
+					.catch(error => {
+						Swal.fire({
+							type: "error",
+							title: "대여 신청 실패",
+							text: error,
+						});
+					});
+					element.classList.add("disabled");
 				});
 				element.classList.add("listener-added");
 			});

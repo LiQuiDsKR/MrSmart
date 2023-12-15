@@ -161,6 +161,6 @@ public class OutstandingRentalSheetService {
 		sheet.updateOutstandingState(OutstandingState.REQUEST);
 		repository.save(sheet);
 		
-		return "Good";
+		return "outstandingRentalSheet Id : "+sheet.getId()+" OutstandingStatus changed to" + sheet.getOutstandingStatus();
 	}
 }
