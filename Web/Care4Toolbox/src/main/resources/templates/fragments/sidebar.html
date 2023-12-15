@@ -69,6 +69,12 @@
 				</a>
 			</li>
 			<li class="nav-category">공기구 반납</li>
+			<li class="">
+				<a th:href="@{/return/outstanding_rental_sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/return/sheet/create}">
 					<i class="icofont-navigation-menu"></i>

@@ -50,6 +50,7 @@ public class OutstandingRentalSheet extends BaseEntity {
 		this.rentalSheet = rentalSheet;
 		this.totalCount = totalCount;
 		this.totalOutstandingCount = totalOutstandingCount;
+		this.outstandingStatus = outstandingStatus;
 	}
 	
 	public void updateOutstandingCount(int totalOutstandingCount) {
@@ -57,6 +58,6 @@ public class OutstandingRentalSheet extends BaseEntity {
 	}
 	
 	public void updateOutstandingState(OutstandingState outstandingStatus) {
-		
+		this.outstandingStatus = outstandingStatus;
 	}
 }
