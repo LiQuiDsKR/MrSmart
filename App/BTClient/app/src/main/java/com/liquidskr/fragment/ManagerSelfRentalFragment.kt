@@ -15,12 +15,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
+import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import java.lang.reflect.Type
 
 class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var workerSearchBtn: ImageButton
@@ -33,6 +37,7 @@ class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var bluetoothManager: BluetoothManager
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
@@ -52,6 +57,7 @@ class ManagerSelfRentalFragment() : Fragment() {
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
         workerName = view.findViewById(R.id.BorrowerName)
         leaderName = view.findViewById(R.id.LeaderName)
@@ -105,10 +111,21 @@ class ManagerSelfRentalFragment() : Fragment() {
                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(tool.id, toolCount))
                     }
-                    Log.d("test",  gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, 5222,rentalRequestToolFormDtoList.toList())))
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
+                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                                BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                }
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
+                            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                            Thread.sleep(1000)
                             requireActivity().supportFragmentManager.popBackStack()
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()

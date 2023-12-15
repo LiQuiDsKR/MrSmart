@@ -80,7 +80,8 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
                             e.printStackTrace()
                         }
                     })
-                    //requireActivity().supportFragmentManager.popBackStack()
+                    Thread.sleep(1000)
+                    requireActivity().supportFragmentManager.popBackStack()
                 }
             }
         }
