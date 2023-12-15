@@ -47,4 +47,24 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 
 		    return new PageImpl<>(content, pageable, total);
 		}
+
+		@Override
+		public List<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(
+				long membershipId, LocalDateTime startDate, LocalDateTime endDate) {
+			
+			QOutstandingRentalSheet outstandingRentalSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			
+			BooleanExpression condition = outstandingRentalSheet.rentalSheet.eventTimestamp.between(startDate, endDate)
+					.and(outstandingRentalSheet.rentalSheet.worker.id.eq(membershipId)
+							.or(outstandingRentalSheet.rentalSheet.leader.id.eq(membershipId))
+							.or(outstandingRentalSheet.rentalSheet.approver.id.eq(membershipId))
+					);
+			
+			List<OutstandingRentalSheet> content = queryFactory
+					.selectFrom(outstandingRentalSheet)
+					.where(condition)
+					.fetch();
+
+		    return content;
+		}
 }
