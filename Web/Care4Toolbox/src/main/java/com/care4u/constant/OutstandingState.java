@@ -1,5 +1,5 @@
 package com.care4u.constant;
 
-public enum OutstandingStatus {
+public enum OutstandingState {
 	READY, REQUEST, DONE
 }

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.care4u.constant.OutstandingStatus;
+import com.care4u.constant.OutstandingState;
 import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
@@ -23,7 +23,7 @@ public interface OutstandingRentalSheetRepository extends JpaRepository<Outstand
 	
 	OutstandingRentalSheet findByRentalSheetId(long RentalSheetId);
 	
-	Page<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingStatus status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	Page<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingStatus status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate);
+	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate);
 }

@@ -282,6 +282,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					handler.sendData(GsonUtils.toJson(sheetList));
 				}
 				break;
+			case RETURN_SHEET_REQUEST:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
+			    	try {
+			    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
+			    		handler.sendData("good");
+			    	}catch(IllegalStateException e) {
+			    		handler.sendData("bad");
+			    	}catch(Exception e) {
+			    		handler.sendData("bad");
+			    	}
+				}
+				break;
 			case RETURN_SHEET_FORM:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 			    	ReturnSheetFormDto formDto;

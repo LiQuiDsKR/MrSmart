@@ -71,4 +71,11 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	            )
 	            .fetchOne();
 	    }
+
+		@Override
+		public StockStatusSummaryByMainGroupDto getStockStatusSummaryByMainGroupDto(long toolboxId,
+				LocalDate currentDate) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 }

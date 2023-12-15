@@ -11,7 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import com.care4u.constant.OutstandingStatus;
+import com.care4u.constant.OutstandingState;
 import com.care4u.entity.BaseEntity;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 
@@ -41,12 +41,12 @@ public class OutstandingRentalSheet extends BaseEntity {
 	private int totalOutstandingCount;
 	
 	@Enumerated(EnumType.STRING)
-	private OutstandingStatus outstandingStatus;
+	private OutstandingState outstandingStatus;
 	
 	
 	
 	@Builder
-	public OutstandingRentalSheet(RentalSheet rentalSheet, int totalCount, int totalOutstandingCount, OutstandingStatus outstandingStatus) {
+	public OutstandingRentalSheet(RentalSheet rentalSheet, int totalCount, int totalOutstandingCount, OutstandingState outstandingStatus) {
 		this.rentalSheet = rentalSheet;
 		this.totalCount = totalCount;
 		this.totalOutstandingCount = totalOutstandingCount;
@@ -56,7 +56,7 @@ public class OutstandingRentalSheet extends BaseEntity {
 		this.totalOutstandingCount = totalOutstandingCount;
 	}
 	
-	public void updateOutstandingStatus(OutstandingStatus outstandingStatus) {
+	public void updateOutstandingState(OutstandingState outstandingStatus) {
 		
 	}
 }
