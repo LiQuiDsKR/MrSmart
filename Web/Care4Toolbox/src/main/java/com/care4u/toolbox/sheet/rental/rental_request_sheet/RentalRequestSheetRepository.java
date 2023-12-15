@@ -13,7 +13,7 @@ import com.care4u.constant.SheetState;
 
 public interface RentalRequestSheetRepository extends JpaRepository<RentalRequestSheet, Long> {
 	
-	Page<RentalRequestSheet> findAllByStatusAndToolboxIdOrderByEventTimestampAsc(SheetState stauts, long toolboxId, Pageable pageable);
+	Page<RentalRequestSheet> findAllByStatusAndToolboxIdOrderByEventTimestampAsc(SheetState status, long toolboxId, Pageable pageable);
 	
 	Page<RentalRequestSheet> findAllByStatusAndToolboxIdAndEventTimestampBetweenOrderByEventTimestampAsc(SheetState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
@@ -21,7 +21,7 @@ public interface RentalRequestSheetRepository extends JpaRepository<RentalReques
 	
 	Page<RentalRequestSheet> findAllByToolboxId(long toolboxId, Pageable pageable);
 	
-	List<RentalRequestSheet> findAllByToolboxId(long toolboxId);
+	List<RentalRequestSheet> findAllByStatusAndToolboxIdOrderByEventTimestampAsc(SheetState status, long toolboxId);
 	
 	@Query("SELECT r FROM RentalRequestSheet r " +
 	        "WHERE (r.worker.id = :id1 OR r.leader.id = :id2) " +

@@ -25,7 +25,7 @@
 					<span class="link-title">조직 정보</span>
 				</a>
 			</li>
-			<li class="" >
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" >
 				<a th:href="@{/membership}">
 					<i class="icofont-ui-user"></i>
 					<span class="link-title">인원 정보</span>
@@ -53,7 +53,7 @@
 			<li class="">
 				<a th:href="@{/rental/request_sheet/create}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">리스트 생성</span>
+					<span class="link-title">신청</span>
 				</a>
 			</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
