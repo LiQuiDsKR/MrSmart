@@ -27,9 +27,9 @@ class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) 
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
         val currentOutstandingRentalTool = outstandingRentalTools[position]
         holder.toolName.text = currentOutstandingRentalTool.toolDto.name
-        holder.toolCount.text = currentOutstandingRentalTool.count.toString()
+        holder.toolCount.text = currentOutstandingRentalTool.outstandingCount.toString()
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
-            showNumberDialog(holder.toolCount, currentOutstandingRentalTool.count)
+            showNumberDialog(holder.toolCount, currentOutstandingRentalTool.outstandingCount)
         }
         holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
         holder.itemView.setOnClickListener{// 항목 자체를 눌렀을 때
