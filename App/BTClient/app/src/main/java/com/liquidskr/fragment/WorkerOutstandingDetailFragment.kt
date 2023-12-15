@@ -59,7 +59,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         confirmBtn.setOnClickListener {
             recyclerView.adapter?.let { adapter ->
                 if (adapter is WorkerOutstandingDetailAdapter) {
-                    bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
+                    bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
