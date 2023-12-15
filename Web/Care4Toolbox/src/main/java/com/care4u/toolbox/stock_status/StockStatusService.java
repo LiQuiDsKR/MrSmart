@@ -97,7 +97,7 @@ public class StockStatusService {
 		return null;
 	}
 	
-	@Scheduled(cron = "10 25 20 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "10 30 09 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();

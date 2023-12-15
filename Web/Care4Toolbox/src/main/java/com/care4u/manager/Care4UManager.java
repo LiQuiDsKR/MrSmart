@@ -182,7 +182,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
 
-			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(toolboxId);
+			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
 					handler.sendData(GsonUtils.toJson(sheetList));
 				}
 				break;

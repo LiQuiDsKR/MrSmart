@@ -88,8 +88,8 @@ public class RentalRequestSheetService {
 	}
 	
 	@Transactional(readOnly = true)
-	public List<RentalRequestSheetDto> getList( Long toolboxId) {
-		List<RentalRequestSheet> list = repository.findAllByToolboxId(toolboxId);
+	public List<RentalRequestSheetDto> getList(SheetState status, Long toolboxId) {
+		List<RentalRequestSheet> list = repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId);
 		List<RentalRequestSheetDto> dtoList = new ArrayList<RentalRequestSheetDto>();
 		for (RentalRequestSheet item : list) {
 			dtoList.add(convertToDto(item));

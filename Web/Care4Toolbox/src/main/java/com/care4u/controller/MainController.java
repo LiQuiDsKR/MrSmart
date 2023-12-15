@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
 
@@ -22,10 +23,13 @@ public class MainController {
 	@Autowired
 	private ToolService toolService;
 	
-    @GetMapping(value = "/")
-    public String main(Model model){
-    	    	
-        return "index";
+	@Autowired
+	private ToolboxService toolboxService;
+	
+	@GetMapping(value = "")
+    public String toolState(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+        return "analytics/tool_states";
     }
     
     @GetMapping(value = "/test")
