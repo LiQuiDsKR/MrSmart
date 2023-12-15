@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface StockStatusRepositoryCustom {
-	StockStatusSummaryDto getStockStatusSummary(long toolboxId, LocalDate currentDate);
-	List<StockStatusSummaryDto> getStockStatusSummary(long toolboxId, LocalDate startDate, LocalDate endDate);
+	StockStatusSummaryByToolStateDto getStockStatusSummaryByToolStateDto(long toolboxId, LocalDate currentDate);
+	List<StockStatusSummaryByToolStateDto> getStockStatusSummary(long toolboxId, LocalDate startDate, LocalDate endDate);
+	StockStatusSummaryByMainGroupDto getStockStatusSummaryByMainGroupDto(long toolboxId, LocalDate currentDate);
+	
 }
