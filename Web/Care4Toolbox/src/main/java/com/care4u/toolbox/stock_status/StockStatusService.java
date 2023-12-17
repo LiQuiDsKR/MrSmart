@@ -97,7 +97,7 @@ public class StockStatusService {
 		return null;
 	}
 	
-	@Scheduled(cron = "10 30 09 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "40 47 02 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		LocalDate formerDate = LocalDate.now().minusDays(1);
 		LocalDate latterDate = LocalDate.now();
@@ -196,6 +196,10 @@ public class StockStatusService {
 	public List<StockStatusSummaryByToolStateDto> getSummary(long toolboxId, LocalDate startDate, LocalDate endDate) {
 		return repository.getStockStatusSummary(toolboxId, startDate, endDate);
 	}
+	@Transactional(readOnly=true)
+	public List<StockStatusSummaryByMainGroupDto> getStockStatusSummaryByMainGroupDto(Long toolboxId, LocalDate currentLocalDate) {
+		return repository.getStockStatusSummaryByMainGroupDto(toolboxId, currentLocalDate);
+	}
 	
 	/**
 	 * 초기 모의 데이터 생성용입니다. > Care4UManager에서 1회 사용 후 폐기
@@ -240,4 +244,5 @@ public class StockStatusService {
 		}
 		logger.info("Complete, total " + debugCount +" items added");
 	}
+
 }

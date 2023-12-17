@@ -63,7 +63,7 @@
 										</td>
 										<td>
 											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="toolboxSelect">
+												<select class="disabled theme-input-style" id="toolboxSelect" style="background-color: white;cursor: auto;"disabled>
 													<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
 														th:text="${toolbox.name}">name?</option>
 												</select>
@@ -432,7 +432,7 @@
 				},
 				"columnDefs": [
 					{
-						"targets": [0, 2, 6, 7, 8, 9],
+						"targets": [0, 2, 5, 7, 8, 9],
 						"visible": false
 					}
 				],

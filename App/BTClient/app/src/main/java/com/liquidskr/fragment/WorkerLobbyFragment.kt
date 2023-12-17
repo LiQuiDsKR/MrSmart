@@ -68,7 +68,7 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
     }
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id},startDate:\"2020-01-01\",endDate:\"2023-12-16\"}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id},startDate:\"2020-01-01\",endDate:\"2023-12-30\"}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 outstandingRentalSheetDtoList = gson.fromJson(result, type)
             }

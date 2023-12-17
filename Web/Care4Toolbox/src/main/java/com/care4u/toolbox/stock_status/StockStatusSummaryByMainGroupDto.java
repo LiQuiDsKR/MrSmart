@@ -1,6 +1,7 @@
 package com.care4u.toolbox.stock_status;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.care4u.toolbox.group.main_group.MainGroupDto;
 
@@ -13,6 +14,9 @@ import lombok.Getter;
 public class StockStatusSummaryByMainGroupDto {
     private String toolboxName;
     private LocalDate currentDay;
-    private MainGroupDto mainGroupDto;
+    private String mainGroupName;
     private Integer totalCount;
+    private Integer rentalCount;
+    private Integer returnCount;
+    private Integer storedCount;
 }

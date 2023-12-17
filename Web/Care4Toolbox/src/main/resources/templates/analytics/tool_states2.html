@@ -5,11 +5,10 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 	<style>
-		
-	.td_btn,
-	.th_btn{
-		text-align: end;
-	}
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
 	</style>
 </th:block>
 <!-- Main Content -->
@@ -19,223 +18,164 @@
 			<div class="col-12">
 				<div class="card mb-20">
 					<div class="d-flex flex-row align-items-center">
-						
+
 						<h2 class="ml-4">분석 현황 </h2>
-						<div class="m-4" style="width:500px;">
+						<div class="m-4" style="width:300px;">
 							<div class="custom-select style--two large">
 								<select class="theme-input-style" id="toolboxSelect">
 									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
-														th:text="${toolbox.name}">name?</option>
+										th:text="${toolbox.name}">name?</option>
 								</select>
 							</div>
 						</div>
-					</div>
-				</div>
-			
-			</div>
-		</div>
-		
-		<div class="row">
-			
-			
-			
-			<div class="col-4">
-				<!-- Card -->
-				<div class="card mb-30 progress_3 bg-white mr-0">
-					<div class="card-body">
-						<h3 class="progress-title mb-1">대여 / 반납 현황</h3>
-						<p class="progress-title mb-1 date-today">2023-12-10</p>
-
-						<div class="ProgressBar-wrap position-relative mb-4">
-							<div
-								id = "progressBar-circle"
-								class="ProgressBar ProgressBar_3"
-								data-progress="90">
-								<svg
-									class="ProgressBar-contentCircle"
-									viewBox="0 0 200 200">
-									<circle
-										transform="rotate(135, 100, 100)"
-										class="ProgressBar-background"
-										cx="100"
-										cy="100"
-										r="85"
-										stroke-width="20" />
-									<circle
-										transform="rotate(135, 100, 100)"
-										class="ProgressBar-circle"
-										cx="100"
-										cy="100"
-										r="85"
-										stroke-width="20" />
-								</svg>
-								<span class="ProgressBar-percentage--text">
-									현 재고량
-								</span>
-								<span class="ProgressBar-percentage ProgressBar-percentage--count"></span>
-							</div>
-						</div>
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-16">대여중</span>
-									<span id="rental-count" class="process-width font-16">1023</span>
-									<span id="rental-bar"class="process-bar style--four" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-16">반납중</span>
-									<span id="return-count" class="process-width font-16">1023</span>
-									<span id="return-bar" class="process-bar style--four" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-					</div>
-				</div>
-				<!-- End Card -->
-			</div>
-			
-			<div class="col-4">
-				<div class="card mb-30">
-					<div class="card-body pb-1">
-						<h3>공기구 상태 현황</h3>
-						<p class="progress-title mb-1 date-today">2023-12-10</p>
-					</div>
-					<div class="p-2">
-						<div
-							id="multiple-color-donut-chart"
-							style="height: 300px"></div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="col-4">
-				
-				<!-- Card -->
-				<div class="card mb-30 bg-white"style="overflow-x:auto;">
-					<div class="card-body">
-						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
-							<div class="">
-								<h3 class="mb-1">공기구 상태 현황</h3>
-								<p class="font-16 date-today">
-									2023-12-10
-								</p>
-							</div>
-						</div>
-						<div class="product-list">
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">양호 수량</span>
-									<span id="good-count" class="process-width font-20">1023</span>
-									<span id="good-count-bar" class="process-bar style--two" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">고장 수량</span>
-									<span id="fault-count" class="process-width font-20">1023</span>
-									<span id="fault-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">파손 수량</span>
-									<span id="damage-count" class="process-width font-20">1023</span>
-									<span id="damage-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">망실 수량</span>
-									<span id="loss-count" class="process-width font-20">1023</span>
-									<span id="loss-count-bar" class="process-bar style--three" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">폐기 수량</span>
-									<span id="discard-count" class="process-width font-20">1023</span>
-									<span id="discard-count-bar" class="process-bar style--three" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-						</div>
-					</div>
-				</div>
-				<!-- End Card-->
-				
-			</div>
-			
-		</div>
-		
-		<div class="row">
-			
-			
-			<div class="col-12">
-				<!-- Card -->
-				<div class="card mb-30 bg-white">
-					<div class="d-flex ml-3">
 						<!-- Form Group -->
-						<div class="form-group m-2">
+						<div class="form-group m-2" hidden>
 							<label class="mb-2 font-14 bold">시작 날짜</label>
-		
+
 							<!-- Date Picker -->
 							<div class="dashboard-date style--four">
 								<span id="start-date-btn" class="input-group-addon">
 									<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
 								</span>
-		
+
 								<input type="text" id="start-date" placeholder="Select Date" />
 							</div>
 							<!-- End Date Picker -->
 						</div>
 						<!-- End Form Group -->
-		
+
 						<!-- Form Group -->
 						<div class="form-group m-2 mr-4">
-							<label class="mb-2 font-14 bold">종료 날짜</label>
-		
+							<label class="mb-2 font-14 bold">날짜</label>
+
 							<!-- Date Picker -->
 							<div class="dashboard-date style--four">
 								<span id="end-date-btn" class="input-group-addon">
 									<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
 								</span>
-		
+
 								<input type="text" id="end-date" placeholder="Select Date" />
 							</div>
 							<!-- End Date Picker -->
 						</div>
 						<!-- End Form Group -->
 					</div>
-					
-					<div id="sector1">
-						
+				</div>
+
+			</div>
+		</div>
+
+		<div class="row">
+
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 공기구 대여 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector1">
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 공기구 재고 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector2">
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 공기구 입고 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector3">
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+
+		</div>
+
+		<div class="row">
+
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 공기구 대여 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector4">
+						 	No Data
+						</div>
 					</div>
 				</div>
 				<!-- End Card -->
 			</div>
 			
-			
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 용접봉 대여 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector5">
+							No Data
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+
 		</div>
 	</div>
 </div>
@@ -243,377 +183,699 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-		
-	var toolboxId=5222;
-	initializeDatepicker();
-	var chart1=initializeChart1();
-	var chart4=initializeChart4();
-	abcHttp.get(
-		'/membership/getbycode',
-		{
-			code:parseInt( document.getElementById("user-code").textContent)
-		}
-	)
-	.then(data=>{
-		return new Promise((resolved,rejected)=>{
-			abcHttp.get(
-				'/toolbox/getbyname',
-				{
-					name:data.partDto.subPartDto.mainPartDto.name
-				}
-			)
-			.then(toolboxData=>{
-				if (toolboxData==null){
-					throw error("no toolbox");
-				} else{
-					toolboxId=toolboxData.id;
-					resolved(toolboxData.id);
-				}
-			})
-			.catch(error=>{
-				Swal.fire({
-					type: 'error',
-					title: '정비실 없음',
-					text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
-				}).then(()=>{rejected();});
-			});
+
+		var toolboxId = 5222;
+		initializeDatepicker();
+		document.querySelectorAll(".date-today").forEach(e => {
+			e.textContent = formatDate(new Date());
 		});
-	})
-	.then(toolboxId=>{
-		document.getElementById("toolboxSelect").value=toolboxId;
-		loadChart1.apply(chart1,[toolboxId]);
-		loadChart2(toolboxId);
-		loadChart3(toolboxId);
-		loadChart4.apply(chart4,[toolboxId]);
-	});
-		
-	//apex initialize
-	function initializeChart1(){
-		
-			/*
-			const chartData2 = data.map(item => ({
-				x: new Date(item.currentDay),
-				y: item.totalCount
-			}));
-			*/
-	
-			// ApexCharts 설정
-			const options = {
+
+		var chart1 = initializeChart1();
+		var chart2 = initializeChart2();
+		var chart3 = initializeChart3();
+		//var chart4 = initializeChart4();
+		abcHttp.get(
+			'/membership/getbycode',
+			{
+				code: parseInt(document.getElementById("user-code").textContent)
+			}
+		)
+			.then(data => {
+				return new Promise((resolved, rejected) => {
+					abcHttp.get(
+						'/toolbox/getbyname',
+						{
+							name: data.partDto.subPartDto.mainPartDto.name
+						}
+					)
+						.then(toolboxData => {
+							if (toolboxData == null) {
+								throw error("no toolbox");
+							} else {
+								toolboxId = toolboxData.id;
+								resolved(toolboxData.id);
+							}
+						})
+						.catch(error => {
+							Swal.fire({
+								type: 'error',
+								title: '정비실 없음',
+								text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+							}).then(() => {rejected();});
+						});
+				});
+			})
+			.then(toolboxId => {
+				document.getElementById("toolboxSelect").value = toolboxId;
+				loadChart1.apply(chart1, [toolboxId]);
+				loadChart2.apply(chart2, [toolboxId]);
+				loadChart3.apply(chart3, [toolboxId]);
+				//loadChart4.apply(chart4, [toolboxId]);
+			});
+
+		const toolboxSelect = document.getElementById("toolboxSelect");
+		toolboxSelect.addEventListener("change", toolboxChangeEventHandler);
+
+
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function toolboxChangeEventHandler() {
+			toolboxId = this.value;
+			loadChart1.apply(chart1, [toolboxId]);
+			loadChart2.apply(chart2, [toolboxId]);
+			loadChart3.apply(chart3, [toolboxId]);
+		}
+
+
+		function initializeChart1() {
+			var column_options = {
 				series: [
-				{
-					name: '대여 수량',
-					data: [0]
-				}
+					{
+						name: "자산성",
+						data: [2]
+					},
+					{
+						name: "소모성",
+						data: [2]
+					},
+					{
+						name: "내구성",
+						data: [2]
+					},
 				],
 				chart: {
-					id: 'area-datetime',
-					type: 'area',
-					height: 300,
-					zoom: {
-					    autoScaleYaxis: true
-					},
+					type: 'bar',
+					height: 389,
 					toolbar: {
-					    show: false
-					},
-				},
-				dataLabels: {
-					enabled: false
-				},
-				markers: {
-					size: 0,
-					style: 'hollow',
-				},
-				xaxis: {
-					type: 'datetime',
-					labels: {
-						datetimeFormatter: {
-							year: 'yyyy',
-							month: 'yyyy-MM',
-							day: 'yyyy-MM-dd'
-						}
-					},
-					min: new Date($('#start-date').val()).getTime(),
-					max: new Date($('#end-date').val()).getTime(),
-					tickAmount: 6,
-					axisTicks: {
 						show: false,
 					},
-					axisBorder: {
-						show: false
-					},
 				},
-				tooltip: {
-					x: {
-						format: 'yyyy-MM-dd'
-					},
-				},
+				colors: ['#76B0FF', '#67CF94', '#0AD1DE'],
 				fill: {
 					type: 'gradient',
 					gradient: {
-						shadeIntensity: 1,
-						opacityFrom: 0.7,
-						opacityTo: 0.9,
-						stops: [0, 100]
+						shade: 'light',
+						type: 'vertical',
+						shadeIntensity: 0.5,
+						gradientToColors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+						inverseColors: false,
+						opacityFrom: 1,
+						opacityTo: 0.6,
+						stops: [0, 80],
+					},
+				},
+				plotOptions: {
+					bar: {
+						horizontal: false,
+						columnWidth: '55%',
+						endingShape: 'rounded',
+					},
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function (val) {
+						return val;
+					},
+					textAnchor: 'middle',
+					style: {
+						fontSize: '20px',
+						fontFamily: '"PT Sans", "sans-serif"',
+						colors: ["#000000"]
 					}
 				},
-				
-
-				//colors: [],
-			};
-			var chart = new ApexCharts(document.querySelector("#sector1"), options);
-			chart.render();	
-			return chart;
-	}
-	//apex update
-	function loadChart1(toolboxId){
-		
-		abcHttp.get(
-			'/stock_status/get/analytics/list',
-			{
-				toolboxId:toolboxId,
-				startDate: $('#start-date').val(),
-				endDate: $('#end-date').val(),
-			}
-		).then(data=>{
-			console.log(data);
-			const chartData = data.map(item => ({
-				x: new Date(item.currentDay),
-				y: item.rentalCount
-			}));
-			this.updateOptions({
-				series:[
-				{
-					name:'대여 수량',
-					data:chartData
-				}
+				stroke: {
+					show: true,
+					width: 2,
+					colors: ['transparent'],
+				},
+				xaxis: {
+					categories: [
+						'대여 현황'
+					],
+				},
+				yaxis: {
+					tickAmount: 4,
+					title: {
+						text: '',
+					},
+				},
+				legend: {
+					position: 'top',
+					horizontalAlign: 'right',
+					fontSize: '12px',
+					fontFamily: '"PT Sans", sans-serif',
+					offsetY: 0,
+					height: 60,
+					labels: {
+						colors: '#727272',
+					},
+					itemMargin: {
+						horizontal: 5,
+						vertical: 20,
+					},
+					markers: {
+						width: 17,
+						height: 11,
+						radius: 0,
+					},
+				},
+				tooltip: {
+				},
+				responsive: [
+					{
+						breakpoint: 576,
+						options: {
+							legend: {
+								position: 'top',
+								horizontalAlign: 'left',
+								height: 0,
+								itemMargin: {
+									horizontal: 5,
+									vertical: 10,
+								},
+							},
+						},
+					},
 				],
-				xaxis:{
-					min: new Date($('#start-date').val()).getTime(),
-					max: new Date($('#end-date').val()).getTime(),
+			};
+
+			var columnChart = new ApexCharts(
+				document.querySelector('#sector1'),
+				column_options
+			);
+
+			columnChart.render();
+
+			return columnChart;
+		}
+		function loadChart1(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics/by_main_group',
+				{
+					toolboxId: toolboxId,
+					currentDate: $('#end-date').val()
+				}
+			).then(data => {
+				console.log(data);
+				series = [];
+				for (item of data) {
+					series.push({
+						name: item.mainGroupName,
+						data: [item.rentalCount]
+					});
+				}
+				this.updateOptions({
+					series: series
+				});
+			});
+		}
+		function initializeChart2() {
+			var column_options = {
+				series: [
+					{
+						name: "자산성",
+						data: [2]
+					},
+					{
+						name: "소모성",
+						data: [2]
+					},
+					{
+						name: "내구성",
+						data: [2]
+					},
+				],
+				chart: {
+					type: 'bar',
+					height: 389,
+					toolbar: {
+						show: false,
+					},
+				},
+				colors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shade: 'light',
+						type: 'vertical',
+						shadeIntensity: 0.5,
+						gradientToColors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+						inverseColors: false,
+						opacityFrom: 1,
+						opacityTo: 0.6,
+						stops: [0, 80],
+					},
+				},
+				plotOptions: {
+					bar: {
+						horizontal: false,
+						columnWidth: '55%',
+						endingShape: 'rounded',
+					},
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function (val) {
+						return val;
+					},
+					textAnchor: 'middle',
+					style: {
+						fontSize: '20px',
+						fontFamily: '"PT Sans", "sans-serif"',
+						colors: ["#000000"]
+					}
+				},
+				stroke: {
+					show: true,
+					width: 2,
+					colors: ['transparent'],
+				},
+				xaxis: {
+					categories: [
+						'재고 현황'
+					],
+				},
+				yaxis: {
+					tickAmount: 4,
+					title: {
+						text: '',
+					},
+				},
+				legend: {
+					position: 'top',
+					horizontalAlign: 'right',
+					fontSize: '12px',
+					fontFamily: '"PT Sans", sans-serif',
+					offsetY: 0,
+					height: 60,
+					labels: {
+						colors: '#727272',
+					},
+					itemMargin: {
+						horizontal: 5,
+						vertical: 20,
+					},
+					markers: {
+						width: 17,
+						height: 11,
+						radius: 0,
+					},
+				},
+				tooltip: {
+				},
+				responsive: [
+					{
+						breakpoint: 576,
+						options: {
+							legend: {
+								position: 'top',
+								horizontalAlign: 'left',
+								height: 0,
+								itemMargin: {
+									horizontal: 5,
+									vertical: 10,
+								},
+							},
+						},
+					},
+				],
+			};
+
+			var columnChart = new ApexCharts(
+				document.querySelector('#sector2'),
+				column_options
+			);
+
+			columnChart.render();
+
+			return columnChart;
+		}
+		function loadChart2(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics/by_main_group',
+				{
+					toolboxId: toolboxId,
+					currentDate: $('#end-date').val()
+				}
+			).then(data => {
+				console.log(data);
+				series = [];
+				for (item of data) {
+					series.push({
+						name: item.mainGroupName,
+						data: [item.returnCount]
+					});
+				}
+				this.updateOptions({
+					series: series
+				});
+			});
+		}
+		function initializeChart3() {
+			var column_options = {
+				series: [
+					{
+						name: "자산성",
+						data: [2]
+					},
+					{
+						name: "소모성",
+						data: [2]
+					},
+					{
+						name: "내구성",
+						data: [2]
+					},
+				],
+				chart: {
+					type: 'bar',
+					height: 389,
+					toolbar: {
+						show: false,
+					},
+				},
+				colors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shade: 'light',
+						type: 'vertical',
+						shadeIntensity: 0.5,
+						gradientToColors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+						inverseColors: false,
+						opacityFrom: 1,
+						opacityTo: 0.6,
+						stops: [0, 80],
+					},
+				},
+				plotOptions: {
+					bar: {
+						horizontal: false,
+						columnWidth: '55%',
+						endingShape: 'rounded',
+					},
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function (val) {
+						return val;
+					},
+					textAnchor: 'middle',
+					style: {
+						fontSize: '20px',
+						fontFamily: '"PT Sans", "sans-serif"',
+						colors: ["#000000"]
+					}
+				},
+				stroke: {
+					show: true,
+					width: 2,
+					colors: ['transparent'],
+				},
+				xaxis: {
+					categories: [
+						'입고 현황'
+					],
+				},
+				yaxis: {
+					tickAmount: 4,
+					title: {
+						text: '',
+					},
+				},
+				legend: {
+					position: 'top',
+					horizontalAlign: 'right',
+					fontSize: '12px',
+					fontFamily: '"PT Sans", sans-serif',
+					offsetY: 0,
+					height: 60,
+					labels: {
+						colors: '#727272',
+					},
+					itemMargin: {
+						horizontal: 5,
+						vertical: 20,
+					},
+					markers: {
+						width: 17,
+						height: 11,
+						radius: 0,
+					},
+				},
+				tooltip: {
+				},
+				responsive: [
+					{
+						breakpoint: 576,
+						options: {
+							legend: {
+								position: 'top',
+								horizontalAlign: 'left',
+								height: 0,
+								itemMargin: {
+									horizontal: 5,
+									vertical: 10,
+								},
+							},
+						},
+					},
+				],
+			};
+
+			var columnChart = new ApexCharts(
+				document.querySelector('#sector3'),
+				column_options
+			);
+
+			columnChart.render();
+
+			return columnChart;
+		}
+		function loadChart3(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics/by_main_group',
+				{
+					toolboxId: toolboxId,
+					currentDate: $('#end-date').val()
+				}
+			).then(data => {
+				console.log(data);
+				series = [];
+				for (item of data) {
+					series.push({
+						name: item.mainGroupName,
+						data: [item.storedCount]
+					});
+				}
+				console.log(series)
+				this.updateOptions({
+					series: series
+				});
+			});
+		}
+
+/*
+		function initializeChart4() {
+			var options = {
+			  series: [
+			  {
+				name: "대여량",
+				data: [2]
+			},
+			{
+				name: "잔여량",
+				data: [2]
+			}
+			],
+			  chart: {
+			    type: 'donut',
+			    fontFamily: 'PT Sans, sans-serif', // Set the font family to PT Sans
+			  },
+			  stroke: {
+			    show: true,
+			    width: 2,
+			    colors: ['transparent']
+			  },
+			  fill: {
+			    colors:undefined
+			  },
+			  plotOptions: {
+			    pie: {
+			      donut: {
+			        size: '65%',
+			        background: 'transparent',
+			        labels: {
+			          show: true,
+			          name: {
+			            show: true,
+			            fontSize: '22px', // Adjust the font size as needed
+			            fontFamily: 'PT Sans, sans-serif',
+			            color: undefined,
+			          },
+			          value: {
+			            show: true,
+			            fontSize: '26px', // Increased font size for the central value
+			            fontFamily: 'PT Sans, sans-serif',
+			            color: undefined,
+			            offsetY: 16,
+			            formatter: function (val) {
+			              return val + '%';
+			            }
+			          },
+			          total: {
+			            show: true,
+			            label: 'Total',
+			            color: '#373d3f',
+					  	formatter: function (w) {
+			              return w.globals.seriesTotals.reduce((a, b) => {
+			                return a + b;
+			              }, 0) + '%';
+						}
+			          }
+			        }
+			      }
+			    }
+			  },
+			  legend: {
+			    show: true,
+			    position: 'bottom',
+			    horizontalAlign: 'center', // Align the legend to the center at the bottom
+			    floating: false,
+			    fontSize: '14px', // Adjust the legend font size as needed
+			    fontFamily: 'PT Sans, sans-serif',
+			    offsetX: 0,
+			    offsetY: 10 // Adjust the offset if needed
+			  },
+			  responsive: [{
+			    breakpoint: 480,
+			    options: {
+			      chart: {
+			        width: 200
+			      },
+			      legend: {
+			        position: 'bottom',
+			        horizontalAlign: 'center', // Ensure the legend alignment for responsive design
+			        offsetX: 0,
+			        offsetY: 0
+			      }
+			    }
+			  }]
+			};
+			var chart = new ApexCharts(document.querySelector("#sector4"), options);
+			chart.render();
+
+			return chart;
+		}
+		function loadChart4(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics/by_main_group',
+				{
+					toolboxId: toolboxId,
+					currentDate: $('#end-date').val()
+				}
+			).then(data => {
+				console.log(data);
+				series = [];
+				for (item of data) {
+					if (item.mainGroupName=="소모자재"){
+					series.push({
+						name: '대여량',
+						data: [item.rentalCount]
+					},
+					{
+						name: '잔여량',
+						data: [item.totalCount-item.rentalCount]
+					});
+					}else{
+						return;
+					}
+				}
+				this.updateOptions({
+					series: series
+				});
+			});
+		}
+*/
+
+
+
+
+
+
+
+
+
+
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		function initializeDatepicker() {
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = today.getMonth() + 1;
+			const day = today.getDate();
+			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+			const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
+			$('#start-date').val(formattedLastMonthDate);
+			$('#end-date').val(formattedTodayDate);
+
+			$('#start-date').on('change', function () {
+				console.log('start changed');
+			});
+			$('#end-date').on('change', function () {
+				loadChart1.apply(chart1, [toolboxId]);
+				loadChart2.apply(chart2, [toolboxId]);
+				loadChart3.apply(chart3, [toolboxId]);
+				console.log('end changed');
+			})
+
+			$('#start-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					console.log('start changed');
 				}
 			});
-		});
-	}
-	function initializeChart4(){
-		return new Morris.Donut({
-			element: 'multiple-color-donut-chart',
-			data: [
-				{
-					value: 35,
-					label: '대여',
-				},
-				{
-					value: 25,
-					label: '양호',
-				},
-				{
-					value: 15,
-					label: '고장',
-				},
-				{
-					value: 15,
-					label: '파손',
-				},
-				{
-					value: 10,
-					label: '망실',
-				},
-				{
-					value: 10,
-					label: '폐기',
-				},
-			],
-			backgroundColor: '#fff',
-			labelColor: '#060',
-			colors: [
-				'#8280FD',
-				'#67CF94',
-				'#09D1DE',
-				'#FFB959',
-				'#FC7383',
-				'#727272',
-				'#727272',
-			],
-			formatter: function (x) {
-				return x + '%';
-			},
-		});
-	}
-	function loadChart4(toolboxId){
-		abcHttp.get(
-			'/stock_status/get/analytics',
-			{
-				toolboxId:toolboxId,
-				currentDate:formatDate(new Date())
-			}
-		).then(data=>{
-			var newData = [
-		        { label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
-		        { label: '양호', value: Math.floor(data.goodCount/ data.totalCount * 100)},
-		        { label: '고장', value: Math.floor(data.faultCount/ data.totalCount * 100)},
-		        { label: '파손', value: Math.floor(data.damageCount/ data.totalCount * 100)},
-		        { label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
-		        { label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
-		    ];
-		    this.setData(newData);
-	    });	
-	}
-	
-	//대여/반납현황
-	function loadChart2(toolboxId){
-		abcHttp.get(
-			"/stock_status/get/analytics",
-			{
-				toolboxId:toolboxId,
-				currentDate: formatDate(new Date())
-			}
-		)
-		.then(data=>{
-			document.getElementById("progressBar-circle").setAttribute('data-progress',
-				Math.floor(100 - data.rentalCount/data.totalCount*100));
-			
-			document.getElementById("rental-count").textContent=data.rentalCount;
-			document.getElementById("return-count").textContent=data.totalCount-data.rentalCount;
-
-			$("#rental-bar").data('process-width', Math.floor(data.rentalCount / data.totalCount * 100));
-			$("#return-bar").data('process-width', Math.floor((data.totalCount - data.rentalCount) / data.totalCount * 100));
-			
-			$('.ProgressBar_3').bekeyProgressbar();
-			processControl();
-		})
-	}
-	//공기구 상태 현황
-	function loadChart3(toolboxId){
-		abcHttp.get(
-			"/stock_status/get/analytics",
-			{
-				toolboxId:toolboxId,
-				currentDate: formatDate(new Date())
-			}
-		)
-		.then(data=>{
-			document.getElementById("good-count").textContent=data.goodCount;
-			document.getElementById("fault-count").textContent=data.faultCount;
-			document.getElementById("damage-count").textContent=data.damageCount;
-			document.getElementById("loss-count").textContent=data.lossCount;
-			document.getElementById("discard-count").textContent=data.discardCount;
-
-			$("#good-count-bar").data('process-width', Math.floor(data.goodCount / data.totalCount * 100));
-			$("#fault-count-bar").data('process-width', Math.floor(data.faultCount / data.totalCount * 100));
-			$("#damage-count-bar").data('process-width', Math.floor(data.damageCount / data.totalCount * 100));
-			$("#loss-count-bar").data('process-width', Math.floor(data.lossCount / data.totalCount * 100));
-			$("#discard-count-bar").data('process-width', Math.floor(data.discardCount / data.totalCount * 100));
-			processControl();
-		});
-	}
-	
-	//script.js에서 참조.
-	//막대 표시용
-	function processControl() {
-		var processBarWrapper = $('.process-bar-wrapper');
-		if (processBarWrapper.length) {
-				processBarWrapper.each(function () {
-					var processBarOffset = $(this).offset().top - $(window).height(),
-						processTime = '2.25s',
-						processBarWidth = $(this)
-							.children('[data-process-width]')
-							.data('process-width');
-
-					if ($(window).scrollTop() > processBarOffset) {
-						if (processBarWidth > 100) {
-							$(this).children('.process-bar').css({
-								width: '100%',
-								transition: processTime,
-							});
-						} else {
-							$(this)
-								.children('.process-bar')
-								.css({
-									width: processBarWidth + '%',
-									transition: processTime,
-								});
-						}
-					}
-				});
+			$('#start-date-btn').on('click', function () {
+				$('#start-date').datepicker('show');
+			});
+			$('#end-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					document.querySelectorAll(".date-today").forEach(e => {
+						e.textContent = formatDate(new Date($('#end-date').val()));
+					});
+					
+					loadChart1.apply(chart1, [toolboxId]);
+					loadChart2.apply(chart2, [toolboxId]);
+					loadChart3.apply(chart3, [toolboxId]);
+					console.log('end changed');
+				}
+			});
+			$('#end-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
 		}
-	}
-	
-	const toolboxSelect = document.getElementById("toolboxSelect");
-		toolboxSelect.addEventListener("change", toolboxChangeEventHandler)
-		//정비실 선택 드롭다운 change시 이벤트핸들러
-		function toolboxChangeEventHandler() {
-			toolboxId=this.value;
-			
-			loadChart1.apply(chart1,[toolboxId]);
-			loadChart2(toolboxId);
-			loadChart3(toolboxId);
-			loadChart4.apply(chart4,[toolboxId]);
+
+
+		function formatDateTime(inputDate) {
+			const dateObject = new Date(inputDate);
+			const year = dateObject.getFullYear();
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const hours = dateObject.getHours().toString().padStart(2, '0');
+			const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+			return formattedDate;
 		}
-	
-	//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
-	function initializeDatepicker(){
-		const today = new Date();
-		const year = today.getFullYear();
-		const month = today.getMonth() + 1;
-		const day = today.getDate();
-		const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
-		const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
-		$('#start-date').val(formattedLastMonthDate);
-		$('#end-date').val(formattedTodayDate);
-
-		$('#start-date').on('change', function () {
-			loadChart1.apply(chart1,[toolboxId]);
-			console.log('start changed');
-		});
-		$('#end-date').on('change', function () {
-			loadChart1.apply(chart1,[toolboxId]);
-			console.log('end changed');
-		})
-
-		$('#start-date').datepicker({
-			language: 'en',
-			dateFormat: 'yyyy-mm-dd',
-			onSelect: function () {
-				loadChart1.apply(chart1,[toolboxId]);
-				console.log('start changed');
-			}
-		});
-		$('#start-date-btn').on('click', function () {
-			$('#start-date').datepicker('show');
-		});
-		$('#end-date').datepicker({
-			language: 'en',
-			dateFormat: 'yyyy-mm-dd',
-			onSelect: function () {
-				loadChart1.apply(chart1,[toolboxId]);
-				console.log('end changed');
-			}
-		});
-		$('#end-date-btn').on('click', function () {
-			$('#end-date').datepicker('show');
-		});
-	}
-
-
-	function formatDateTime(inputDate) {
-		const dateObject = new Date(inputDate);
-		const year = dateObject.getFullYear();
-		const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
-		const day = dateObject.getDate().toString().padStart(2, '0');
-		const hours = dateObject.getHours().toString().padStart(2, '0');
-		const minutes = dateObject.getMinutes().toString().padStart(2, '0');
-
-		const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
-
-		return formattedDate;
-	}
-	function formatDate(inputDate){
-		const year = inputDate.getFullYear();
-		const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
-		const day = inputDate.getDate().toString().padStart(2, '0');
-		const formattedDate = `${year}-${month}-${day}`;
-		return formattedDate;
-	}
+		function formatDate(inputDate) {
+			const year = inputDate.getFullYear();
+			const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+			const day = inputDate.getDate().toString().padStart(2, '0');
+			const formattedDate = `${year}-${month}-${day}`;
+			return formattedDate;
+		}
 
 	</script>
 </th:block>

@@ -1,4 +1,4 @@
-package com.care4u.toolbox.stock_status;
+package com.care4u.toolbox.sheet.supply_sheet;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,35 +28,17 @@ import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 
 @Controller
-@RequestMapping("/analytics")
-public class StockStatusController {
+@RequestMapping("/supply")
+public class SupplySheetController {
 	
-	private static final Logger logger = Logger.getLogger(StockStatusController.class);
+	private static final Logger logger = Logger.getLogger(SupplySheetController.class);
 	
-	@Autowired
-	private StockStatusService stockStatusSheetService;
 	@Autowired
 	private ToolboxService toolboxService;
 	
-    @GetMapping(value = "tool_states")
-    public String toolState(Model model){
-    	model.addAttribute("toolboxList",toolboxService.list());
-        return "analytics/tool_states";
+    @GetMapping(value = "sheet")
+    public String supplySheet(Model model) {
+    	return "supply/sheet";
     }
     
-    @GetMapping(value = "tool_states/rental_return/old")
-    public String rentalReturnStateOld(Model model){
-    	model.addAttribute("toolboxList",toolboxService.list());
-    	return "analytics/tool_states";
-    } 
-    @GetMapping(value = "tool_states/rental_return")
-    public String rentalReturnState(Model model){
-    	model.addAttribute("toolboxList",toolboxService.list());
-    	return "analytics/tool_states2";
-    }
-    @GetMapping(value = "tool_states/main_group")
-    public String mainGroupState(Model model){
-    	model.addAttribute("toolboxList",toolboxService.list());
-    	return "analytics/tool_states3";
-    }
 }

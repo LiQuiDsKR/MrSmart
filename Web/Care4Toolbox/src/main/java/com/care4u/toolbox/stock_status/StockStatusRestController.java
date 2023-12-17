@@ -76,4 +76,15 @@ public class StockStatusRestController {
     	List<StockStatusSummaryByToolStateDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
+    @GetMapping(value="/stock_status/get/analytics/by_main_group")
+    public ResponseEntity<List<StockStatusSummaryByMainGroupDto>> getStockStatusSummaryByMainGroup(
+    		@RequestParam(name="toolboxId") Long toolboxId,
+    		@RequestParam(name="currentDate") String currentDate
+    		){
+    	
+    	LocalDate currentLocalDate = LocalDate.parse(currentDate, DateTimeFormatter.ISO_DATE);
+    	
+    	List<StockStatusSummaryByMainGroupDto> summaryDto=stockStatusService.getStockStatusSummaryByMainGroupDto(toolboxId, currentLocalDate);
+    	return ResponseEntity.ok(summaryDto);
+    }
 }

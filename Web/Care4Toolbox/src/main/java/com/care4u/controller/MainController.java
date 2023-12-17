@@ -29,7 +29,7 @@ public class MainController {
 	@GetMapping(value = "")
     public String toolState(Model model){
     	model.addAttribute("toolboxList",toolboxService.list());
-        return "analytics/tool_states";
+        return "analytics/tool_states2";
     }
     
     @GetMapping(value = "/test")
