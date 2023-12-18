@@ -1,6 +1,8 @@
 package com.care4u.toolbox.sheet.buy_sheet;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +31,8 @@ import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDt
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
+import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
+import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -57,7 +61,7 @@ public class BuySheetService {
 		return convertToDto(item.get());
 	}
 
-
+	@Transactional(readOnly=true)
 	private BuySheetDto convertToDto(BuySheet sheet) {
 		List<BuyToolDto> dtoList = new ArrayList<BuyToolDto>();
 		List<BuyTool> toolList = buyToolRepository.findAllByBuySheetId(sheet.getId());
@@ -67,6 +71,7 @@ public class BuySheetService {
 		return new BuySheetDto(sheet,dtoList);
 	}
 
+	@Transactional
 	public BuySheetDto addNew(@Valid BuySheetFormDto formDto) {
 
 		Optional<Membership> approver = membershipRepository.findById(formDto.getApproverDtoId());
@@ -98,9 +103,15 @@ public class BuySheetService {
 		return convertToDto(savedBuySheet);
 	}
 
-	public Page<BuySheetDto> getPage(long toolboxId, Pageable pageable) {
-		// TODO Auto-generated method stub
-		return null;
+	@Transactional(readOnly = true)
+	public Page<BuySheetDto> getPage(long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable){
+		Optional<Toolbox> toolboxOptional = toolboxRepository.findById(toolboxId);
+		if(toolboxOptional.isEmpty()) {
+			logger.error("invalid toolbox id : "+toolboxId);
+			return null;
+		}
+		Page<BuySheet> page = repository.findByToolboxIdAndEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e->convertToDto(e));
 	}
 
 }

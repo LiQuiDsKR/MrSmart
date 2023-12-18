@@ -93,8 +93,13 @@ public class StockStatusService {
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
-	public StockStatusDto buyItems(long id, int count) {
-		return null;
+	public StockStatusDto buyItems(long toolId, long toolboxId, int count) {
+		StockStatus stock=repository.findByToolIdAndToolboxId(toolId,toolboxId);
+		if (stock==null) {
+			stock=addNew(toolId, toolboxId, count);
+		}
+		stock.buyUpdate(count);
+		return new StockStatusDto(repository.save(stock));
 	}
 	
 	@Scheduled(cron = "40 47 02 * * ?") // 매일 자정에 실행
@@ -150,7 +155,7 @@ public class StockStatusService {
 	 * 반드시 매입 Or 초기화 때만 호출해야 함
 	 */
 	@Transactional
-	public StockStatusDto addNew(long toolId, long toolboxId, int count) {
+	public StockStatus addNew(long toolId, long toolboxId, int count) {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxId);
@@ -185,7 +190,7 @@ public class StockStatusService {
 		
 		repository.save(stock);
 		
-		return new StockStatusDto(stock);
+		return stock;
 	}
 	
 	@Transactional(readOnly=true)

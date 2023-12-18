@@ -129,6 +129,7 @@
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
 		var membershipId=1;
+		var toolboxId=5222;
 		$(document).ready(function () {
 			initializeDatepicker();
 			abcHttp.get(
@@ -136,42 +137,60 @@
 				{
 					code:parseInt(document.getElementById("user-code").textContent)
 				}
-			).then(data=>{
+			).then(data=>{				
+				membershipId=data.id;
 				return new Promise((resolved,rejected)=>{
-					if (data==null){
-						rejected();
-					}else{						
-						membershipId=data.id;
-						resolved(data.id);
-					}
+					abcHttp.get(
+						'/toolbox/getbyname',
+						{
+							name:data.partDto.subPartDto.mainPartDto.name
+						}
+					)
+					.then(toolboxData=>{
+						if (toolboxData==null){
+							throw error("no toolbox");
+						} else{
+							toolboxId=toolboxData.id;
+							resolved(toolboxData.id);
+						}
+					})
+					.catch(error=>{
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(()=>{rejected();});
+					});
 				});
-			}).then(membershipId=>{	
-				load(membershipId);
-			});
+			})
+			.then(toolboxId=>{
+				load(toolboxId);
+			})
 		});
 
 		//fetch
-		function load(membershipId) {
+		function load(toolboxId) {
 			abcHttp.get(
-				`/rental/sheet/getpage`,
+				`/buy/sheet/getpage`,
 				{
-					membershipId: membershipId,
+					toolboxId:toolboxId,
 					page: 0,
 					size: 10,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
 			).then(data => {
+				console.log(data);
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML='';
 				let htmlString = ``
-				if (true) {
+				if (data.empty) {
 					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
 					containerDiv.innerHTML = htmlString;
-					return; //abcsdfwlo
+					return;
 				}
 				data.content.forEach(element => {
-					const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
+					//const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
 					htmlString = `
 					<!-- Sheet -->
 					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
@@ -180,10 +199,8 @@
 							<table class="text-nowrap bg-white">
 								<thead>
 									<tr>
-										<th>대여승인시간</th>
+										<th>매입등록시간</th>
 										<th>정비실</th>
-										<th>작업자</th>
-										<th>리더</th>
 										<th>승인자</th>
 									</tr>
 								</thead>
@@ -191,8 +208,6 @@
 									<tr>
 										<td class="time">${formatDate(element.eventTimestamp)}</td>
 										<td class="toolbox">${element.toolboxDto.name}</td>
-										<td class="worker">${element.workerDto.name}</td>
-										<td class="leader">${element.leaderDto.name}</td>
 										<td class="approver">${element.approverDto.name}</td>
 									</tr>
 								</tbody>
@@ -205,9 +220,11 @@
 									<tr>
 										<th>정비실명</th>
 										<th>이름</th>
+										<th>품목코드</th>
+										<th>대분류</th>
+										<th>중분류</th>
 										<th>규격</th>
 										<th>신청수량</th>
-										<th>미반납수량</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -219,9 +236,11 @@
 									<tr>
 										<td class="toolbox">${element.toolboxDto.name}</td>
 										<td class="name">${tool.toolDto.name}</td>
+										<td class="code">${tool.toolDto.code}</td>
+										<td class="maingroup">${tool.toolDto.subGroupDto.mainGroupDto.name}</td>
+										<td class="subgroup">${tool.toolDto.subGroupDto.name}</td>
 										<td class="spec">${tool.toolDto.spec}</td>
 										<td class="count">${tool.count}</td>
-										<td class="outstandingcount">${tool.outstandingCount}</td>
 									</tr>
 					`;
 					}
@@ -255,11 +274,11 @@
 			$('#end-date').val(formattedTodayDate);
 
 			$('#start-date').on('change', function () {
-				load(membershipId);
+				load(toolboxId);
 				console.log('start changed')
 			});
 			$('#end-date').on('change', function () {
-				load(membershipId);
+				load(toolboxId);
 				console.log('end changed')
 			})
 
@@ -267,7 +286,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load(membershipId);
+					load(toolboxId);
 					console.log('start changed')
 				}
 			});
@@ -278,7 +297,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load(membershipId);
+					load(toolboxId);
 					console.log('end changed')
 				}
 			});
@@ -287,29 +306,6 @@
 			});
 		}
 		
-		
-		//아직 생각 안했는데 이미 반납된거면 반납 신청 버튼을 '반납됨'으로 바꾸고 disabled할거임
-		function activateApproveBtn() {
-			const sheet = this.closest("div.sheet");
-			const btn = sheet.querySelector("a.btn");
-			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => e.classList.contains("selected"));
-			btn.classList.toggle("disabled", !condition);
-		}
-		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
-		//아직 생각 안했는데 반납신청 누르면 반납 페이지로 넘길거임
-		function addListenerApproveBtn(data) {
-			document.querySelectorAll(".btn:not(.listener-added)").forEach(element => {
-				element.addEventListener("click", function () {
-					abcHttp.post(
-						`/rental/request_sheet/approve?approverId=${100001}`,
-						data,
-					).then(data => {
-
-					})
-				});
-				element.classList.add("listener-added");
-			});
-		}
 
 		function formatDate(inputDate) {
 			const dateObject = new Date(inputDate);

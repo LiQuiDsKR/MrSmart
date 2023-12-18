@@ -1,6 +1,8 @@
 package com.care4u.toolbox.sheet.buy_sheet;
 
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,18 +62,23 @@ public class BuySheetRestController {
     public ResponseEntity<Page<BuySheetDto>> getBuySheetPage(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "toolboxId") long toolboxId
+            @RequestParam(name = "toolboxId") long toolboxId,
+    		@RequestParam(name="startDate") String startDate,
+    		@RequestParam(name="endDate") String endDate
             ){
 
     	logger.info("page=" + page + ", size=" + size);
+    	
+        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);	
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<BuySheetDto> rentalRequestSheetPage = buySheetService.getPage(toolboxId,pageable);
+        Page<BuySheetDto> buySheetPage = buySheetService.getPage(toolboxId,startLocalDate, endLocalDate,pageable);
         
-        for (BuySheetDto item : rentalRequestSheetPage.getContent()) {
+        for (BuySheetDto item : buySheetPage.getContent()) {
         	logger.info(item.toString());
         }
-        return ResponseEntity.ok(rentalRequestSheetPage);
+        return ResponseEntity.ok(buySheetPage);
     }
     
 }

@@ -316,7 +316,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					String qrcode = jsonObj.getString("qrcode");
 					int count = jsonObj.getInt("count");
 			    	try {
-						toolboxToolLabelService.register(toolId, toolboxId, qrcode, count);
+						toolboxToolLabelService.register(toolId, toolboxId, qrcode);
 			    		handler.sendData("good");
 			    	}catch(Exception e) {
 			    		handler.sendData("bad");
