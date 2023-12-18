@@ -9,7 +9,7 @@ import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 
 
-class OutstandingRentalSheetAdapter(private val outstandingRentalSheets: List<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
+class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
     RecyclerView.Adapter<OutstandingRentalSheetAdapter.OutstandingRentalSheetViewHolder>() {
 
     class OutstandingRentalSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -41,10 +41,12 @@ class OutstandingRentalSheetAdapter(private val outstandingRentalSheets: List<Ou
             onItemClick(currentOutstandingRentalSheet)
         }
     }
-
-
     override fun getItemCount(): Int {
         return outstandingRentalSheets.size
+    }
+    fun updateList(newList: List<OutstandingRentalSheetDto>) {
+        outstandingRentalSheets = newList
+        notifyDataSetChanged()
     }
 
 

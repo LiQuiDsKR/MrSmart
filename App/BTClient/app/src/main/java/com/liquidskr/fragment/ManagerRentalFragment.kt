@@ -3,7 +3,6 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +27,6 @@ class ManagerRentalFragment() : Fragment() {
     lateinit var recyclerView: RecyclerView
     lateinit var selfRentalBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var rentalRequestSheetDtoList: List<RentalRequestSheetDto>
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -42,7 +40,15 @@ class ManagerRentalFragment() : Fragment() {
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         val layoutManager = LinearLayoutManager(requireContext())
 
-        rentalRequestSheetDtoList = emptyList()
+        val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
+            val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+        recyclerView.adapter = adapter
+
 
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
@@ -61,15 +67,7 @@ class ManagerRentalFragment() : Fragment() {
         searchTypeSpinner.adapter = adapter1
 
         getRentalRequestSheetList()
-        Thread.sleep(1000)
-        val adapter = RentalRequestSheetAdapter(rentalRequestSheetDtoList) { rentalRequestSheet ->
-            val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
-        recyclerView.adapter = adapter
+
         return view
     }
 
@@ -77,9 +75,10 @@ class ManagerRentalFragment() : Fragment() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
-                Log.d("asdf",result)
-                rentalRequestSheetDtoList = gson.fromJson(result, type)
-                Log.d("asdf",rentalRequestSheetDtoList.toString())
+                val updatedList: List<RentalRequestSheetDto> = gson.fromJson(result, type)
+                requireActivity().runOnUiThread {
+                    (recyclerView.adapter as RentalRequestSheetAdapter).updateList(updatedList)
+                }
             }
 
             override fun onError(e: Exception) {

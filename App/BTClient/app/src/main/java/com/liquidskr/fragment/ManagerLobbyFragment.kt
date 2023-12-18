@@ -71,8 +71,17 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
+/*
+        override fun onConnectionStateChanged(newState: Int) {
+            // 연결 상태가 변경될 때 호출되는 코드
+            // newState에는 BluetoothProfile.STATE_CONNECTED 또는 BluetoothProfile.STATE_DISCONNECTED가 전달됩니다.
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                // Bluetooth 연결이 성공한 경우 처리
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                // Bluetooth 연결이 끊어진 경우 처리
+            }
+        }*/
 
         return view
     }
-
 }

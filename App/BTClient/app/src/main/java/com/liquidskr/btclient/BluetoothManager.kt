@@ -14,7 +14,6 @@ import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.google.zxing.integration.android.IntentIntegrator
 import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto

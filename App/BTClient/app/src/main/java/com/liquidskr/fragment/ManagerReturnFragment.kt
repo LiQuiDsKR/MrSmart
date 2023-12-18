@@ -25,7 +25,6 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var searchTypeSpinner: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var outstandingRentalSheetDtoList: List<OutstandingRentalSheetDto>
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -39,16 +38,7 @@ class ManagerReturnFragment() : Fragment() {
 
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        outstandingRentalSheetDtoList = emptyList()
-
-        val category1Data = arrayOf("리더명", "대여자명", "공기구명")
-        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, category1Data)
-        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        searchTypeSpinner.adapter = adapter1
-        getOutstandingRentalSheetList()
-        Thread.sleep(1000)
-        val adapter = OutstandingRentalSheetAdapter(outstandingRentalSheetDtoList) { outstandingRentalSheet ->
+        val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
@@ -57,13 +47,23 @@ class ManagerReturnFragment() : Fragment() {
         }
         recyclerView.adapter = adapter
 
+        val category1Data = arrayOf("리더명", "대여자명", "공기구명")
+        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, category1Data)
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        searchTypeSpinner.adapter = adapter1
+
+
+        getOutstandingRentalSheetList()
         return view
     }
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId},startDate:\"2020-01-01\",endDate:\"2023-12-15\"}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId},startDate:\"2020-01-01\",endDate:\"2023-12-30\"}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
-                outstandingRentalSheetDtoList = gson.fromJson(result, type)
+                val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
+                requireActivity().runOnUiThread {
+                    (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(updatedList)
+                }
             }
 
             override fun onError(e: Exception) {
