@@ -117,6 +117,7 @@ class ManagerSelfRentalFragment() : Fragment() {
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
+                                    Log.d("asdf","대여 신청 완료")
                                     Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                 }
                                 override fun onError(e: Exception) {

@@ -74,4 +74,5 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
 
         return view
     }
+
 }

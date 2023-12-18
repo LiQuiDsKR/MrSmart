@@ -19,8 +19,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="#4C96F1"
+                android:layout_height="55dp"
+                android:background="#32345e"
                 android:gravity="left"
                 android:orientation="horizontal">
 
@@ -28,6 +28,7 @@
                     android:id="@+id/imageView7"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
                     android:layout_weight="0"
                     android:background="#00FFFFFF"
                     android:scaleType="fitCenter"
@@ -51,6 +52,39 @@
                     android:text="님 환영합니다."
                     android:textColor="#FFFFFF"
                     android:textSize="16sp" />
+            </LinearLayout>
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentContainerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="#CDE2FB"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/ConnectBtn"
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    android:scaleX="2"
+                    android:scaleY="2"
+                    app:srcCompat="@drawable/manager_lobby_connectionbtn" />
+
+                <ImageButton
+                    android:id="@+id/LobbyRentalBtn"
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/manager_lobby_syncbtn" />
             </LinearLayout>
 
             <LinearLayout
@@ -95,37 +129,6 @@
                     android:backgroundTint="#00FFFFFF"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/manager_lobby_holdbtn" />
-            </LinearLayout>
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/fragmentContainerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="#CDE2FB"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/ConnectBtn"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_connectionbtn" />
-
-                <ImageButton
-                    android:id="@+id/LobbyRentalBtn"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_syncbtn" />
             </LinearLayout>
 
         </LinearLayout>

@@ -3,6 +3,9 @@ package com.liquidskr.btclient
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothProfile
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.os.Handler
@@ -25,15 +28,19 @@ import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import java.util.UUID
 
-
+interface BluetoothConnectionListener {
+    fun onConnectionStateChanged(newState: Int)
+}
 class BluetoothManager (private val context: Context, private val activity: Activity) {
     private lateinit var bluetoothDevice: BluetoothDevice
     private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var bluetoothGatt: BluetoothGatt? = null
 
     private var timeoutHandler: Handler = Handler(Looper.getMainLooper())
+    private val connectionListeners = mutableListOf<BluetoothConnectionListener>()
 
     var gson = Gson()
     var timeout = false
@@ -41,7 +48,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     fun bluetoothOpen() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         val permissionManager = PermissionManager(activity)
-        var flagPermissionOK: Boolean = false
         permissionManager.checkAndRequestPermission()
         val pairedDevices = bluetoothAdapter.bondedDevices
         if (pairedDevices.size > 0) {
@@ -51,7 +57,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     break
                 }
             }
-            flagPermissionOK = true
         } else {
             Toast.makeText(context, "연결된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
         }
@@ -62,6 +67,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         } catch (e: IOException) {
             e.printStackTrace()
         }
+
+        bluetoothGatt = bluetoothDevice.connectGatt(context, false, gattCallback)
     }
 
     fun bluetoothClose() {
@@ -214,31 +221,51 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         thread.start()
     }
 
-    fun updateTool(dataSet: String) {
-        val rows = dataSet.split("\n")
-        val dbHelper = DatabaseHelper(context)
+    fun isBluetoothConnected(): Boolean {
+        val permissionManager = PermissionManager(activity)
+        permissionManager.checkAndRequestPermission()
+        val pairedDevices = bluetoothAdapter.bondedDevices
 
-        for (row in rows) {
-            val columns = row.split(",")
-            if (columns.size == 11) {
-                val toolId = columns[0].trim().toLong()
-                val toolMaingroup = columns[1].trim()
-                val toolSubgroup = columns[2].trim()
-                val toolCode = columns[3].trim()
-                val toolKrName = columns[4].trim()
-                val toolEngName = columns[5].trim()
-                val toolSpec = columns[6].trim()
-                val toolUnit = columns[7].trim()
-                val toolPrice = columns[8].trim().toInt()
-                val toolReplacementCycle = columns[9].trim().toInt()
-                val toolBuyCode = columns[10].trim()
-                dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle)
-                //dbHelper.updateToolData(toolId, toolMaingroup, toolSubgroup, toolCode, toolKrName, toolEngName, toolSpec, toolUnit, toolPrice, toolReplacementCycle, toolBuyCode)
+        for (device in pairedDevices) {
+            if (device.address == bluetoothDevice.address) {
+                // 현재 연결된 디바이스가 우리가 연결하려는 디바이스와 일치하면 연결 상태임
+                return true
             }
         }
-        dbHelper.close()
+        return false
+    }
+    private val gattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    // 연결 성공
+                    Log.d("BluetoothManager", "Bluetooth 연결 성공")
+                    notifyConnectionStateChanged(newState)
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    // 연결이 끊어짐
+                    Log.d("BluetoothManager", "Bluetooth 연결 끊김")
+                    notifyConnectionStateChanged(newState)
+                }
+            }
+        }
+    }
+    // 연결 상태 변경 리스너를 등록하는 메서드
+    fun addConnectionListener(listener: BluetoothConnectionListener) {
+        connectionListeners.add(listener)
     }
 
+    // 연결 상태 변경 리스너를 제거하는 메서드
+    fun removeConnectionListener(listener: BluetoothConnectionListener) {
+        connectionListeners.remove(listener)
+    }
+
+    // 연결 상태 변경 이벤트를 리스너에 알리는 메서드
+    private fun notifyConnectionStateChanged(newState: Int) {
+        for (listener in connectionListeners) {
+            listener.onConnectionStateChanged(newState)
+        }
+    }
     fun dataSend(sendingData: String) {
         try {
             outputStream = bluetoothSocket.outputStream
@@ -248,14 +275,5 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         } catch (e: Exception) {
             Log.d("mDataOuputStream Error", e.toString())
         }
-    }
-
-    // 이 아래는 QR Camera 중 권한 요청 처리입니다.
-    private fun startQRScanner() {
-        val integrator = IntentIntegrator(LobbyActivity())
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.DATA_MATRIX)
-        integrator.setPrompt("2D Data Matrix 인식 대기 중...")
-        integrator.setOrientationLocked(false)
-        integrator.initiateScan()
     }
 }

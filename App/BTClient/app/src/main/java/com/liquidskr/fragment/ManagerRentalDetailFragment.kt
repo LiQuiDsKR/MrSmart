@@ -2,6 +2,7 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +74,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                     bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
+                            Log.d("asdf","대여 승인 완료")
                             Toast.makeText(requireContext(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
                         }
 
