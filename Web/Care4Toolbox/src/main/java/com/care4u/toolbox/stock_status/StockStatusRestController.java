@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -29,6 +30,7 @@ import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.care4u.toolbox.tool.ToolForRentalDto;
 import com.care4u.toolbox.tool.ToolService;
 import com.google.gson.Gson;
 
@@ -42,6 +44,9 @@ public class StockStatusRestController {
 
 	@Autowired
 	private StockStatusService stockStatusService;
+	
+	@Autowired
+	private SubGroupService subGroupService;
 	
     @GetMapping(value="/stock_status/get")
     public ResponseEntity<StockStatusDto> getStockStatus(
@@ -86,5 +91,26 @@ public class StockStatusRestController {
     	
     	List<StockStatusSummaryByMainGroupDto> summaryDto=stockStatusService.getStockStatusSummaryByMainGroupDto(toolboxId, currentLocalDate);
     	return ResponseEntity.ok(summaryDto);
+    }
+    
+    @PostMapping(value="/stock_status/getpage")
+    public ResponseEntity<Page<StockStatusDto>> getToolForRentalPage(@RequestBody StockStatusSearchDto data){
+
+    	logger.info("page=" + data.page + ", size=" + data.size);
+    	
+    	List<Long> subGroupId;
+    	if (data.getSubGroupId().isEmpty()) {
+    		subGroupId=subGroupService.list().stream().map(SubGroupDto::getId).collect(Collectors.toList());
+    	} else {
+    		subGroupId=data.getSubGroupId();
+    	}
+    		
+        Pageable pageable = PageRequest.of(data.page,data.size);
+        Page<StockStatusDto> stockPage = stockStatusService.getTodayPage(data.toolboxId, data.name, subGroupId, pageable);
+        
+        for (StockStatusDto item : stockPage.getContent()) {
+        	logger.info(item.toString());
+        }
+        return ResponseEntity.ok(stockPage);
     }
 }

@@ -398,7 +398,7 @@
 				"serverSide": true,
 				"processing": true,
 				"ajax": {
-					"url": `/tool/getpage/rental`, // 데이터를 가져올 엔드포인트 URL
+					"url": `/stock_status/getpage`, // 데이터를 가져올 엔드포인트 URL
 					//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
 					"method": "POST",
 					"contentType": "application/json",
@@ -484,12 +484,12 @@
 					{"data": "toolDto.unit"},
 					{"data": "toolDto.price", "type": Number},
 					{"data": "toolDto.replacementCycle", "type": Number},
-					{"data": "stockDto.goodCount"},
+					{"data": "goodCount"},
 					{
 						"data": null,
 						"render": function (data, type, row) {
 							if (type === "display") {
-								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.stockDto.goodCount<1)
+								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.goodCount<1)
 								return '<a  class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
 									'<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
 									'</a>';
