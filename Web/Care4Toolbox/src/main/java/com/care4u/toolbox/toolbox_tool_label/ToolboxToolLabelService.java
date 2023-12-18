@@ -143,11 +143,8 @@ public class ToolboxToolLabelService {
 	}
 	
 	@Transactional
-	public ToolboxToolLabelDto register(long toolId, long toolboxId, String qrcode, int count) {
+	public ToolboxToolLabelDto register(long toolId, long toolboxId, String qrcode) {
 		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
-		if(toolboxToolLabel == null){
-			stockStatusService.addNew(toolId, toolboxId, count);
-		}
 		return update(toolId,toolboxId,qrcode);
 	}
 	
