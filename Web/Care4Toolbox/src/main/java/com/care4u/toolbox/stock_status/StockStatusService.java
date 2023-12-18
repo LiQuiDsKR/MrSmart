@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.group.sub_group.SubGroupDto;
+import com.care4u.toolbox.group.sub_group.SubGroupRepository;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolRepository;
@@ -40,6 +43,7 @@ public class StockStatusService {
 	private final StockStatusRepository repository;
 	private final ToolboxRepository toolboxRepository;
 	private final ToolRepository toolRepository;
+	private final SubGroupRepository subGroupRepository;
 	
 	@Transactional(readOnly = true)
 	public StockStatusDto get(long id){
@@ -63,6 +67,18 @@ public class StockStatusService {
 	
 		return new StockStatusDto(status);
 	}
+	@Transactional(readOnly=true)
+	public Page<StockStatusDto> getTodayPage(long toolboxId, String searchString, List<Long> subGroupIds, Pageable pageable){
+		for (long i : subGroupIds) {
+			if (subGroupRepository.findById(i).isEmpty()) {
+				logger.error("invalid subGroupId : "+i);
+				return null;
+			}
+		}
+		Page<StockStatus> stockPage = repository.findAllByToolboxIdAndCurrentDay(toolboxId, LocalDate.now(), searchString, subGroupIds, pageable);
+		return stockPage.map(e->new StockStatusDto(e));
+	}
+	
 	
 	@Transactional
 	public StockStatusDto rentItems(long id, int count) {

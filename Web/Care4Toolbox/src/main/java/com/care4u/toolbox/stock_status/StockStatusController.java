@@ -59,4 +59,9 @@ public class StockStatusController {
     	model.addAttribute("toolboxList",toolboxService.list());
     	return "analytics/tool_states3";
     }
+    @GetMapping(value = "other_stock")
+    public String otherToolboxStock(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+    	return "analytics/other_stock";
+    }
 }
