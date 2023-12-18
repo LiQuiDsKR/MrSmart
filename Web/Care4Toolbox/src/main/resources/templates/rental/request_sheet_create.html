@@ -1081,11 +1081,11 @@
 							type: "success",
 							title: "대여 신청 완료",
 							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
-						});
-					})
-					.then(result2 => {
+						}).then(result2 => {
 						location.href = '/rental/request_sheet/create';
 					})
+					})
+					
 					.catch(error => {
 						Swal.fire({
 							type: "error",

@@ -108,7 +108,7 @@ public class RentalRequestSheetService {
 		}
 		return sheetList;
 	}
-
+	@Transactional(readOnly=true)
 	private RentalRequestSheetDto convertToDto(RentalRequestSheet rentalRequestSheet) {
 		List<RentalRequestToolDto> dtoList = new ArrayList<RentalRequestToolDto>();
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(rentalRequestSheet.getId());

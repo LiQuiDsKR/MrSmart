@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.toolbox.sheet.buy_sheet.BuySheet;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,6 +29,11 @@ public class BuyToolService {
 		}
 		
 		return new BuyToolDto(item.get());
+	}
+
+	public BuyTool addNew(BuyToolFormDto tool, BuySheet savedBuySheet) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

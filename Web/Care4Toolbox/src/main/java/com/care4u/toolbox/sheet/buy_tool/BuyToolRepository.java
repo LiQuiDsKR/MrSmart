@@ -9,5 +9,7 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 public interface BuyToolRepository extends JpaRepository<BuyTool, Long> {
 	
 	List<BuyTool> findAllByBuySheet(RentalSheet RentalSheet);
+
+	List<BuyTool> findAllByBuySheetId(long id);
 	
 }
