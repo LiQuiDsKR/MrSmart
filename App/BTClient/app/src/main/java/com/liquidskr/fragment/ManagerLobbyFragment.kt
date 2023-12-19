@@ -64,6 +64,14 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
             }
         }
 
+        standbyBtn.setOnClickListener {
+            val fragment = ManagerStandByFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
         registerBtn.setOnClickListener {
             val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()

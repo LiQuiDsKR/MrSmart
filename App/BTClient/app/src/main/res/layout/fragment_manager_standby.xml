@@ -27,9 +27,11 @@
                 app:srcCompat="@drawable/manager_standby_topview" />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/Manager_Return_RecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                tools:listitem="@layout/fragment_outstanding_rentalsheet" />
 
             <LinearLayout
                 android:layout_width="match_parent"

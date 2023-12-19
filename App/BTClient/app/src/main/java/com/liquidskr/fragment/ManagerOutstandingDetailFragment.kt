@@ -8,19 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.returns.ReturnSheetFormDto
@@ -73,15 +70,14 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
-                            Toast.makeText(requireContext(), "반납 승인 완료", Toast.LENGTH_SHORT).show()
+                            Log.d("asdf","반납 승인 완료")
+                            requireActivity().supportFragmentManager.popBackStack()
                         }
 
                         override fun onError(e: Exception) {
                             e.printStackTrace()
                         }
                     })
-                    Thread.sleep(1000)
-                    requireActivity().supportFragmentManager.popBackStack()
                 }
             }
         }
@@ -93,25 +89,5 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         recyclerView.adapter = adapter
 
         return view
-    }
-
-    fun getOutstandingRentalSheetList(): List<OutstandingRentalSheetDto> {
-        /*
-        bluetoothManager.dataSend("REQUEST_RentalRequestSheetList")
-        if (bluetoothManager.dataReceiveSingle().equals("Ready")) {
-            val sendMessage =
-                gson.toJson(RentalRequestSheetCall(SheetStatus.REQUEST, sharedViewModel.toolBoxId))
-            bluetoothManager.dataSend(sendMessage)
-        }*/
-
-        //val rentalrequestSheetListPageString = bluetoothManager.dataReceive()
-        val outstandingRentalSheetListPageString = ""
-        Log.d("Debug", "JSON String: $outstandingRentalSheetListPageString")
-        val pagedata: Page = gson.fromJson(outstandingRentalSheetListPageString, Page::class.java)
-        val listOutstandingRentalSheetDto = object : TypeToken<List<OutstandingRentalSheetDto>>(){}.type
-        Log.d("Debug", "TypeToken: $listOutstandingRentalSheetDto")
-        val outstandingRentalSheetDtoList: List<OutstandingRentalSheetDto> = gson.fromJson(gson.toJson(pagedata.content), listOutstandingRentalSheetDto)
-        Log.d("Debug", "OutstandingRentalSheetDto List: $outstandingRentalSheetDtoList")
-        return outstandingRentalSheetDtoList
     }
 }

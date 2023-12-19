@@ -68,6 +68,43 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
 
         bluetoothGatt = bluetoothDevice.connectGatt(context, false, gattCallback)
+
+        // 보류 항목 모두 전송
+        var dbHelper = DatabaseHelper(context)
+        val rentalList = dbHelper.getRentalStandby()
+        val returnList = dbHelper.getReturnStandby()
+        for (sheet: String in rentalList) {
+            Log.d("dbtest",sheet)
+            try {
+                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, sheet, object:
+                    BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        Log.d("asdf","대여 승인 완료")
+                    }
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+            } catch (e: IOException) {
+
+            }
+        }
+        for (sheet: String in returnList) {
+            try {
+                requestData(RequestType.RETURN_SHEET_FORM, sheet, object:
+                    BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        Log.d("asdf","반납 승인 완료")
+                    }
+
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+            } catch (e: IOException) {
+
+            }
+        }
     }
 
     fun bluetoothClose() {
