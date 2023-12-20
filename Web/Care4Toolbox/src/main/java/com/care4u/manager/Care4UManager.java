@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import javax.microedition.io.StreamConnection;
 
@@ -47,6 +48,7 @@ import com.care4u.toolbox.group.main_group.MainGroupDto;
 import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.stock_status.StockStatusService;
+import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
@@ -355,14 +357,19 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolId = jsonObj.getLong("toolId");
 					long toolboxId = jsonObj.getLong("toolboxId");
-					handler.sendData(GsonUtils.toJson(toolboxToolLabelService.get(toolId, toolboxId)));
+					handler.sendData(GsonUtils.toJson(toolboxToolLabelService.get(toolId, toolboxId).getQrcode()));
 				}
 				break;
 			case TAG_LIST:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					String tagString = jsonObj.getString("tag");
-					handler.sendData(GsonUtils.toJson(tagService.getSiblings(tagString)));
+					List<String> strings= tagService.getSiblings(tagString)
+							.stream()
+							.map(e->e.getMacaddress())
+							.collect(Collectors.toList());
+					
+					handler.sendData(GsonUtils.toJson(strings));
 				}
 				break;
 			case TAG_ALL:

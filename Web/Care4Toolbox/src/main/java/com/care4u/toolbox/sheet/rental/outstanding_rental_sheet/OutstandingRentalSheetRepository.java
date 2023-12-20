@@ -29,5 +29,4 @@ public interface OutstandingRentalSheetRepository extends JpaRepository<Outstand
 	
 	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxId(OutstandingState status, long toolboxId);
 	
-	List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState status, long membershipId);
 }

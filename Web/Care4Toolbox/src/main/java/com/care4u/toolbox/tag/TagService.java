@@ -227,12 +227,13 @@ public class TagService {
 		}
 	}
 
-	public List<Tag> getSiblings(String tagString) {
+	public List<TagDto> getSiblings(String tagString) {
 		Tag tag = repository.findByMacaddress(tagString);
 		if (tag==null) {
 			logger.error("Invalid tag : "+tagString);
 			return null;
 		}
-		return repository.findByTagGroup(tag.getTagGroup());
+		return repository.findByTagGroup(tag.getTagGroup()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
+
 	}
 }

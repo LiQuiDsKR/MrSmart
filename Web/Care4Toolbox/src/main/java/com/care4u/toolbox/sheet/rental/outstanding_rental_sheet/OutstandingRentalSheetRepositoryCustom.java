@@ -7,7 +7,10 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.care4u.constant.OutstandingState;
+
 public interface OutstandingRentalSheetRepositoryCustom {
 	Page<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(long membershipId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	List<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(long membershipId, LocalDateTime startDate, LocalDateTime endDate);
+	List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState status, long membershipId);
 }
