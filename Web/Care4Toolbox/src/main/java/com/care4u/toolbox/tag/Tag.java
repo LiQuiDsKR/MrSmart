@@ -39,7 +39,7 @@ public class Tag extends BaseEntity {
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Toolbox toolbox;
-	zjal
+	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Tool tool;

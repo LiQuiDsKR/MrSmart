@@ -204,7 +204,7 @@ public class TagService {
 				.macaddress(tagString)
 				.tool(tool.get())
 				.toolbox(toolbox.get())
-				.TagGroup(tagGroup)
+				.tagGroup(tagGroup)
 				.build();
 		
 		logger.info("Tag added : " + tagString + " -> " + tagGroup + " : " + tool.get().getName());
