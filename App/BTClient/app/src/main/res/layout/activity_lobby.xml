@@ -20,7 +20,7 @@
             android:padding="5dp">
 
             <ImageButton
-                android:id="@+id/testSendBtn"
+                android:id="@+id/bluetoothBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:backgroundTint="#00FFFFFF"
@@ -30,7 +30,7 @@
                 app:srcCompat="@drawable/ic_refresh" />
 
             <ImageButton
-                android:id="@+id/bluetoothBtn"
+                android:id="@+id/testSendBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:backgroundTint="#00FFFFFF"

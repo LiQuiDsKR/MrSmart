@@ -1,6 +1,6 @@
 package com.mrsmart.standard.tool
 
-data class ToolboxLabelDto(
+data class ToolboxToolLabelDto(
     val id: Long,
     val toolboxDto: ToolboxDto,
     val location: String,

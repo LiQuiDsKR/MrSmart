@@ -69,6 +69,21 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         var adapter = ToolRegisterTagDetailAdapter(emptyList())
 
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                if (result == "null") {
+                    qrDisplay.text = "미등록"
+                } else {
+                    qrDisplay.text = result
+                }
+            }
+
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+
         scanBtn.setOnClickListener {
             qrTextEdit.text.clear()
             qrTextEdit.requestFocus()
@@ -118,7 +133,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         confirmBtn.setOnClickListener {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:\"${qrcode}\"",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
                 }

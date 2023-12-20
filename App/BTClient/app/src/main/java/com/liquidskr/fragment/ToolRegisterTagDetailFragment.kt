@@ -88,8 +88,9 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>) : Frag
         }
 
         confirmBtn.setOnClickListener {
+            val tagList = gson.toJson(adapter.qrcodes)
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:\"${qrcode}\"",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TAG_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},tagGroup:\"\",tagList:${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
                 }

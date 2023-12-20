@@ -49,7 +49,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_STANDBY_STATUS = "standby_status"
 
         private const val TABLE_TBT_NAME = "ToolboxToolLabel"
-        private const val COLUMN_TBT_ID = "standby_id"
+        private const val COLUMN_TBT_ID = "tbt_id"
+        private const val COLUMN_TBT_LOCATION = "tbt_location"
+        private const val COLUMN_TBT_TOOL_ID = "tbt_toolid"
+        private const val COLUMN_TBT_QRCODE = "tbt_qrcode"
+
+        private const val TABLE_TAG_NAME = "Tag"
+        private const val COLUMN_TAG_ID = "tag_id"
+        private const val COLUMN_TAG_MACADDRESS = "tag_macaddress"
+        private const val COLUMN_TAG_TOOL_ID = "tag_toolid"
+        private const val COLUMN_TAG_RENTALTOOL_ID = "tag_rentaltoolid"
+        private const val COLUMN_TAG_TAGGROUP = "tag_taggroup"
+
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -83,9 +94,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_STANDBY_TYPE TEXT, " +
                 "$COLUMN_STANDBY_STATUS TEXT)"
 
+        val createTBTTableQuery = "CREATE TABLE $TABLE_TBT_NAME " +
+                "($COLUMN_TBT_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TBT_TOOLBOX_ID INTEGER, " +
+                "$COLUMN_TBT_LOCATION TEXT, " +
+                "$COLUMN_TBT_TOOL_ID INTEGER, " +
+                "$COLUMN_TBT_QRCODE TEXT)"
+
+        val createTagTableQuery = "CREATE TABLE $TABLE_TAG_NAME " +
+                "($COLUMN_TAG_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TAG_MACADDRESS TEXT, " +
+                "$COLUMN_TAG_TOOL_ID INTEGER, " +
+                "$COLUMN_TAG_RENTALTOOL_ID INTEGER, " +
+                "$COLUMN_TAG_TAGGROUP TEXT)"
+
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
         db.execSQL(createStandbyTableQuery)
+        db.execSQL(createTBTTableQuery)
+        db.execSQL(createTagTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -93,6 +120,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_Membership_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOL_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_STANDBY_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TBT_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TAG_NAME")
 
         onCreate(db)
     }
@@ -170,6 +199,44 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_STANDBY_JSON, standbyJson)
         values.put(COLUMN_STANDBY_TYPE, standbyType)
         values.put(COLUMN_STANDBY_STATUS, standbyStatus)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        db.close()
+        return id
+    }
+    fun insertTBTData(
+        tbtId: Long,
+        tbtToolboxId: Long,
+        tbtLocation: String,
+        tbtToolId: Long,
+        tbtQRcode: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_ID, tbtId)
+        values.put(COLUMN_TBT_TOOLBOX_ID, tbtToolboxId)
+        values.put(COLUMN_TBT_LOCATION, tbtLocation)
+        values.put(COLUMN_TBT_TOOL_ID, tbtToolId)
+        values.put(COLUMN_TBT_QRCODE, tbtQRcode)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        db.close()
+        return id
+    }
+    fun insertTagData(
+        tagId: Long,
+        tagMacAddress: String,
+        tagToolId: String,
+        tagRentalToolId: String,
+        tagTagGroup: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TAG_ID, tagId)
+        values.put(COLUMN_TAG_MACADDRESS, tagMacAddress)
+        values.put(COLUMN_TAG_TOOL_ID, tagToolId)
+        values.put(COLUMN_TAG_RENTALTOOL_ID, tagRentalToolId)
+        values.put(COLUMN_TAG_TAGGROUP, tagTagGroup)
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_STANDBY_NAME, null, values)

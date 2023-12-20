@@ -18,7 +18,9 @@ import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
+import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -240,6 +242,26 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         }
                         RequestType.RETURN_SHEET_REQUEST ->{
                             val type: Type = object : TypeToken<String>() {}.type
+                            callback.onSuccess(jsonString, type)
+                        }
+                        RequestType.TAG_FORM ->{
+                            val type: Type = object : TypeToken<String>() {}.type
+                            callback.onSuccess(jsonString, type)
+                        }
+                        RequestType.TOOLBOX_TOOL_LABEL ->{
+                            val type: Type = object : TypeToken<ToolboxToolLabelDto>() {}.type
+                            callback.onSuccess(jsonString, type)
+                        }
+                        RequestType.TAG_LIST ->{
+                            val type: Type = object : TypeToken<List<String>>() {}.type
+                            callback.onSuccess(jsonString, type)
+                        }
+                        RequestType.TAG_ALL ->{
+                            val type: Type = object : TypeToken<List<TagDto>>() {}.type
+                            callback.onSuccess(jsonString, type)
+                        }
+                        RequestType.TOOLBOX_TOOL_LABEL_ALL ->{
+                            val type: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
                             callback.onSuccess(jsonString, type)
                         }
                     }
