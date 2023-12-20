@@ -159,7 +159,7 @@ public class ToolboxToolLabelService {
 		ToolboxToolLabel tempObject = repository.findByQrcode(qrcode);
 		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
 		if(toolboxToolLabel!=null) {
-			if (tempObject.equals(toolboxToolLabel)) {
+			if (toolboxToolLabel.equals(tempObject)) {
 				return update(toolboxToolLabel,qrcode);	
 			}else {
 				logger.error(qrcode +" already exists!");
