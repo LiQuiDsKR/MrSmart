@@ -47,6 +47,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_STANDBY_JSON = "standby_json"
         private const val COLUMN_STANDBY_TYPE = "standby_type"
         private const val COLUMN_STANDBY_STATUS = "standby_status"
+
+        private const val TABLE_TBT_NAME = "ToolboxToolLabel"
+        private const val COLUMN_TBT_ID = "standby_id"
     }
 
     override fun onCreate(db: SQLiteDatabase) {

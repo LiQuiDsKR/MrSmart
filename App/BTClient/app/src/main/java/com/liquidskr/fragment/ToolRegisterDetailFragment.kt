@@ -2,16 +2,14 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.app.AlertDialog
-import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
@@ -22,6 +20,7 @@ import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
+import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
@@ -31,12 +30,18 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
-    private lateinit var QR_okay: TextView
-    private lateinit var toolCount: TextView
-    private lateinit var QR_Btn: ImageButton
-    private lateinit var QR_registerText: EditText
 
-    private lateinit var confirmBtn: ImageButton
+    lateinit var scanBtn: LinearLayout
+    lateinit var qrTextEdit: EditText
+    lateinit var qrDisplay: TextView
+    var qrcode: String = ""
+
+    lateinit var qr_tagRegisterBtn: LinearLayout
+
+    lateinit var qr_checkScanBtn: LinearLayout
+    lateinit var qr_checkScanEdit: EditText
+
+    private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
 
     val gson = Gson()
@@ -48,40 +53,72 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
-        QR_okay = view.findViewById(R.id.Register_QR_Okay)
-        toolCount = view.findViewById(R.id.Register_ToolCount)
-        QR_Btn = view.findViewById(R.id.QR_Btn)
-        QR_registerText = view.findViewById(R.id.QR_RegisterText)
-        confirmBtn = view.findViewById(R.id.Register_ConfirmBtn)
 
         toolName.text = tool.name
         toolSpec.text = tool.spec
-        QR_okay.text = ""
-        var QR_context = ""
+        scanBtn = view.findViewById(R.id.qr_scanBtn)
+        qrTextEdit = view.findViewById(R.id.qr_textEdit)
+        qrDisplay = view.findViewById(R.id.qr_display)
 
-        QR_Btn.setOnClickListener {
-            if (!QR_registerText.isFocused) {
-                QR_registerText.requestFocus()
-            }
-        }
-        toolCount.setOnClickListener{
-            showNumberDialog(toolCount)
-        }
-        QR_registerText.setOnEditorActionListener { _, actionId, event ->
-            val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        qr_tagRegisterBtn = view.findViewById(R.id.qr_tagRegisterBtn)
 
+        qr_checkScanBtn = view.findViewById(R.id.qr_checkScanBtn)
+        qr_checkScanEdit = view.findViewById(R.id.qr_checkScanEdit)
+
+        confirmBtn = view.findViewById(R.id.confirmBtn)
+
+        var adapter = ToolRegisterTagDetailAdapter(emptyList())
+
+        scanBtn.setOnClickListener {
+            qrTextEdit.text.clear()
+            qrTextEdit.requestFocus()
+            qrDisplay.text = "인식 중.."
+        }
+
+        qr_checkScanBtn.setOnClickListener{
+            qr_checkScanEdit.text.clear()
+            qr_checkScanEdit.requestFocus()
+        }
+
+        qr_tagRegisterBtn.setOnClickListener {
+            val fragment = ToolRegisterTagDetailFragment(tool, emptyList())
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                QR_context = fixCode(QR_registerText.text.toString().replace("\n", ""))
-                QR_registerText.text.clear()
-                QR_okay.text = "QR 등록 완료 : ${QR_context}"
-
+                qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
+                val fragment = ToolRegisterTagDetailFragment(tool, listOf("11111","12345")) // bluetooth로 받아야함
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, fragment)
+                    .addToBackStack(null)
+                    .commit()
+                qr_checkScanEdit.text.clear()
                 return@setOnEditorActionListener true
             }
+
             false
         }
+
+        qrTextEdit.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                qrcode = fixCode(qrTextEdit.text.toString().replace("\n", ""))
+                // qrcode가 이미 쓰인건지 체크
+                qrDisplay.text = "${qrcode}"
+                qrTextEdit.text.clear()
+                qrTextEdit.clearFocus()
+                return@setOnEditorActionListener true
+            }
+
+            false
+        }
+
         confirmBtn.setOnClickListener {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:\"${QR_context}\",count:${toolCount.text.toString().toInt()}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},qrcode:\"${qrcode}\"",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
                 }
@@ -92,7 +129,6 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             })
             requireActivity().supportFragmentManager.popBackStack()
         }
-
         return view
     }
     private fun fixCode(input: String): String {

@@ -17,6 +17,7 @@
         tools:layout_editor_absoluteY="0dp">
 
         <LinearLayout
+            android:id="@+id/qr_scanBtn"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:layout_marginLeft="10dp"
@@ -41,27 +42,29 @@
                 android:text="QR 등록"
                 android:textColor="#FFFFFF" />
 
-            <EditText
-                android:id="@+id/editTextText2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:backgroundTint="#00FFFFFF"
-                android:ems="10"
-                android:inputType="text" />
         </LinearLayout>
 
+        <EditText
+            android:id="@+id/qr_textEdit"
+            android:layout_width="1dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:backgroundTint="#00FFFFFF"
+            android:ems="10"
+            android:inputType="textMultiLine"
+            android:textColor="#00FFFFFF" />
+
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/qr_display"
             android:layout_width="150dp"
             android:layout_height="40dp"
             android:layout_marginLeft="10dp"
             android:gravity="center"
-            android:text="00000"
+            android:text="미등록"
             android:textSize="24sp" />
 
         <ImageButton
-            android:id="@+id/imageButton4"
+            android:id="@+id/qr_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -69,7 +72,7 @@
             android:scaleType="fitCenter"
             android:scaleX="0.5"
             android:scaleY="0.5"
-            app:srcCompat="@drawable/icon_choice_ic_choice_round_on" />
+            app:srcCompat="@drawable/group_4" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

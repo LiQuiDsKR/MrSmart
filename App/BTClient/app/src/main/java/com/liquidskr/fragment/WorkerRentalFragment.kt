@@ -2,7 +2,6 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -11,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -99,8 +97,6 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
-            val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
             // I want to make my keyboard must be type in English, not a Korean.
             qrEditText.textLocale = Locale.ENGLISH
 
