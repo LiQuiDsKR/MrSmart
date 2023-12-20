@@ -270,11 +270,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 //수신 중 에러
                 callback.onError(e)
             }
+        /*
             try {
                 Thread.sleep(1000) // 100ms
             } catch (e: InterruptedException) {
 
-            }
+            }*/
         }
 
         thread.start()

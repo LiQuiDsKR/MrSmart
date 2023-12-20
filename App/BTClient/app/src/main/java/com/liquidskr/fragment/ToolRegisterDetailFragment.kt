@@ -3,6 +3,7 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -104,14 +105,27 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
 
         qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
+
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
-                val fragment = ToolRegisterTagDetailFragment(tool, listOf("11111","12345")) // bluetooth로 받아야함
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, fragment)
-                    .addToBackStack(null)
-                    .commit()
-                qr_checkScanEdit.text.clear()
+                bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        val tagList: List<String> = gson.fromJson(result, type)
+                        Log.d("tmp", tagList.toString()
+
+                        )
+                        val fragment = ToolRegisterTagDetailFragment(tool, tagList) // bluetooth로 받아야함
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerView, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                        qr_checkScanEdit.text.clear()
+                    }
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+
                 return@setOnEditorActionListener true
             }
 

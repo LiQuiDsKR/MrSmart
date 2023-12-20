@@ -50,6 +50,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         private const val TABLE_TBT_NAME = "ToolboxToolLabel"
         private const val COLUMN_TBT_ID = "tbt_id"
+        private const val COLUMN_TBT_TOOLBOX_ID = "tbt_toolboxid"
         private const val COLUMN_TBT_LOCATION = "tbt_location"
         private const val COLUMN_TBT_TOOL_ID = "tbt_toolid"
         private const val COLUMN_TBT_QRCODE = "tbt_qrcode"
@@ -454,6 +455,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return sheetList
+    }
+
+    @SuppressLint("Range")
+    fun getTagGroupByTag(tag: String): String {
+        var tagGroup = ""
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TAG_TAGGROUP FROM $TABLE_TAG_NAME WHERE $COLUMN_TAG_MACADDRESS = ?"
+        val selectionArgs = arrayOf(tag)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            tagGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TAG_TAGGROUP))
+        }
+
+        cursor.close()
+        db.close()
+        return tagGroup
     }
     fun removeFirstAndLastQuotes(input: String): String {
         return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
