@@ -31,9 +31,11 @@ import com.care4u.toolbox.sheet.rental.rental_tool.RentalTool;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolService;
+import com.care4u.toolbox.sheet.supply_sheet.SupplySheetService;
 import com.care4u.toolbox.sheet.supply_tool.SupplyTool;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
+import com.care4u.toolbox.tool.ToolDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -52,6 +54,7 @@ public class RentalSheetService {
 	private final RentalToolService rentalToolService;
 	private final OutstandingRentalSheetService outstandingRentalSheetService;
 	private final RentalRequestSheetService rentalRequestSheetService;
+	private final SupplySheetService supplySheetService;
 	
 	@Transactional(readOnly = true)
 	public RentalSheetDto get(long id){
@@ -92,11 +95,25 @@ public class RentalSheetService {
 	
 	
 	/**
-	 * RentalSheet, RentalTool, OutstandingRentalSheet를 전부 생성합니다.
-	 * RentalTool 생성 시 Tags가 생성되며, StockStatus가 변경됩니다.
-	 * @param requestSheetDto
-	 * @param approverId
-	 * @return rentalSheetDto
+	 * 다음 순서로 업데이트 됩니다.
+	 * rentalSheet ->
+	 * [
+	 * 		rentalTool -> 
+	 * 			[
+	 * 				tag,
+	 * 				stockStatus,
+	 * 			]
+	 * 		supplySheet ->
+	 * 			[
+	 * 				supplyTool ->
+	 * 					[
+	 * 						stockStatus
+	 * 					]
+	 * 			]
+	 * 		outstandingSheet
+	 * ]
+	 * 
+	 * @param formDto
 	 */
 	@Transactional
 	public RentalSheetDto addNew(RentalRequestSheetDto requestSheetDto, long approverId) {
@@ -134,13 +151,21 @@ public class RentalSheetService {
 		RentalSheet savedRentalSheet = repository.save(rentalSheet);
 		
 		List<RentalTool> toolList = new ArrayList<RentalTool>();
+		
+		List<RentalRequestToolDto> supplyRequestToolList = new ArrayList<RentalRequestToolDto>(); 
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
-			RentalTool newTool = rentalToolService.addNew(tool, savedRentalSheet, requestSheetDto);
-			if (newTool.getTool().getSubGroup().getMainGroup().getName().equals("소모자재")) {
-				logger.info("must be added to supplySheet, not rentalSheet.");
+			if (tool.getToolDto().getSubGroupDto().getMainGroupDto().getName().equals("소모자재")) {
+				supplyRequestToolList.add(tool);
+				continue;
 			}
+			RentalTool newTool = rentalToolService.addNew(tool, savedRentalSheet, requestSheetDto);
 			toolList.add(newTool);
+			logger.info(newTool.getTool().getName()+" added to RentalSheet:"+savedRentalSheet.getId());
 		}
+		if(supplyRequestToolList.size()>0) {
+			supplySheetService.addNew(requestSheetDto,supplyRequestToolList, approverId);
+		}
+		
 		RentalSheetDto result=convertToDto(savedRentalSheet);
 		
 		outstandingRentalSheetService.addNew(savedRentalSheet, toolList);

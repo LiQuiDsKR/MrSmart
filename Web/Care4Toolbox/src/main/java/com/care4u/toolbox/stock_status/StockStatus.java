@@ -107,4 +107,8 @@ public class StockStatus extends BaseEntity {
 		this.buyCount+=count;
 		this.totalCount+=count;
 	}
+	public void supplyUpdate(int count) {
+		this.goodCount-=count;
+		this.totalCount-=count;
+	}
 }

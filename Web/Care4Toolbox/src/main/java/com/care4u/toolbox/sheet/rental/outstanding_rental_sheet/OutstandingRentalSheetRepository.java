@@ -26,4 +26,8 @@ public interface OutstandingRentalSheetRepository extends JpaRepository<Outstand
 	Page<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
 	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState status, long toolboxId, LocalDateTime startDate, LocalDateTime endDate);
+	
+	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxId(OutstandingState status, long toolboxId);
+	
+	List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState status, long membershipId);
 }

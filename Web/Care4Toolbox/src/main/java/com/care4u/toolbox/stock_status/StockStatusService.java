@@ -117,6 +117,22 @@ public class StockStatusService {
 		stock.buyUpdate(count);
 		return new StockStatusDto(repository.save(stock));
 	}
+	@Transactional
+	public StockStatusDto supplyItems(long id, int count) {
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		if (count>stock.getGoodCount()) {
+			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
+			return null;
+		}
+		stock.supplyUpdate(count);
+		return new StockStatusDto(repository.save(stock));
+	}
 	
 	@Scheduled(cron = "0 11 15 * * ?") // 매일 자정에 실행
     public void copyEntities() {
