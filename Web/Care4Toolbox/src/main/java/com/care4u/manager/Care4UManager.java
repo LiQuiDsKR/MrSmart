@@ -357,7 +357,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolId = jsonObj.getLong("toolId");
 					long toolboxId = jsonObj.getLong("toolboxId");
-					handler.sendData(GsonUtils.toJson(toolboxToolLabelService.get(toolId, toolboxId).getQrcode()));
+					
+					String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
+					if (result==null) {
+						handler.sendData("null");
+					}else {				
+						handler.sendData(GsonUtils.toJson(result));
+					}
 				}
 				break;
 			case TAG_LIST:
