@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.microedition.io.StreamConnection;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ import com.care4u.toolbox.group.main_group.MainGroupDto;
 import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.stock_status.StockStatusService;
+import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
@@ -59,6 +62,7 @@ import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
+import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelDto;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -240,13 +244,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long membershipId = jsonObj.getLong("membershipId");
-		    		String startDate = jsonObj.getString("startDate");
-					String endDate = jsonObj.getString("endDate");
+		    		//String startDate = jsonObj.getString("startDate");
+					//String endDate = jsonObj.getString("endDate");
 
-			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+			        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
-			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId, startLocalDate, endLocalDate);
+			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
 			        
 					handler.sendData(GsonUtils.toJson(sheetList));
 				}
@@ -272,13 +276,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
-		    		String startDate = jsonObj.getString("startDate");
-					String endDate = jsonObj.getString("endDate");
+		    		//String startDate = jsonObj.getString("startDate");
+					//String endDate = jsonObj.getString("endDate");
 
-			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+			        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+			        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
-			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId, startLocalDate, endLocalDate);
+			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
 					handler.sendData(GsonUtils.toJson(sheetList));
 				}
 				break;
@@ -314,14 +318,69 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long toolId = jsonObj.getLong("toolId");
 					long toolboxId = jsonObj.getLong("toolboxId");
 					String qrcode = jsonObj.getString("qrcode");
-					int count = jsonObj.getInt("count");
 			    	try {
 						toolboxToolLabelService.register(toolId, toolboxId, qrcode);
 			    		handler.sendData("good");
+			    	}catch(IllegalArgumentException e) {
+			    		handler.sendData(e.getMessage());
 			    	}catch(Exception e) {
 			    		handler.sendData("bad");
 			    	}
 				}
+				break;
+			case TAG_FORM:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolId = jsonObj.getLong("toolId");
+					long toolboxId = jsonObj.getLong("toolboxId");
+					String tagGroup = jsonObj.getString("tagGroup");
+					JSONArray tagListArray = jsonObj.getJSONArray("tagList");
+			        List<String> tagList = new ArrayList<String>();
+			        for (int i = 0; i < tagListArray.length(); i++) {
+			            tagList.add(tagListArray.getString(i));
+			        }
+
+			    	try {
+						tagService.register(toolId, toolboxId, tagList, tagGroup);
+			    		handler.sendData("good");
+			    	}catch(IllegalArgumentException e) {
+			    		handler.sendData(e.getMessage());
+			    	}catch(Exception e) {
+			    		handler.sendData("bad");
+			    	}
+				}
+				break;
+			case TOOLBOX_TOOL_LABEL:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolId = jsonObj.getLong("toolId");
+					long toolboxId = jsonObj.getLong("toolboxId");
+					handler.sendData(GsonUtils.toJson(toolboxToolLabelService.get(toolId, toolboxId)));
+				}
+				break;
+			case TAG_LIST:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tagString = jsonObj.getString("tag");
+					handler.sendData(GsonUtils.toJson(tagService.getSiblings(tagString)));
+				}
+				break;
+			case TAG_ALL:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolboxId = jsonObj.getLong("toolboxId");
+			        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
+					handler.sendData(GsonUtils.toJson(tagList));
+				}
+				break;
+			case TOOLBOX_TOOL_LABEL_ALL:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolboxId = jsonObj.getLong("toolboxId");
+			        List<ToolboxToolLabelDto> tagList = toolboxToolLabelService.listByToolboxId(toolboxId);
+					handler.sendData(GsonUtils.toJson(tagList));
+				}
+				break;
 			}
 		}
 		

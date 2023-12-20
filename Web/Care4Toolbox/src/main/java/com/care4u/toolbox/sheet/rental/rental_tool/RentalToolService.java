@@ -108,8 +108,20 @@ public class RentalToolService {
 		if (requestDto.getTags() != null && requestDto.getTags().length() > 0) {
 			String[] tags = requestDto.getTags().split(",");
 			for (String tagString : tags) {
-				Tag tag = tagService.addNew(tagString);
-				tag.updateRentalTool(savedRentalTool);
+				Tag tag = tagRepository.findByMacaddress(tagString);
+				if (tag==null) {
+					logger.error("Tag : "+tagString+" not found");
+					return null;
+				}
+				List<Tag> tagGroup = tagRepository.findByTagGroup(tag.getTagGroup());
+				if (tagGroup.size()<1) {
+					logger.error("TagGroup Not found");
+					return null;
+				}
+				for (Tag t : tagGroup) {
+					t.updateRentalTool(savedRentalTool);
+					logger.info(t.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
+				}
 			}
 		}
 		

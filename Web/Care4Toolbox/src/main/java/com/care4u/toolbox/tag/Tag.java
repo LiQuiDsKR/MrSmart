@@ -47,12 +47,15 @@ public class Tag extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private RentalTool rentalTool;
 	
+	private String tagGroup; 
+	
 	@Builder
-	public Tag(String macaddress, Toolbox toolbox, Tool tool) {
+	public Tag(String macaddress, Toolbox toolbox, Tool tool, String TagGroup) {
 		this.macaddress = macaddress;
 		this.toolbox = toolbox;
 		this.tool = tool;
 		this.rentalTool = null;
+		this.tagGroup = tagGroup;
 	}
 	
 	public void updateToolbox(Toolbox toolbox) {

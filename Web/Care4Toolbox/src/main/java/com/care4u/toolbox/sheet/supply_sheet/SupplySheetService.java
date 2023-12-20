@@ -20,6 +20,7 @@ import com.care4u.toolbox.sheet.supply_tool.SupplyTool;
 import com.care4u.toolbox.sheet.supply_tool.SupplyToolDto;
 import com.care4u.toolbox.sheet.supply_tool.SupplyToolRepository;
 import com.care4u.toolbox.sheet.supply_tool.SupplyToolService;
+import com.care4u.toolbox.tool.ToolDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -94,11 +95,55 @@ public class SupplySheetService {
 		List<SupplyTool> toolList = new ArrayList<SupplyTool>();
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
 			SupplyTool newTool = supplyToolService.addNew(tool, savedSupplySheet);
-			if (newTool.getTool().getSubGroup().getMainGroup().getName().equals("소모자재")) {
-				logger.info("must be added to supplySheet, not supplySheet.");
+			if (!newTool.getTool().getSubGroup().getMainGroup().getName().equals("소모자재")) {
 			}
 			toolList.add(newTool);
 		}
+		return convertToDto(savedSupplySheet);
+	}
+	
+	@Transactional
+	public SupplySheetDto addNew(RentalRequestSheetDto requestSheetDto,List<RentalRequestToolDto> supplyRequestToolList, long approverId) {
+		Optional<Membership> worker = membershipRepository.findById(requestSheetDto.getWorkerDto().getId());
+		Optional<Membership> leader = membershipRepository.findById(requestSheetDto.getLeaderDto().getId());
+		Optional<Membership> approver = membershipRepository.findById(approverId);
+		Optional<Toolbox> toolbox = toolboxRepository.findById(requestSheetDto.getToolboxDto().getId());
+		
+		if (worker.isEmpty()) {
+			logger.debug("worker : " + worker);
+			return null;
+		}
+		if (leader.isEmpty()) {
+			logger.debug("leader :" + leader);
+			return null;
+		}
+		if (approver.isEmpty()) {
+			logger.debug("approver :" + approver);
+			return null;
+		}
+		if (toolbox.isEmpty()) {
+			logger.debug("toolbox : " + toolbox);
+			return null;
+		}
+		
+		SupplySheet supplySheet = SupplySheet.builder()
+				.worker(worker.get())
+				.leader(leader.get())
+				.approver(approver.get())
+				.toolbox(toolbox.get())
+				.eventTimestamp(LocalDateTime.now())
+				.build()
+				;
+		
+		SupplySheet savedSupplySheet = repository.save(supplySheet);
+		
+		List<SupplyTool> toolList = new ArrayList<SupplyTool>();
+		for (RentalRequestToolDto tool : supplyRequestToolList) {
+			SupplyTool newTool = supplyToolService.addNew(tool, savedSupplySheet);
+			toolList.add(supplyToolService.addNew(tool, savedSupplySheet));
+			logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
+		}
+		
 		return convertToDto(savedSupplySheet);
 	}
 }

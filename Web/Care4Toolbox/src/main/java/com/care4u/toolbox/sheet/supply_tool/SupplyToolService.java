@@ -1,5 +1,6 @@
 package com.care4u.toolbox.sheet.supply_tool;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,10 @@ import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalTool;
 import com.care4u.toolbox.sheet.supply_sheet.SupplySheet;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,7 @@ public class SupplyToolService {
 	
 	private final SupplyToolRepository repository;
 	private final ToolRepository toolRepository;
+	private final StockStatusService stockStatusService;
 	
 	@Transactional(readOnly = true)
 	public SupplyToolDto get(long id){
@@ -54,8 +59,11 @@ public class SupplyToolService {
 				.supplySheet(sheet)
 				.tool(tool.get())
 				.count(requestDto.getCount())
-				.replacementDate(null)
+				.replacementDate(LocalDate.now().plusMonths(tool.get().getReplacementCycle()))
 				.build();
+		
+		StockStatusDto stockDto = stockStatusService.get(supplyTool.getTool().getId(),sheet.getToolbox().getId());
+		stockStatusService.supplyItems(stockDto.getId(), supplyTool.getCount());
 		
 		return repository.save(supplyTool);
 	}

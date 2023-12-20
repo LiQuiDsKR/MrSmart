@@ -24,13 +24,16 @@ public class TagDto {
 	
 	private RentalToolDto rentalToolDto;
 	
+	private String tagGroup;
+	
 	@Builder
-	public TagDto(long id, String macaddress, ToolboxDto toolboxDto, ToolDto toolDto, RentalToolDto rentalToolDto) {
+	public TagDto(long id, String macaddress, ToolboxDto toolboxDto, ToolDto toolDto, RentalToolDto rentalToolDto, String TagGroup) {
 		this.id = id;
 		this.macaddress = macaddress;
 		this.toolboxDto = toolboxDto;
 		this.toolDto = toolDto;
 		this.rentalToolDto = rentalToolDto;
+		this.tagGroup = tagGroup;
 	}
 	
 	public TagDto(Tag tag, String rentalToolTags) {
@@ -39,6 +42,7 @@ public class TagDto {
 		this.toolboxDto = new ToolboxDto(tag.getToolbox());
 		this.toolDto = new ToolDto(tag.getTool());
 		this.rentalToolDto = tag.getRentalTool()==null?null:new RentalToolDto(tag.getRentalTool(),rentalToolTags);
+		this.tagGroup = tag.getTagGroup();
 	}
 	
 	public TagDto(Tag tag) {
@@ -47,6 +51,7 @@ public class TagDto {
 		this.toolboxDto = new ToolboxDto(tag.getToolbox());
 		this.toolDto = new ToolDto(tag.getTool());
 		this.rentalToolDto = null;
+		this.tagGroup = tag.getTagGroup();
 	}
 	
 }

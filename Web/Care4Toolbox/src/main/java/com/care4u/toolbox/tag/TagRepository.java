@@ -15,4 +15,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 	List<Tag> findAllByToolIdAndToolboxId(long toolId, long toolboxId);
 	
 	long countByToolIdAndToolboxId(long toolId, long toolboxId);
+	
+	List<Tag> findByTagGroup(String tagGroup);
 }
