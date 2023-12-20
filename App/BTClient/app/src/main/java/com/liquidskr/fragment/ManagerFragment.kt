@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -14,7 +15,7 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 
 class ManagerFragment : Fragment() {
-    lateinit var loginBtn: ImageButton
+    lateinit var loginBtn: Button
     lateinit var idTextField: EditText
     lateinit var pwTextField: EditText
 
@@ -31,6 +32,22 @@ class ManagerFragment : Fragment() {
         idTextField = view.findViewById(R.id.IDtextField)
         pwTextField = view.findViewById(R.id.PWtextField)
 
+        idTextField.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                // 포커스가 주어졌을 때의 동작
+                idTextField.setBackgroundResource(R.drawable.edittext_rounded_enable_bg)
+            } else {
+                idTextField.setBackgroundResource(R.drawable.edittext_rounded_bg)
+            }
+        }
+        pwTextField.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                // 포커스가 주어졌을 때의 동작
+                pwTextField.setBackgroundResource(R.drawable.edittext_rounded_enable_bg)
+            } else {
+                pwTextField.setBackgroundResource(R.drawable.edittext_rounded_bg)
+            }
+        }
 
         loginBtn.setOnClickListener {
             try {

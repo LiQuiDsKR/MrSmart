@@ -77,58 +77,119 @@
                     android:scaleY="2"
                     app:srcCompat="@drawable/manager_lobby_connectionbtn" />
 
-                <ImageButton
-                    android:id="@+id/LobbyRentalBtn"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_syncbtn" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="90dp"
-                android:background="#CDE2FB"
+                android:background="#FFFFFF"
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/RentalBtn"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_rentalbtn" />
+                    android:orientation="vertical">
 
-                <ImageButton
-                    android:id="@+id/ReturnBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_returnbtn" />
+                    <ImageButton
+                        android:id="@+id/RentalBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_01" />
 
-                <ImageButton
-                    android:id="@+id/StandbyBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_holdbtn" />
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="대여"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/RegisterBtn"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_holdbtn" />
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/ReturnBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_02" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="반납"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/StandbyBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_03" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="보류"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/RegisterBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_04" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="등록"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>

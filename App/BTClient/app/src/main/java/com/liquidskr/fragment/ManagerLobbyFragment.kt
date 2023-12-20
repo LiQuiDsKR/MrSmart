@@ -44,19 +44,24 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
 
 
         rentalBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
                 .commit()
         }
 
         returnBtn.setOnClickListener {
-            // LobbyActivity에서 만든 managerRentalFragment를 가져와서 사용
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_on_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val lobbyActivity = activity as? LobbyActivity
             val managerReturnFragment = lobbyActivity?.managerReturnFragment
 
-            // managerRentalFragment가 null이 아니라면 프래그먼트 교체
             managerReturnFragment?.let {
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.fragmentContainerView, it)
@@ -65,18 +70,24 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
         }
 
         standbyBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_on_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val fragment = ManagerStandByFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
                 .commit()
         }
 
         registerBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_on_04)
             val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
                 .commit()
         }
 /*

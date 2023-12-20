@@ -68,7 +68,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
 
         bluetoothGatt = bluetoothDevice.connectGatt(context, false, gattCallback)
-
+        
+        /* ## 보류 항목 올리기
         // 보류 항목 모두 전송
         var dbHelper = DatabaseHelper(context)
         val rentalList = dbHelper.getRentalStandby()
@@ -104,7 +105,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             } catch (e: IOException) {
 
             }
-        }
+        }*/
     }
 
     fun bluetoothClose() {
