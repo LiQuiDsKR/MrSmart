@@ -159,14 +159,19 @@ public class ToolboxToolLabelService {
 		ToolboxToolLabel tempObject = repository.findByQrcode(qrcode);
 		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
 		if(toolboxToolLabel!=null) {
-			if (toolboxToolLabel.equals(tempObject)) {
+			if (toolboxToolLabel.equals(tempObject)||tempObject==null) {
 				return update(toolboxToolLabel,qrcode);	
 			}else {
 				logger.error(qrcode +" already exists!");
 				throw new IllegalArgumentException(qrcode +" already exists!");
 			}
 		}
-		return addNew(toolId,toolboxId,qrcode); 
+		if (tempObject != null) {
+			return addNew(toolId,toolboxId,qrcode); 
+		}else {
+			logger.error(qrcode +" already e1231234xists!");
+			throw new IllegalArgumentException(qrcode +" already exists!");
+		}
 	}
 	
 	@Transactional

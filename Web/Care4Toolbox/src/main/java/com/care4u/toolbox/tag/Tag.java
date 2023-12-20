@@ -39,7 +39,7 @@ public class Tag extends BaseEntity {
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Toolbox toolbox;
-	
+	zjal
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Tool tool;
@@ -50,7 +50,7 @@ public class Tag extends BaseEntity {
 	private String tagGroup; 
 	
 	@Builder
-	public Tag(String macaddress, Toolbox toolbox, Tool tool, String TagGroup) {
+	public Tag(String macaddress, Toolbox toolbox, Tool tool, String tagGroup) {
 		this.macaddress = macaddress;
 		this.toolbox = toolbox;
 		this.tool = tool;

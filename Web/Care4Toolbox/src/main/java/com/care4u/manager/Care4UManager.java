@@ -362,7 +362,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					if (result==null) {
 						handler.sendData("null");
 					}else {				
-						handler.sendData(GsonUtils.toJson(result));
+						handler.sendData(result);
 					}
 				}
 				break;
