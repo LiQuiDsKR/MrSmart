@@ -118,16 +118,16 @@ class ManagerSelfRentalFragment() : Fragment() {
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     Log.d("asdf","대여 신청 완료")
-                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
                                 }
                                 override fun onError(e: Exception) {
                                     e.printStackTrace()
                                 }
                             })
-                            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                            Thread.sleep(1000)
-                            requireActivity().supportFragmentManager.popBackStack()
+
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }

@@ -5,7 +5,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
+import com.google.gson.Gson
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.rental.RentalRequestSheetApprove
+import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -37,6 +41,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_TOOL_PRICE = "tool_price"
         private const val COLUMN_TOOL_REPLACEMENTCYCLE = "tool_replacementcycle"
         private const val COLUMN_TOOL_BUYCODE = "tool_buycode"
+
+        private const val TABLE_STANDBY_NAME = "Standby"
+        private const val COLUMN_STANDBY_ID = "standby_id"
+        private const val COLUMN_STANDBY_JSON = "standby_json"
+        private const val COLUMN_STANDBY_TYPE = "standby_type"
+        private const val COLUMN_STANDBY_STATUS = "standby_status"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -64,14 +74,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_TOOL_REPLACEMENTCYCLE INTEGER, " +
                 "$COLUMN_TOOL_BUYCODE TEXT)"
 
+        val createStandbyTableQuery = "CREATE TABLE $TABLE_STANDBY_NAME " +
+                "($COLUMN_STANDBY_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_STANDBY_JSON TEXT, " +
+                "$COLUMN_STANDBY_TYPE TEXT, " +
+                "$COLUMN_STANDBY_STATUS TEXT)"
+
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
+        db.execSQL(createStandbyTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_Membership_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOL_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_STANDBY_NAME")
 
         onCreate(db)
     }
@@ -106,34 +124,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
-    fun updateMembershipData(
-        membershipId: Long,
-        membershipCode: String,
-        membershipPassword: String,
-        membershipName: String,
-        membershipPart: String,
-        membershipSubpart: String,
-        membershipMainpart: String,
-        membershipRole: String,
-        membershipEmploymentState: String
-    ): Int {
-        val values = ContentValues()
-        values.put(COLUMN_Membership_ID, membershipId)
-        values.put(COLUMN_Membership_CODE, membershipCode)
-        values.put(COLUMN_Membership_PASSWORD, membershipPassword)
-        values.put(COLUMN_Membership_NAME, membershipName)
-        values.put(COLUMN_Membership_PART, membershipPart)
-        values.put(COLUMN_Membership_SUBPART, membershipSubpart)
-        values.put(COLUMN_Membership_MAINPART, membershipMainpart)
-        values.put(COLUMN_Membership_ROLE, membershipRole)
-        values.put(COLUMN_Membership_EMPLOYMENT_STATE, membershipEmploymentState)
-
-        val db = this.writableDatabase
-        val updatedRows = db.update(TABLE_TOOL_NAME, values, "$COLUMN_TOOL_ID = ?", arrayOf(membershipId.toString()))
-        db.close()
-        return updatedRows
-    }
-
     fun insertToolData(
         toolId: Long,
         toolMaingroup: String,
@@ -166,35 +156,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
-    fun updateToolData(
-        toolId: Long,
-        toolMaingroup: String,
-        toolSubgroup: String,
-        toolCode: String,
-        toolKrName: String,
-        toolEngName: String,
-        toolSpec: String,
-        toolUnit: String,
-        toolPrice: Int,
-        toolReplacementCycle: Int,
-        //toolBuyCode: String
-    ): Int {
+    fun insertStandbyData(
+        //standbyId: Long,
+        standbyJson: String,
+        standbyType: String,
+        standbyStatus: String
+    ): Long {
         val values = ContentValues()
-        values.put(COLUMN_TOOL_MAINGROUP, toolMaingroup)
-        values.put(COLUMN_TOOL_SUBGROUP, toolSubgroup)
-        values.put(COLUMN_TOOL_CODE, toolCode)
-        values.put(COLUMN_TOOL_KRNAME, toolKrName)
-        values.put(COLUMN_TOOL_ENGNAME, toolEngName)
-        values.put(COLUMN_TOOL_SPEC, toolSpec)
-        values.put(COLUMN_TOOL_UNIT, toolUnit)
-        values.put(COLUMN_TOOL_PRICE, toolPrice)
-        values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
-        //values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+        //values.put(COLUMN_STANDBY_ID, standbyId)
+        values.put(COLUMN_STANDBY_JSON, standbyJson)
+        values.put(COLUMN_STANDBY_TYPE, standbyType)
+        values.put(COLUMN_STANDBY_STATUS, standbyStatus)
 
         val db = this.writableDatabase
-        val updatedRows = db.update(TABLE_TOOL_NAME, values, "$COLUMN_TOOL_ID = ?", arrayOf(toolId.toString()))
+        val id = db.insert(TABLE_STANDBY_NAME, null, values)
         db.close()
-        return updatedRows
+        return id
     }
 
     @SuppressLint("Range")
@@ -325,5 +302,94 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return password
+    }
+
+    @SuppressLint("Range")
+    fun getAllStandby(): List<Any> {
+        val gson = Gson()
+        val db = this.readableDatabase
+        val sheetList = mutableListOf<Any>()
+        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
+        val selectionArgs = arrayOf("STANDBY")
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        while (cursor.moveToNext()) {
+            //val id = cursor.getInt(cursor.getColumnIndex(COLUMN_STANDBY_ID))
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            //val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
+            //val status = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_STATUS))
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+            Log.d("dbdb",json)
+            try {
+                val rentalRequestSheetApprove: RentalRequestSheetApprove = gson.fromJson(json, RentalRequestSheetApprove::class.java)
+                sheetList.add(rentalRequestSheetApprove)
+            } catch (e: Exception) {
+                Log.d("db","cannot be rentalRequestSheet")
+                try {
+                    val returnSheetFormDto: ReturnSheetFormDto = gson.fromJson(json, ReturnSheetFormDto::class.java)
+                    sheetList.add(returnSheetFormDto)
+                } catch (e: Exception) {
+                    Log.d("db","cannot be ReturnSheetForm")
+                }
+            }
+        }
+
+        cursor.close()
+        db.close()
+
+        return sheetList
+    }
+
+    @SuppressLint("Range")
+    fun getRentalStandby(): List<String> {
+        val sheetList = mutableListOf<String>()
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
+
+        val selectionArgs = arrayOf("STANDBY", "RENTAL")
+
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+            sheetList.add(json)
+        }
+
+        cursor.close()
+        db.close()
+        return sheetList
+    }
+    @SuppressLint("Range")
+    fun getReturnStandby(): List<String> {
+        val sheetList = mutableListOf<String>()
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
+        val selectionArgs = arrayOf("STANDBY", "RETURN")
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+            sheetList.add(json)
+        }
+
+        cursor.close()
+        db.close()
+        return sheetList
+    }
+    fun removeFirstAndLastQuotes(input: String): String {
+        return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
+            input.substring(1, input.length - 1)
+        } else {
+            input
+        }
     }
 }

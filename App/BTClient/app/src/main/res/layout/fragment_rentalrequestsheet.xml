@@ -11,85 +11,136 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:background="@drawable/view_border">
-
-        <ImageView
-            android:id="@+id/imageView9"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="8dp"
-            app:srcCompat="@drawable/rental_icon" />
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#00C54040"
+            android:layout_height="150dp"
+            android:background="@drawable/sheet_background"
+            android:gravity="center"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/RentalRequestSheet_TimeStamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Timestamp"
-                android:textSize="20sp" />
-
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_width="330dp"
+                android:layout_height="90dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="10dp">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp">
+
+                    <ImageView
+                        android:id="@+id/imageView9"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="4dp"
+                        android:layout_marginTop="8dp"
+                        app:srcCompat="@drawable/rental_icon" />
+
+                    <FrameLayout
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                    </FrameLayout>
 
                     <TextView
-                        android:id="@+id/textView3"
+                        android:id="@+id/RentalRequestSheet_TimeStamp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="작업자 : "
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/RentalRequestSheet_WorkerName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="이름"
-                        android:textSize="20sp" />
-
+                        android:layout_marginRight="8dp"
+                        android:text="Timestamp"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="horizontal">
+                    android:background="#00C54040"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/textView3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="8dp"
+                                android:layout_marginRight="8dp"
+                                android:text="작업자"
+                                android:textColor="#32345E"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/RentalRequestSheet_WorkerName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="8dp"
+                                android:layout_marginRight="8dp"
+                                android:text="이름"
+                                android:textColor="#32345E"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="8dp"
+                                android:layout_marginRight="8dp"
+                                android:text="리더"
+                                android:textColor="#32345E"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/RentalRequestSheet_LeaderName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="8dp"
+                                android:layout_marginRight="8dp"
+                                android:text="이름"
+                                android:textColor="#32345E"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/ToolListTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="리더 : "
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/RentalRequestSheet_LeaderName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="이름"
-                        android:textSize="20sp" />
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="toolList"
+                        android:textColor="#32345E" />
 
                 </LinearLayout>
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/ToolListTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="toolList" />
 
         </LinearLayout>
 
