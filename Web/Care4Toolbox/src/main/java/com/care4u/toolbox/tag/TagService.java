@@ -215,6 +215,13 @@ public class TagService {
 	
 	@Transactional
 	public void register(long toolId, long toolboxId, List<String> tagList, String tagGroup) {
+		if (tagGroup.isEmpty()) {
+			if (tagList.size()<1) {
+				logger.error("처음 등록할 거면 리스트라도 좀 채워주세요");
+			}
+			tagGroup=tagList.get(0);
+		}
+		
 		List<Tag> tempList = repository.findByTagGroup(tagGroup);
 		for (Tag t : tempList) {
 			if(!tagList.contains(t.getMacaddress())) {
