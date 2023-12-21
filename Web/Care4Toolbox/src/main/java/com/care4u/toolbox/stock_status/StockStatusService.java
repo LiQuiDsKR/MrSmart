@@ -112,7 +112,7 @@ public class StockStatusService {
 	public StockStatusDto buyItems(long toolId, long toolboxId, int count) {
 		StockStatus stock=repository.findByToolIdAndToolboxId(toolId,toolboxId);
 		if (stock==null) {
-			stock=addNew(toolId, toolboxId, count);
+			stock=addNew(toolId, toolboxId, 0);
 		}
 		stock.buyUpdate(count);
 		return new StockStatusDto(repository.save(stock));
