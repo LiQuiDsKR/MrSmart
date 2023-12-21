@@ -28,12 +28,12 @@
                     android:id="@+id/SearchTypeSpinner"
                     android:layout_width="83dp"
                     android:layout_height="match_parent"
-                    android:background="@drawable/manager_return_spinner" />
+                    android:background="@drawable/sheet_background" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@drawable/manager_return_searchfield"
+                    android:background="@drawable/tool_background"
                     android:orientation="horizontal">
 
                     <EditText
@@ -49,15 +49,16 @@
                         android:text="" />
 
                     <ImageButton
-                        android:id="@+id/imageButton2"
+                        android:id="@+id/imageButton5"
                         android:layout_width="42dp"
                         android:layout_height="42dp"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginRight="10dp"
+                        android:layout_weight="1"
                         android:backgroundTint="#00FFFFFF"
                         android:scaleType="fitCenter"
-                        android:scaleX="1.8"
-                        android:scaleY="1.8"
-                        android:src="@drawable/manager_return_searchbtn" />
+                        android:src="@drawable/icon_fix_ic_top_search_copy" />
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -68,13 +69,6 @@
                 android:layout_height="match_parent"
                 tools:listitem="@layout/fragment_outstanding_rentalsheet"
                 android:layout_weight="1" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="#4C96F1"
-                android:gravity="center"
-                android:orientation="horizontal"/>
 
         </LinearLayout>
     </FrameLayout>

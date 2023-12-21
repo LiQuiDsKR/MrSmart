@@ -184,7 +184,7 @@ public class TagService {
 				return tempObject;
 			}else {
 				logger.error(tagString +" already exists!");
-				throw new IllegalArgumentException(tagString +" already exists!");
+				throw new IllegalArgumentException("ERROR_ALREADY_EXIST");
 			}
 		}
 		

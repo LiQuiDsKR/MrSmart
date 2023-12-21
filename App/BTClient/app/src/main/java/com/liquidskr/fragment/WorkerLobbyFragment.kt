@@ -18,6 +18,7 @@ import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
@@ -55,19 +56,21 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
             val workerRentalFragment = lobbyActivity?.workerRentalFragment
 
             // managerRentalFragment가 null이 아니라면 프래그먼트 교체
-            workerRentalFragment?.let {
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, it)
-                    .addToBackStack(null)
-                    .commit()
-            }
+            sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
+            sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
+            sharedViewModel.rentalRequestToolList.clear()
+            val fragment = WorkerRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
         getOutstandingRentalSheetList()
         return view
     }
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id},startDate:\"2020-01-01\",endDate:\"2023-12-30\"}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
                 requireActivity().runOnUiThread {

@@ -65,7 +65,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        standbyProcess()
+        //standbyProcess()
     }
 
     fun bluetoothClose() {
@@ -76,6 +76,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         fun onError(e: Exception)
     }
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
+        if (!bluetoothSocket.isConnected) {
+            callback.onError(IOException("Bluetooth socket is not connected"))
+            return
+        }
+
         isSending = true
         try {
             // 앱에서 서버로 type 전송.
@@ -85,11 +90,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             sendMsg += ",".toByteArray(Charsets.UTF_8)
             sendMsg += params.toByteArray(Charsets.UTF_8)
 
-            /*outputStream.write(type.name.toByteArray(Charsets.UTF_8))
-            if (!params.isNullOrEmpty()) {
-                outputStream.write(",".toByteArray())
-                outputStream.write(params.toByteArray())
-            }*/
             outputStream.write(sendMsg)
             outputStream.flush()
             Log.d("SEND", type.name)
@@ -99,8 +99,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
 
         val timeoutRunnable = Runnable {
-            timeout = true
-            dataSend("TIMEOUT")
+            if (!timeout) {
+                timeout = true
+                dataSend("TIMEOUT")
+            }
+
             // Timeout 시, 메시지 전송 완료로 처리
             isSending = false
             if (messageQueue.isNotEmpty()) {
@@ -141,6 +144,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
                 //정상적으로 데이터를 받았다면
                 if (byteArray.isNotEmpty()) {
+                    Log.d("Received", String(byteArray, Charsets.UTF_8))
                     clearSendingState() // 무언가 받았으므로, 송수신 정상이며 isSending 플래그 처리
 
                     val jsonString = String(byteArray, Charsets.UTF_8)
@@ -236,6 +240,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             val type: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
                             callback.onSuccess(jsonString, type)
                         }
+                        RequestType.TAG_GROUP ->{
+                        val type: Type = object : TypeToken<TagDto>() {}.type
+                        callback.onSuccess(jsonString, type)
+                    }
                     }
                 }
             } catch (e: Exception) {

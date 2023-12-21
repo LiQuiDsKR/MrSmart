@@ -21,6 +21,6 @@ enum class RequestType {
     TAG_LIST,
     TAG_ALL,
     TOOLBOX_TOOL_LABEL_ALL,
-
+    TAG_GROUP,
 
 }

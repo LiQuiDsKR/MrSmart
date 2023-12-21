@@ -13,14 +13,14 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
     RecyclerView.Adapter<RentalRequestToolAdapter.RentalRequestToolViewHolder>() {
     val selectedToolsToRental: MutableList<RentalRequestToolDto> = mutableListOf()
     class RentalRequestToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var toolName: TextView = itemView.findViewById(R.id.RentalRequestTool_Name)
-        var toolSpec: TextView = itemView.findViewById(R.id.RentalRequestTool_Spec)
-        var toolCount: TextView = itemView.findViewById(R.id.RentalRequestTool_Count)
+        var toolName: TextView = itemView.findViewById(R.id.ToolName)
+        var toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
+        var toolCount: TextView = itemView.findViewById(R.id.ToolCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RentalRequestToolViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_rentalrequesttool, parent, false)
+            .inflate(R.layout.fragment_rentaltool, parent, false)
         return RentalRequestToolViewHolder(itemView)
     }
 

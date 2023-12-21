@@ -21,24 +21,15 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#4C96F1">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginRight="4dp"
-                    android:background="#C0DBFB"
+                    android:layout_margin="4dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:paddingLeft="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="이름 : " />
 
                     <EditText
                         android:id="@+id/editTextName"
@@ -46,7 +37,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:backgroundTint="#00FFFFFF"
-                        android:hint="이름을 입력하세요" />
+                        android:hint="이름 입력"
+                        android:textSize="16sp" />
 
                     <ImageButton
                         android:id="@+id/SearchBtn"
@@ -54,27 +46,11 @@
                         android:layout_height="45dp"
                         android:backgroundTint="#00FFFFFF"
                         android:scaleType="fitCenter"
-                        android:scaleX="1.5"
-                        android:scaleY="1.5"
-                        app:srcCompat="@drawable/manager_rental_searchbtn" />
+                        app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
                 </LinearLayout>
             </FrameLayout>
 
             <!-- 부서 검색 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#4C96F1"
-                android:orientation="vertical"
-                android:padding="2dp">
-
-
-
-                <!-- 중분류 -->
-
-                <!-- 소분류 -->
-
-            </LinearLayout>
 
             <!-- RecycleView를 담을 FrameLayout -->
             <FrameLayout
@@ -86,8 +62,6 @@
                     android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/fragment_membership" />
 

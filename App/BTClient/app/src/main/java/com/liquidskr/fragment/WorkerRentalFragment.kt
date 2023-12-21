@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -35,8 +36,8 @@ import java.util.Locale
 class WorkerRentalFragment() : Fragment() {
     lateinit var leaderSearchBtn: ImageButton
     lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: ImageButton
-    lateinit var addToolBtn: ImageButton
+    lateinit var qrcodeBtn: LinearLayout
+    lateinit var addToolBtn: LinearLayout
     lateinit var selectAllBtn: ImageButton
     lateinit var confirmBtn: ImageButton
     lateinit var clearBtn: ImageButton
@@ -69,10 +70,10 @@ class WorkerRentalFragment() : Fragment() {
         confirmBtn = view.findViewById(R.id.worker_rental_confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
 
-        workerName = view.findViewById(R.id.BorrowerName)
-        leaderName = view.findViewById(R.id.LeaderName)
+        workerName = view.findViewById(R.id.workerName)
+        leaderName = view.findViewById(R.id.leaderName)
 
-        recyclerView = view.findViewById(R.id.ManagerLobby_RecyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         worker = sharedViewModel.loginWorker
@@ -84,11 +85,10 @@ class WorkerRentalFragment() : Fragment() {
         Log.d("asdf", sharedViewModel.worker.toString())
 
         leaderSearchBtn.setOnClickListener {
-            val bundle = Bundle()
             val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
         qrcodeBtn.setOnClickListener {
@@ -101,9 +101,9 @@ class WorkerRentalFragment() : Fragment() {
             qrEditText.textLocale = Locale.ENGLISH
 
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val toolId = fixCode(qrEditText.text.toString().replace("\n", ""))
+                val tbt = fixCode(qrEditText.text.toString().replace("\n", ""))
                 try {
-                    sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByCode(toolId))
+                    sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByTBT(tbt))
                     recyclerViewUpdate()
                 } catch (e: UninitializedPropertyAccessException) {
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -149,18 +149,18 @@ class WorkerRentalFragment() : Fragment() {
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
-                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     Log.d("test", rentalRequestSheet)
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
                                 }
 
                                 override fun onError(e: Exception) {
                                     e.printStackTrace()
                                 }
                             })
-                            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                            Thread.sleep(1000)
-                            requireActivity().supportFragmentManager.popBackStack()
+
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }

@@ -370,13 +370,17 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			case TAG_LIST:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
-					String tagString = jsonObj.getString("tag");
-					List<String> strings= tagService.getSiblings(tagString)
-							.stream()
-							.map(e->e.getMacaddress())
-							.collect(Collectors.toList());
+					String tagString = jsonObj.getString("tag");				
+					if (tagService.getSiblings(tagString) != null) {
+						List<String> strings= tagService.getSiblings(tagString)
+								.stream()
+								.map(e->e.getMacaddress())
+								.collect(Collectors.toList());
+						handler.sendData(GsonUtils.toJson(strings));
+					} else {
+						handler.sendData("null");
+					}
 					
-					handler.sendData(GsonUtils.toJson(strings));
 				}
 				break;
 			case TAG_ALL:
@@ -399,7 +403,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					String tagString = jsonObj.getString("tag");
-					handler.sendData(GsonUtils.toJson(tagService.getTagGroup(tagString)));
+					handler.sendData(GsonUtils.toJson(tagService.get(tagString)));
 				}
 			}
 		}

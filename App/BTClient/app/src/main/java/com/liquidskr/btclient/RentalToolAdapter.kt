@@ -15,7 +15,7 @@ class RentalToolAdapter(val tools: List<ToolDtoSQLite>) :
 
     class RentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var id: Long = 0
-        val toolName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
+        val toolName: TextView = itemView.findViewById(R.id.ToolName)
         val toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
         val toolCount: TextView = itemView.findViewById(R.id.ToolCount)
     }

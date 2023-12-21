@@ -24,7 +24,6 @@ class MembershipFindFragment : Fragment(){
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
-
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -41,7 +40,6 @@ class MembershipFindFragment : Fragment(){
         // DatabaseHelper 인스턴스 생성
         val databaseHelper = DatabaseHelper(requireContext())
         val memberships: List<MembershipSQLite> = databaseHelper.getAllMemberships()
-
 
         searchBtn.setOnClickListener {
             filterByName(memberships, editTextName.text.toString())

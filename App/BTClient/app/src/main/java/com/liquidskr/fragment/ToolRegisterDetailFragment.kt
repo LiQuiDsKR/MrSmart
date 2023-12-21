@@ -1,7 +1,6 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -10,9 +9,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.NumberPicker
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
@@ -34,7 +31,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     lateinit var scanBtn: LinearLayout
     lateinit var qrTextEdit: EditText
     lateinit var qrDisplay: TextView
-    var qrcode: String = ""
+    var tbt_qrcode: String = ""
 
     lateinit var qr_tagRegisterBtn: LinearLayout
 
@@ -76,6 +73,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                     qrDisplay.text = "미등록"
                 } else {
                     qrDisplay.text = result
+                    tbt_qrcode = result
                 }
             }
 
@@ -107,16 +105,22 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
             qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check_ready)
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
+                val qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
-                        val tagList: List<String> = gson.fromJson(result, type)
-                        val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                        qr_checkScanEdit.text.clear()
+                        if (result == "null") {
+                            /*requireActivity().runOnUiThread {
+                                Toast.makeText(requireContext(), "해당 QR은 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }*/
+                        } else {
+                            val tagList: List<String> = gson.fromJson(result, type)
+                            val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.fragmentContainerView, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                            qr_checkScanEdit.text.clear()
+                        }
                     }
                     override fun onError(e: Exception) {
                         e.printStackTrace()
@@ -131,9 +135,9 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         qrTextEdit.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                qrcode = fixCode(qrTextEdit.text.toString().replace("\n", ""))
+                tbt_qrcode = fixCode(qrTextEdit.text.toString().replace("\n", ""))
                 // qrcode가 이미 쓰인건지 체크
-                qrDisplay.text = "${qrcode}"
+                qrDisplay.text = "${tbt_qrcode}"
                 qrTextEdit.text.clear()
                 qrTextEdit.clearFocus()
                 return@setOnEditorActionListener true
@@ -144,9 +148,11 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         confirmBtn.setOnClickListener {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                    /*requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                    }*/
                 }
 
                 override fun onError(e: Exception) {
@@ -178,28 +184,5 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             correctedText.append(correctedChar)
         }
         return correctedText.toString()
-    }
-    private fun showNumberDialog(textView: TextView) {
-        val builder = AlertDialog.Builder(textView.context)
-        builder.setTitle("공구 등록 개수")
-        val input = NumberPicker(textView.context)
-        input.minValue = 0
-        input.maxValue = 999
-        input.wrapSelectorWheel = false
-        input.value = textView.text.toString().toInt()
-
-        builder.setView(input)
-
-        builder.setPositiveButton("확인") { _, _ ->
-            val newValue = input.value.toString()
-            // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
-            textView.text = newValue
-        }
-
-        builder.setNegativeButton("취소") { dialog, _ ->
-            dialog.cancel()
-        }
-
-        builder.show()
     }
 }

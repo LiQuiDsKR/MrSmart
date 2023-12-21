@@ -146,10 +146,4 @@ class ManagerSelfRentalFragment() : Fragment() {
 
         return view
     }
-    companion object {
-        fun newInstance(): ManagerSelfRentalFragment {
-            val fragment = ManagerSelfRentalFragment()
-            return fragment
-        }
-    }
 }

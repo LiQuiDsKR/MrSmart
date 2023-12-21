@@ -19,47 +19,31 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <FrameLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#4C96F1">
+                android:layout_height="45dp"
+                android:layout_margin="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <EditText
+                    android:id="@+id/editTextName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00FFFFFF"
+                    android:hint="이름 입력"
+                    android:textSize="16sp" />
+
+                <ImageButton
+                    android:id="@+id/SearchBtn"
+                    android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:background="#C0DBFB"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="0dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="8dp"
-                        android:text="이름 : " />
-
-                    <EditText
-                        android:id="@+id/editTextName"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:hint="이름을 입력하세요" />
-
-                    <ImageButton
-                        android:id="@+id/SearchBtn"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:backgroundTint="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        android:scaleX="1.5"
-                        android:scaleY="1.5"
-                        app:srcCompat="@drawable/manager_rental_searchbtn" />
-                </LinearLayout>
-            </FrameLayout>
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
+            </LinearLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"

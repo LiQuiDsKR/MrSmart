@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +22,7 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
+import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
@@ -96,8 +96,25 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             bluetoothManager.requestData(RequestType.TAG_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
-                    
+                    /*
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                    }*/
+                    for (tag: String in adapter.qrcodes) {
+                        bluetoothManager.requestData(RequestType.TAG_GROUP,"{\"tag\":\"${tag}\"}",object:BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                val tag: TagDto = gson.fromJson(result, type)
+                                dbHelper.insertTagData(tag.id, tag.macaddress, tag.toolDto.id, tag.tagGroup)
+                            }
+
+                            override fun onError(e: Exception) {
+                                /*requireActivity().runOnUiThread {
+                                    Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                                }*/
+                                e.printStackTrace()
+                            }
+                        })
+                    }
                 }
 
                 override fun onError(e: Exception) {

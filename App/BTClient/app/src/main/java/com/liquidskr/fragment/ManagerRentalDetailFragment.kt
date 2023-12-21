@@ -6,9 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,7 +35,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
 
-    private lateinit var confirmBtn: ImageButton
+    private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
 
     val gson = Gson()
@@ -50,7 +49,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
         confirmBtn = view.findViewById(R.id.rental_detail_confirmBtn)
-        recyclerView = view.findViewById(R.id.Manager_Rental_Detail_RecyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         workerName.text = "대여자: " + rentalRequestSheet.workerDto.name
@@ -79,20 +78,12 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                             override fun onSuccess(result: String, type: Type) {
                                 Log.d("asdf","대여 승인 완료")
 
-                                requireActivity().runOnUiThread {
-                                    Toast.makeText(requireContext(), "대여 승인 성공",Toast.LENGTH_SHORT).show()
-                                }
                                 requireActivity().supportFragmentManager.popBackStack()
                             }
 
                             override fun onError(e: Exception) {
                                 handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
                                 e.printStackTrace()
-
-                                requireActivity().runOnUiThread {
-                                    Toast.makeText(requireContext(), "대여 승인 실패, 보류 페이지로 전송됨",Toast.LENGTH_SHORT).show()
-                                }
-
                                 requireActivity().supportFragmentManager.popBackStack()
                             }
                         })

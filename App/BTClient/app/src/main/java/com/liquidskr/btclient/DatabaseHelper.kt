@@ -298,12 +298,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return membershipList
     }
     @SuppressLint("Range")
-    fun getToolByCode(codeToFind: String): ToolDtoSQLite {
+    fun getToolById(id: Long): ToolDtoSQLite {
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
-        val selectionArgs = arrayOf(codeToFind)
+        val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
         lateinit var toolDtoSQLite: ToolDtoSQLite
-
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
             val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
@@ -452,6 +451,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return sheetList
+    }
+
+    @SuppressLint("Range")
+    fun getToolByTBT(tbt: String): ToolDtoSQLite {
+        var toolId: Long = 0
+        lateinit var toolDtoSQLite: ToolDtoSQLite
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TBT_TOOL_ID FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_QRCODE = ?"
+        val selectionArgs = arrayOf(tbt)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            toolId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOL_ID))
+        }
+        toolDtoSQLite = getToolById(toolId)
+
+        cursor.close()
+        db.close()
+        return toolDtoSQLite
     }
 
     @SuppressLint("Range")
