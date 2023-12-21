@@ -8,8 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +17,7 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 
 class WorkerFragment : Fragment() {
-    private lateinit var loginBtn: ImageButton
+    private lateinit var loginBtn: Button
     private lateinit var idTextField: EditText
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel

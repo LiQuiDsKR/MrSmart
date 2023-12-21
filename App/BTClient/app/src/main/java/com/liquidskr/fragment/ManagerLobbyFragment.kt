@@ -21,7 +21,7 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
     lateinit var registerBtn: ImageButton
-    val manager = manager;
+    val manager = manager
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 

@@ -71,7 +71,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_marginLeft="30dp"
                         android:layout_marginTop="7dp"
                         android:layout_marginRight="30dp"
@@ -97,8 +97,9 @@
                             android:id="@+id/workerName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginRight="20dp"
                             android:gravity="center"
-                            android:text="TextView" />
+                            android:text="홍길동" />
 
                     </LinearLayout>
 
@@ -131,19 +132,21 @@
                             android:layout_width="150dp"
                             android:layout_height="50dp"
                             android:background="@drawable/sheet_background"
-                            android:gravity="center"
-                            android:orientation="horizontal">
+                            android:gravity="right|center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp">
 
                             <TextView
                                 android:id="@+id/leaderName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="TextView" />
+                                android:text="홍길동" />
 
                             <TextView
                                 android:id="@+id/textView16"
-                                android:layout_width="30dp"
+                                android:layout_width="20dp"
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
@@ -157,6 +160,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/blank"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#F4F4FF"
@@ -194,8 +198,8 @@
 
                     <EditText
                         android:id="@+id/QR_EditText"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
                         android:background="#00FFFFFF"
                         android:ems="10"
                         android:inputType="text"
@@ -232,7 +236,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/worker_rental_confirmBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"

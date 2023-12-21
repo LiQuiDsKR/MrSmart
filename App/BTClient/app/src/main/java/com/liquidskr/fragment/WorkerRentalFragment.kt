@@ -31,7 +31,6 @@ import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
 import java.lang.reflect.Type
-import java.util.Locale
 
 class WorkerRentalFragment() : Fragment() {
     lateinit var leaderSearchBtn: ImageButton
@@ -39,7 +38,7 @@ class WorkerRentalFragment() : Fragment() {
     lateinit var qrcodeBtn: LinearLayout
     lateinit var addToolBtn: LinearLayout
     lateinit var selectAllBtn: ImageButton
-    lateinit var confirmBtn: ImageButton
+    lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: ImageButton
 
     lateinit var workerName: TextView
@@ -67,7 +66,7 @@ class WorkerRentalFragment() : Fragment() {
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
-        confirmBtn = view.findViewById(R.id.worker_rental_confirmBtn)
+        confirmBtn = view.findViewById(R.id.confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
 
         workerName = view.findViewById(R.id.workerName)
@@ -97,14 +96,18 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
-            // I want to make my keyboard must be type in English, not a Korean.
-            qrEditText.textLocale = Locale.ENGLISH
-
+            Log.d("tst","textEditted")
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tbt = fixCode(qrEditText.text.toString().replace("\n", ""))
+
+                Log.d("tst",tbt)
                 try {
-                    sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByTBT(tbt))
+                    if (!(dbHelper.getToolByTBT(tbt) in sharedViewModel.rentalRequestToolList)) {
+                        sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByTBT(tbt))
+                    }
                     recyclerViewUpdate()
+
+                    Log.d("tst","tooladded")
                 } catch (e: UninitializedPropertyAccessException) {
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }

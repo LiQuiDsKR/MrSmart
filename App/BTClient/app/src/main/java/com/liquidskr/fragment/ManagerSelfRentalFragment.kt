@@ -59,8 +59,8 @@ class ManagerSelfRentalFragment() : Fragment() {
         clearBtn = view.findViewById(R.id.ClearBtn)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
-        workerName = view.findViewById(R.id.BorrowerName)
-        leaderName = view.findViewById(R.id.LeaderName)
+        workerName = view.findViewById(R.id.workerName)
+        leaderName = view.findViewById(R.id.leaderName)
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

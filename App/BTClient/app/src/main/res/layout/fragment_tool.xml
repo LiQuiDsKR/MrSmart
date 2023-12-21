@@ -57,13 +57,11 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/ToolCheck"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginRight="20dp"
-            android:background="#00FFFFFF"
-            android:src="@tools:sample/avatars"
-            app:srcCompat="@drawable/icon_choice_ic_choice_round_off" />
+            android:background="@drawable/icon_choice_ic_choice_round_off" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

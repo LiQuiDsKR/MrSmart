@@ -3,7 +3,7 @@ package com.liquidskr.btclient
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.tool.ToolDtoSQLite
@@ -13,9 +13,9 @@ class ToolAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLit
     private val selectedTools: MutableList<ToolDtoSQLite> = mutableListOf()
 
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val toolName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
+        val toolName: TextView = itemView.findViewById(R.id.ToolName)
         val toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
-        val toolCheck: CheckBox = itemView.findViewById(R.id.ToolCheck)
+        val toolCheck: ImageView = itemView.findViewById(R.id.ToolCheck)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToolViewHolder {
@@ -28,16 +28,16 @@ class ToolAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLit
         val currentTool = tools[position]
         holder.toolName.text = currentTool.name
         holder.toolSpec.text = currentTool.spec
-
-        holder.toolCheck.isChecked = selectedTools.contains(currentTool)
-        holder.itemView.setOnClickListener {
-            holder.toolCheck.isChecked = !holder.toolCheck.isChecked // toggle check
-            if (holder.toolCheck.isChecked) { // 체크된 항목은 추가
+        var isChecked: Boolean = false
+        holder.toolCheck.setOnClickListener {
+            isChecked = !isChecked
+            if (isChecked) {
+                holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_on)
                 selectedTools.add(currentTool)
             } else {
+                holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_off)
                 selectedTools.remove(currentTool) // 체크해제된 항목은 제거
             }
-            onItemClick(currentTool)
         }
     }
     fun getSelectedTools(): List<ToolDtoSQLite> {

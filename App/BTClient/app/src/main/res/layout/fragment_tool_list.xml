@@ -61,21 +61,22 @@
             </FrameLayout>
 
             <LinearLayout
+                android:id="@+id/confirmBtn"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="#4C96F1"
+                android:background="#32345E"
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/ConfirmBtn"
-                    android:layout_width="95dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_rental_confirmbtn" />
-
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="확인"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <!-- 부서 검색 -->

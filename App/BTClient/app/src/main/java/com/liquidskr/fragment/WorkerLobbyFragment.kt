@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +26,9 @@ import java.lang.reflect.Type
 class WorkerLobbyFragment(worker: Membership) : Fragment() {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
+    val worker = worker
 
+    lateinit var welcomeMessage: TextView
     val gson = Gson()
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
@@ -36,11 +39,12 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
 
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
-
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        
+
+        welcomeMessage.text = worker.name + "님 환영합니다."
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
             val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
