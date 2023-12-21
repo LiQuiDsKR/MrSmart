@@ -58,11 +58,6 @@ public class BuyToolService {
 		
 		BuyTool savedBuyTool= repository.save(buyTool);
 		
-		StockStatus status= stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(formDto.getToolDtoId(), sheet.getToolbox().getId(), LocalDate.now());
-		if (status==null) {
-			stockStatusService.addNew(formDto.getToolDtoId(), sheet.getToolbox().getId(), 0);
-		}
-		
 		stockStatusService.buyItems(formDto.getToolDtoId(), sheet.getToolbox().getId(), savedBuyTool.getCount());
 		
 		return repository.save(buyTool);
