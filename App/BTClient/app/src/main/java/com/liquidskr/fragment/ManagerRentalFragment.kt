@@ -19,6 +19,7 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.btclient.RequestType
+import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
@@ -52,6 +53,9 @@ class ManagerRentalFragment() : Fragment() {
 
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
+            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+            sharedViewModel.rentalRequestToolList.clear()
             val fragment = ManagerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)

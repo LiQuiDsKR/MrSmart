@@ -59,11 +59,7 @@ class MembershipFindFragment : Fragment(){
                 Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
             }
 
-            // 새로운 Fragment 생성 (Fragment 백스택)
-            val fragment = ManagerSelfRentalFragment.newInstance()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .commit()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         recyclerView.adapter = adapter
@@ -90,11 +86,7 @@ class MembershipFindFragment : Fragment(){
                 Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
             }
 
-            // 새로운 Fragment 생성 (Fragment 백스택)
-            val fragment = ManagerSelfRentalFragment.newInstance()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .commit()
+            requireActivity().supportFragmentManager.popBackStack()
         }
         recyclerView.adapter = adapter
     }
@@ -106,7 +98,6 @@ class MembershipFindFragment : Fragment(){
         }
         fun newInstance(type: Int): MembershipFindFragment {
             val fragment = MembershipFindFragment()
-            val bundle = Bundle()
             this.type = type
             return fragment
         }
