@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -29,9 +30,9 @@ import java.lang.reflect.Type
 class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var workerSearchBtn: ImageButton
     private lateinit var leaderSearchBtn: ImageButton
-    private lateinit var addToolBtn: ImageButton
+    private lateinit var addToolBtn: LinearLayout
     private lateinit var selectAllBtn: ImageButton
-    private lateinit var confirmBtn: ImageButton
+    private lateinit var confirmBtn: LinearLayout
     private lateinit var clearBtn: ImageButton
 
     private lateinit var workerName: TextView
@@ -62,7 +63,7 @@ class ManagerSelfRentalFragment() : Fragment() {
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
 
-        recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         worker = sharedViewModel.worker

@@ -62,11 +62,10 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
             val lobbyActivity = activity as? LobbyActivity
             val managerReturnFragment = lobbyActivity?.managerReturnFragment
 
-            managerReturnFragment?.let {
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, it)
-                    .commit()
-            }
+            val fragment = ManagerReturnFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .commit()
         }
 
         standbyBtn.setOnClickListener {

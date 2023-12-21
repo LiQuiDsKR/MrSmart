@@ -95,7 +95,7 @@
                             android:layout_weight="1" />
 
                         <TextView
-                            android:id="@+id/textView6"
+                            android:id="@+id/timestamp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="시각"
@@ -130,7 +130,7 @@
                             android:layout_weight="1" />
 
                         <TextView
-                            android:id="@+id/textView6"
+                            android:id="@+id/returnerName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="이름"
@@ -165,7 +165,7 @@
                             android:layout_weight="1" />
 
                         <TextView
-                            android:id="@+id/textView6"
+                            android:id="@+id/workerName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="이름"
@@ -200,7 +200,7 @@
                             android:layout_weight="1" />
 
                         <TextView
-                            android:id="@+id/textView6"
+                            android:id="@+id/leaderName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="이름"

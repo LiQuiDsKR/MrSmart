@@ -97,19 +97,21 @@
                             android:layout_width="150dp"
                             android:layout_height="50dp"
                             android:background="@drawable/sheet_background"
-                            android:gravity="center"
-                            android:orientation="horizontal">
+                            android:gravity="right|center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp">
 
                             <TextView
                                 android:id="@+id/workerName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="TextView" />
+                                android:text="홍길동" />
 
                             <TextView
                                 android:id="@+id/textView16"
-                                android:layout_width="30dp"
+                                android:layout_width="20dp"
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
@@ -150,19 +152,21 @@
                             android:layout_width="150dp"
                             android:layout_height="50dp"
                             android:background="@drawable/sheet_background"
-                            android:gravity="center"
-                            android:orientation="horizontal">
+                            android:gravity="right|center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp">
 
                             <TextView
                                 android:id="@+id/leaderName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="TextView" />
+                                android:text="홍길동" />
 
                             <TextView
                                 android:id="@+id/textView16"
-                                android:layout_width="30dp"
+                                android:layout_width="20dp"
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
@@ -188,26 +192,9 @@
                         android:layout_width="150dp"
                         android:layout_height="48dp"
                         android:layout_marginLeft="10dp"
-                        android:background="@drawable/edittext_rounded_bg"
-                        android:backgroundTint="#FEA039"
                         android:gravity="center"
                         android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/imageView4"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_margin="10dp"
-                            app:srcCompat="@drawable/scan" />
-
-                        <TextView
-                            android:id="@+id/textView5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:text="QR 코드"
-                            android:textColor="#FFFFFF" />
 
                     </LinearLayout>
 
@@ -222,7 +209,7 @@
                         android:textSize="0sp" />
 
                     <LinearLayout
-                        android:id="@+id/addToolBtn"
+                        android:id="@+id/AddToolBtn"
                         android:layout_width="150dp"
                         android:layout_height="48dp"
                         android:layout_marginLeft="10dp"
@@ -304,7 +291,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/confirmBtn"
+                android:id="@+id/ConfirmBtn"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="#32345E"

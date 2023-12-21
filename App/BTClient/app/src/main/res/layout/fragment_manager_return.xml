@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F4F4FF"
     android:clickable="true">
 
     <FrameLayout
@@ -34,14 +34,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@drawable/tool_background"
+                    android:gravity="right|center_vertical"
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/editTextText"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/searchSheetEdit"
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
-                        android:layout_weight="1"
                         android:background="@null"
                         android:ems="10"
                         android:inputType="text"
@@ -49,12 +49,11 @@
                         android:text="" />
 
                     <ImageButton
-                        android:id="@+id/imageButton5"
+                        android:id="@+id/sheetSearchBtn"
                         android:layout_width="42dp"
                         android:layout_height="42dp"
                         android:layout_gravity="center_vertical"
                         android:layout_marginRight="10dp"
-                        android:layout_weight="1"
                         android:backgroundTint="#00FFFFFF"
                         android:scaleType="fitCenter"
                         android:src="@drawable/icon_fix_ic_top_search_copy" />
@@ -67,8 +66,8 @@
                 android:id="@+id/Manager_Return_RecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:listitem="@layout/fragment_outstanding_rentalsheet"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                tools:listitem="@layout/fragment_outstanding_rentalsheet" />
 
         </LinearLayout>
     </FrameLayout>
