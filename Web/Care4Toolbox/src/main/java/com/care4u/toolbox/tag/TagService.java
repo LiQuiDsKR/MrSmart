@@ -180,7 +180,7 @@ public class TagService {
 		
 		Tag tempObject = repository.findByMacaddress(tagString);
 		if (tempObject!=null) {
-			if(tempObject.getTagGroup().equals(tagString)) {
+			if(tempObject.getTagGroup().equals(tagGroup)) {
 				return tempObject;
 			}else {
 				logger.error(tagString +" already exists!");
@@ -233,7 +233,7 @@ public class TagService {
 			addNew(toolId, toolboxId, tag, tagGroup);
 		}
 	}
-
+	@Transactional(readOnly=true)
 	public List<TagDto> getSiblings(String tagString) {
 		Tag tag = repository.findByMacaddress(tagString);
 		if (tag==null) {
@@ -243,4 +243,14 @@ public class TagService {
 		return repository.findByTagGroup(tag.getTagGroup()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
 
 	}
+	@Transactional(readOnly=true)
+	public String getTagGroup(String tagString) {
+		Tag tag = repository.findByMacaddress(tagString);
+		if (tag==null) {
+			logger.error("Invalid tag : "+tagString);
+			return null;
+		}
+		return tag.getTagGroup();
+	}
+	
 }
