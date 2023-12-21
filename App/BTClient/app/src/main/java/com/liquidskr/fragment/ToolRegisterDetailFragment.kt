@@ -93,6 +93,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         qr_checkScanBtn.setOnClickListener{
             qr_checkScanEdit.text.clear()
             qr_checkScanEdit.requestFocus()
+            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check)
         }
 
         qr_tagRegisterBtn.setOnClickListener {
@@ -104,7 +105,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
 
         qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
-
+            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check_ready)
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{

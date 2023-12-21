@@ -97,6 +97,7 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
             bluetoothManager.requestData(RequestType.TAG_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                    
                 }
 
                 override fun onError(e: Exception) {

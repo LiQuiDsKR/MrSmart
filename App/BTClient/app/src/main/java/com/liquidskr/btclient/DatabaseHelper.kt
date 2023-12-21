@@ -14,6 +14,8 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
+    lateinit var bluetoothManager: BluetoothManager
+
     companion object {
         private const val DATABASE_VERSION = 1
         private const val DATABASE_NAME = "StandardInfo.db"
@@ -417,7 +419,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
 
         val selectionArgs = arrayOf("STANDBY", "RENTAL")
-
 
         val cursor = db.rawQuery(query, selectionArgs)
         while (cursor.moveToNext()) {

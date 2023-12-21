@@ -160,36 +160,6 @@ class LobbyActivity  : AppCompatActivity() {
             })
 
         }
-        /*
-        testSendBtn.setOnClickListener {
-            bluetoothManager.requestData(RequestType.TOOL_ALL,"",object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    val dbHelper = DatabaseHelper(context)
-                    val ToolListType = object : TypeToken<List<ToolDto>>(){}.type
-                    var toolList: List<ToolDto> = gson.fromJson(result, ToolListType)
-                    for (tool in toolList) {
-                        val id = tool.id
-                        val mainGroup = tool.subGroupDto.mainGroupDto.name
-                        val subGroup = tool.subGroupDto.name
-                        val code = tool.code
-                        val krName = tool.name
-                        val engName = tool.engName
-                        val spec = tool.spec
-                        val unit = tool.unit
-                        val price = tool.price
-                        val replacementCycle = tool.replacementCycle
-                        val buyCode = ""
-                        dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                        Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
-                    }
-                    dbHelper.close()
-                }
-
-                override fun onError(e: Exception) {
-                    e.printStackTrace()
-                }
-            })
-        }*/
 
         bluetoothBtn.setOnClickListener {
             bluetoothManager.bluetoothOpen()

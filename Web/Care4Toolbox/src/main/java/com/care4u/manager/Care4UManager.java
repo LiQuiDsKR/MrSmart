@@ -358,10 +358,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long toolId = jsonObj.getLong("toolId");
 					long toolboxId = jsonObj.getLong("toolboxId");
 					
-					String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
-					if (result==null) {
+					if (toolboxToolLabelService.get(toolId, toolboxId) == null) {
 						handler.sendData("null");
-					}else {				
+					}					
+					else {	
+						String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
 						handler.sendData(result);
 					}
 				}
