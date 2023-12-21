@@ -1,5 +1,6 @@
 package com.care4u.toolbox.sheet.buy_tool;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.toolbox.sheet.buy_sheet.BuySheet;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
+import com.care4u.toolbox.stock_status.StockStatus;
 import com.care4u.toolbox.stock_status.StockStatusDto;
 import com.care4u.toolbox.stock_status.StockStatusRepository;
 import com.care4u.toolbox.stock_status.StockStatusService;
@@ -56,11 +58,13 @@ public class BuyToolService {
 		
 		BuyTool savedBuyTool= repository.save(buyTool);
 		
+		StockStatus status= stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(formDto.getToolDtoId(), sheet.getToolbox().getId(), LocalDate.now());
+		if (status==null) {
+			stockStatusService.addNew(formDto.getToolDtoId(), sheet.getToolbox().getId(), 0);
+		}
+		
 		stockStatusService.buyItems(formDto.getToolDtoId(), sheet.getToolbox().getId(), savedBuyTool.getCount());
 		
 		return repository.save(buyTool);
 	}
-
-	
-	
 }
