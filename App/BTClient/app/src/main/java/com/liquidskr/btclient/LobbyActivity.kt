@@ -1,12 +1,13 @@
 package com.liquidskr.btclient
 
+import SharedViewModel
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
@@ -15,15 +16,17 @@ import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
 import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.lang.reflect.Type
 
 class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
     lateinit var managerBtn: ImageButton
     lateinit var dbSyncBtn: ImageButton
-    lateinit var testSendBtn: ImageButton
+    //lateinit var testSendBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
@@ -31,7 +34,9 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerRentalFragment: WorkerRentalFragment
     private var workerFragment: WorkerFragment? = null
-
+    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
+        ViewModelProvider(this).get(SharedViewModel::class.java)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
@@ -47,7 +52,7 @@ class LobbyActivity  : AppCompatActivity() {
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
         dbSyncBtn = findViewById(R.id.DBSyncBtn)
-        testSendBtn = findViewById(R.id.testSendBtn)
+        //testSendBtn = findViewById(R.id.testSendBtn)
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
         settingBtn = findViewById(R.id.SettingBtn)
 
@@ -71,8 +76,7 @@ class LobbyActivity  : AppCompatActivity() {
             bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     val dbHelper = DatabaseHelper(context)
-                    val MembershipListType = object : TypeToken<List<Membership>>(){}.type
-                    var membershipList: List<Membership> = gson.fromJson(result, MembershipListType)
+                    var membershipList: List<Membership> = gson.fromJson(result, type)
                     for (member in membershipList) {
                         val id = member.id
                         val code = member.code
@@ -86,7 +90,66 @@ class LobbyActivity  : AppCompatActivity() {
                         dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
                         Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
                     }
-                    dbHelper.close()
+                    bluetoothManager.requestData(RequestType.TOOL_ALL,"",object:BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            var toolList: List<ToolDto> = gson.fromJson(result, type)
+                            for (tool in toolList) {
+                                val id = tool.id
+                                val mainGroup = tool.subGroupDto.mainGroupDto.name
+                                val subGroup = tool.subGroupDto.name
+                                val code = tool.code
+                                val krName = tool.name
+                                val engName = tool.engName
+                                val spec = tool.spec
+                                val unit = tool.unit
+                                val price = tool.price
+                                val replacementCycle = tool.replacementCycle
+                                val buyCode = ""
+                                dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
+                                Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
+                            }
+                            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
+                                    for (tbt in tbtList) {
+                                        val id = tbt.id
+                                        val toolbox = tbt.toolboxDto.id
+                                        val location = tbt.location
+                                        val tool = tbt.toolDto.id
+                                        val qrcode = tbt.qrcode
+
+                                        dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
+                                    }
+                                    bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                                        override fun onSuccess(result: String, type: Type) {
+                                            var tagList: List<TagDto> = gson.fromJson(result, type)
+                                            for (tag in tagList) {
+                                                val id = tag.id
+                                                val macaddress = tag.macaddress
+                                                val tool = tag.toolDto.id
+                                                val taggroup = tag.tagGroup
+
+                                                dbHelper.insertTagData(id, macaddress, tool, taggroup)
+                                            }
+                                            dbHelper.close()
+                                        }
+
+                                        override fun onError(e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    })
+                                }
+
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
+                        }
+
+                        override fun onError(e: Exception) {
+                            e.printStackTrace()
+                        }
+                    })
                 }
 
                 override fun onError(e: Exception) {
@@ -95,6 +158,7 @@ class LobbyActivity  : AppCompatActivity() {
             })
 
         }
+        /*
         testSendBtn.setOnClickListener {
             bluetoothManager.requestData(RequestType.TOOL_ALL,"",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
@@ -123,7 +187,8 @@ class LobbyActivity  : AppCompatActivity() {
                     e.printStackTrace()
                 }
             })
-        }
+        }*/
+
         bluetoothBtn.setOnClickListener {
             bluetoothManager.bluetoothOpen()
         }

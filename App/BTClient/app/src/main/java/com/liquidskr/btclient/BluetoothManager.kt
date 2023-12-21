@@ -45,7 +45,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
     var gson = Gson()
     var timeout = false
-
     fun bluetoothOpen() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         val permissionManager = PermissionManager(activity)

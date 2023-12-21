@@ -180,7 +180,7 @@ public class TagService {
 		
 		Tag tempObject = repository.findByMacaddress(tagString);
 		if (tempObject!=null) {
-			if(tempObject.getTagGroup().equals(tagString)) {
+			if(tempObject.getTagGroup().equals(tagGroup)) {
 				return tempObject;
 			}else {
 				logger.error(tagString +" already exists!");

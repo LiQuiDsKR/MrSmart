@@ -59,7 +59,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_TAG_ID = "tag_id"
         private const val COLUMN_TAG_MACADDRESS = "tag_macaddress"
         private const val COLUMN_TAG_TOOL_ID = "tag_toolid"
-        private const val COLUMN_TAG_RENTALTOOL_ID = "tag_rentaltoolid"
         private const val COLUMN_TAG_TAGGROUP = "tag_taggroup"
 
     }
@@ -106,7 +105,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "($COLUMN_TAG_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TAG_MACADDRESS TEXT, " +
                 "$COLUMN_TAG_TOOL_ID INTEGER, " +
-                "$COLUMN_TAG_RENTALTOOL_ID INTEGER, " +
                 "$COLUMN_TAG_TAGGROUP TEXT)"
 
         db.execSQL(createMembershipTableQuery)
@@ -221,26 +219,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_TBT_QRCODE, tbtQRcode)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        val id = db.insert(TABLE_TBT_NAME, null, values)
         db.close()
         return id
     }
     fun insertTagData(
         tagId: Long,
         tagMacAddress: String,
-        tagToolId: String,
-        tagRentalToolId: String,
+        tagToolId: Long,
         tagTagGroup: String
     ): Long {
         val values = ContentValues()
         values.put(COLUMN_TAG_ID, tagId)
         values.put(COLUMN_TAG_MACADDRESS, tagMacAddress)
         values.put(COLUMN_TAG_TOOL_ID, tagToolId)
-        values.put(COLUMN_TAG_RENTALTOOL_ID, tagRentalToolId)
         values.put(COLUMN_TAG_TAGGROUP, tagTagGroup)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        val id = db.insert(TABLE_TAG_NAME, null, values)
         db.close()
         return id
     }

@@ -3,7 +3,6 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -97,7 +96,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
 
         qr_tagRegisterBtn.setOnClickListener {
-            val fragment = ToolRegisterTagDetailFragment(tool, emptyList())
+            val fragment = ToolRegisterTagDetailFragment(tool, emptyList(), "")
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
@@ -111,10 +110,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         val tagList: List<String> = gson.fromJson(result, type)
-                        Log.d("tmp", tagList.toString()
-
-                        )
-                        val fragment = ToolRegisterTagDetailFragment(tool, tagList) // bluetooth로 받아야함
+                        val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
                         requireActivity().supportFragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainerView, fragment)
                             .addToBackStack(null)
