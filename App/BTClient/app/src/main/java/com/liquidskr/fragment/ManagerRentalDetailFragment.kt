@@ -86,7 +86,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                             }
                         })
                     } catch (e: IOException) {
-                        //handleBluetoothError(e, gson.toJson(rentalRequestSheetApprove))
+
                     }
                 }
             }

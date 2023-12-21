@@ -70,14 +70,11 @@ class ManagerSelfRentalFragment() : Fragment() {
         leader = sharedViewModel.leader
         leaderName.text = sharedViewModel.leader.name
 
-        Log.d("asdf", worker.toString())
-        Log.d("asdf", sharedViewModel.worker.toString())
-
         workerSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(1) // type = 1
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
 
@@ -85,7 +82,7 @@ class ManagerSelfRentalFragment() : Fragment() {
             val fragment = MembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
         addToolBtn.setOnClickListener {

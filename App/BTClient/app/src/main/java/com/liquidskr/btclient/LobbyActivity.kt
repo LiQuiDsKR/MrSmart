@@ -108,6 +108,7 @@ class LobbyActivity  : AppCompatActivity() {
                                 dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
                                 Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
                             }
+                            dbHelper.clearTBTTable()
                             bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
@@ -120,6 +121,7 @@ class LobbyActivity  : AppCompatActivity() {
 
                                         dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
                                     }
+                                    dbHelper.clearTagTable()
                                     bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
                                         override fun onSuccess(result: String, type: Type) {
                                             var tagList: List<TagDto> = gson.fromJson(result, type)

@@ -476,4 +476,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             input
         }
     }
+
+    fun clearTBTTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_TBT_NAME")
+        db.close()
+    }
+
+    fun clearTagTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_TAG_NAME")
+        db.close()
+    }
 }
