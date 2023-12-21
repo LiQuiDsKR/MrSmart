@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -77,16 +78,26 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 Log.d("asdf","대여 승인 완료")
+
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(requireContext(), "대여 승인 성공",Toast.LENGTH_SHORT).show()
+                                }
                                 requireActivity().supportFragmentManager.popBackStack()
                             }
 
                             override fun onError(e: Exception) {
-                                handleBluetoothError(e, gson.toJson(rentalRequestSheetApprove))
+                                handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
                                 e.printStackTrace()
+
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(requireContext(), "대여 승인 실패, 보류 페이지로 전송됨",Toast.LENGTH_SHORT).show()
+                                }
+
+                                requireActivity().supportFragmentManager.popBackStack()
                             }
                         })
                     } catch (e: IOException) {
-                        //handleBluetoothError(e, gson.toJson(rentalRequestSheetApprove))
+
                     }
                 }
             }
@@ -94,9 +105,10 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
 
         return view
     }
-    private fun handleBluetoothError(e: Exception, json: String) {
+    private fun handleBluetoothError(json: String) {
         Log.d("STANDBY","STANDBY ACCESS")
         var dbHelper = DatabaseHelper(requireContext())
         dbHelper.insertStandbyData(gson.toJson(json), "RENTAL","STANDBY" )
+        dbHelper.close()
     }
 }

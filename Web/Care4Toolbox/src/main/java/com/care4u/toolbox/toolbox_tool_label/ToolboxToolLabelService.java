@@ -166,10 +166,10 @@ public class ToolboxToolLabelService {
 				throw new IllegalArgumentException(qrcode +" already exists!");
 			}
 		}
-		if (tempObject != null) {
+		if (tempObject == null) {
 			return addNew(toolId,toolboxId,qrcode); 
 		}else {
-			logger.error(qrcode +" already e1231234xists!");
+			logger.error(qrcode +" already exists!");
 			throw new IllegalArgumentException(qrcode +" already exists!");
 		}
 	}

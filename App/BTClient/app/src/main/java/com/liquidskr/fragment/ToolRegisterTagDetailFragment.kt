@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
@@ -25,10 +26,11 @@ import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
-class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>) : Fragment() {
+class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, accessQR: String) : Fragment() {
 
     val tool: ToolDto = tool
     val tagList: List<String> = tagList
+    val accessQR: String = accessQR
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
@@ -89,10 +91,13 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>) : Frag
 
         confirmBtn.setOnClickListener {
             val tagList = gson.toJson(adapter.qrcodes)
+            var dbHelper = DatabaseHelper(requireContext())
+            val tagGroup = dbHelper.getTagGroupByTag(accessQR)
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TAG_FORM,"{toolId:${tool.id},toolboxId:${sharedViewModel.toolBoxId},tagGroup:\"\",tagList:${tagList}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TAG_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
+                    
                 }
 
                 override fun onError(e: Exception) {

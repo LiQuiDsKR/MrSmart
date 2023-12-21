@@ -93,10 +93,11 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         qr_checkScanBtn.setOnClickListener{
             qr_checkScanEdit.text.clear()
             qr_checkScanEdit.requestFocus()
+            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check)
         }
 
         qr_tagRegisterBtn.setOnClickListener {
-            val fragment = ToolRegisterTagDetailFragment(tool, emptyList())
+            val fragment = ToolRegisterTagDetailFragment(tool, emptyList(), "")
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
@@ -104,14 +105,24 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
 
         qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
+            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check_ready)
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
-                val fragment = ToolRegisterTagDetailFragment(tool, listOf("11111","12345")) // bluetooth로 받아야함
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, fragment)
-                    .addToBackStack(null)
-                    .commit()
-                qr_checkScanEdit.text.clear()
+                bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        val tagList: List<String> = gson.fromJson(result, type)
+                        val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerView, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                        qr_checkScanEdit.text.clear()
+                    }
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+
                 return@setOnEditorActionListener true
             }
 

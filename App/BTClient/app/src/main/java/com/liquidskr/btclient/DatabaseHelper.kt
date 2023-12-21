@@ -14,6 +14,8 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
+    lateinit var bluetoothManager: BluetoothManager
+
     companion object {
         private const val DATABASE_VERSION = 1
         private const val DATABASE_NAME = "StandardInfo.db"
@@ -50,6 +52,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         private const val TABLE_TBT_NAME = "ToolboxToolLabel"
         private const val COLUMN_TBT_ID = "tbt_id"
+        private const val COLUMN_TBT_TOOLBOX_ID = "tbt_toolboxid"
         private const val COLUMN_TBT_LOCATION = "tbt_location"
         private const val COLUMN_TBT_TOOL_ID = "tbt_toolid"
         private const val COLUMN_TBT_QRCODE = "tbt_qrcode"
@@ -58,7 +61,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_TAG_ID = "tag_id"
         private const val COLUMN_TAG_MACADDRESS = "tag_macaddress"
         private const val COLUMN_TAG_TOOL_ID = "tag_toolid"
-        private const val COLUMN_TAG_RENTALTOOL_ID = "tag_rentaltoolid"
         private const val COLUMN_TAG_TAGGROUP = "tag_taggroup"
 
     }
@@ -105,7 +107,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "($COLUMN_TAG_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TAG_MACADDRESS TEXT, " +
                 "$COLUMN_TAG_TOOL_ID INTEGER, " +
-                "$COLUMN_TAG_RENTALTOOL_ID INTEGER, " +
                 "$COLUMN_TAG_TAGGROUP TEXT)"
 
         db.execSQL(createMembershipTableQuery)
@@ -220,26 +221,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         values.put(COLUMN_TBT_QRCODE, tbtQRcode)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        val id = db.insert(TABLE_TBT_NAME, null, values)
         db.close()
         return id
     }
     fun insertTagData(
         tagId: Long,
         tagMacAddress: String,
-        tagToolId: String,
-        tagRentalToolId: String,
+        tagToolId: Long,
         tagTagGroup: String
     ): Long {
         val values = ContentValues()
         values.put(COLUMN_TAG_ID, tagId)
         values.put(COLUMN_TAG_MACADDRESS, tagMacAddress)
         values.put(COLUMN_TAG_TOOL_ID, tagToolId)
-        values.put(COLUMN_TAG_RENTALTOOL_ID, tagRentalToolId)
         values.put(COLUMN_TAG_TAGGROUP, tagTagGroup)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_STANDBY_NAME, null, values)
+        val id = db.insert(TABLE_TAG_NAME, null, values)
         db.close()
         return id
     }
@@ -421,7 +420,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         val selectionArgs = arrayOf("STANDBY", "RENTAL")
 
-
         val cursor = db.rawQuery(query, selectionArgs)
         while (cursor.moveToNext()) {
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
@@ -455,11 +453,40 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return sheetList
     }
+
+    @SuppressLint("Range")
+    fun getTagGroupByTag(tag: String): String {
+        var tagGroup = ""
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TAG_TAGGROUP FROM $TABLE_TAG_NAME WHERE $COLUMN_TAG_MACADDRESS = ?"
+        val selectionArgs = arrayOf(tag)
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            tagGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TAG_TAGGROUP))
+        }
+
+        cursor.close()
+        db.close()
+        return tagGroup
+    }
     fun removeFirstAndLastQuotes(input: String): String {
         return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
             input.substring(1, input.length - 1)
         } else {
             input
         }
+    }
+
+    fun clearTBTTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_TBT_NAME")
+        db.close()
+    }
+
+    fun clearTagTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_TAG_NAME")
+        db.close()
     }
 }
