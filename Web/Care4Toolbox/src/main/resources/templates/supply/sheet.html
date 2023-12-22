@@ -153,15 +153,21 @@
 		//fetch
 		function load(membershipId) {
 			abcHttp.get(
-				`/rental/sheet/getpage`,
+				`/supply/sheet/getpage`,
 				{
+					partId:0,
 					membershipId: membershipId,
+					toolId:0,
+					isWorker:true,
+					isLeader:true,
+					isApprover:true,
 					page: 0,
 					size: 10,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
 			).then(data => {
+				console.log(data);
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML='';
 				let htmlString = ``
