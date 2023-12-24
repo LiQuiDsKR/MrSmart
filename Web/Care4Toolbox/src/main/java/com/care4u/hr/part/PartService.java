@@ -112,4 +112,9 @@ public class PartService {
 		return dtoList;
 	}
 
+	public List<PartDto> getByName(String name) {
+		List<Part> list = repository.findByNameContaining(name);
+		return getDtoList(list);
+	}
+
 }

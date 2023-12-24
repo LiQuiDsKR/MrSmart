@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.Toolbox;
 
-public interface SupplySheetRepository extends JpaRepository<SupplySheet, Long> {
+public interface SupplySheetRepository extends JpaRepository<SupplySheet, Long> , SupplySheetRepositoryCustom{
 	
 	Page<SupplySheet> findAllByEventTimestampBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
