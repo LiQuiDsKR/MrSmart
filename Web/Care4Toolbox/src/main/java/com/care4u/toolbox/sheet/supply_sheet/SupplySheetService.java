@@ -157,7 +157,7 @@ public class SupplySheetService {
 		List<SupplyTool> toolList = new ArrayList<SupplyTool>();
 		for (RentalRequestToolDto tool : supplyRequestToolList) {
 			SupplyTool newTool = supplyToolService.addNew(tool, savedSupplySheet);
-			toolList.add(supplyToolService.addNew(tool, savedSupplySheet));
+			toolList.add(newTool);
 			logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
 		}
 		

@@ -32,6 +32,6 @@ public interface StockStatusRepository extends JpaRepository<StockStatus, Long>,
 	        Pageable pageable
 	    );
 	
-	@Query("SELECT s.currentDay FROM StockStatus s ORDER BY s.currentDay DESC")
+	@Query("SELECT MAX(s.currentDay) FROM StockStatus s")
 	LocalDate getLatestCurrentDay();
 }
