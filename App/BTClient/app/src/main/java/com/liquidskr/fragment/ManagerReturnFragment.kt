@@ -120,10 +120,12 @@ class ManagerReturnFragment() : Fragment() {
     fun filterByToolName(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
         val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
         for (sheet in sheets) {
-            for (tool in sheet.rentalSheetDto.toolList)
-            if (keyword in tool.toolDto.name) {
-                newList.add(sheet)
+            for (tool in sheet.rentalSheetDto.toolList) {
+                if (keyword in tool.toolDto.name) {
+                    newList.add(sheet)
+                }
             }
+
         }
         adapter.updateList(newList)
     }

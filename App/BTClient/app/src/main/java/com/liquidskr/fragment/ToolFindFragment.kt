@@ -51,11 +51,11 @@ class ToolFindFragment() : Fragment() {
 
         }
         confirmBtn.setOnClickListener {
-            val toolList: MutableList<ToolDtoSQLite> = mutableListOf()
+            val toolIdList: MutableList<Long> = mutableListOf()
             for (tool: ToolDtoSQLite in adapter.getSelectedTools()) {
-                toolList.add(tool) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
+                toolIdList.add(tool.id) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
             }
-            sharedViewModel.rentalRequestToolList.addAll(toolList)
+            sharedViewModel.rentalRequestToolIdList.addAll(toolIdList)
 
             requireActivity().supportFragmentManager.popBackStack()
         }

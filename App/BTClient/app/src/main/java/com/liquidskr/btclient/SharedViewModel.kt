@@ -1,7 +1,6 @@
 
 import androidx.lifecycle.ViewModel
 import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class SharedViewModel : ViewModel() {
     var toolBoxId: Long = 5222 // 하드코딩
@@ -12,6 +11,6 @@ class SharedViewModel : ViewModel() {
     var loginWorker = MembershipSQLite(0,"","","","","","","", "" )
     var loginManager = MembershipSQLite(0,"","","","","","","", "" )
 
-    val rentalRequestToolList: MutableList<ToolDtoSQLite> = mutableListOf()
+    val rentalRequestToolIdList: MutableList<Long> = mutableListOf()
 
 }

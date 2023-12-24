@@ -6,6 +6,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import android.widget.Toast
 import com.google.gson.Gson
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
@@ -14,6 +15,7 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
+    val context: Context = context
     lateinit var bluetoothManager: BluetoothManager
 
     companion object {
@@ -488,6 +490,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return tagGroup
     }
+    @SuppressLint("Range")
+    fun getToolByTag(tag: String): ToolDtoSQLite {
+        var toolId = 0
+        lateinit var tool: ToolDtoSQLite
+        try {
+            val db = this.readableDatabase
+            val query = "SELECT $COLUMN_TAG_TOOL_ID FROM $TABLE_TAG_NAME WHERE $COLUMN_TAG_MACADDRESS = ?"
+            val selectionArgs = arrayOf(tag)
+            val cursor = db.rawQuery(query, selectionArgs)
+            while (cursor.moveToNext()) {
+                toolId = cursor.getInt(cursor.getColumnIndex(COLUMN_TAG_TOOL_ID))
+            }
+            cursor.close()
+            db.close()
+        } catch (e:Exception) {
+            Toast.makeText(context,"QR 태그 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+        }
+
+        try {
+            tool =  getToolById(toolId.toLong())
+        } catch (e:Exception) {
+            Toast.makeText(context,"공기구 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+        }
+        return tool
+    }
+
     fun removeFirstAndLastQuotes(input: String): String {
         return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
             input.substring(1, input.length - 1)

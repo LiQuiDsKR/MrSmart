@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
@@ -118,7 +119,7 @@ class ManagerSelfRentalFragment() : Fragment() {
                                     Log.d("asdf","대여 신청 완료")
                                     sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                                     sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                                    sharedViewModel.rentalRequestToolList.clear()
+                                    sharedViewModel.rentalRequestToolIdList.clear()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
                                 override fun onError(e: Exception) {
@@ -137,12 +138,22 @@ class ManagerSelfRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+            sharedViewModel.rentalRequestToolIdList.clear()
+            var dbHelper = DatabaseHelper(requireContext())
+            var toolList: List<ToolDtoSQLite> = listOf()
+            for (id in sharedViewModel.rentalRequestToolIdList) {
+                toolList = toolList.plus(dbHelper.getToolById(id))
+            }
+            val adapter = RentalToolAdapter(toolList)
             recyclerView.adapter = adapter
         }
 
-        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+        var dbHelper = DatabaseHelper(requireContext())
+        var toolList: List<ToolDtoSQLite> = listOf()
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            toolList = toolList.plus(dbHelper.getToolById(id))
+        }
+        val adapter = RentalToolAdapter(toolList)
         recyclerView.adapter = adapter
 
         return view
