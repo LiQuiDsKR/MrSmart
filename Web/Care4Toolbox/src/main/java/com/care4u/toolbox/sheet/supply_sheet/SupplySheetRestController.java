@@ -67,6 +67,6 @@ public class SupplySheetRestController {
         for (SupplySheetDto item : supplySheetPage.getContent()) {
         	logger.info(item.toString());
         }
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(supplySheetPage);
     }
 }

@@ -92,7 +92,7 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
                 		.or(searchPartEquals(partId))
                 		.or(searchToolEquals(tool)))
                 )
-                .orderBy(sTool.replacementDate.asc())
+                .orderBy(sTool.replacementDate.asc(),sSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

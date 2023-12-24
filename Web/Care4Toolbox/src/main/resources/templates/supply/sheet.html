@@ -311,13 +311,12 @@
 				const containerDiv = document.getElementById("containerdiv");
 				containerDiv.innerHTML = '';
 				let htmlString = ``
-				if (true) {
+				if (data.empty) {
 					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
 					containerDiv.innerHTML = htmlString;
 					return; //abcsdfwlo
 				}
 				data.content.forEach(element => {
-					const sheetState = {"REQUEST": "대기", "APPROVE": "승인", "CANCEL": "취소"}[element.status];
 					htmlString = `
 					<!-- Sheet -->
 					<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
@@ -353,7 +352,7 @@
 										<th>이름</th>
 										<th>규격</th>
 										<th>신청수량</th>
-										<th>미반납수량</th>
+										<th>재지급일자</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -367,7 +366,7 @@
 										<td class="name">${tool.toolDto.name}</td>
 										<td class="spec">${tool.toolDto.spec}</td>
 										<td class="count">${tool.count}</td>
-										<td class="outstandingcount">${tool.outstandingCount}</td>
+										<td class="outstandingcount">${tool.replacementDate}</td>
 									</tr>
 					`;
 					}
