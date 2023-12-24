@@ -13,4 +13,6 @@ public interface PartRepository extends JpaRepository<Part, Long> {
 	public List<Part> findAllBySubPartOrderByNameAsc(SubPart subPart);
 		
 	public Part findBySubPartIdAndName(long subPartId, String name);
+
+	public List<Part> findByNameContaining(String name);
 }

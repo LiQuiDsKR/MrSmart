@@ -176,16 +176,25 @@ public class SupplySheetService {
 				}
 			}
 		}
-		Optional<Membership> membership = membershipRepository.findById(membershipId);
-		if (membership.isEmpty()) {
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
 			logger.info("no membership : " +membershipId + " all membership selected.");
-		}
-		Optional<Tool> tool = toolRepository.findById(toolId);
-		if (tool.isEmpty()) {
-			logger.info("no tool : " +toolId + " all tool selected.");
+			membership=null;
+		}else {
+			membership=membershipOptional.get();
 		}
 		
-		Page<SupplySheet> page = repository.findBySearchQuery(partId, membership.get(), isWorker, isLeader, isApprover, tool.get(), LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		Optional<Tool> toolOptional = toolRepository.findById(toolId);
+		Tool tool;
+		if (toolOptional.isEmpty()) {
+			logger.info("no tool : " +toolId + " all tool selected.");
+			tool=null;
+		}else {
+			tool=toolOptional.get();
+		}
+		
+		Page<SupplySheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		
 		return page.map(e -> convertToDto(e));
 	}

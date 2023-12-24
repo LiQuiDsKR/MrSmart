@@ -113,15 +113,8 @@ public class RentalToolService {
 					logger.error("Tag : "+tagString+" not found");
 					return null;
 				}
-				List<Tag> tagGroup = tagRepository.findByTagGroup(tag.getTagGroup());
-				if (tagGroup.size()<1) {
-					logger.error("TagGroup Not found");
-					return null;
-				}
-				for (Tag t : tagGroup) {
-					t.updateRentalTool(savedRentalTool);
-					logger.info(t.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
-				}
+					tag.updateRentalTool(savedRentalTool);
+					logger.info(tag.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
 			}
 		}
 		

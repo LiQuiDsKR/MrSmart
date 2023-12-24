@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.hr.main_part.MainPart;
 import com.care4u.hr.main_part.MainPartRepository;
+import com.care4u.hr.part.Part;
 
 import lombok.RequiredArgsConstructor;
 
@@ -112,4 +113,8 @@ public class SubPartService {
 		return dtoList;
 	}
 
+	public List<SubPartDto> getByName(String name) {
+		List<SubPart> list = repository.findByNameContaining(name);
+		return getDtoList(list);
+	}
 }

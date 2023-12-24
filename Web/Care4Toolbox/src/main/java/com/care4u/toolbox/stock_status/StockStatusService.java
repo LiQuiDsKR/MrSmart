@@ -136,37 +136,44 @@ public class StockStatusService {
 	
 	@Scheduled(cron = "40 17 0 * * ?") // 매일 자정에 실행
     public void copyEntities() {
-		LocalDate formerDate = LocalDate.now().minusDays(1);
-		LocalDate latterDate = LocalDate.now();
-        List<StockStatus> formerStatus = repository.findAllByCurrentDay(formerDate);
-        int count = 0;
-        for (StockStatus former : formerStatus) {
-        	StockStatus latter;
-        	if (isCorrect(former)) {
-        		latter=StockStatus.builder()
-        				.toolbox(former.getToolbox())
-        				.tool(former.getTool())
-        				.buyCount(0)
-        				.damageCount(former.getDamageCount())
-        				.discardCount(0)
-        				.faultCount(former.getFaultCount())
-        				.goodCount(former.getGoodCount())
-        				.lossCount(0)
-        				.rentalCount(former.getRentalCount())
-        				.totalCount(former.getTotalCount())
-        				.currentDay(latterDate)
-        				.build();
-        		repository.save(latter);
-        		logger.info(count+" : "+former.toString()+" -> "+latter.toString());
-        		count++;
-        	}
-        }
-        logger.info(count+"/"+formerStatus.size());
+		
+		LocalDate latestDate = repository.getLatestCurrentDay();
+		LocalDate currentDate = latestDate;
+
+		while (!currentDate.isAfter(LocalDate.now())) {
+		    currentDate = currentDate.plusDays(1);
+			LocalDate formerDate = currentDate.minusDays(1);
+			LocalDate latterDate = currentDate;
+	        List<StockStatus> formerStatus = repository.findAllByCurrentDay(formerDate);
+	        int count = 0;
+	        for (StockStatus former : formerStatus) {
+	        	StockStatus latter;
+	        	if (isCorrect(former)) {
+	        		latter=StockStatus.builder()
+	        				.toolbox(former.getToolbox())
+	        				.tool(former.getTool())
+	        				.buyCount(0)
+	        				.damageCount(former.getDamageCount())
+	        				.discardCount(0)
+	        				.faultCount(former.getFaultCount())
+	        				.goodCount(former.getGoodCount())
+	        				.lossCount(0)
+	        				.rentalCount(former.getRentalCount())
+	        				.totalCount(former.getTotalCount())
+	        				.currentDay(latterDate)
+	        				.build();
+	        		repository.save(latter);
+	        		logger.info(count+" : "+former.toString()+" -> "+latter.toString());
+	        		count++;
+	        	}
+	        }
+	        logger.info(count+"/"+formerStatus.size());
+		}
     }
 	
 	private boolean isCorrect(StockStatus stockStatus) {
-		//그날 있었던 Rental과 Return 전부 조회 후 개수 비교 및 합산.
-		//자정 업데이트간 사용하는 검증절차.
+		LocalDate currentDate = stockStatus.getCurrentDay();
+		
 		return true;
 	}
 	

@@ -31,4 +31,7 @@ public interface StockStatusRepository extends JpaRepository<StockStatus, Long>,
 	        @Param("subGroupIds") List<Long> subGroupIds,
 	        Pageable pageable
 	    );
+	
+	@Query("SELECT s.currentDay FROM StockStatus s ORDER BY s.currentDay DESC")
+	LocalDate getLatestCurrentDay();
 }

@@ -112,13 +112,6 @@ public class ToolRestController {
     }
     
     
-    /**
-     * @deprecated
-     * @param membershipSearchDto
-     * @param page
-     * @param model
-     * @return
-     */
     @GetMapping(value="/tool/getpage")
     public ResponseEntity<Page<ToolDto>> getToolPage(
             @RequestParam(name = "page", defaultValue = "0") int page,

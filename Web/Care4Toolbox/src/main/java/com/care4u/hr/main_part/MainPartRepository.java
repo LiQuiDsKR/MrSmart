@@ -8,5 +8,6 @@ public interface MainPartRepository extends JpaRepository<MainPart, Long> {
 	
 	public List<MainPart> findAllByOrderByNameAsc();
 	public MainPart findByName(String name);
+	public List<MainPart> findByNameContaining(String name);
 	
 }
