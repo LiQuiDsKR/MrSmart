@@ -5,13 +5,14 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.rental.RentalRequestSheetApprove
-import com.mrsmart.standard.returns.ReturnSheetFormDto
+import com.mrsmart.standard.rental.StandbyDto
+import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import java.lang.reflect.Type
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -51,6 +52,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_STANDBY_JSON = "standby_json"
         private const val COLUMN_STANDBY_TYPE = "standby_type"
         private const val COLUMN_STANDBY_STATUS = "standby_status"
+        private const val COLUMN_STANDBY_DETAIL = "standby_detail"
 
         private const val TABLE_TBT_NAME = "ToolboxToolLabel"
         private const val COLUMN_TBT_ID = "tbt_id"
@@ -64,6 +66,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_TAG_MACADDRESS = "tag_macaddress"
         private const val COLUMN_TAG_TOOL_ID = "tag_toolid"
         private const val COLUMN_TAG_TAGGROUP = "tag_taggroup"
+
+        private const val TABLE_RENTALSHEET_NAME = "RentalSheet"
+        private const val COLUMN_RENTALSHEET_ID = "rentalSheet_id"
+        private const val COLUMN_RENTALSHEET_WOKRER = "rentalSheet_workerid"
+        private const val COLUMN_RENTALSHEET_LEADER = "rentalSheet_leaderid"
+        private const val COLUMN_RENTALSHEET_TIMESTAMP = "rentalSheet_timestamp"
+        private const val COLUMN_RENTALSHEET_TOOLLIST = "rentalSheet_toolList"
 
     }
 
@@ -96,7 +105,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "($COLUMN_STANDBY_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_STANDBY_JSON TEXT, " +
                 "$COLUMN_STANDBY_TYPE TEXT, " +
-                "$COLUMN_STANDBY_STATUS TEXT)"
+                "$COLUMN_STANDBY_STATUS TEXT, " +
+                "$COLUMN_STANDBY_DETAIL TEXT)"
 
         val createTBTTableQuery = "CREATE TABLE $TABLE_TBT_NAME " +
                 "($COLUMN_TBT_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -111,11 +121,19 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_TAG_TOOL_ID INTEGER, " +
                 "$COLUMN_TAG_TAGGROUP TEXT)"
 
+        val createRSTableQuery = "CREATE TABLE $TABLE_RENTALSHEET_NAME " +
+                "($COLUMN_RENTALSHEET_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_RENTALSHEET_WOKRER TEXT, " +
+                "$COLUMN_RENTALSHEET_LEADER TEXT, " +
+                "$COLUMN_RENTALSHEET_TIMESTAMP TEXT, " +
+                "$COLUMN_RENTALSHEET_TOOLLIST TEXT)"
+
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
         db.execSQL(createStandbyTableQuery)
         db.execSQL(createTBTTableQuery)
         db.execSQL(createTagTableQuery)
+        db.execSQL(createRSTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -125,6 +143,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_STANDBY_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TBT_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TAG_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_RENTALSHEET_NAME")
 
         onCreate(db)
     }
@@ -195,13 +214,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         //standbyId: Long,
         standbyJson: String,
         standbyType: String,
-        standbyStatus: String
+        standbyStatus: String,
+        standbyDetail: String
     ): Long {
         val values = ContentValues()
         //values.put(COLUMN_STANDBY_ID, standbyId)
         values.put(COLUMN_STANDBY_JSON, standbyJson)
         values.put(COLUMN_STANDBY_TYPE, standbyType)
         values.put(COLUMN_STANDBY_STATUS, standbyStatus)
+        values.put(COLUMN_STANDBY_DETAIL, standbyDetail)
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_STANDBY_NAME, null, values)
@@ -241,6 +262,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_TAG_NAME, null, values)
+        db.close()
+        return id
+    }
+    fun insertRSData(
+        rsId: Long,
+        rsWorkerName: String,
+        rsLeaderName: String,
+        rsTimeStamp: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_RENTALSHEET_ID, rsId)
+        values.put(COLUMN_RENTALSHEET_WOKRER, rsWorkerName)
+        values.put(COLUMN_RENTALSHEET_LEADER, rsLeaderName)
+        values.put(COLUMN_RENTALSHEET_TIMESTAMP, rsTimeStamp)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_RENTALSHEET_NAME, null, values)
         db.close()
         return id
     }
@@ -375,11 +413,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
-    fun getAllStandby(): List<Any> {
+    fun getAllStandby(): List<StandbyDto> {
         val gson = Gson()
         val db = this.readableDatabase
-        val sheetList = mutableListOf<Any>()
-        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
+        val sheetList = mutableListOf<StandbyDto>()
+        val query = "SELECT $COLUMN_STANDBY_JSON, $COLUMN_STANDBY_TYPE, $COLUMN_STANDBY_DETAIL FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
         val selectionArgs = arrayOf("STANDBY")
 
         val cursor = db.rawQuery(query, selectionArgs)
@@ -387,23 +425,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         while (cursor.moveToNext()) {
             //val id = cursor.getInt(cursor.getColumnIndex(COLUMN_STANDBY_ID))
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
-            //val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
+            val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
             //val status = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_STATUS))
+            val detail = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_DETAIL)) // workerName, leaderName, toolList
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
             json = removeFirstAndLastQuotes(json)
-            Log.d("dbdb",json)
+
             try {
-                val rentalRequestSheetApprove: RentalRequestSheetApprove = gson.fromJson(json, RentalRequestSheetApprove::class.java)
-                sheetList.add(rentalRequestSheetApprove)
+                sheetList.add(StandbyDto(type, json, detail))
             } catch (e: Exception) {
-                Log.d("db","cannot be rentalRequestSheet")
-                try {
-                    val returnSheetFormDto: ReturnSheetFormDto = gson.fromJson(json, ReturnSheetFormDto::class.java)
-                    sheetList.add(returnSheetFormDto)
-                } catch (e: Exception) {
-                    Log.d("db","cannot be ReturnSheetForm")
-                }
+
             }
         }
 
@@ -412,22 +444,38 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         return sheetList
     }
+    @SuppressLint("Range")
+    fun updateStandbyStatus(standbyId: Long) {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(COLUMN_STANDBY_STATUS, "APPROVED")
+
+        db.update(
+            TABLE_STANDBY_NAME,
+            contentValues,
+            "$COLUMN_STANDBY_ID = ?",
+            arrayOf(standbyId.toString())
+        )
+
+        db.close()
+    }
 
     @SuppressLint("Range")
-    fun getRentalStandby(): List<String> {
-        val sheetList = mutableListOf<String>()
+    fun getRentalStandby(): List<Pair<Long, String>> {
+        val sheetList = mutableListOf<Pair<Long, String>>()
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
+        val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
 
         val selectionArgs = arrayOf("STANDBY", "RENTAL")
 
         val cursor = db.rawQuery(query, selectionArgs)
         while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
             json = removeFirstAndLastQuotes(json)
-            sheetList.add(json)
+            sheetList.add(Pair(id, json))
         }
 
         cursor.close()
@@ -435,25 +483,27 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return sheetList
     }
     @SuppressLint("Range")
-    fun getReturnStandby(): List<String> {
-        val sheetList = mutableListOf<String>()
+    fun getReturnStandby(): List<Pair<Long, String>> {
+        val sheetList = mutableListOf<Pair<Long, String>>()
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
+        val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
         val selectionArgs = arrayOf("STANDBY", "RETURN")
 
         val cursor = db.rawQuery(query, selectionArgs)
         while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
             json = removeFirstAndLastQuotes(json)
-            sheetList.add(json)
+            sheetList.add(Pair(id, json))
         }
 
         cursor.close()
         db.close()
         return sheetList
     }
+
 
     @SuppressLint("Range")
     fun getToolByTBT(tbt: String): ToolDtoSQLite {
@@ -515,6 +565,68 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         return tool
     }
+    @SuppressLint("Range")
+    fun getNamesByRSId(id: Long): Pair<String, String> {
+        var workerName = ""
+        var leaderName = ""
+        try {
+            val db = this.readableDatabase
+            val query = "SELECT $COLUMN_RENTALSHEET_WOKRER, $COLUMN_RENTALSHEET_LEADER FROM $TABLE_RENTALSHEET_NAME WHERE $COLUMN_RENTALSHEET_ID = ?"
+            val selectionArgs = arrayOf(id.toString())
+            val cursor = db.rawQuery(query, selectionArgs)
+            while (cursor.moveToNext()) {
+                workerName = cursor.getString(cursor.getColumnIndex(COLUMN_RENTALSHEET_WOKRER))
+                leaderName = cursor.getString(cursor.getColumnIndex(COLUMN_RENTALSHEET_LEADER))
+            }
+            cursor.close()
+            db.close()
+        } catch (e:Exception) {
+
+        }
+
+        return Pair(workerName, leaderName)
+    }
+    @SuppressLint("Range")
+    fun getTimestampByRSId(id: Long): String {
+        var timestamp = ""
+        try {
+            val db = this.readableDatabase
+            val query = "SELECT $COLUMN_RENTALSHEET_TIMESTAMP FROM $TABLE_RENTALSHEET_NAME WHERE $COLUMN_RENTALSHEET_ID = ?"
+            val selectionArgs = arrayOf(id.toString())
+            val cursor = db.rawQuery(query, selectionArgs)
+            while (cursor.moveToNext()) {
+                timestamp = cursor.getString(cursor.getColumnIndex(COLUMN_RENTALSHEET_TIMESTAMP))
+            }
+            cursor.close()
+            db.close()
+        } catch (e:Exception) {
+
+        }
+
+        return timestamp
+    }
+    @SuppressLint("Range")
+    fun getToolListByRSId(id: Long): List<ReturnToolFormDto> {
+        val gson = Gson()
+        var toolList = listOf<ReturnToolFormDto>()
+        try {
+            val db = this.readableDatabase
+            val query = "SELECT $COLUMN_RENTALSHEET_TOOLLIST FROM $TABLE_RENTALSHEET_NAME WHERE $COLUMN_RENTALSHEET_ID = ?"
+            val selectionArgs = arrayOf(id.toString())
+            val cursor = db.rawQuery(query, selectionArgs)
+            while (cursor.moveToNext()) {
+                val toolListString = cursor.getString(cursor.getColumnIndex(COLUMN_RENTALSHEET_TOOLLIST))
+                val listReturnToolFormDtoType: Type = object : TypeToken<List<ReturnToolFormDto>>() {}.type
+                toolList = gson.fromJson(toolListString, listReturnToolFormDtoType)
+            }
+            cursor.close()
+            db.close()
+        } catch (e:Exception) {
+
+        }
+
+        return toolList
+    }
 
     fun removeFirstAndLastQuotes(input: String): String {
         return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
@@ -533,6 +645,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun clearTagTable() {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_TAG_NAME")
+        db.close()
+    }
+
+    fun clearRSTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_RENTALSHEET_NAME")
         db.close()
     }
 }

@@ -65,7 +65,7 @@ class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
-        input.minValue = 0
+        input.minValue = 1
         input.maxValue = 100 // 예를 들어 최대값을 설정
         input.wrapSelectorWheel = false
         input.value = textView.text.toString().toInt()

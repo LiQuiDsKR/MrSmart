@@ -147,6 +147,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         }
 
         confirmBtn.setOnClickListener {
+            var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
                 if (adapter is RentalRequestToolAdapter) {
                     val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
@@ -157,9 +158,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                     if (tool.id == adapter.selectedToolsToRental[i]) {
                                         val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RentalRequestToolAdapter.RentalRequestToolViewHolder
                                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(activity, "${adapter.rentalRequestTools.indexOf(tool)}, ${toolCount}", Toast.LENGTH_SHORT).show()
-                                        }
+
                                         Log.d("cnt",holder?.toolName.toString())
                                         Log.d("cnt",toolCount.toString())
                                         rentalRequestToolDtoList.add(RentalRequestToolDto(tool.id, tool.toolDto, toolCount, tool.Tags))
@@ -182,12 +181,14 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                             }
 
                             override fun onError(e: Exception) {
-                                requireActivity().runOnUiThread {
-                                    Toast.makeText(activity, "대여 승인 실패, 보류에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                if (!standbyAlreadySent) {
+                                    requireActivity().runOnUiThread {
+                                        Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                    }
+                                    handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
+                                    e.printStackTrace()
+                                    requireActivity().supportFragmentManager.popBackStack()
                                 }
-                                handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
-                                e.printStackTrace()
-                                requireActivity().supportFragmentManager.popBackStack()
                             }
                         })
                     } catch (e: IOException) {
@@ -195,6 +196,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                     }
                 }
             }
+            standbyAlreadySent = true
         }
 
         return view
@@ -219,7 +221,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private fun handleBluetoothError(json: String) {
         Log.d("STANDBY","STANDBY ACCESS")
         var dbHelper = DatabaseHelper(requireContext())
-        dbHelper.insertStandbyData(gson.toJson(json), "RENTAL","STANDBY" )
+        dbHelper.insertStandbyData(gson.toJson(json), "RENTAL","STANDBY","")
         dbHelper.close()
     }
 }

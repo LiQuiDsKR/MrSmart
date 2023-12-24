@@ -5,23 +5,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.google.gson.Gson
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.rental.StandbyDto
+import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 
 
-class StandByAdapter(private var sheets: List<Any>) :
+class StandByAdapter(private var sheets: List<StandbyDto>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val Rental = 1
     private val Return = 2
+    val gson = Gson()
 
     override fun getItemViewType(position: Int): Int {
-        return when (sheets[position]) {
-            is RentalRequestSheetApprove -> Rental
-            is ReturnSheetFormDto -> Return
+        val sheetPair = sheets[position]
+        // Pair의 첫 번째 요소가 "Rental"인 경우 Rental, "Return"인 경우 Return으로 구분
+        return when (sheetPair.type) {
+            "RENTAL" -> Rental
+            "RETURN" -> Return
             else -> throw IllegalArgumentException("Invalid data type at position $position")
         }
     }
@@ -42,12 +46,30 @@ class StandByAdapter(private var sheets: List<Any>) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder.itemViewType) {
-            Rental -> (holder as Type1ViewHolder).bind(sheets[position] as RentalRequestSheetApprove)
-            Return -> (holder as Type2ViewHolder).bind(sheets[position] as OutstandingRentalSheetDto)
-            else -> throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
+        when (getItemViewType(position)) {
+            Rental -> {
+                if (holder is Type1ViewHolder) {
+                    val json = sheets[position].json
+                    val rentalRequestSheetApprove = gson.fromJson(json, RentalRequestSheetApprove::class.java)
+                    holder.bind(rentalRequestSheetApprove)
+                } else {
+                    throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
+                }
+            }
+            Return -> {
+                if (holder is Type2ViewHolder) {
+                    val json = sheets[position].json
+                    val detail = sheets[position].detail
+                    val returnSheetForm = gson.fromJson(json, ReturnSheetFormDto::class.java)
+                    holder.bind(returnSheetForm, detail)
+                } else {
+                    throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
+                }
+            }
+            else -> throw IllegalArgumentException("Invalid view type: ${getItemViewType(position)}")
         }
     }
+
 
     override fun getItemCount(): Int = sheets.size
 
@@ -78,15 +100,17 @@ class StandByAdapter(private var sheets: List<Any>) :
         var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
-        fun bind(item: OutstandingRentalSheetDto) {
-            val currentOutstandingRentalSheet = item
-            workerName.text = currentOutstandingRentalSheet.rentalSheetDto.workerDto.name
-            leaderName.text = currentOutstandingRentalSheet.rentalSheetDto.leaderDto.name
-            timeStamp.text = currentOutstandingRentalSheet.rentalSheetDto.eventTimestamp
+        fun bind(item: ReturnSheetFormDto, detail: String) {
+            val currentReturnSheetFormDto = item
+            val dbData = gson.fromJson(detail, StandbyParam::class.java)
+
+            workerName.text = dbData.workerName
+            leaderName.text = dbData.leaderName
+            timeStamp.text = dbData.timestamp
             var toolListString = ""
-            for (tool: RentalToolDto in currentOutstandingRentalSheet.rentalSheetDto.toolList) {
-                val toolName: String = tool.toolDto.name
-                val toolCount: String = tool.count.toString()
+            for (pair in dbData.toolList) {
+                val toolName: String = pair.first
+                val toolCount: String = pair.second.toString()
                 toolListString = toolListString.plus("$toolName($toolCount)  ")
             }
             toolListTextView.text = toolListString

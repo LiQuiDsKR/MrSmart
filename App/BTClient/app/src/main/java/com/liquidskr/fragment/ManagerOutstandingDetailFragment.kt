@@ -27,6 +27,7 @@ import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.tool.ToolDto
@@ -70,6 +71,13 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         workerName.text = "대여자: " + outstandingSheet.rentalSheetDto.workerDto.name
         leaderName.text = "리더: " + outstandingSheet.rentalSheetDto.leaderDto.name
         timeStamp.text = "대여일시: " + outstandingSheet.rentalSheetDto.eventTimestamp
+
+
+        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val adapter = OutstandingDetailAdapter(toolList)
+        recyclerView.adapter = adapter
 
         var sheetForTag: List<RentalRequestToolDto> = listOf()
 
@@ -149,6 +157,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         }
 
         confirmBtn.setOnClickListener {
+            var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
                 if (adapter is OutstandingDetailAdapter) {
                     val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
@@ -175,23 +184,27 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
-                            Log.d("asdf","반납 승인 완료")
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
+                            }
                             requireActivity().supportFragmentManager.popBackStack()
                         }
 
                         override fun onError(e: Exception) {
-                            e.printStackTrace()
+                            if (!standbyAlreadySent) {
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                                handleBluetoothError(gson.toJson(returnSheetForm))
+                                e.printStackTrace()
+                                requireActivity().supportFragmentManager.popBackStack()
+                            }
                         }
                     })
                 }
             }
+            standbyAlreadySent = true
         }
-
-        recyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        val adapter = OutstandingDetailAdapter(toolList)
-        recyclerView.adapter = adapter
 
         return view
     }
@@ -215,8 +228,23 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
     }
     private fun handleBluetoothError(json: String) {
         Log.d("STANDBY","STANDBY ACCESS")
+
+        val returnSheetForm = gson.fromJson(json, ReturnSheetFormDto::class.java)
+        val toolList = returnSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
-        dbHelper.insertStandbyData(gson.toJson(json), "RENTAL","STANDBY" )
+        val names: Pair<String, String> = dbHelper.getNamesByRSId(returnSheetForm.rentalSheetDtoId)
+        val timestamp = dbHelper.getTimestampByRSId(returnSheetForm.rentalSheetDtoId)
+
+        var pairToolList = listOf<Pair<String,Int>>()
+        for (tool in toolList) {
+            val name = dbHelper.getToolById(tool.toolDtoId).name
+            val count = tool.count
+            val pair = Pair(name, count)
+            pairToolList = pairToolList.plus(pair)
+        }
+        val detail = gson.toJson(StandbyParam(returnSheetForm.rentalSheetDtoId, names.first, names.second, timestamp, pairToolList))
+
+        dbHelper.insertStandbyData(gson.toJson(json), "RETURN","STANDBY", detail)
         dbHelper.close()
     }
 }
