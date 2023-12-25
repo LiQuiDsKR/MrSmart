@@ -110,7 +110,7 @@ public class StockStatusService {
 	}
 	@Transactional
 	public StockStatusDto buyItems(long toolId, long toolboxId, int count) {
-		StockStatus stock=repository.findByToolIdAndToolboxId(toolId,toolboxId);
+		StockStatus stock=repository.findByToolIdAndToolboxIdAndCurrentDay(toolId,toolboxId,LocalDate.now());
 		if (stock==null) {
 			stock=addNew(toolId, toolboxId, 0);
 		}
