@@ -9,13 +9,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.tool.ToolDtoSQLite
 
-class RentalToolAdapter(val tools: List<ToolDtoSQLite>) :
+class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
     RecyclerView.Adapter<RentalToolAdapter.RentalToolViewHolder>() {
     val selectedToolsToRental: MutableList<ToolDtoSQLite> = mutableListOf()
 
     class RentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var id: Long = 0
-        val toolName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
+        val toolName: TextView = itemView.findViewById(R.id.ToolName)
         val toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
         val toolCount: TextView = itemView.findViewById(R.id.ToolCount)
     }
@@ -65,7 +65,7 @@ class RentalToolAdapter(val tools: List<ToolDtoSQLite>) :
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
-        input.minValue = 0
+        input.minValue = 1
         input.maxValue = 100 // 예를 들어 최대값을 설정
         input.wrapSelectorWheel = false
         input.value = textView.text.toString().toInt()
@@ -74,17 +74,18 @@ class RentalToolAdapter(val tools: List<ToolDtoSQLite>) :
 
         builder.setPositiveButton("확인") { _, _ ->
             val newValue = input.value.toString()
-            // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
             textView.text = newValue
         }
 
         builder.setNegativeButton("취소") { dialog, _ ->
             dialog.cancel()
         }
-
         builder.show()
     }
-
+    fun updateList(newList: List<ToolDtoSQLite>) {
+        tools = newList
+        notifyDataSetChanged()
+    }
     override fun getItemCount(): Int {
         return tools.size
     }

@@ -21,7 +21,7 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
     lateinit var registerBtn: ImageButton
-    val manager = manager;
+    val manager = manager
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 
@@ -44,33 +44,61 @@ class ManagerLobbyFragment(manager: Membership) : Fragment() {
 
 
         rentalBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
                 .commit()
         }
 
         returnBtn.setOnClickListener {
-            // LobbyActivity에서 만든 managerRentalFragment를 가져와서 사용
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_on_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val lobbyActivity = activity as? LobbyActivity
             val managerReturnFragment = lobbyActivity?.managerReturnFragment
 
-            // managerRentalFragment가 null이 아니라면 프래그먼트 교체
-            managerReturnFragment?.let {
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, it)
-                    .commit()
-            }
+            val fragment = ManagerReturnFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .commit()
+        }
+
+        standbyBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_on_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
+            val fragment = ManagerStandByFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .commit()
         }
 
         registerBtn.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
+            registerBtn.setImageResource(R.drawable.ic_menu_on_04)
             val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
                 .commit()
         }
+/*
+        override fun onConnectionStateChanged(newState: Int) {
+            // 연결 상태가 변경될 때 호출되는 코드
+            // newState에는 BluetoothProfile.STATE_CONNECTED 또는 BluetoothProfile.STATE_DISCONNECTED가 전달됩니다.
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                // Bluetooth 연결이 성공한 경우 처리
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                // Bluetooth 연결이 끊어진 경우 처리
+            }
+        }*/
 
         return view
     }

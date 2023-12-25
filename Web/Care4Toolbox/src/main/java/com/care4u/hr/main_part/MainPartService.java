@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.hr.part.Part;
+import com.care4u.hr.sub_part.SubPart;
+import com.care4u.hr.sub_part.SubPartDto;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -79,5 +83,18 @@ public class MainPartService {
 		mainPart.update(mainPartDto);
 		
 		return new MainPartDto(repository.save(mainPart));
+	}
+
+	public List<MainPartDto> getByName(String name) {
+		List<MainPart> list = repository.findByNameContaining(name);
+		return getDtoList(list);
+	}
+
+	private List<MainPartDto> getDtoList(List<MainPart> list) {
+		List<MainPartDto> dtoList = new ArrayList<MainPartDto>();
+		for (MainPart item : list) {
+			dtoList.add(new MainPartDto(item));
+		}
+		return dtoList;
 	}
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.care4u.constant.OutstandingState;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -66,5 +67,23 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 					.fetch();
 
 		    return content;
+		}
+
+		@Override
+		public List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(
+				OutstandingState status, long membershipId) {
+			QOutstandingRentalSheet outstandingRentalSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			
+			BooleanExpression condition = outstandingRentalSheet.outstandingStatus.eq(status)
+					.and(outstandingRentalSheet.rentalSheet.worker.id.eq(membershipId)
+							.or(outstandingRentalSheet.rentalSheet.leader.id.eq(membershipId))
+							.or(outstandingRentalSheet.rentalSheet.approver.id.eq(membershipId))
+					);
+			
+			List<OutstandingRentalSheet> content = queryFactory
+					.selectFrom(outstandingRentalSheet)
+					.where(condition)
+					.fetch();
+			return content;
 		}
 }

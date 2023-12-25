@@ -112,45 +112,69 @@ public class StockStatusService {
 	public StockStatusDto buyItems(long toolId, long toolboxId, int count) {
 		StockStatus stock=repository.findByToolIdAndToolboxId(toolId,toolboxId);
 		if (stock==null) {
-			stock=addNew(toolId, toolboxId, count);
+			stock=addNew(toolId, toolboxId, 0);
 		}
 		stock.buyUpdate(count);
 		return new StockStatusDto(repository.save(stock));
 	}
+	@Transactional
+	public StockStatusDto supplyItems(long id, int count) {
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		if (count>stock.getGoodCount()) {
+			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
+			return null;
+		}
+		stock.supplyUpdate(count);
+		return new StockStatusDto(repository.save(stock));
+	}
 	
-	@Scheduled(cron = "01 00 00 * * ?") // 매일 자정에 실행
+@Scheduled(cron = "01 00 00 * * ?") // 매일 자정에 실행
+
     public void copyEntities() {
-		LocalDate formerDate = LocalDate.now().minusDays(1);
-		LocalDate latterDate = LocalDate.now();
-        List<StockStatus> formerStatus = repository.findAllByCurrentDay(formerDate);
-        int count = 0;
-        for (StockStatus former : formerStatus) {
-        	StockStatus latter;
-        	if (isCorrect(former)) {
-        		latter=StockStatus.builder()
-        				.toolbox(former.getToolbox())
-        				.tool(former.getTool())
-        				.buyCount(0)
-        				.damageCount(former.getDamageCount())
-        				.discardCount(0)
-        				.faultCount(former.getFaultCount())
-        				.goodCount(former.getGoodCount())
-        				.lossCount(0)
-        				.rentalCount(former.getRentalCount())
-        				.totalCount(former.getTotalCount())
-        				.currentDay(latterDate)
-        				.build();
-        		repository.save(latter);
-        		logger.info(count+" : "+former.toString()+" -> "+latter.toString());
-        		count++;
-        	}
-        }
-        logger.info(count+"/"+formerStatus.size());
+		
+		LocalDate latestDate = repository.getLatestCurrentDay();
+		LocalDate currentDate = latestDate;
+
+		while (!currentDate.isAfter(LocalDate.now().minusDays(1))) {
+		    currentDate = currentDate.plusDays(1);
+			LocalDate formerDate = currentDate.minusDays(1);
+			LocalDate latterDate = currentDate;
+	        List<StockStatus> formerStatus = repository.findAllByCurrentDay(formerDate);
+	        int count = 0;
+	        for (StockStatus former : formerStatus) {
+	        	StockStatus latter;
+	        	if (isCorrect(former)) {
+	        		latter=StockStatus.builder()
+	        				.toolbox(former.getToolbox())
+	        				.tool(former.getTool())
+	        				.buyCount(0)
+	        				.damageCount(former.getDamageCount())
+	        				.discardCount(0)
+	        				.faultCount(former.getFaultCount())
+	        				.goodCount(former.getGoodCount())
+	        				.lossCount(0)
+	        				.rentalCount(former.getRentalCount())
+	        				.totalCount(former.getTotalCount())
+	        				.currentDay(latterDate)
+	        				.build();
+	        		repository.save(latter);
+	        		logger.info(count+" : "+former.toString()+" -> "+latter.toString());
+	        		count++;
+	        	}
+	        }
+	        logger.info(count+"/"+formerStatus.size());
+		}
     }
 	
 	private boolean isCorrect(StockStatus stockStatus) {
-		//그날 있었던 Rental과 Return 전부 조회 후 개수 비교 및 합산.
-		//자정 업데이트간 사용하는 검증절차.
+		LocalDate currentDate = stockStatus.getCurrentDay();
+		
 		return true;
 	}
 	

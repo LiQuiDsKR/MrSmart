@@ -13,4 +13,6 @@ public interface ToolboxToolLabelRepository extends JpaRepository<ToolboxToolLab
 	ToolboxToolLabel findByToolboxAndLocation(Toolbox toolbox, String location);
 	
 	ToolboxToolLabel findByToolIdAndToolboxId(long toolId, long toolboxId);
+	
+	ToolboxToolLabel findByQrcode(String qrcode);
 }

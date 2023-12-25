@@ -24,7 +24,6 @@ class MembershipFindFragment : Fragment(){
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
-
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -42,7 +41,6 @@ class MembershipFindFragment : Fragment(){
         val databaseHelper = DatabaseHelper(requireContext())
         val memberships: List<MembershipSQLite> = databaseHelper.getAllMemberships()
 
-
         searchBtn.setOnClickListener {
             filterByName(memberships, editTextName.text.toString())
         }
@@ -59,11 +57,7 @@ class MembershipFindFragment : Fragment(){
                 Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
             }
 
-            // 새로운 Fragment 생성 (Fragment 백스택)
-            val fragment = ManagerSelfRentalFragment.newInstance()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .commit()
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         recyclerView.adapter = adapter
@@ -90,11 +84,7 @@ class MembershipFindFragment : Fragment(){
                 Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
             }
 
-            // 새로운 Fragment 생성 (Fragment 백스택)
-            val fragment = ManagerSelfRentalFragment.newInstance()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .commit()
+            requireActivity().supportFragmentManager.popBackStack()
         }
         recyclerView.adapter = adapter
     }
@@ -106,7 +96,6 @@ class MembershipFindFragment : Fragment(){
         }
         fun newInstance(type: Int): MembershipFindFragment {
             val fragment = MembershipFindFragment()
-            val bundle = Bundle()
             this.type = type
             return fragment
         }

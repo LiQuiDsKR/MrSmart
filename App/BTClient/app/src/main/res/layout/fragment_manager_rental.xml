@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F4F4FF"
     android:clickable="true">
 
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#F4F4FF"
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="1dp">
 
@@ -28,20 +29,20 @@
                     android:id="@+id/SearchTypeSpinner"
                     android:layout_width="83dp"
                     android:layout_height="match_parent"
-                    android:background="@drawable/manager_return_spinner" />
+                    android:background="@drawable/sheet_background" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@drawable/manager_return_searchfield"
+                    android:background="@drawable/tool_background"
+                    android:gravity="right|center_vertical"
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/editTextText"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/searchSheetEdit"
+                        android:layout_width="200dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
-                        android:layout_weight="1"
                         android:background="@null"
                         android:ems="10"
                         android:inputType="text"
@@ -49,15 +50,14 @@
                         android:text="" />
 
                     <ImageButton
-                        android:id="@+id/imageButton2"
+                        android:id="@+id/sheetSearchBtn"
                         android:layout_width="42dp"
                         android:layout_height="42dp"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginRight="10dp"
                         android:backgroundTint="#00FFFFFF"
                         android:scaleType="fitCenter"
-                        android:scaleX="1.8"
-                        android:scaleY="1.8"
-                        android:src="@drawable/manager_return_searchbtn" />
+                        android:src="@drawable/icon_fix_ic_top_search_copy" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -67,23 +67,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#F4F4FF"
                 tools:listitem="@layout/fragment_rentalrequestsheet" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="#4C96F1"
+                android:background="#F4F4FF"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/Manager_SelfRentalBtn"
                     android:layout_width="120dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_weight="0"
                     android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_rental" />
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/group_8" />
+
             </LinearLayout>
 
         </LinearLayout>

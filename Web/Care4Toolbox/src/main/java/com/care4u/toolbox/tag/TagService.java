@@ -170,43 +170,87 @@ public class TagService {
 	}
 	
 	@Transactional
-	public Tag addNew(Tool tool, Toolbox toolbox) {
-		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(tool.getId(), toolbox.getId(), LocalDate.now());
-		if (stock == null) {
-			logger.error("stock not found");
-			return null;
-		}
-		long tagCount = repository.countByToolIdAndToolboxId(tool.getId(),toolbox.getId());
-		if (tagCount>=stock.getTotalCount()) {
-			logger.error("All Tool already has Tags : "+tagCount+"/"+stock.getTotalCount());
-			return null;
-		}
-		Tag tag = Tag.builder()
-		.tool(tool)
-		.toolbox(toolbox)
-		.macaddress(toolbox.getId()+"_"+tool.getId()+"_"+tagCount)
-		.build();
-		return repository.save(tag);
-	}
-	/**
-	 * 초기 모의 데이터 생성용입니다. > Care4UManager에서 1회 사용 후 폐기
-	 * @deprecated
-	 */
-	@Transactional
-	public void addMock() {
-		List<StockStatus> stocks = stockStatusRepository.findAllByCurrentDay(LocalDate.now());
+	public Tag addNew(long toolId, long toolboxId, String tagString, String tagGroup) {
+
+//		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(tool.getId(), toolbox.getId(), LocalDate.now());
+//		if (stock == null) {
+//			logger.error("stock not found");	
+//			return null;
+//		}
 		
-		Random random = new Random();
-		int debugCount = 0;
-		for (StockStatus stock : stocks) {
-			if (random.nextInt(stocks.size())<stocks.size()*0.4) {
-				for (int i = random.nextInt(stock.getTotalCount());i>=0;i--) {
-					Tag tag = addNew(stock.getTool(),stock.getToolbox());
-					logger.info("item "+debugCount + " added. / " +stock.getToolbox().getId()+"_"+stock.getTool().getId()+"_"+i +" / " +tag.getMacaddress());
-					debugCount++;
-				}
+		Tag tempObject = repository.findByMacaddress(tagString);
+		if (tempObject!=null) {
+			if(tempObject.getTagGroup().equals(tagGroup)) {
+				return tempObject;
+			}else {
+				logger.error(tagString +" already exists!");
+				throw new IllegalArgumentException("ERROR_ALREADY_EXIST");
 			}
 		}
-		logger.info("Complete, total " + debugCount +" items added");
+		
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
+		Tag tag = Tag.builder()
+				.macaddress(tagString)
+				.tool(tool.get())
+				.toolbox(toolbox.get())
+				.tagGroup(tagGroup)
+				.build();
+		
+		logger.info("Tag added : " + tagString + " -> " + tagGroup + " : " + tool.get().getName());
+
+		return repository.save(tag);
 	}
+	
+	
+	@Transactional
+	public void register(long toolId, long toolboxId, List<String> tagList, String tagGroup) {
+		if (tagGroup.isEmpty()) {
+			if (tagList.size()<1) {
+				logger.error("처음 등록할 거면 리스트라도 좀 채워주세요");
+			}
+			tagGroup=tagList.get(0);
+		}
+		
+		List<Tag> tempList = repository.findByTagGroup(tagGroup);
+		for (Tag t : tempList) {
+			if(!tagList.contains(t.getMacaddress())) {
+				repository.delete(t);
+				logger.info("Tag Deleted : "+t.getMacaddress());
+			}
+		}
+		for (String tag : tagList) {
+			addNew(toolId, toolboxId, tag, tagGroup);
+		}
+	}
+	@Transactional(readOnly=true)
+	public List<TagDto> getSiblings(String tagString) {
+		Tag tag = repository.findByMacaddress(tagString);
+		if (tag==null) {
+			logger.error("Invalid tag : "+tagString);
+			return null;
+		}
+		return repository.findByTagGroup(tag.getTagGroup()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
+
+	}
+	@Transactional(readOnly=true)
+	public String getTagGroup(String tagString) {
+		Tag tag = repository.findByMacaddress(tagString);
+		if (tag==null) {
+			logger.error("Invalid tag : "+tagString);
+			return null;
+		}
+		return tag.getTagGroup();
+	}
+	
 }

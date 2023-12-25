@@ -7,5 +7,6 @@ data class TagDto(
     val macaddress: String,
     val toolboxDto: ToolboxDto,
     val toolDto: ToolDto,
-    val rentalToolDto: RentalToolDto
+    val rentalToolDto: RentalToolDto,
+    val tagGroup: String
 )

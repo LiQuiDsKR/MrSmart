@@ -79,10 +79,23 @@ public class OutstandingRentalSheetService {
 				.findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState.REQUEST, toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
+	/**
+	 * @deprecated 앱에서만 쓰는데 date쿼리 필요없어져서 변경. & readyㅋㅋ
+	 */
 	@Transactional(readOnly = true)
 	public List<OutstandingRentalSheetDto> getListByToolboxId(Long toolboxId, LocalDate startDate, LocalDate endDate) {
 		List<OutstandingRentalSheet> list = repository
 				.findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(OutstandingState.REQUEST, toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
+		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+		for (OutstandingRentalSheet item : list) {
+			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+		}
+		return dtoList;
+	}
+	@Transactional(readOnly = true)
+	public List<OutstandingRentalSheetDto> getListByToolboxId(Long toolboxId) {
+		List<OutstandingRentalSheet> list = repository
+			.findByOutstandingStatusAndRentalSheetToolboxId(OutstandingState.REQUEST, toolboxId);
 		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
 		for (OutstandingRentalSheet item : list) {
 			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
@@ -95,6 +108,9 @@ public class OutstandingRentalSheetService {
 				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
+	/**
+	 * @deprecated 앱에서만 쓰는데 date쿼리 필요없어져서 변경. & readyㅋㅋ
+	 */
 	@Transactional(readOnly = true)
 	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate) {
 		List<OutstandingRentalSheet> list = repository
@@ -105,6 +121,18 @@ public class OutstandingRentalSheetService {
 		}
 		return dtoList;
 	}
+	@Transactional(readOnly = true)
+	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId) {
+		List<OutstandingRentalSheet> list = repository
+				.findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState.READY,membershipId);
+		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+		for (OutstandingRentalSheet item : list) {
+			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+		}
+		return dtoList;
+	}
+	
+	
 	@Transactional
 	public OutstandingRentalSheet addNew(RentalSheet sheet, List<RentalTool> toolList) {
 		int totalCount = 0;

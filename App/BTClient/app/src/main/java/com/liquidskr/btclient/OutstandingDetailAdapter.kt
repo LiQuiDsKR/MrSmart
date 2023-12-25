@@ -11,11 +11,11 @@ import com.mrsmart.standard.rental.RentalToolDto
 
 class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
-    val selectedToolsToReturn: MutableList<RentalToolDto> = mutableListOf()
+    val selectedToolsToReturn: MutableList<Long> = mutableListOf()
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var toolName: TextView = itemView.findViewById(R.id.ReturnToolName)
-        var toolCount: TextView = itemView.findViewById(R.id.ReturnToolCount)
-        var toolSpec: TextView = itemView.findViewById(R.id.ReturnToolSpec)
+        var toolName: TextView = itemView.findViewById(R.id.ToolName)
+        var toolCount: TextView = itemView.findViewById(R.id.ToolCount)
+        var toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OutstandingRentalToolViewHolder {
@@ -33,11 +33,11 @@ class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) 
         }
         holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
         holder.itemView.setOnClickListener{// 항목 자체를 눌렀을 때
-            if (!(currentOutstandingRentalTool in selectedToolsToReturn)) {
-                selectedToolsToReturn.add(currentOutstandingRentalTool)
+            if (!(currentOutstandingRentalTool.id in selectedToolsToReturn)) {
+                selectedToolsToReturn.add(currentOutstandingRentalTool.id)
                 holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
             } else {
-                selectedToolsToReturn.remove(currentOutstandingRentalTool)
+                selectedToolsToReturn.remove(currentOutstandingRentalTool.id)
                 holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
             }
         }
@@ -51,7 +51,7 @@ class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) 
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
-        input.minValue = 0
+        input.minValue = 1
         input.maxValue = maxCount // 최댓값은 공구수
         input.wrapSelectorWheel = false
         input.value = textView.text.toString().toInt()

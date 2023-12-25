@@ -16,80 +16,56 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/background"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="match_parent"
-                android:layout_height="76dp"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/manager_topview" />
-
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="309dp"
                 android:gravity="center|center_horizontal"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/imageView6"
-                    android:layout_width="78dp"
-                    android:layout_height="81dp"
-                    app:srcCompat="@drawable/app_logo" />
+                    android:layout_width="108dp"
+                    android:layout_height="153dp"
+                    app:srcCompat="@drawable/img_intro_manager" />
 
-                <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="213dp"
-                    android:layout_height="115dp"
-                    android:translationY="10dp"
-                    app:srcCompat="@drawable/manager_login_title" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="280dp"
+                android:layout_width="wrap_content"
                 android:layout_height="363dp"
                 android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="80dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="bottom|left"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_id" />
-
                 <EditText
                     android:id="@+id/IDtextField"
-                    android:layout_width="match_parent"
-                    android:layout_height="55dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/manager_id_field"
+                    android:layout_width="280dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/edittext_rounded_bg"
                     android:ems="10"
+                    android:hint="아이디 입력"
                     android:inputType="text"
                     android:paddingLeft="15dp"
-                    android:textColor="#5547AE" />
-
-                <ImageView
-                    android:id="@+id/imageView4"
-                    android:layout_width="91dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="25dp"
-                    android:layout_weight="1"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/manager_pw" />
+                    android:textColor="#32345E"
+                    android:textColorLink="#000000"
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/PWtextField"
-                    android:layout_width="match_parent"
-                    android:layout_height="55dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/manager_id_field"
+                    android:layout_width="280dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/edittext_rounded_bg"
                     android:ems="10"
+                    android:hint="비밀번호 입력"
                     android:inputType="textPassword"
                     android:paddingLeft="15dp"
-                    android:textColor="#5547AE" />
+                    android:textColor="#32345E"
+                    android:textColorLink="#000000"
+                    android:textSize="16sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -100,13 +76,12 @@
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
 
-                    <ImageButton
+                    <Button
                         android:id="@+id/LoginBtn"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:background="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/manager_login_btn" />
+                        android:layout_width="122dp"
+                        android:background="@drawable/btn_rounded_bg"
+                        android:layout_height="wrap_content"
+                        android:text="로그인" />
                 </LinearLayout>
 
             </LinearLayout>

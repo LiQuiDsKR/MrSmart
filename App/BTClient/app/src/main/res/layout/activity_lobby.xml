@@ -9,14 +9,8 @@
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_centerInParent="true" />
+        android:layout_height="match_parent"
+        android:background="@drawable/background">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,17 +27,7 @@
                 android:scaleType="fitCenter"
                 android:scaleX="1.5"
                 android:scaleY="1.5"
-                app:srcCompat="@drawable/lobby_db_sync" />
-
-            <ImageButton
-                android:id="@+id/testSendBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:backgroundTint="#00FFFFFF"
-                android:scaleType="fitCenter"
-                android:scaleX="1.5"
-                android:scaleY="1.5"
-                app:srcCompat="@drawable/lobby_db_sync" />
+                app:srcCompat="@drawable/ic_refresh" />
 
             <ImageButton
                 android:id="@+id/DBSyncBtn"
@@ -53,7 +37,7 @@
                 android:scaleType="fitCenter"
                 android:scaleX="1.5"
                 android:scaleY="1.5"
-                app:srcCompat="@drawable/lobby_db_sync" />
+                app:srcCompat="@drawable/ic_refresh" />
 
             <ImageButton
                 android:id="@+id/SettingBtn"
@@ -63,7 +47,7 @@
                 android:scaleType="fitCenter"
                 android:scaleX="1.5"
                 android:scaleY="1.5"
-                app:srcCompat="@drawable/lobby_settings" />
+                app:srcCompat="@drawable/ic_set" />
 
         </LinearLayout>
 
@@ -77,58 +61,60 @@
 
             <ImageView
                 android:id="@+id/appLogo"
-                android:layout_width="255dp"
-                android:layout_height="100dp"
+                android:layout_width="200dp"
+                android:layout_height="182dp"
                 android:layout_marginStart="147dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="147dp"
                 android:translationY="100dp"
-                app:srcCompat="@drawable/lobby_title" />
+                app:srcCompat="@drawable/intro_logo" />
 
 
         </LinearLayout>
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
             android:layout_gravity="bottom">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="311dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="bottom"
-                android:orientation="horizontal">
+                android:gravity="bottom|center"
+                android:orientation="vertical">
 
                 <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
                     android:layout_weight="1">
 
                     <ImageButton
                         android:id="@+id/workerBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
-                        android:scaleType="fitXY"
-                        app:srcCompat="@drawable/lobby_worker_login" />
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/but_intro_worker" />
 
                 </FrameLayout>
 
                 <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
                     android:layout_weight="1">
 
                     <ImageButton
                         android:id="@+id/managerBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
-                        android:scaleType="fitXY"
-                        app:srcCompat="@drawable/lobby_manager_login" />
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/but_intro_manager" />
                 </FrameLayout>
 
             </LinearLayout>

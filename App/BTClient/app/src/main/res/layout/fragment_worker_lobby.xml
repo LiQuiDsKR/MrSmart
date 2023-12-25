@@ -19,17 +19,39 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:background="#4C96F1"
+                android:layout_height="55dp"
+                android:background="#FF7859"
                 android:gravity="left"
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/imageView11"
+                    android:id="@+id/imageView7"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_weight="0"
+                    android:background="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/worker" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/WelcomeMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/worker_lobby_topview" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0"
+                    android:fontFamily="@font/noto_sans"
+                    android:paddingRight="20dp"
+                    android:text="님 환영합니다."
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -49,27 +71,29 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="#0ADB86"
+                android:layout_height="50dp"
+                android:background="#FEFEFE"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/ConnectBtn"
+                    android:id="@+id/connectBtn"
                     android:layout_width="120dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_weight="0"
                     android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/worker_lobby_connectionbtn" />
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/manager_lobby_connectionbtn" />
 
                 <ImageButton
                     android:id="@+id/LobbyRentalBtn"
                     android:layout_width="120dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_weight="0"
                     android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/worker_lobby_rental" />
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/group_8" />
+
             </LinearLayout>
 
         </LinearLayout>

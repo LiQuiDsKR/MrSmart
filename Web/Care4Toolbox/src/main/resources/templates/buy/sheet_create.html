@@ -506,17 +506,14 @@
 		//대여 신청 수량을 +1.
 		// : 왼쪽 div의 "+" 버튼을 눌렀을 때 실행.
 		function increaseCount(index) {
-			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
-				.then(stockData => {
-						if (index >= list.length) {
-							return "없다 그런거";
-						}
-						list[index].count++;
-						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-						count.textContent = parseInt(count.textContent) + 1;
+			if (index >= list.length) {
+				return "없다 그런거";
+			}
+			list[index].count++;
+			const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+			count.textContent = parseInt(count.textContent) + 1;
 
-						stack.push({key: "i", param: index});
-				})
+			stack.push({key: "i", param: index});
 		}
 		//대여 신청 수량을 -1.
 		// : 왼쪽 div의 "-" 버튼을 눌렀을 때 실행.

@@ -2,7 +2,6 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -11,9 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -32,16 +31,16 @@ import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
 import java.lang.reflect.Type
-import java.util.Locale
 
 class WorkerRentalFragment() : Fragment() {
     lateinit var leaderSearchBtn: ImageButton
     lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: ImageButton
-    lateinit var addToolBtn: ImageButton
+    lateinit var qrcodeBtn: LinearLayout
+    lateinit var addToolBtn: LinearLayout
     lateinit var selectAllBtn: ImageButton
-    lateinit var confirmBtn: ImageButton
+    lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: ImageButton
+
 
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
@@ -68,13 +67,13 @@ class WorkerRentalFragment() : Fragment() {
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
-        confirmBtn = view.findViewById(R.id.worker_rental_confirmBtn)
+        confirmBtn = view.findViewById(R.id.confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
 
-        workerName = view.findViewById(R.id.BorrowerName)
-        leaderName = view.findViewById(R.id.LeaderName)
+        workerName = view.findViewById(R.id.workerName)
+        leaderName = view.findViewById(R.id.leaderName)
 
-        recyclerView = view.findViewById(R.id.ManagerLobby_RecyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         worker = sharedViewModel.loginWorker
@@ -86,11 +85,10 @@ class WorkerRentalFragment() : Fragment() {
         Log.d("asdf", sharedViewModel.worker.toString())
 
         leaderSearchBtn.setOnClickListener {
-            val bundle = Bundle()
             val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
         qrcodeBtn.setOnClickListener {
@@ -99,16 +97,18 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
-            val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-            // I want to make my keyboard must be type in English, not a Korean.
-            qrEditText.textLocale = Locale.ENGLISH
-
+            Log.d("tst","textEditted")
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val toolId = fixCode(qrEditText.text.toString().replace("\n", ""))
+                val tbt = fixCode(qrEditText.text.toString().replace("\n", ""))
+
+                Log.d("tst",tbt)
                 try {
-                    sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByCode(toolId))
+                    if (!(dbHelper.getToolByTBT(tbt).id in sharedViewModel.rentalRequestToolIdList)) {
+                        sharedViewModel.rentalRequestToolIdList.add(dbHelper.getToolByTBT(tbt).id)
+                    }
                     recyclerViewUpdate()
+
+                    Log.d("tst","tooladded")
                 } catch (e: UninitializedPropertyAccessException) {
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -153,18 +153,18 @@ class WorkerRentalFragment() : Fragment() {
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
-                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     Log.d("test", rentalRequestSheet)
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolIdList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
                                 }
 
                                 override fun onError(e: Exception) {
                                     e.printStackTrace()
                                 }
                             })
-                            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                            Thread.sleep(1000)
-                            requireActivity().supportFragmentManager.popBackStack()
+
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }
@@ -176,8 +176,12 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+            sharedViewModel.rentalRequestToolIdList.clear()
+            var toolList: List<ToolDtoSQLite> = listOf()
+            for (id in sharedViewModel.rentalRequestToolIdList) {
+                toolList = toolList.plus(dbHelper.getToolById(id))
+            }
+            val adapter = RentalToolAdapter(toolList)
             recyclerView.adapter = adapter
         }
         recyclerViewUpdate()
@@ -201,7 +205,12 @@ class WorkerRentalFragment() : Fragment() {
         return correctedText.toString()
     }
     fun recyclerViewUpdate() {
-        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+        var dbHelper = DatabaseHelper(requireContext())
+        var toolList: List<ToolDtoSQLite> = listOf()
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            toolList = toolList.plus(dbHelper.getToolById(id))
+        }
+        val adapter = RentalToolAdapter(toolList)
         recyclerView.adapter = adapter
     }
     companion object {

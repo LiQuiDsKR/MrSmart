@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.membership.MembershipSQLite
 
-class MembershipAdapter(private val memberships: List<MembershipSQLite>, private val onItemClick: (MembershipSQLite) -> Unit) :
+class MembershipAdapter(var memberships: List<MembershipSQLite>, private val onItemClick: (MembershipSQLite) -> Unit) :
     RecyclerView.Adapter<MembershipAdapter.MembershipViewHolder>() {
 
     class MembershipViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,6 +34,8 @@ class MembershipAdapter(private val memberships: List<MembershipSQLite>, private
     override fun getItemCount(): Int {
         return memberships.size
     }
-
-
+    fun updateList(newList: List<MembershipSQLite>) {
+        memberships = newList
+        notifyDataSetChanged()
+    }
 }

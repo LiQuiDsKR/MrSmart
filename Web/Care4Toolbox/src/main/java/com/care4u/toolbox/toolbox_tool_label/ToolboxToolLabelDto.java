@@ -28,11 +28,12 @@ public class ToolboxToolLabelDto {
 	private String qrcode;
 	
 	@Builder
-	public ToolboxToolLabelDto(long id, ToolboxDto toolboxDto, String location, ToolDto toolDto) {
+	public ToolboxToolLabelDto(long id, ToolboxDto toolboxDto, String location, ToolDto toolDto, String qrcode) {
 		this.id = id;
 		this.toolboxDto = toolboxDto;
 		this.location = location;
 		this.toolDto = toolDto;
+		this.qrcode = qrcode;
 	}
 	
 	public ToolboxToolLabelDto(ToolboxToolLabel toolboxTool) {
@@ -40,6 +41,7 @@ public class ToolboxToolLabelDto {
 		this.toolboxDto = new ToolboxDto(toolboxTool.getToolbox());
 		this.location = toolboxTool.getLocation();
 		this.toolDto = new ToolDto(toolboxTool.getTool());
+		this.qrcode = toolboxTool.getQrcode();
 	}
 	
 }

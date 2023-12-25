@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
@@ -29,9 +31,9 @@ import java.lang.reflect.Type
 class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var workerSearchBtn: ImageButton
     private lateinit var leaderSearchBtn: ImageButton
-    private lateinit var addToolBtn: ImageButton
+    private lateinit var addToolBtn: LinearLayout
     private lateinit var selectAllBtn: ImageButton
-    private lateinit var confirmBtn: ImageButton
+    private lateinit var confirmBtn: LinearLayout
     private lateinit var clearBtn: ImageButton
 
     private lateinit var workerName: TextView
@@ -59,10 +61,10 @@ class ManagerSelfRentalFragment() : Fragment() {
         clearBtn = view.findViewById(R.id.ClearBtn)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
-        workerName = view.findViewById(R.id.BorrowerName)
-        leaderName = view.findViewById(R.id.LeaderName)
+        workerName = view.findViewById(R.id.workerName)
+        leaderName = view.findViewById(R.id.leaderName)
 
-        recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         worker = sharedViewModel.worker
@@ -70,14 +72,11 @@ class ManagerSelfRentalFragment() : Fragment() {
         leader = sharedViewModel.leader
         leaderName.text = sharedViewModel.leader.name
 
-        Log.d("asdf", worker.toString())
-        Log.d("asdf", sharedViewModel.worker.toString())
-
         workerSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(1) // type = 1
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
 
@@ -85,7 +84,7 @@ class ManagerSelfRentalFragment() : Fragment() {
             val fragment = MembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
-                //.addToBackStack(null)
+                .addToBackStack(null)
                 .commit()
         }
         addToolBtn.setOnClickListener {
@@ -117,16 +116,17 @@ class ManagerSelfRentalFragment() : Fragment() {
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
-                                    Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                    Log.d("asdf","대여 신청 완료")
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolIdList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
                                 }
                                 override fun onError(e: Exception) {
                                     e.printStackTrace()
                                 }
                             })
-                            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                            Thread.sleep(1000)
-                            requireActivity().supportFragmentManager.popBackStack()
+
                         } else {
                             Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }
@@ -138,20 +138,24 @@ class ManagerSelfRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+            sharedViewModel.rentalRequestToolIdList.clear()
+            var dbHelper = DatabaseHelper(requireContext())
+            var toolList: List<ToolDtoSQLite> = listOf()
+            for (id in sharedViewModel.rentalRequestToolIdList) {
+                toolList = toolList.plus(dbHelper.getToolById(id))
+            }
+            val adapter = RentalToolAdapter(toolList)
             recyclerView.adapter = adapter
         }
 
-        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+        var dbHelper = DatabaseHelper(requireContext())
+        var toolList: List<ToolDtoSQLite> = listOf()
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            toolList = toolList.plus(dbHelper.getToolById(id))
+        }
+        val adapter = RentalToolAdapter(toolList)
         recyclerView.adapter = adapter
 
         return view
-    }
-    companion object {
-        fun newInstance(): ManagerSelfRentalFragment {
-            val fragment = ManagerSelfRentalFragment()
-            return fragment
-        }
     }
 }

@@ -117,6 +117,13 @@ public class ToolboxToolLabelService {
 		
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
 	}
+	/**
+	 * @deprecated 어짜피 register에서만 쓰니까 오버로드된 다른 버전 쓰세요.
+	 * @param toolId
+	 * @param toolboxId
+	 * @param qrcode
+	 * @return
+	 */
 	@Transactional
 	public ToolboxToolLabelDto update(long toolId, long toolboxId, String qrcode) {
 
@@ -141,18 +148,32 @@ public class ToolboxToolLabelService {
 		
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
 	}
+	@Transactional
+	public ToolboxToolLabelDto update(ToolboxToolLabel label, String qrcode) {
+		label.update(label.getToolbox(), label.getLocation(), label.getTool(), qrcode);
+		return new ToolboxToolLabelDto(repository.save(label));
+	}
 	
 	@Transactional
 	public ToolboxToolLabelDto register(long toolId, long toolboxId, String qrcode) {
+		ToolboxToolLabel tempObject = repository.findByQrcode(qrcode);
 		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
-		return update(toolId,toolboxId,qrcode);
+		if(toolboxToolLabel!=null) {
+			if (toolboxToolLabel.equals(tempObject)||tempObject==null) {
+				return update(toolboxToolLabel,qrcode);	
+			}else {
+				logger.error(qrcode +" already exists!");
+				throw new IllegalArgumentException(qrcode +" already exists!");
+			}
+		}
+		if (tempObject == null) {
+			return addNew(toolId,toolboxId,qrcode); 
+		}else {
+			logger.error(qrcode +" already exists!");
+			throw new IllegalArgumentException(qrcode +" already exists!");
+		}
 	}
 	
-	
-	/**
-	 * buy시 생성하셔야 합니다 + 일단 기준정보 페이지에 없는 내용이라 Dto로 안하긴 했는데
-	 * @return
-	 */
 	@Transactional
 	public ToolboxToolLabelDto addNew(long toolId, long toolboxId, String qrcode) {		
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);

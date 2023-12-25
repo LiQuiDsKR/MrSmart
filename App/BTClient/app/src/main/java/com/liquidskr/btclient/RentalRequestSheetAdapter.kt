@@ -9,7 +9,7 @@ import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 
 
-class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
+class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
 
     class RentalRequestSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -44,6 +44,10 @@ class RentalRequestSheetAdapter(private val rentalRequestSheets: List<RentalRequ
 
     override fun getItemCount(): Int {
         return rentalRequestSheets.size
+    }
+    fun updateList(newList: List<RentalRequestSheetDto>) {
+        rentalRequestSheets = newList
+        notifyDataSetChanged()
     }
 
 

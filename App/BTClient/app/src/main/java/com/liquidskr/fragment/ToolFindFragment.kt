@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,7 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 
 class ToolFindFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var confirmBtn: ImageButton
+    private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
 
     private lateinit var editTextName: EditText
@@ -42,7 +43,7 @@ class ToolFindFragment() : Fragment() {
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        confirmBtn = view.findViewById(R.id.ConfirmBtn)
+        confirmBtn = view.findViewById(R.id.confirmBtn)
 
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
@@ -50,11 +51,11 @@ class ToolFindFragment() : Fragment() {
 
         }
         confirmBtn.setOnClickListener {
-            val toolList: MutableList<ToolDtoSQLite> = mutableListOf()
+            val toolIdList: MutableList<Long> = mutableListOf()
             for (tool: ToolDtoSQLite in adapter.getSelectedTools()) {
-                toolList.add(tool) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
+                toolIdList.add(tool.id) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
             }
-            sharedViewModel.rentalRequestToolList.addAll(toolList)
+            sharedViewModel.rentalRequestToolIdList.addAll(toolIdList)
 
             requireActivity().supportFragmentManager.popBackStack()
         }
