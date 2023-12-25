@@ -164,7 +164,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
                     for (toolId in adapter.selectedToolsToReturn) {
                         for (tool in outstandingSheet.rentalSheetDto.toolList) {
                             if (tool.id == toolId) {
-                                for (i in adapter.outstandingRentalTools.indices) {
+                                for (i in adapter.selectedToolsToReturn.indices) {
                                     if (tool.id == adapter.selectedToolsToReturn[i]) {
                                         val holder = recyclerView.findViewHolderForAdapterPosition(adapter.outstandingRentalTools.indexOf(tool)) as? OutstandingDetailAdapter.OutstandingRentalToolViewHolder
                                         val count = holder?.toolCount?.text.toString().toInt()

@@ -1,7 +1,10 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
+import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -11,6 +14,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,6 +39,8 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
 
+    private lateinit var context: Context
+
     lateinit var qrCheckBtn: LinearLayout
     lateinit var qrAddBtn: LinearLayout
     lateinit var qrSearchText: EditText
@@ -52,6 +58,9 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_tag_detail, container, false)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        context = requireContext()
+        val handler = Handler(Looper.getMainLooper())
+
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 
@@ -96,10 +105,9 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             bluetoothManager.requestData(RequestType.TAG_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    /*
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
-                    }*/
+                    handler.post {
+                        Toast.makeText(context, "태그 등록 완료", Toast.LENGTH_SHORT).show()
+                    }
                     for (tag: String in adapter.qrcodes) {
                         bluetoothManager.requestData(RequestType.TAG_GROUP,"{\"tag\":\"${tag}\"}",object:BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
@@ -108,9 +116,7 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
                             }
 
                             override fun onError(e: Exception) {
-                                /*requireActivity().runOnUiThread {
-                                    Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
-                                }*/
+
                                 e.printStackTrace()
                             }
                         })
@@ -118,6 +124,9 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
                 }
 
                 override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(context, "태그 등록 실패", Toast.LENGTH_SHORT).show()
+                    }
                     e.printStackTrace()
                 }
             })

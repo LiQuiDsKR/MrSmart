@@ -153,6 +153,9 @@ class WorkerRentalFragment() : Fragment() {
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
+                                    requireActivity().runOnUiThread {
+                                        Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                                    }
                                     Log.d("test", rentalRequestSheet)
                                     sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                                     sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )

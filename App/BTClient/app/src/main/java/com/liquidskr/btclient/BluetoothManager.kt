@@ -35,6 +35,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
+    var pcName: String = "LQD"
+
+    var currentBytes = 0
+    var totalBytes = 0
+    
+
     var isSending: Boolean = false
     private val messageQueue: Queue<BluetoothMessage> = LinkedList()
 
@@ -51,7 +57,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             val pairedDevices = bluetoothAdapter.bondedDevices
             if (pairedDevices.size > 0) {
                 for (device in pairedDevices) {
-                    if (device.name == "DESKTOP-0E0EKMO" || device.name=="LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
+                    if (device.name == pcName) { // 연결하려는 디바이스의 이름을 지정하세요.
                         bluetoothDevice = device
                         break
                     }
@@ -104,6 +110,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
 
         val timeoutRunnable = Runnable {
+            Log.d("bluetoothTimeOut", "TIMEOUT")
             if (!timeout) {
                 timeout = true
                 dataSend("TIMEOUT")
@@ -130,6 +137,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
                 inputStream.read(lengthBuffer,0,4)
                 val dataSize = ByteBuffer.wrap(lengthBuffer).int
+                totalBytes = dataSize // progressBar
 
                 val dataBuffer = ByteArray(1024) //한 번에 받을 byteArray단위
                 val byteStream = ByteArrayOutputStream() //최종 byteStream
@@ -142,6 +150,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     }
                     byteStream.write(dataBuffer, 0, result) // 이 부분 추가
                     bytesRead += result
+
+                    currentBytes = bytesRead // progressBar
                 }
                 timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
 

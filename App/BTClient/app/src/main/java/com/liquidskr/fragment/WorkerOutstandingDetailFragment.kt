@@ -62,7 +62,9 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
-                            Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(requireContext(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         override fun onError(e: Exception) {
                             e.printStackTrace()

@@ -1,7 +1,10 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
+import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
@@ -27,6 +31,8 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
+
+    private lateinit var context: Context
 
     lateinit var scanBtn: LinearLayout
     lateinit var qrTextEdit: EditText
@@ -48,6 +54,8 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_detail, container, false)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        val handler = Handler(Looper.getMainLooper())
+        context = requireContext()
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 
@@ -109,9 +117,9 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         if (result == "null") {
-                            /*requireActivity().runOnUiThread {
-                                Toast.makeText(requireContext(), "해당 QR은 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
-                            }*/
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(context, "해당 태그는 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             val tagList: List<String> = gson.fromJson(result, type)
                             val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
@@ -150,12 +158,15 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    /*requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "공구 등록 완료", Toast.LENGTH_SHORT).show()
-                    }*/
+                    handler.post {
+                        Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(context, "공기구 등록 실패", Toast.LENGTH_SHORT).show()
+                    }
                     e.printStackTrace()
                 }
             })
