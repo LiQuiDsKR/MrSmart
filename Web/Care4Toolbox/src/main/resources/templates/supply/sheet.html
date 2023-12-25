@@ -348,6 +348,7 @@
 							<table class="tool-list invoice-list-table text-nowrap bg-white">
 								<thead>
 									<tr>
+										<th hidden>id</th>
 										<th>정비실명</th>
 										<th>이름</th>
 										<th>규격</th>
@@ -362,6 +363,7 @@
 						htmlString +=
 							`
 									<tr>
+										<td class="supplyToolId" hidden>${tool.id}</td>
 										<td class="toolbox">${element.toolboxDto.name}</td>
 										<td class="name">${tool.toolDto.name}</td>
 										<td class="spec">${tool.toolDto.spec}</td>

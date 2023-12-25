@@ -63,11 +63,15 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	    }
 	    
 	    private BooleanExpression searchMembershipEquals(Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover) {
-	    	BooleanExpression worker = isWorker? searchWorkerEquals(membership) : Expressions.asBoolean(true).isTrue();
-	    	BooleanExpression leader = isLeader? searchLeaderEquals(membership) : Expressions.asBoolean(true).isTrue();
-	    	BooleanExpression approver = isApprover? searchApproverEquals(membership) : Expressions.asBoolean(true).isTrue();
-	    	
-	    	return membership == null? null :worker.or(leader).or(approver);
+	    	if (membership == null) {
+	    		return Expressions.asBoolean(true).isTrue();
+	    	}else {
+		    	BooleanExpression worker = isWorker? searchWorkerEquals(membership) : Expressions.asBoolean(true).isTrue();
+		    	BooleanExpression leader = isLeader? searchLeaderEquals(membership) : Expressions.asBoolean(true).isTrue();
+		    	BooleanExpression approver = isApprover? searchApproverEquals(membership) : Expressions.asBoolean(true).isTrue();
+		    	
+		    	return worker.or(leader).or(approver);
+	    	}
 	    }
 	    
 	    //supplyTool join하고 사용합시다.
@@ -88,9 +92,9 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
                 .join(sTool.supplySheet,sSheet)
                 .where(
                 		sSheet.eventTimestamp.between(startDate, endDate)
-                		.and(searchMembershipEquals(membership,isWorker,isLeader,isApprover)
-                		.or(searchPartEquals(partId))
-                		.or(searchToolEquals(tool)))
+                		.and(searchMembershipEquals(membership,isWorker,isLeader,isApprover))
+                		.and(searchPartEquals(partId))
+                		.and(searchToolEquals(tool))
                 )
                 .orderBy(sTool.replacementDate.asc(),sSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())

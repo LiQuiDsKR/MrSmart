@@ -20,7 +20,7 @@
 				<div class="card mb-20">
 					<div class="d-flex flex-row align-items-center">
 						
-						<h2 class="ml-4">분석 현황 </h2>
+						<h2 class="ml-4">분석</h2>
 						<div class="m-4" style="width:500px;">
 							<div class="custom-select style--two large">
 								<select class="theme-input-style" id="toolboxSelect">
@@ -89,7 +89,7 @@
 							<!-- Product List Item -->
 							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
 								<div class="process-bar-wrapper">
-									<span class="process-name font-16">반납중</span>
+									<span class="process-name font-16">현 재고</span>
 									<span id="return-count" class="process-width font-16">1023</span>
 									<span id="return-bar" class="process-bar style--four" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
 								</div>
@@ -122,7 +122,7 @@
 					<div class="card-body">
 						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
 							<div class="">
-								<h3 class="mb-1">공기구 상태 현황</h3>
+								<h3 class="mb-1">재고 증감 현황</h3>
 								<p class="font-16 date-today">
 									2023-12-10
 								</p>
@@ -132,9 +132,9 @@
 							<!-- Product List Item -->
 							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
 								<div class="process-bar-wrapper">
-									<span class="process-name font-20">양호 수량</span>
-									<span id="good-count" class="process-width font-20">1023</span>
-									<span id="good-count-bar" class="process-bar style--two" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+									<span class="process-name font-20">매입 수량</span>
+									<span id="buy-count" class="process-width font-20">1023</span>
+									<span id="buy-count-bar" class="process-bar style--two" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
 								</div>
 							</div>
 							<!-- End Product List Item -->
@@ -142,19 +142,9 @@
 							<!-- Product List Item -->
 							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
 								<div class="process-bar-wrapper">
-									<span class="process-name font-20">고장 수량</span>
-									<span id="fault-count" class="process-width font-20">1023</span>
-									<span id="fault-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
-								</div>
-							</div>
-							<!-- End Product List Item -->
-
-							<!-- Product List Item -->
-							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
-								<div class="process-bar-wrapper">
-									<span class="process-name font-20">파손 수량</span>
-									<span id="damage-count" class="process-width font-20">1023</span>
-									<span id="damage-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+									<span class="process-name font-20">지급 수량</span>
+									<span id="supply-count" class="process-width font-20">1023</span>
+									<span id="supply-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
 								</div>
 							</div>
 							<!-- End Product List Item -->
@@ -409,10 +399,6 @@
 			element: 'multiple-color-donut-chart',
 			data: [
 				{
-					value: 35,
-					label: '대여',
-				},
-				{
 					value: 25,
 					label: '양호',
 				},
@@ -424,19 +410,11 @@
 					value: 15,
 					label: '파손',
 				},
-				{
-					value: 10,
-					label: '망실',
-				},
-				{
-					value: 10,
-					label: '폐기',
-				},
 			],
 			backgroundColor: '#fff',
 			labelColor: '#060',
 			colors: [
-				'#8280FD',
+				//'#8280FD',
 				'#67CF94',
 				'#09D1DE',
 				'#FFB959',
@@ -458,12 +436,12 @@
 			}
 		).then(data=>{
 			var newData = [
-		        { label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
+		        //{ label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
 		        { label: '양호', value: Math.floor(data.goodCount/ data.totalCount * 100)},
 		        { label: '고장', value: Math.floor(data.faultCount/ data.totalCount * 100)},
 		        { label: '파손', value: Math.floor(data.damageCount/ data.totalCount * 100)},
-		        { label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
-		        { label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
+		        //{ label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
+		        //{ label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
 		    ];
 		    this.setData(newData);
 	    });	
@@ -492,7 +470,7 @@
 			processControl();
 		})
 	}
-	//공기구 상태 현황
+	//재고 증감현황
 	function loadChart3(toolboxId){
 		abcHttp.get(
 			"/stock_status/get/analytics",
@@ -502,15 +480,13 @@
 			}
 		)
 		.then(data=>{
-			document.getElementById("good-count").textContent=data.goodCount;
-			document.getElementById("fault-count").textContent=data.faultCount;
-			document.getElementById("damage-count").textContent=data.damageCount;
+			document.getElementById("buy-count").textContent=data.buyCount;
+			document.getElementById("supply-count").textContent=data.supplyCount;
 			document.getElementById("loss-count").textContent=data.lossCount;
 			document.getElementById("discard-count").textContent=data.discardCount;
 
-			$("#good-count-bar").data('process-width', Math.floor(data.goodCount / data.totalCount * 100));
-			$("#fault-count-bar").data('process-width', Math.floor(data.faultCount / data.totalCount * 100));
-			$("#damage-count-bar").data('process-width', Math.floor(data.damageCount / data.totalCount * 100));
+			$("#buy-count-bar").data('process-width', Math.floor(data.buyCount / data.totalCount * 100));
+			$("#supply-count-bar").data('process-width', Math.floor(data.supplyCount / data.totalCount * 100));
 			$("#loss-count-bar").data('process-width', Math.floor(data.lossCount / data.totalCount * 100));
 			$("#discard-count-bar").data('process-width', Math.floor(data.discardCount / data.totalCount * 100));
 			processControl();
@@ -570,6 +546,7 @@
 		const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
 		$('#start-date').val(formattedLastMonthDate);
 		$('#end-date').val(formattedTodayDate);
+		$('#today-date').val(formattedTodayDate);
 
 		$('#start-date').on('change', function () {
 			loadChart1.apply(chart1,[toolboxId]);
@@ -578,7 +555,11 @@
 		$('#end-date').on('change', function () {
 			loadChart1.apply(chart1,[toolboxId]);
 			console.log('end changed');
-		})
+		});
+		$('#today-date').on('change', function () {
+			
+			console.log('today changed');
+		});
 
 		$('#start-date').datepicker({
 			language: 'en',
@@ -600,6 +581,17 @@
 			}
 		});
 		$('#end-date-btn').on('click', function () {
+			$('#end-date').datepicker('show');
+		});
+		$('#today-date').datepicker({
+			language: 'en',
+			dateFormat: 'yyyy-mm-dd',
+			onSelect: function () {
+				loadChart1.apply(chart1,[toolboxId]);
+				console.log('end changed');
+			}
+		});
+		$('#today-date-btn').on('click', function () {
 			$('#end-date').datepicker('show');
 		});
 	}
