@@ -154,7 +154,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                     for (toolId in adapter.selectedToolsToRental) {
                         for (tool in rentalRequestSheet.toolList) {
                             if (tool.id == toolId) {
-                                for (i in adapter.rentalRequestTools.indices) {
+                                for (i in adapter.selectedToolsToRental.indices) {
                                     if (tool.id == adapter.selectedToolsToRental[i]) {
                                         val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RentalRequestToolAdapter.RentalRequestToolViewHolder
                                         val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0

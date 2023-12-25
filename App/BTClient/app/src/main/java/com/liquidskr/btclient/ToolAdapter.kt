@@ -29,7 +29,7 @@ class ToolAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLit
         holder.toolName.text = currentTool.name
         holder.toolSpec.text = currentTool.spec
         var isChecked: Boolean = false
-        holder.toolCheck.setOnClickListener {
+        holder.itemView.setOnClickListener {
             isChecked = !isChecked
             if (isChecked) {
                 holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_on)
