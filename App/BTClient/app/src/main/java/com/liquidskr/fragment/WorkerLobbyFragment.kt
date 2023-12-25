@@ -62,7 +62,7 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
             // managerRentalFragment가 null이 아니라면 프래그먼트 교체
             sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
             sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
-            sharedViewModel.rentalRequestToolList.clear()
+            sharedViewModel.rentalRequestToolIdList.clear()
             val fragment = WorkerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)

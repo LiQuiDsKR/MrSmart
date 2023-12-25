@@ -68,7 +68,7 @@ class ManagerRentalFragment() : Fragment() {
         selfRentalBtn.setOnClickListener {
             sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
             sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-            sharedViewModel.rentalRequestToolList.clear()
+            sharedViewModel.rentalRequestToolIdList.clear()
             val fragment = ManagerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)

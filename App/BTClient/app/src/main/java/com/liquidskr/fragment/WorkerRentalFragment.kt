@@ -41,6 +41,7 @@ class WorkerRentalFragment() : Fragment() {
     lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: ImageButton
 
+
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
@@ -102,8 +103,8 @@ class WorkerRentalFragment() : Fragment() {
 
                 Log.d("tst",tbt)
                 try {
-                    if (!(dbHelper.getToolByTBT(tbt) in sharedViewModel.rentalRequestToolList)) {
-                        sharedViewModel.rentalRequestToolList.add(dbHelper.getToolByTBT(tbt))
+                    if (!(dbHelper.getToolByTBT(tbt).id in sharedViewModel.rentalRequestToolIdList)) {
+                        sharedViewModel.rentalRequestToolIdList.add(dbHelper.getToolByTBT(tbt).id)
                     }
                     recyclerViewUpdate()
 
@@ -155,7 +156,7 @@ class WorkerRentalFragment() : Fragment() {
                                     Log.d("test", rentalRequestSheet)
                                     sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                                     sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                                    sharedViewModel.rentalRequestToolList.clear()
+                                    sharedViewModel.rentalRequestToolIdList.clear()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
 
@@ -175,8 +176,12 @@ class WorkerRentalFragment() : Fragment() {
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolList.clear()
-            val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+            sharedViewModel.rentalRequestToolIdList.clear()
+            var toolList: List<ToolDtoSQLite> = listOf()
+            for (id in sharedViewModel.rentalRequestToolIdList) {
+                toolList = toolList.plus(dbHelper.getToolById(id))
+            }
+            val adapter = RentalToolAdapter(toolList)
             recyclerView.adapter = adapter
         }
         recyclerViewUpdate()
@@ -200,7 +205,12 @@ class WorkerRentalFragment() : Fragment() {
         return correctedText.toString()
     }
     fun recyclerViewUpdate() {
-        val adapter = RentalToolAdapter(sharedViewModel.rentalRequestToolList)
+        var dbHelper = DatabaseHelper(requireContext())
+        var toolList: List<ToolDtoSQLite> = listOf()
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            toolList = toolList.plus(dbHelper.getToolById(id))
+        }
+        val adapter = RentalToolAdapter(toolList)
         recyclerView.adapter = adapter
     }
     companion object {

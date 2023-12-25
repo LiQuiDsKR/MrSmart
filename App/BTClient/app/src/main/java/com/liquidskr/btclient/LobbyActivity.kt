@@ -26,7 +26,6 @@ class LobbyActivity  : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
     lateinit var managerBtn: ImageButton
     lateinit var dbSyncBtn: ImageButton
-    //lateinit var testSendBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
@@ -52,7 +51,6 @@ class LobbyActivity  : AppCompatActivity() {
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
         dbSyncBtn = findViewById(R.id.DBSyncBtn)
-        //testSendBtn = findViewById(R.id.testSendBtn)
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
         settingBtn = findViewById(R.id.SettingBtn)
 

@@ -11,7 +11,7 @@ import com.mrsmart.standard.rental.RentalRequestToolDto
 
 class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto>) :
     RecyclerView.Adapter<RentalRequestToolAdapter.RentalRequestToolViewHolder>() {
-    val selectedToolsToRental: MutableList<RentalRequestToolDto> = mutableListOf()
+    var selectedToolsToRental: MutableList<Long> = mutableListOf()
     class RentalRequestToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
         var toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
@@ -33,11 +33,11 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
             showNumberDialog(holder.toolCount, currentRentalRequestTool.count)
         }
         holder.itemView.setOnClickListener{// 항목 자체를 눌렀을 때
-            if (!(currentRentalRequestTool in selectedToolsToRental)) {
-                selectedToolsToRental.add(currentRentalRequestTool)
+            if (!(currentRentalRequestTool.id in selectedToolsToRental)) {
+                selectedToolsToRental.add(currentRentalRequestTool.id)
                 holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
             } else {
-                selectedToolsToRental.remove(currentRentalRequestTool)
+                selectedToolsToRental.remove(currentRentalRequestTool.id)
                 holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
             }
         }
@@ -50,7 +50,7 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
-        input.minValue = 0
+        input.minValue = 1
         input.maxValue = maxCount // 최댓값은 공구수
         input.wrapSelectorWheel = false
         input.value = textView.text.toString().toInt()

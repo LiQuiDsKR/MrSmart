@@ -202,7 +202,7 @@
                         android:layout_height="1dp"
                         android:background="#00FFFFFF"
                         android:ems="10"
-                        android:inputType="text"
+                        android:inputType="textMultiLine"
                         android:textColor="#00000000"
                         android:textSize="0sp" />
 

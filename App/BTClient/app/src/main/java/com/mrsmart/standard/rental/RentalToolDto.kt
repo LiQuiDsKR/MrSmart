@@ -8,5 +8,5 @@ data class RentalToolDto(
     val toolDto: ToolDto,
     val count: Int,
     val outstandingCount: Int,
-    val tags: String // macaddress ','로 구분
+    val Tags: String // macaddress ','로 구분
 )

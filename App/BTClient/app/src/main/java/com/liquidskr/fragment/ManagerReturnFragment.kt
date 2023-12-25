@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
@@ -89,6 +90,12 @@ class ManagerReturnFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
                 outStandingRentalSheetList = updatedList
+
+                val dbhelper = DatabaseHelper(requireContext()) // 여기부터 DB에 RentalSheet 저장
+                dbhelper.clearRSTable()
+                for (sheet in outStandingRentalSheetList) {
+                    dbhelper.insertRSData(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.name, sheet.rentalSheetDto.leaderDto.name, sheet.rentalSheetDto.eventTimestamp)
+                }
                 requireActivity().runOnUiThread {
                     (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(updatedList)
                 }
@@ -120,10 +127,12 @@ class ManagerReturnFragment() : Fragment() {
     fun filterByToolName(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
         val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
         for (sheet in sheets) {
-            for (tool in sheet.rentalSheetDto.toolList)
-            if (keyword in tool.toolDto.name) {
-                newList.add(sheet)
+            for (tool in sheet.rentalSheetDto.toolList) {
+                if (keyword in tool.toolDto.name) {
+                    newList.add(sheet)
+                }
             }
+
         }
         adapter.updateList(newList)
     }

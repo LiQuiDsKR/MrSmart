@@ -44,28 +44,33 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var gson = Gson()
     var timeout = false
     fun bluetoothOpen() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        val permissionManager = PermissionManager(activity)
-        permissionManager.checkAndRequestPermission()
-        val pairedDevices = bluetoothAdapter.bondedDevices
-        if (pairedDevices.size > 0) {
-            for (device in pairedDevices) {
-                if (device.name == "DESKTOP-0E0EKMO" || device.name=="LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
-                    bluetoothDevice = device
-                    break
-                }
-            }
-        } else {
-            Toast.makeText(context, "연결된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
-        }
         try {
-            val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
-            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
-            bluetoothSocket.connect()
-        } catch (e: IOException) {
-            e.printStackTrace()
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            val permissionManager = PermissionManager(activity)
+            permissionManager.checkAndRequestPermission()
+            val pairedDevices = bluetoothAdapter.bondedDevices
+            if (pairedDevices.size > 0) {
+                for (device in pairedDevices) {
+                    if (device.name == "DESKTOP-0E0EKMO" || device.name=="LQD") { // 연결하려는 디바이스의 이름을 지정하세요.
+                        bluetoothDevice = device
+                        break
+                    }
+                }
+            } else {
+                Toast.makeText(context, "연결된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+            try {
+                val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
+                bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
+                bluetoothSocket.connect()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            standbyProcess()
+        } catch (e:Exception) {
+            Toast.makeText(activity, "블루투스 연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
-        //standbyProcess()
+
     }
 
     fun bluetoothClose() {
@@ -295,12 +300,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         var dbHelper = DatabaseHelper(context)
         val rentalList = dbHelper.getRentalStandby()
         val returnList = dbHelper.getReturnStandby()
-        for (sheet: String in rentalList) {
+        for ((id, json) in rentalList) {
             try {
-                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, sheet, object:
-                BluetoothManager.RequestCallback{
+                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, json, object:
+                    BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
-
+                        dbHelper.updateStandbyStatus(id)
                     }
                     override fun onError(e: Exception) {
                         e.printStackTrace()
@@ -310,12 +315,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 Log.d("standby","cannot send rental standby")
             }
         }
-        for (sheet: String in returnList) {
+        for ((id, json) in returnList) {
             try {
-                requestData(RequestType.RETURN_SHEET_FORM, sheet, object:
+                requestData(RequestType.RETURN_SHEET_FORM, json, object:
                     BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
-
+                        dbHelper.updateStandbyStatus(id)
                     }
 
                     override fun onError(e: Exception) {
