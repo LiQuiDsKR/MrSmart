@@ -59,6 +59,8 @@ public class StockStatus extends BaseEntity {
 	
 	private int discardCount;
 	
+	private int supplyCount;
+	
 	@Builder
 	public StockStatus(Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
 			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
@@ -110,6 +112,7 @@ public class StockStatus extends BaseEntity {
 	}
 	public void supplyUpdate(int count) {
 		this.goodCount-=count;
+		this.supplyCount+=count;
 		this.totalCount-=count;
 	}
 }

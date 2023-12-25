@@ -87,8 +87,8 @@
 					<span class="link-title">기록 조회</span>
 				</a>
 			</li>
-			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">소모자재</li>
-			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+			<li class="nav-category" >소모자재</li>
+			<li class="">
 				<a th:href="@{/supply/sheet}">
 					<i class="icofont-navigation-menu"></i>
 					<span class="link-title">지급 기록 조회</span>
@@ -107,7 +107,7 @@
 					<span class="link-title">기록 조회</span>
 				</a>
 			</li>
-			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">분석 현황</li>
+			<li class="nav-category">분석</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" hidden>
 				<a th:href="@{/analytics/tool_states/rental_return/old}">
 					<i class="icofont-navigation-menu"></i>
