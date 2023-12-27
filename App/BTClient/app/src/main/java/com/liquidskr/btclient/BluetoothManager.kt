@@ -65,26 +65,39 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var gson = Gson()
     fun bluetoothOpen() {
         try {
+            try {
+                bluetoothClose()
+            } catch (e: Exception) {
+
+            }
+            val dbHelper = DatabaseHelper(context)
+            pcName = dbHelper.getDeviceName()
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             val permissionManager = PermissionManager(activity)
             permissionManager.checkAndRequestPermission()
+            var flag = false
             val pairedDevices = bluetoothAdapter.bondedDevices
             if (pairedDevices.size > 0) {
                 for (device in pairedDevices) {
                     if (device.name == pcName) { // 연결하려는 디바이스의 이름을 지정하세요.
                         bluetoothDevice = device
+                        try {
+                            val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
+                            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
+                            bluetoothSocket.connect()
+                            flag = true
+                            Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
                         break
                     }
                 }
+                if (!flag) {
+                    Toast.makeText(context, "정비실 노트북 이름이 잘못되었습니다.", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(context, "연결된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-            try {
-                val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
-                bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
-                bluetoothSocket.connect()
-            } catch (e: IOException) {
-                e.printStackTrace()
+                Toast.makeText(context, "페어링된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
             }
             standbyProcess()
             receiveThread = Thread {
@@ -344,8 +357,5 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
         }
         dbHelper.close()
-    }
-    fun intToByteArray(value: Int): ByteArray {
-        return ByteArray(4) { index -> ((value shr (index * 8)) and 0xFF).toByte() }
     }
 }

@@ -74,6 +74,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_RENTALSHEET_TIMESTAMP = "rentalSheet_timestamp"
         private const val COLUMN_RENTALSHEET_TOOLLIST = "rentalSheet_toolList"
 
+        private const val TABLE_DEVICE_NAME = "Devices"
+        private const val COLUMN_DEVICE_ID = "device_id"
+        private const val COLUMN_DEVICE_NAME = "device_name"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -128,12 +131,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_RENTALSHEET_TIMESTAMP TEXT, " +
                 "$COLUMN_RENTALSHEET_TOOLLIST TEXT)"
 
+        val createDeviceTableQuery = "CREATE TABLE $TABLE_DEVICE_NAME " +
+                "($COLUMN_DEVICE_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_DEVICE_NAME TEXT)"
+
+
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
         db.execSQL(createStandbyTableQuery)
         db.execSQL(createTBTTableQuery)
         db.execSQL(createTagTableQuery)
         db.execSQL(createRSTableQuery)
+        db.execSQL(createDeviceTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -144,11 +153,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TBT_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TAG_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RENTALSHEET_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_DEVICE_NAME")
 
         onCreate(db)
     }
 
+    fun RefreshDeviceData(
+        deviceName: String
+    ): Long {
 
+        val values = ContentValues()
+        values.put(COLUMN_DEVICE_ID, 1)
+        values.put(COLUMN_DEVICE_NAME, deviceName)
+
+        val db = this.writableDatabase
+        try {
+            db.execSQL("DELETE FROM $TABLE_DEVICE_NAME")
+        } catch (e: Exception) {
+
+        }
+        val id = db.insert(TABLE_DEVICE_NAME, null, values)
+
+        db.close()
+        return id
+    }
     fun insertMembershipData(
         membershipId: Long,
         membershipCode: String,
@@ -283,6 +311,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
+    @SuppressLint("Range")
+    fun getDeviceName(): String {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_DEVICE_NAME FROM $TABLE_DEVICE_NAME WHERE $COLUMN_DEVICE_ID = ?"
+        var deviceName = ""
+        val selectionArgs = arrayOf("1")
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            deviceName = cursor.getString(cursor.getColumnIndex(COLUMN_DEVICE_NAME))
+        }
+        cursor.close()
+        db.close()
+        return deviceName
+    }
     @SuppressLint("Range")
     fun getMembershipByCode(codeToFind: String): MembershipSQLite {
         val db = this.readableDatabase

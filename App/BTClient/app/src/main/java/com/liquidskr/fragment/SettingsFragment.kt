@@ -34,6 +34,7 @@ import java.lang.reflect.Type
 
 class SettingsFragment() : Fragment() {
     lateinit var importStandard: LinearLayout
+    lateinit var importQRData: LinearLayout
     lateinit var setServerPCName: LinearLayout
     lateinit var setToolBox: LinearLayout
     lateinit var closeBtn: LinearLayout
@@ -41,12 +42,16 @@ class SettingsFragment() : Fragment() {
     private lateinit var bluetoothManager: BluetoothManager
 
     private lateinit var popupLayout: View
+    private lateinit var popupLayout2: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
+    private lateinit var progressBar2: ProgressBar
+    private lateinit var progressText2: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private val gson = Gson()
     private var isPopupVisible = false
+    private var isPopupVisible2 = false
     private val progressRunnable = object : Runnable {
         override fun run() {
             // 여기에 반복해서 실행할 코드 추가
@@ -64,7 +69,27 @@ class SettingsFragment() : Fragment() {
 
             }
             // 0.5초 후에 다시 실행
-            handler.postDelayed(this, 200)
+            handler.postDelayed(this, 300)
+        }
+    }
+    private val progressRunnable2 = object : Runnable {
+        override fun run() {
+            // 여기에 반복해서 실행할 코드 추가
+            if (popupLayout2.visibility == 0) { // Visible
+                val currentBytes = bluetoothManager.currentBytes
+                val totalBytes = bluetoothManager.totalBytes
+                try {
+                    progressText2.text = "${currentBytes}/${totalBytes}, ${currentBytes * 100 / totalBytes}%"
+                } catch (e:Exception) {
+
+                }
+                progressBar2.progress = currentBytes
+                progressBar2.max = totalBytes
+            } else if (popupLayout2.visibility == 8) { // Gone
+
+            }
+            // 0.5초 후에 다시 실행
+            handler.postDelayed(this, 300)
         }
     }
 
@@ -75,26 +100,29 @@ class SettingsFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         popupLayout = view.findViewById(R.id.popupLayout)
+        popupLayout2 = view.findViewById(R.id.popupLayout2)
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
+        progressBar2 = view.findViewById(R.id.progressBar2)
+        progressText2 = view.findViewById(R.id.progressText2)
         importStandard = view.findViewById(R.id.importStandard)
+        importQRData = view.findViewById(R.id.importQRData)
         setServerPCName = view.findViewById(R.id.setServerPCName)
         setToolBox = view.findViewById(R.id.setToolBox)
         closeBtn = view.findViewById(R.id.closeBtn)
         popupLayout.setOnTouchListener { _, _ -> true }
+        popupLayout2.setOnTouchListener { _, _ -> true }
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
         val dbHelper = DatabaseHelper(requireContext())
         closeBtn.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        if (isPopupVisible) {
-            disableBackButton()
-        }
         setServerPCName.setOnClickListener {
             var currentPCName = bluetoothManager.pcName
             showTextDialog(requireContext(), "정비실 노트북(PC)의 이름을 입력하세요.", currentPCName) { string ->
                 bluetoothManager.pcName = string
+                dbHelper.RefreshDeviceData(string)
             }
         }
         var toolboxArray = arrayOf("선강정비1실", "선강정비2실", "선강정비3실", "선강정비4실", "선강정비5실")
@@ -125,110 +153,134 @@ class SettingsFragment() : Fragment() {
                 }
             }
         }
+        importQRData.setOnClickListener {
+            try {
+                showPopup2() // progressBar appear
+                handler.postDelayed(progressRunnable2, 300)
+                progressText2.text = ""
+                bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
+                    BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        dbHelper.clearTBTTable()
+                        var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
+                        for (tbt in tbtList) {
+                            val id = tbt.id
+                            val toolbox = tbt.toolboxDto.id
+                            val location = tbt.location
+                            val tool = tbt.toolDto.id
+                            val qrcode = tbt.qrcode
+
+                            dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
+                        }
+                        bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
+                            BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                dbHelper.clearTagTable()
+                                var tagList: List<TagDto> = gson.fromJson(result, type)
+                                for (tag in tagList) {
+                                    val id = tag.id
+                                    val macaddress = tag.macaddress
+                                    val tool = tag.toolDto.id
+                                    val taggroup = tag.tagGroup
+
+                                    dbHelper.insertTagData(id, macaddress, tool, taggroup)
+                                }
+                                dbHelper.close()
+                                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                                requireActivity().runOnUiThread {
+                                    hidePopup2() // progressBar hide
+                                    Toast.makeText(activity, "QR코드 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                            override fun onError(e: Exception) {
+                                e.printStackTrace()
+                            }
+                        })
+                    }
+
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+            } catch (e: Exception) {
+                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                requireActivity().runOnUiThread {
+                    hidePopup2() // progressBar hide
+                    Toast.makeText(activity, "QR코드 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        }
 
         importStandard.setOnClickListener {
-            showPopup() // progressBar appear
-            handler.postDelayed(progressRunnable, 200)
-            progressText.text = ""
-            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object: BluetoothManager.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    dbHelper.clearMembershipTable()
-                    var membershipList: List<Membership> = gson.fromJson(result, type)
-                    for (member in membershipList) {
-                        val id = member.id
-                        val code = member.code
-                        val password = member.password
-                        val name = member.name
-                        val part = member.partDto.name
-                        val subPart = member.partDto.subPartDto.name
-                        val mainPart = member.partDto.subPartDto.mainPartDto.name
-                        val role = member.role.toString()
-                        val employmentStatus = member.employmentStatus.toString()
-                        dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                        Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
-                    }
-                    bluetoothManager.requestData(RequestType.TOOL_ALL,"",object: BluetoothManager.RequestCallback{
-                        override fun onSuccess(result: String, type: Type) {
-                            dbHelper.clearToolTable()
-                            var toolList: List<ToolDto> = gson.fromJson(result, type)
-                            for (tool in toolList) {
-                                val id = tool.id
-                                val mainGroup = tool.subGroupDto.mainGroupDto.name
-                                val subGroup = tool.subGroupDto.name
-                                val code = tool.code
-                                val krName = tool.name
-                                val engName = tool.engName
-                                val spec = tool.spec
-                                val unit = tool.unit
-                                val price = tool.price
-                                val replacementCycle = tool.replacementCycle
-                                val buyCode = ""
-                                dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                                Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
+            try {
+                showPopup() // progressBar appear
+                handler.postDelayed(progressRunnable, 300)
+                progressText.text = ""
+                bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object: BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        dbHelper.clearMembershipTable()
+                        var membershipList: List<Membership> = gson.fromJson(result, type)
+                        for (member in membershipList) {
+                            val id = member.id
+                            val code = member.code
+                            val password = member.password
+                            val name = member.name
+                            val part = member.partDto.name
+                            val subPart = member.partDto.subPartDto.name
+                            val mainPart = member.partDto.subPartDto.mainPartDto.name
+                            val role = member.role.toString()
+                            val employmentStatus = member.employmentStatus.toString()
+                            dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                            Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
+                        }
+                        bluetoothManager.requestData(RequestType.TOOL_ALL,"",object: BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                dbHelper.clearToolTable()
+                                var toolList: List<ToolDto> = gson.fromJson(result, type)
+                                for (tool in toolList) {
+                                    val id = tool.id
+                                    val mainGroup = tool.subGroupDto.mainGroupDto.name
+                                    val subGroup = tool.subGroupDto.name
+                                    val code = tool.code
+                                    val krName = tool.name
+                                    val engName = tool.engName
+                                    val spec = tool.spec
+                                    val unit = tool.unit
+                                    val price = tool.price
+                                    val replacementCycle = tool.replacementCycle
+                                    val buyCode = ""
+                                    dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
+                                    Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
+                                }
+                                handler.removeCallbacks(progressRunnable) // progressBar callback remove
+                                requireActivity().runOnUiThread {
+                                    hidePopup() // progressBar hide
+                                    Toast.makeText(activity, "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
-                                BluetoothManager.RequestCallback{
-                                override fun onSuccess(result: String, type: Type) {
-                                    dbHelper.clearTBTTable()
-                                    var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
-                                    for (tbt in tbtList) {
-                                        val id = tbt.id
-                                        val toolbox = tbt.toolboxDto.id
-                                        val location = tbt.location
-                                        val tool = tbt.toolDto.id
-                                        val qrcode = tbt.qrcode
 
-                                        dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
-                                    }
-                                    bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
-                                        BluetoothManager.RequestCallback{
-                                        override fun onSuccess(result: String, type: Type) {
-                                            dbHelper.clearTagTable()
-                                            var tagList: List<TagDto> = gson.fromJson(result, type)
-                                            for (tag in tagList) {
-                                                val id = tag.id
-                                                val macaddress = tag.macaddress
-                                                val tool = tag.toolDto.id
-                                                val taggroup = tag.tagGroup
+                            override fun onError(e: Exception) {
+                                e.printStackTrace()
+                            }
+                        })
+                    }
 
-                                                dbHelper.insertTagData(id, macaddress, tool, taggroup)
-                                            }
-                                            dbHelper.close()
-                                            Log.d("popup","asdf")
-                                            handler.removeCallbacks(progressRunnable) // progressBar callback remove
-                                            requireActivity().runOnUiThread {
-                                                hidePopup() // progressBar hide
-                                                Toast.makeText(activity, "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-
-                                        override fun onError(e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    })
-                                }
-
-                                override fun onError(e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            })
-                        }
-
-                        override fun onError(e: Exception) {
-                            e.printStackTrace()
-                        }
-                    })
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+            } catch (e: Exception) {
+                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                requireActivity().runOnUiThread {
+                    hidePopup() // progressBar hide
+                    Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
-
-                override fun onError(e: Exception) {
-                    e.printStackTrace()
-                }
-            })
+            }
         }
 
         return view
-    }
-    private fun disableBackButton() {
     }
 
     private fun enableBackButton() {
@@ -236,10 +288,26 @@ class SettingsFragment() : Fragment() {
     }
     private fun showPopup() {
         isPopupVisible = true
-        disableBackButton()
         // Show the popup layout
         popupLayout.visibility = View.VISIBLE
+    }
+    private fun showPopup2() {
+        isPopupVisible2 = true
+        // Show the popup layout
+        popupLayout2.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        isPopupVisible = false
+        enableBackButton()
+        // Hide the popup layout
+        popupLayout.visibility = View.GONE
 
+    }
+    private fun hidePopup2() {
+        isPopupVisible2 = false
+        enableBackButton()
+        // Hide the popup layout
+        popupLayout2.visibility = View.GONE
 
     }
     fun showTextDialog(context: Context, title: String, defaultText: String, callback: (String) -> Unit) {
@@ -259,13 +327,7 @@ class SettingsFragment() : Fragment() {
         dialog.show()
     }
 
-    fun showSelectionDialog(
-        context: Context,
-        title: String,
-        items: Array<String>,
-        defaultSelectedItem: String?,
-        callback: (String) -> Unit
-    ) {
+    fun showSelectionDialog(context: Context, title: String, items: Array<String>, defaultSelectedItem: String?, callback: (String) -> Unit) {
         val selectedIndex = items.indexOf(defaultSelectedItem)
 
         val dialog = AlertDialog.Builder(context)
@@ -288,13 +350,6 @@ class SettingsFragment() : Fragment() {
         dialog.show()
     }
 
-    private fun hidePopup() {
-        isPopupVisible = false
-        enableBackButton()
-        // Hide the popup layout
-        popupLayout.visibility = View.GONE
-
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         // 프래그먼트가 종료될 때 핸들러의 작업 중지
