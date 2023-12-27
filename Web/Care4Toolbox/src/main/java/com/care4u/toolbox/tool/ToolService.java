@@ -135,6 +135,17 @@ public class ToolService {
 		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
 		return toolPage.map(ToolDto::new);
 	}
+	@Transactional(readOnly = true)
+	public Page<ToolDto> getToolPage(Pageable pageable){
+		Page<Tool> toolPage = repository.findAll(pageable);
+		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
+		return toolPage.map(ToolDto::new);
+	}
+
+	@Transactional(readOnly=true)
+	public long getToolCount() {
+		return repository.count();
+	}
 	
 
 //	12.18 폐기 : stockStatus가져오는 걸로 바꿈.

@@ -112,11 +112,22 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
 		return membershipPage.map(MembershipDto::new);
     }
+	@Transactional(readOnly = true)
+    public Page<MembershipDto> getMembershipPage(Pageable pageable){
+		Page<Membership> membershipPage = repository.findAll(pageable);
+		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
+		return membershipPage.map(MembershipDto::new);
+    }
 	
 	@Transactional(readOnly = true)
 	public Page<MembershipDto> getMembershipPageByName(Pageable pageable, String name){
 		Page<Membership> membershipPage = repository.findByNameContaining(pageable, name);
 		return membershipPage.map(MembershipDto::new);
+	}
+	
+	@Transactional(readOnly = true)
+	public long getMembershipCount() {
+		return repository.count();
 	}
 	
 	@Transactional(readOnly=true)

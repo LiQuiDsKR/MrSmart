@@ -40,6 +40,7 @@ import com.care4u.constant.SheetState;
 import com.care4u.domain.Message;
 import com.care4u.hr.main_part.MainPartService;
 import com.care4u.hr.membership.MembershipDto;
+import com.care4u.hr.membership.MembershipSearchDto;
 import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartService;
@@ -166,11 +167,31 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			String keyword = type.name() + ",";
 			switch(type) {
+			case MEMBERSHIP_ALL_COUNT:
+				handler.sendData(keyword+GsonUtils.toJson(keyword+membershipService.getMembershipCount()));
+				break;
 			case MEMBERSHIP_ALL:
-				handler.sendData(keyword + GsonUtils.toJson(membershipService.list()));
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					
+					Pageable pageable = PageRequest.of(page,pageSize);
+					handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipPage(pageable)));
+				}
+				break;
+			case TOOL_ALL_COUNT:
+				handler.sendData(keyword+GsonUtils.toJson(keyword+toolService.getToolCount()));
 				break;
 			case TOOL_ALL:
-				handler.sendData(keyword + GsonUtils.toJson(toolService.list()));
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					
+					Pageable pageable = PageRequest.of(page,pageSize);
+					handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
+				}
 				break;
 			case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
