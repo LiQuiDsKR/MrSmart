@@ -53,7 +53,11 @@ class SettingsFragment() : Fragment() {
             if (popupLayout.visibility == 0) { // Visible
                 val currentBytes = bluetoothManager.currentBytes
                 val totalBytes = bluetoothManager.totalBytes
-                progressText.text = "${currentBytes}/${totalBytes}, ${currentBytes * 100 / totalBytes}%"
+                try {
+                    progressText.text = "${currentBytes}/${totalBytes}, ${currentBytes * 100 / totalBytes}%"
+                } catch (e:Exception) {
+
+                }
                 progressBar.progress = currentBytes
                 progressBar.max = totalBytes
             } else if (popupLayout.visibility == 8) { // Gone
@@ -80,6 +84,7 @@ class SettingsFragment() : Fragment() {
         popupLayout.setOnTouchListener { _, _ -> true }
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
+        val dbHelper = DatabaseHelper(requireContext())
         closeBtn.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -127,7 +132,7 @@ class SettingsFragment() : Fragment() {
             progressText.text = ""
             bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    val dbHelper = DatabaseHelper(requireContext())
+                    dbHelper.clearMembershipTable()
                     var membershipList: List<Membership> = gson.fromJson(result, type)
                     for (member in membershipList) {
                         val id = member.id
@@ -144,6 +149,7 @@ class SettingsFragment() : Fragment() {
                     }
                     bluetoothManager.requestData(RequestType.TOOL_ALL,"",object: BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
+                            dbHelper.clearToolTable()
                             var toolList: List<ToolDto> = gson.fromJson(result, type)
                             for (tool in toolList) {
                                 val id = tool.id
@@ -160,10 +166,10 @@ class SettingsFragment() : Fragment() {
                                 dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
                                 Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
                             }
-                            dbHelper.clearTBTTable()
                             bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
+                                    dbHelper.clearTBTTable()
                                     var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
                                     for (tbt in tbtList) {
                                         val id = tbt.id
@@ -174,10 +180,10 @@ class SettingsFragment() : Fragment() {
 
                                         dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
                                     }
-                                    dbHelper.clearTagTable()
                                     bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
                                         BluetoothManager.RequestCallback{
                                         override fun onSuccess(result: String, type: Type) {
+                                            dbHelper.clearTagTable()
                                             var tagList: List<TagDto> = gson.fromJson(result, type)
                                             for (tag in tagList) {
                                                 val id = tag.id

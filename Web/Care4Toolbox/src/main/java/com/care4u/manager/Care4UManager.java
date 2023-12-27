@@ -164,12 +164,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			if (datas.length>1) {				
 				paramJson = datas[1];
 			}
+			String keyword = type.name() + ",";
 			switch(type) {
 			case MEMBERSHIP_ALL:
-				handler.sendData(GsonUtils.toJson(membershipService.list()));
+				handler.sendData(keyword + GsonUtils.toJson(membershipService.list()));
 				break;
 			case TOOL_ALL:
-				handler.sendData(GsonUtils.toJson(toolService.list()));
+				handler.sendData(keyword + GsonUtils.toJson(toolService.list()));
 				break;
 			case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
@@ -180,7 +181,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
-					handler.sendData(GsonUtils.toJson(sheetPage));
+					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 				}
 				break;
 			case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
@@ -189,7 +190,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long toolboxId = jsonObj.getLong("toolboxId");
 
 			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
-					handler.sendData(GsonUtils.toJson(sheetList));
+					handler.sendData(keyword + GsonUtils.toJson(sheetList));
 				}
 				break;
 			case RENTAL_REQUEST_SHEET_FORM:
@@ -198,9 +199,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			    	try {
 						formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
 			    		rentalRequestSheetService.addNew(formDto);
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -214,11 +215,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 						
 			            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
 			            
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(IllegalStateException e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -239,7 +240,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
 			        
-					handler.sendData(GsonUtils.toJson(sheetPage));
+					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 				}
 				break;
 			case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
@@ -254,7 +255,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
 			        
-					handler.sendData(GsonUtils.toJson(sheetList));
+					handler.sendData(keyword + GsonUtils.toJson(sheetList));
 				}
 				break;	
 			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
@@ -271,7 +272,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			        Pageable pageable = PageRequest.of(page,pageSize);
 			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
-					handler.sendData(GsonUtils.toJson(sheetPage));
+					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 				}
 				break;
 			case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
@@ -285,7 +286,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
 			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
-					handler.sendData(GsonUtils.toJson(sheetList));
+					handler.sendData(keyword + GsonUtils.toJson(sheetList));
 				}
 				break;
 			case RETURN_SHEET_REQUEST:
@@ -294,11 +295,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
 			    	try {
 			    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(IllegalStateException e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -308,9 +309,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			    	try {
 						formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
 			    		returnSheetService.addNew(formDto);
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -322,11 +323,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					String qrcode = jsonObj.getString("qrcode");
 			    	try {
 						toolboxToolLabelService.register(toolId, toolboxId, qrcode);
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(IllegalArgumentException e) {
 			    		handler.sendData(e.getMessage());
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -344,11 +345,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 			    	try {
 						tagService.register(toolId, toolboxId, tagList, tagGroup);
-			    		handler.sendData("good");
+			    		handler.sendData(keyword + "good");
 			    	}catch(IllegalArgumentException e) {
-			    		handler.sendData(e.getMessage());
+			    		handler.sendData(keyword + e.getMessage());
 			    	}catch(Exception e) {
-			    		handler.sendData("bad");
+			    		handler.sendData(keyword + "bad");
 			    	}
 				}
 				break;
@@ -359,11 +360,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					long toolboxId = jsonObj.getLong("toolboxId");
 					
 					if (toolboxToolLabelService.get(toolId, toolboxId) == null) {
-						handler.sendData("null");
+						handler.sendData(keyword + "null");
 					}					
 					else {	
 						String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
-						handler.sendData(result);
+						handler.sendData(keyword + result);
 					}
 				}
 				break;
@@ -376,9 +377,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 								.stream()
 								.map(e->e.getMacaddress())
 								.collect(Collectors.toList());
-						handler.sendData(GsonUtils.toJson(strings));
+						handler.sendData(keyword + GsonUtils.toJson(strings));
 					} else {
-						handler.sendData("null");
+						handler.sendData(keyword + "null");
 					}
 					
 				}
@@ -388,7 +389,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
 			        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
-					handler.sendData(GsonUtils.toJson(tagList));
+					handler.sendData(keyword + GsonUtils.toJson(tagList));
 				}
 				break;
 			case TOOLBOX_TOOL_LABEL_ALL:
@@ -396,14 +397,14 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
 			        List<ToolboxToolLabelDto> tagList = toolboxToolLabelService.listByToolboxId(toolboxId);
-					handler.sendData(GsonUtils.toJson(tagList));
+					handler.sendData(keyword + GsonUtils.toJson(tagList));
 				}
 				break;
 			case TAG_GROUP:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					String tagString = jsonObj.getString("tag");
-					handler.sendData(GsonUtils.toJson(tagService.get(tagString)));
+					handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
 				}
 			}
 		}

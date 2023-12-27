@@ -35,6 +35,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
+    private lateinit var receiveThread: Thread
+    private val handler = Handler(Looper.getMainLooper())
+
     var pcName: String = "LQD"
 
     var currentBytes = 0
@@ -44,11 +47,22 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var isSending: Boolean = false
     private val messageQueue: Queue<BluetoothMessage> = LinkedList()
 
+    private var bluetoothDataListener: BluetoothDataListener? = null
 
-    private var timeoutHandler: Handler = Handler(Looper.getMainLooper())
+    fun setBluetoothDataListener(listener: BluetoothDataListener) {
+        this.bluetoothDataListener = listener
+    }
+
+    interface RequestCallback {
+        fun onSuccess(result: String, type: Type)
+        fun onError(e: Exception)
+    }
+    interface BluetoothDataListener {
+        fun onSuccess(result: String, type: Type)
+        fun onError(e: Exception)
+    }
 
     var gson = Gson()
-    var timeout = false
     fun bluetoothOpen() {
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -73,6 +87,44 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 e.printStackTrace()
             }
             standbyProcess()
+            receiveThread = Thread {
+                try {
+                    while (bluetoothSocket.isConnected) {
+                        inputStream = bluetoothSocket.inputStream
+
+                        val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
+                        inputStream.read(lengthBuffer, 0, 4)
+                        val dataSize = ByteBuffer.wrap(lengthBuffer).int
+                        totalBytes = dataSize // progressBar
+
+                        val dataBuffer = ByteArray(1024) // 한 번에 받을 byteArray 단위
+                        val byteStream = ByteArrayOutputStream() // 최종 byteStream
+                        var bytesRead = 0
+
+                        while (bytesRead < dataSize) {
+                            val result = inputStream.read(dataBuffer, 0, 1024)
+                            if (result <= 0) {
+                                break
+                            }
+                            byteStream.write(dataBuffer, 0, result) // 이 부분 추가
+                            bytesRead += result
+
+                            currentBytes = bytesRead // progressBar
+                        }
+
+                        val byteArray = byteStream.toByteArray()
+
+                        // 정상적으로 데이터를 받았다면
+                        if (byteArray.isNotEmpty()) {
+                            clearSendingState() // 다음 큐로 넘김
+                            processData(byteArray) // 데이터 처리 함수 호출
+                        }
+                    }
+                } catch (e: Exception) {
+
+                }
+            }
+            receiveThread.start()
         } catch (e:Exception) {
             Toast.makeText(activity, "블루투스 연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
@@ -82,13 +134,18 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     fun bluetoothClose() {
         bluetoothSocket.close()
     }
-    interface RequestCallback {
-        fun onSuccess(result: String, type: Type)
-        fun onError(e: Exception)
+
+    fun requestData(type:RequestType, params:String, callback:RequestCallback){
+        if (!isSending) {
+            performSend(type, params, callback)
+        } else {
+            // 메시지 전송 중일 때는 큐에 추가
+            messageQueue.offer(BluetoothMessage(type, params, callback))
+        }
     }
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
         if (!bluetoothSocket.isConnected) {
-            callback.onError(IOException("Bluetooth socket is not connected"))
+            bluetoothDataListener?.onError(IOException("Bluetooth socket is not connected"))
             return
         }
 
@@ -101,180 +158,136 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             sendMsg += ",".toByteArray(Charsets.UTF_8)
             sendMsg += params.toByteArray(Charsets.UTF_8)
 
+            val sizeString = String.format("%04d", sendMsg.size)
+            var size = sizeString.toByteArray(Charsets.UTF_8)
+            Log.d("bluetooth", String(size))
+
+            //outputStream.write(size)
             outputStream.write(sendMsg)
             outputStream.flush()
-            Log.d("SEND", type.name)
         } catch (e: Exception) {
             // 전송 중 에러
             callback.onError(e)
         }
-
-        val timeoutRunnable = Runnable {
-            Log.d("bluetoothTimeOut", "TIMEOUT")
-            if (!timeout) {
-                timeout = true
-                dataSend("TIMEOUT")
+        setBluetoothDataListener(object : BluetoothDataListener {
+            override fun onSuccess(result: String, type: Type) {
+                callback.onSuccess(result, type)
             }
 
-            // Timeout 시, 메시지 전송 완료로 처리
-            isSending = false
-            if (messageQueue.isNotEmpty()) {
-                val nextMessage = messageQueue.poll()
-                performSend(nextMessage.type, nextMessage.params, nextMessage.callback)
+            override fun onError(e: Exception) {
+
             }
-        }
+        })
 
-        // receive loop를 돌리는 thread 선언
-        val thread = Thread {
-            timeoutHandler.postDelayed(
-                timeoutRunnable,
-                10000
-            )
-            // 나머지 코드는 그대로 유지
-            try {
-                inputStream = bluetoothSocket.inputStream
-
-                val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
-                inputStream.read(lengthBuffer,0,4)
-                val dataSize = ByteBuffer.wrap(lengthBuffer).int
-                totalBytes = dataSize // progressBar
-
-                val dataBuffer = ByteArray(1024) //한 번에 받을 byteArray단위
-                val byteStream = ByteArrayOutputStream() //최종 byteStream
-                var bytesRead: Int = 0
-
-                while (bytesRead < dataSize) {
-                    val result = inputStream.read(dataBuffer, 0, 1024)
-                    if (result <= 0) {
-                        break
-                    }
-                    byteStream.write(dataBuffer, 0, result) // 이 부분 추가
-                    bytesRead += result
-
-                    currentBytes = bytesRead // progressBar
-                }
-                timeoutHandler.removeCallbacks(timeoutRunnable) // timeout 일어나지 않게끔 Handler 제거
-
-                val byteArray = byteStream. toByteArray()
-
-                //정상적으로 데이터를 받았다면
-                if (byteArray.isNotEmpty()) {
-                    Log.d("Received", String(byteArray, Charsets.UTF_8))
-                    clearSendingState() // 무언가 받았으므로, 송수신 정상이며 isSending 플래그 처리
-
-                    val jsonString = String(byteArray, Charsets.UTF_8)
-                    //RequestType별로 인스턴스 생성
-                    when (type) {
-                        RequestType.MEMBERSHIP_ALL -> {
-                            val listType: Type = object : TypeToken<List<Membership>>() {}.type
-                            callback.onSuccess(jsonString,listType)
-                        }
-
-                        RequestType.TOOL_ALL -> {
-                            val listType: Type = object : TypeToken<List<ToolDto>>() {}.type
-                            callback.onSuccess(jsonString, listType)
-                        }
-
-                        RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX ->{
-                            val pageType: Type = object : TypeToken<Page>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-
-                        RequestType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP ->{
-                            val pageType: Type = object : TypeToken<Page>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-
-                        RequestType.RETURN_SHEET_PAGE_BY_MEMBERSHIP ->{
-                            val pageType: Type = object : TypeToken<Page>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-
-                        RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ->{
-                            val pageType: Type = object : TypeToken<Page>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-
-                        RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ->{
-                            val pageType: Type = object : TypeToken<Page>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-                        RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX ->{
-                            val listType: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
-                            callback.onSuccess(jsonString, listType)
-                        }
-                        RequestType.RENTAL_REQUEST_SHEET_FORM ->{
-                            val type: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP ->{
-                            val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.RENTAL_REQUEST_SHEET_APPROVE ->{
-                            val type: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.RETURN_SHEET_FORM ->{
-                            val type: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.RENTAL_REQUEST_SHEET_APPROVE ->{
-                            val pageType: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-                        RequestType.TOOLBOX_TOOL_LABEL_FORM ->{
-                            val pageType: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, pageType)
-                        }
-                        RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX ->{
-                            val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
-                            callback.onSuccess(jsonString, listType)
-                        }
-                        RequestType.RETURN_SHEET_REQUEST ->{
-                            val type: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TAG_FORM ->{
-                            val type: Type = object : TypeToken<String>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TOOLBOX_TOOL_LABEL ->{
-                            val type: Type = object : TypeToken<ToolboxToolLabelDto>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TAG_LIST ->{
-                            val type: Type = object : TypeToken<List<String>>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TAG_ALL ->{
-                            val type: Type = object : TypeToken<List<TagDto>>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TOOLBOX_TOOL_LABEL_ALL ->{
-                            val type: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
-                            callback.onSuccess(jsonString, type)
-                        }
-                        RequestType.TAG_GROUP ->{
-                        val type: Type = object : TypeToken<TagDto>() {}.type
-                        callback.onSuccess(jsonString, type)
-                    }
-                    }
-                }
-            } catch (e: Exception) {
-                //수신 중 에러
-                callback.onError(e)
-            }
-        }
-        thread.start()
     }
-    fun requestData(type:RequestType,params:String,callback:RequestCallback){
-        if (!isSending) {
-            performSend(type, params, callback)
-        } else {
-            // 메시지 전송 중일 때는 큐에 추가
-            messageQueue.offer(BluetoothMessage(type, params, callback))
+
+    private fun processData(data: ByteArray) {
+
+        val receivedString = String(data, Charsets.UTF_8)
+
+        val (type, jsonString) = parseInputString(receivedString)
+
+
+        Log.d("bluetooth", type)
+        Log.d("bluetooth", jsonString)
+
+        when (type) {
+            RequestType.MEMBERSHIP_ALL.name -> {
+                val listType: Type = object : TypeToken<List<Membership>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+
+            RequestType.TOOL_ALL.name -> {
+                val listType: Type = object : TypeToken<List<ToolDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+
+            RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+
+            RequestType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+
+            RequestType.RETURN_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX.name -> {
+                val listType: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
+                val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RETURN_SHEET_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+                val pageType: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+            RequestType.TOOLBOX_TOOL_LABEL_FORM.name -> {
+                val pageType: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, pageType)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
+                val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+            RequestType.RETURN_SHEET_REQUEST.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TOOLBOX_TOOL_LABEL.name -> {
+                val type: Type = object : TypeToken<ToolboxToolLabelDto>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_LIST.name -> {
+                val type: Type = object : TypeToken<List<String>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_ALL.name -> {
+                val type: Type = object : TypeToken<List<TagDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TOOLBOX_TOOL_LABEL_ALL.name -> {
+                val type: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_GROUP.name -> {
+                val type: Type = object : TypeToken<TagDto>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
         }
+
     }
     private fun clearSendingState() {
         isSending = false
@@ -283,27 +296,16 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             performSend(nextMessage.type, nextMessage.params, nextMessage.callback)
         }
     }
-
-    fun dataSend(sendingData: String) {
-        try {
-            outputStream = bluetoothSocket.outputStream
-            outputStream.write(sendingData.toByteArray())
-            outputStream.flush()
-            Log.d("SEND", sendingData)
-        } catch (e: Exception) {
-            Log.d("mDataOuputStream Error", e.toString())
+    private fun parseInputString(input: String): Pair<String, String> {
+        val index = input.indexOf(',')
+        if (index != -1) {
+            val beforeComma = input.substring(0, index)
+            val afterComma = input.substring(index + 1)
+            return Pair(beforeComma, afterComma)
+        } else {
+            // 적절한 처리가 필요한 경우, 예외 또는 기본값을 반환할 수 있습니다.
+            return Pair(input, "")
         }
-    }
-
-    fun standbyRentalProcess(json: String) {
-        requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, json, object:
-            BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-            }
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
     }
     fun standbyProcess() {
         // 보류 항목 모두 전송
@@ -342,5 +344,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
         }
         dbHelper.close()
+    }
+    fun intToByteArray(value: Int): ByteArray {
+        return ByteArray(4) { index -> ((value shr (index * 8)) and 0xFF).toByte() }
     }
 }
