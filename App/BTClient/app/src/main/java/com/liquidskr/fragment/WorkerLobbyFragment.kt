@@ -18,12 +18,12 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
-class WorkerLobbyFragment(worker: Membership) : Fragment() {
+class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
     val worker = worker

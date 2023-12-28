@@ -1,6 +1,6 @@
 package com.mrsmart.standard.membership
 
-data class Membership(
+data class MembershipDto(
     val id: Long,
     val name: String,
     val code: String,

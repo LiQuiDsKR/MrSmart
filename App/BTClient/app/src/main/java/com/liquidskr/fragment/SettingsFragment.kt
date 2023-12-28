@@ -19,16 +19,16 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolDto
-import com.mrsmart.standard.tool.ToolDtoSQLite
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.lang.reflect.Type
 
@@ -218,65 +218,111 @@ class SettingsFragment() : Fragment() {
                 showPopup() // progressBar appear
                 handler.postDelayed(progressRunnable, 300)
                 progressText.text = ""
-                bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"",object: BluetoothManager.RequestCallback{
+                var membershipCnt = 0
+                bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL_COUNT,"",object: BluetoothManager.RequestCallback {
                     override fun onSuccess(result: String, type: Type) {
-                        dbHelper.clearMembershipTable()
-                        var membershipList: List<Membership> = gson.fromJson(result, type)
-                        for (member in membershipList) {
-                            val id = member.id
-                            val code = member.code
-                            val password = member.password
-                            val name = member.name
-                            val part = member.partDto.name
-                            val subPart = member.partDto.subPartDto.name
-                            val mainPart = member.partDto.subPartDto.mainPartDto.name
-                            val role = member.role.toString()
-                            val employmentStatus = member.employmentStatus.toString()
-                            dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                            Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
+                        try {
+                            membershipCnt = result.toInt()
+                        } catch (e: Exception) {}
+                        for (i in 0 until membershipCnt / 10) {
+                            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${i}}",object: BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    var page: Page = gson.fromJson(result, type)
+                                    val membershipListType: Type = object : TypeToken<List<MembershipDto>>() {}.type
+                                    val membershipList: List<MembershipDto> = gson.fromJson(page.content.toString(), membershipListType)
+                                    for (member in membershipList) {
+                                        val id = member.id
+                                        val code = member.code
+                                        val password = member.password
+                                        val name = member.name
+                                        val part = member.partDto.name
+                                        val subPart = member.partDto.subPartDto.name
+                                        val mainPart = member.partDto.subPartDto.mainPartDto.name
+                                        val role = member.role.toString()
+                                        val employmentStatus = member.employmentStatus.toString()
+                                        dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                                        Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
+                                    }
+                                }
+                                override fun onError(e: Exception) {
+                                    handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                                    requireActivity().runOnUiThread {
+                                        hidePopup() // progressBar hide
+                                        Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            })
+                            if (membershipCnt % 10 > 0) {
+                                bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${membershipCnt / 10}}",object: BluetoothManager.RequestCallback{
+                                    override fun onSuccess(result: String, type: Type) {
+                                        var page: Page = gson.fromJson(result, type)
+                                        val membershipListType: Type = object : TypeToken<List<MembershipDto>>() {}.type
+                                        val membershipList: List<MembershipDto> = gson.fromJson(page.content.toString(), membershipListType)
+                                        for (member in membershipList) {
+                                            val id = member.id
+                                            val code = member.code
+                                            val password = member.password
+                                            val name = member.name
+                                            val part = member.partDto.name
+                                            val subPart = member.partDto.subPartDto.name
+                                            val mainPart = member.partDto.subPartDto.mainPartDto.name
+                                            val role = member.role.toString()
+                                            val employmentStatus = member.employmentStatus.toString()
+                                            dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                                            Log.d("Debug_Standard", MembershipSQLite(id, code, password, name, part, subPart, mainPart, role, employmentStatus).toString())
+                                        }
+                                    }
+                                    override fun onError(e: Exception) {
+                                        handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                                        requireActivity().runOnUiThread {
+                                            hidePopup() // progressBar hide
+                                            Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                })
+                            }
                         }
-                        bluetoothManager.requestData(RequestType.TOOL_ALL,"",object: BluetoothManager.RequestCallback{
-                            override fun onSuccess(result: String, type: Type) {
-                                dbHelper.clearToolTable()
-                                var toolList: List<ToolDto> = gson.fromJson(result, type)
-                                for (tool in toolList) {
-                                    val id = tool.id
-                                    val mainGroup = tool.subGroupDto.mainGroupDto.name
-                                    val subGroup = tool.subGroupDto.name
-                                    val code = tool.code
-                                    val krName = tool.name
-                                    val engName = tool.engName
-                                    val spec = tool.spec
-                                    val unit = tool.unit
-                                    val price = tool.price
-                                    val replacementCycle = tool.replacementCycle
-                                    val buyCode = ""
-                                    dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                                    Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
-                                }
-                                handler.removeCallbacks(progressRunnable) // progressBar callback remove
-                                requireActivity().runOnUiThread {
-                                    hidePopup() // progressBar hide
-                                    Toast.makeText(activity, "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+                    }
 
-                            override fun onError(e: Exception) {
-                                e.printStackTrace()
-                            }
-                        })
+                    override fun onError(e: Exception) {
+
+                    }
+
+                })
+/*
+                bluetoothManager.requestData(RequestType.TOOL_ALL,"",object: BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        dbHelper.clearToolTable()
+                        var toolList: List<ToolDto> = gson.fromJson(result, type)
+                        for (tool in toolList) {
+                            val id = tool.id
+                            val mainGroup = tool.subGroupDto.mainGroupDto.name
+                            val subGroup = tool.subGroupDto.name
+                            val code = tool.code
+                            val krName = tool.name
+                            val engName = tool.engName
+                            val spec = tool.spec
+                            val unit = tool.unit
+                            val price = tool.price
+                            val replacementCycle = tool.replacementCycle
+                            val buyCode = ""
+                            dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
+                            Log.d("Debug_Standard", ToolDtoSQLite(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode).toString())
+                        }
+                        handler.removeCallbacks(progressRunnable) // progressBar callback remove
+                        requireActivity().runOnUiThread {
+                            hidePopup() // progressBar hide
+                            Toast.makeText(activity, "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     }
 
                     override fun onError(e: Exception) {
                         e.printStackTrace()
                     }
                 })
+        */
             } catch (e: Exception) {
-                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
-                requireActivity().runOnUiThread {
-                    hidePopup() // progressBar hide
-                    Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                }
+
             }
         }
 

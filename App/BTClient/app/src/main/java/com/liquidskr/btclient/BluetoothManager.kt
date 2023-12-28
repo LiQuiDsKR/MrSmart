@@ -11,12 +11,10 @@ import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.mrsmart.standard.membership.Membership
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -77,9 +75,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             permissionManager.checkAndRequestPermission()
             var flag = false
             val pairedDevices = bluetoothAdapter.bondedDevices
-            if (pairedDevices.size > 0) {
+            if (pairedDevices.size > 0) { // 서버와 연결 부분
                 for (device in pairedDevices) {
-                    if (device.name == pcName) { // 연결하려는 디바이스의 이름을 지정하세요.
+                    if (device.name == pcName) {
                         bluetoothDevice = device
                         try {
                             val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
@@ -206,12 +204,22 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
         when (type) {
             RequestType.MEMBERSHIP_ALL.name -> {
-                val listType: Type = object : TypeToken<List<Membership>>() {}.type
+                val listType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+
+            RequestType.MEMBERSHIP_ALL_COUNT.name -> {
+                val listType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
             RequestType.TOOL_ALL.name -> {
-                val listType: Type = object : TypeToken<List<ToolDto>>() {}.type
+                val listType: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, listType)
+            }
+
+            RequestType.TOOL_ALL_COUNT.name -> {
+                val listType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
