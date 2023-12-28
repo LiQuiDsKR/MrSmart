@@ -100,12 +100,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             standbyProcess()
             receiveThread = Thread {
                 try {
-                    while (bluetoothSocket.isConnected) {
-                        inputStream = bluetoothSocket.inputStream
+                    inputStream = bluetoothSocket.inputStream
 
+                    while (bluetoothSocket.isConnected) {
                         val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
                         inputStream.read(lengthBuffer, 0, 4)
                         val dataSize = ByteBuffer.wrap(lengthBuffer).int
+                        Log.d("test", dataSize.toString())
                         totalBytes = dataSize // progressBar
 
                         val dataBuffer = ByteArray(1024) // 한 번에 받을 byteArray 단위
@@ -114,13 +115,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
                         while (bytesRead < dataSize) {
                             val result = inputStream.read(dataBuffer, 0, 1024)
-                            if (result <= 0) {
-                                break
-                            }
+
                             byteStream.write(dataBuffer, 0, result) // 이 부분 추가
                             bytesRead += result
 
                             currentBytes = bytesRead // progressBar
+                            if (bytesRead == dataSize) {
+                                break
+                            }
                         }
 
                         val byteArray = byteStream.toByteArray()
@@ -132,7 +134,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         }
                     }
                 } catch (e: Exception) {
-
+                    Log.d("Exception", e.toString())
                 }
             }
             receiveThread.start()
@@ -169,13 +171,15 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             sendMsg += ",".toByteArray(Charsets.UTF_8)
             sendMsg += params.toByteArray(Charsets.UTF_8)
 
-            val sizeString = String.format("%04d", sendMsg.size)
-            var size = sizeString.toByteArray(Charsets.UTF_8)
-            Log.d("bluetooth", String(size))
 
-            //outputStream.write(size)
-            outputStream.write(sendMsg)
+            val sizeBytes = ByteBuffer.allocate(4).putInt(sendMsg.size).array() // 크기를 4바이트로 변환
+
+            val finalMessage = sizeBytes + sendMsg
+            Log.d("finalMessage", byteArrayToHex(finalMessage))
+
+            outputStream.write(finalMessage)
             outputStream.flush()
+            Log.d("SEND", type.name)
         } catch (e: Exception) {
             // 전송 중 에러
             callback.onError(e)
@@ -191,6 +195,15 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         })
 
     }
+    fun byteArrayToHex(byteArray: ByteArray): String {
+        val hexChars = CharArray(byteArray.size * 2)
+        for (i in byteArray.indices) {
+            val v = byteArray[i].toInt() and 0xFF
+            hexChars[i * 2] = "0123456789ABCDEF"[v shr 4]
+            hexChars[i * 2 + 1] = "0123456789ABCDEF"[v and 0x0F]
+        }
+        return String(hexChars)
+    }
 
     private fun processData(data: ByteArray) {
 
@@ -201,6 +214,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
         Log.d("bluetooth", type)
         Log.d("bluetooth", jsonString)
+
+        if ("{\"total\":774,\"content\":[{\"id\":71,\"name\":\"박영인\"," in jsonString) {
+            Log.d("bluetooth", "Breakpoint")
+        }
 
         when (type) {
             RequestType.MEMBERSHIP_ALL.name -> {

@@ -65,6 +65,14 @@
             android:paddingRight="20dp"
             android:text="1"
             android:textSize="20sp" />
+
+        <ImageButton
+            android:id="@+id/deleteBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="#00FFFFFF"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/group_4" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

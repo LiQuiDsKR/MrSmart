@@ -32,7 +32,7 @@
                     android:orientation="horizontal">
 
                     <ImageButton
-                        android:id="@+id/imageButton"
+                        android:id="@+id/backButton"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="#00FFFFFF"

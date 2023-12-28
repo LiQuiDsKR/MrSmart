@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -35,6 +36,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
     private lateinit var timeStamp: TextView
 
     private lateinit var confirmBtn: LinearLayout
+    private lateinit var backButton: ImageButton
 
 
     val gson = Gson()
@@ -50,6 +52,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
         confirmBtn = view.findViewById(R.id.confirmBtn)
+        backButton = view.findViewById(R.id.backButton)
 
         returnerName.text = "반납자: " + outstandingRentalSheet.rentalSheetDto.workerDto.name
         workerName.text = "대여자: " + outstandingRentalSheet.rentalSheetDto.workerDto.name
@@ -70,10 +73,12 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
                             e.printStackTrace()
                         }
                     })
-                    Thread.sleep(1000)
                     requireActivity().supportFragmentManager.popBackStack()
                 }
             }
+        }
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
         }
 
         recyclerView = view.findViewById(R.id.recyclerView)

@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -44,6 +45,8 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     lateinit var qr_checkScanBtn: LinearLayout
     lateinit var qr_checkScanEdit: EditText
 
+    private lateinit var backButton: ImageButton
+
     private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
 
@@ -69,6 +72,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         qr_checkScanBtn = view.findViewById(R.id.qr_checkScanBtn)
         qr_checkScanEdit = view.findViewById(R.id.qr_checkScanEdit)
+        backButton = view.findViewById(R.id.backButton)
 
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
@@ -90,6 +94,9 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             }
         })
 
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
         scanBtn.setOnClickListener {
             qrTextEdit.text.clear()
             qrTextEdit.requestFocus()

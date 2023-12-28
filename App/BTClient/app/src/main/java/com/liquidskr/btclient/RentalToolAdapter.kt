@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
         val toolName: TextView = itemView.findViewById(R.id.ToolName)
         val toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
         val toolCount: TextView = itemView.findViewById(R.id.ToolCount)
+        val deleteBtn: ImageButton = itemView.findViewById(R.id.deleteBtn)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RentalToolViewHolder {
@@ -32,7 +34,6 @@ class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
         holder.toolName.text = currentTool.name
         holder.toolSpec.text = currentTool.spec
         holder.toolCount.text = "1" // count 값을 표시
-
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
             showNumberDialog(holder.toolCount)
         }
@@ -44,6 +45,21 @@ class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
                 selectedToolsToRental.remove(currentTool)
                 holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
             }
+        }
+        holder.deleteBtn.setOnClickListener {
+            var toolIdList = mutableListOf<Long>()
+            for (tool in selectedToolsToRental) {
+                toolIdList.add(tool.id)
+            }
+            val toolIdToRemove = holder.id
+            val indexOfToolToRemove = toolIdList.indexOf(toolIdToRemove)
+            if (indexOfToolToRemove != -1) {
+                selectedToolsToRental.removeAt(indexOfToolToRemove)
+            }
+            val newList = tools.toMutableList()
+            newList.removeAt(holder.adapterPosition)
+            tools = newList
+            notifyDataSetChanged()
         }
     }
 
@@ -85,6 +101,10 @@ class RentalToolAdapter(var tools: List<ToolDtoSQLite>) :
     fun updateList(newList: List<ToolDtoSQLite>) {
         tools = newList
         notifyDataSetChanged()
+    }
+    fun updateCnt(toolId:Long, newCnt:Int) {
+        // 해당 toolId에 대한 위치를 찾기
+
     }
     override fun getItemCount(): Int {
         return tools.size

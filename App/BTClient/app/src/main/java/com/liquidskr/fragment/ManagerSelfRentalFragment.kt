@@ -3,10 +3,14 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -35,6 +39,9 @@ class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var selectAllBtn: ImageButton
     private lateinit var confirmBtn: LinearLayout
     private lateinit var clearBtn: ImageButton
+    private lateinit var qrCodeBtn: LinearLayout
+    private lateinit var qrEditText: EditText
+    private lateinit var backButton: ImageButton
 
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -52,6 +59,7 @@ class ManagerSelfRentalFragment() : Fragment() {
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_self_rental, container, false)
+        var dbHelper = DatabaseHelper(requireContext())
 
         workerSearchBtn = view.findViewById(R.id.BorrowerSearchBtn)
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
@@ -59,7 +67,10 @@ class ManagerSelfRentalFragment() : Fragment() {
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
+        qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
+        qrEditText = view.findViewById(R.id.QREditText)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        backButton = view.findViewById(R.id.backButton)
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -67,11 +78,61 @@ class ManagerSelfRentalFragment() : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        var toolList: List<ToolDtoSQLite> = listOf()
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            toolList = toolList.plus(dbHelper.getToolById(id))
+        }
+        val adapter = RentalToolAdapter(toolList)
+
+        recyclerView.adapter = adapter
         worker = sharedViewModel.worker
         workerName.text = sharedViewModel.worker.name
         leader = sharedViewModel.leader
         leaderName.text = sharedViewModel.leader.name
 
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+        qrCodeBtn.setOnClickListener {
+            if (!qrEditText.isFocused) {
+                qrEditText.requestFocus()
+            }
+        }
+        qrEditText.setOnEditorActionListener { _, actionId, event ->
+            Log.d("tst","textEditted")
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val tbt = qrEditText.text.toString().replace("\n", "")
+
+                Log.d("tst",tbt)
+                try {
+                    if (!(dbHelper.getToolByTBT(tbt).id in sharedViewModel.rentalRequestToolIdList)) {
+                        sharedViewModel.rentalRequestToolIdList.add(dbHelper.getToolByTBT(tbt).id)
+                    } else { // ##########################################
+                        for (tool: ToolDtoSQLite in adapter.tools) {
+                            Log.d("wrf",tool.name)
+                            val holder = recyclerView.findViewHolderForAdapterPosition(adapter.tools.indexOf(tool)) as? RentalToolAdapter.RentalToolViewHolder
+                            var toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
+                            Log.d("wrf",toolCount.toString())
+                            toolCount += 1
+                            holder?.toolCount?.text = toolCount.toString()
+                        }
+                    }
+                    recyclerViewUpdate(adapter)
+
+                } catch (e: UninitializedPropertyAccessException) {
+                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+                qrEditText.text.clear()
+
+                // Use a Handler to set focus after a delay
+                Handler().postDelayed({
+                    qrEditText.requestFocus()
+                }, 100) // You can adjust the delay as needed
+
+                return@setOnEditorActionListener true
+            }
+            false
+        }
         workerSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(1) // type = 1
             requireActivity().supportFragmentManager.beginTransaction()
@@ -148,14 +209,15 @@ class ManagerSelfRentalFragment() : Fragment() {
             recyclerView.adapter = adapter
         }
 
+        return view
+    }
+    fun recyclerViewUpdate(adapter: RentalToolAdapter) {
         var dbHelper = DatabaseHelper(requireContext())
         var toolList: List<ToolDtoSQLite> = listOf()
         for (id in sharedViewModel.rentalRequestToolIdList) {
             toolList = toolList.plus(dbHelper.getToolById(id))
         }
-        val adapter = RentalToolAdapter(toolList)
+        adapter.updateList(toolList)
         recyclerView.adapter = adapter
-
-        return view
     }
 }

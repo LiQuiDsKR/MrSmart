@@ -26,6 +26,8 @@ import java.lang.reflect.Type
 class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
+    lateinit var refreshBtn: ImageButton
+
     val worker = worker
 
     lateinit var welcomeMessage: TextView
@@ -41,6 +43,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
+        refreshBtn = view.findViewById(R.id.refreshBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -53,7 +56,9 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
                 .commit()
         }
         recyclerView.adapter = adapter
-
+        refreshBtn.setOnClickListener {
+            getOutstandingRentalSheetList()
+        }
 
         rentalBtn.setOnClickListener {
             val lobbyActivity = activity as? LobbyActivity
