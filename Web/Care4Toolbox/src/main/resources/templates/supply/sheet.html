@@ -38,8 +38,8 @@
 									<div class="custom-select style--two mr-4" style="max-width:100px;">
 										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
 											<option value="part">부서</option>
-											<option value="worker" selected>작업자</option>
-											<option value="leader">리더</option>
+											<option value="worker" selected>작업자/리더</option>
+											<option value="leader" hidden>리더</option>
 											<option value="tool">공기구</option>
 										</select>
 									</div>
@@ -148,7 +148,7 @@
 							<div class="modal-body">
 								<div class="media flex-column flex-sm-row">
 									<div class="contact-account-setting media-body">
-										<h4 id="membershipModalHeader" class="font-20 mb-3">작업자명을 입력하세요</h4>
+										<h4 id="membershipModalHeader" class="font-20 mb-3">사원명을 입력하세요</h4>
 										<div class="form-group mb-3">
 											<label id="membershipLabel">사번 : 120022 / 부서 :
 												선강정비실1/정비안전지원섹션/정비안전지원팀</label>
@@ -296,11 +296,11 @@
 				`/supply/sheet/getpage`,
 				{
 					partId: $('#searchBySelect').val()==="part"?mainData.part.id:0,
-					membershipId:$('#searchBySelect').val()==="worker"||$('#searchBySelect').val()==="leader"?mainData.membership.id:0,
+					membershipId:$('#searchBySelect').val()==="membership"?mainData.membership.id:0,
 					toolId: $('#searchBySelect').val()==="tool"?mainData.tool.id:0,
-					isWorker: $('#searchBySelect').val()==="worker",
-					isLeader: $('#searchBySelect').val()==="leader",
-					isApprover: true,
+					isWorker: $('#searchBySelect').val()==="membership",
+					isLeader: $('#searchBySelect').val()==="membership",
+					isApprover: $('#searchBySelect').val()==="membership",
 					page: 0,
 					size: 100,
 					startDate: $('#start-date').val(),
@@ -450,6 +450,7 @@
 				break;
 				case "worker":
 				case "leader":
+				case "membership":
 					membership.classList.toggle("d-flex",true);
 					membership.classList.toggle("d-none",false);
 					part.classList.toggle("d-flex",false);
@@ -474,7 +475,7 @@
 			"membership": {
 				"id": 0,
 				"name": "",
-				"type": "worker"
+				//"type": "worker"
 			},
 			"tool":{
 				"id":0,

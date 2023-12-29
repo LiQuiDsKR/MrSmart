@@ -110,18 +110,19 @@ public class RentalSheetService {
 	 * 						stockStatus
 	 * 					]
 	 * 			]
-	 * 		outstandingSheet
+	 * 		outstandingRentalSheet
 	 * ]
 	 * 
 	 * @param formDto
 	 */
 	@Transactional
 	public RentalSheetDto addNew(RentalRequestSheetDto requestSheetDto, long approverId) {
+		
+		//parameter null check
 		Optional<Membership> worker = membershipRepository.findById(requestSheetDto.getWorkerDto().getId());
 		Optional<Membership> leader = membershipRepository.findById(requestSheetDto.getLeaderDto().getId());
 		Optional<Membership> approver = membershipRepository.findById(approverId);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(requestSheetDto.getToolboxDto().getId());
-		
 	    if (worker.isEmpty()) {
 	        logger.debug("Worker not found");
 	        throw new IllegalArgumentException("Worker not found");
@@ -139,6 +140,8 @@ public class RentalSheetService {
 	        throw new IllegalArgumentException("Toolbox not found");
 	    }
 		
+	    
+	    //sheet create
 		RentalSheet rentalSheet = RentalSheet.builder()
 				.worker(worker.get())
 				.leader(leader.get())
@@ -147,30 +150,40 @@ public class RentalSheetService {
 				.eventTimestamp(LocalDateTime.now())
 				.build()
 				;
-		
 		RentalSheet savedRentalSheet = repository.save(rentalSheet);
 		
-		List<RentalTool> toolList = new ArrayList<RentalTool>();
 		
+		//tool create
+		List<RentalTool> toolList = new ArrayList<RentalTool>();
 		List<RentalRequestToolDto> supplyRequestToolList = new ArrayList<RentalRequestToolDto>(); 
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
+			//supplyTool
 			if (tool.getToolDto().getSubGroupDto().getMainGroupDto().getName().equals("소모자재")) {
 				supplyRequestToolList.add(tool);
 				continue;
 			}
+			//rentalTool
 			RentalTool newTool = rentalToolService.addNew(tool, savedRentalSheet, requestSheetDto);
 			toolList.add(newTool);
 			logger.info(newTool.getTool().getName()+" added to RentalSheet:"+savedRentalSheet.getId());
 		}
+		
+		//supplySheet
 		if(supplyRequestToolList.size()>0) {
 			supplySheetService.addNew(requestSheetDto,supplyRequestToolList, approverId);
 		}
 		
-		RentalSheetDto result=convertToDto(savedRentalSheet);
-		
-		outstandingRentalSheetService.addNew(savedRentalSheet, toolList);
-		
-		return result;
+		//outstandingSheet
+		if(toolList.isEmpty()) {
+			repository.delete(savedRentalSheet);
+			return null;
+		}else {
+			RentalSheetDto result=convertToDto(savedRentalSheet);
+			
+			outstandingRentalSheetService.addNew(savedRentalSheet, toolList);
+			
+			return result;
+		}
 	}
 	
 	/**

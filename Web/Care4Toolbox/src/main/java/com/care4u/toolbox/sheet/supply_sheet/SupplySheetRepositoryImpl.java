@@ -87,7 +87,7 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 			QSupplyTool sTool = QSupplyTool.supplyTool;
 			
 			List<SupplySheet> content = queryFactory
-                .select(sSheet)
+                .selectDistinct(sSheet)
                 .from(sTool)
                 .join(sTool.supplySheet,sSheet)
                 .where(

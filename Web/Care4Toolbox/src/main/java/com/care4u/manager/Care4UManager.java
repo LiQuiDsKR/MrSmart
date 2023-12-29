@@ -310,6 +310,15 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					handler.sendData(keyword + GsonUtils.toJson(sheetList));
 				}
 				break;
+			case OUTSTANDING_RENTAL_SHEET_BY_TAG:
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tag = jsonObj.getString("tag");
+					
+			        OutstandingRentalSheetDto sheetList = outstandingRentalSheetService.get(tag);
+					handler.sendData(keyword + GsonUtils.toJson(sheetList));
+				}
+				break;
 			case RETURN_SHEET_REQUEST:
 				if (!(paramJson.isEmpty() || paramJson==null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
