@@ -40,14 +40,27 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	    private BooleanExpression searchPartEquals(Long partId) {
 	    	return (partId == null || partId == 0) ? null :
 	    		QSupplySheet.supplySheet.leader.part.id.eq(partId)
-		    	.or(QSupplySheet.supplySheet.leader.part.subPart != null ? QSupplySheet.supplySheet.leader.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
-		    	.or(QSupplySheet.supplySheet.leader.part.subPart.mainPart != null ? QSupplySheet.supplySheet.leader.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
+		    	.or(QSupplySheet.supplySheet.leader.part.subPart != null ?
+		    			QSupplySheet.supplySheet.leader.part.subPart.id.eq(partId) 
+		    			.or(QSupplySheet.supplySheet.leader.part.subPart.mainPart != null ?
+		    					QSupplySheet.supplySheet.leader.part.subPart.mainPart.id.eq(partId)
+		    					: Expressions.asBoolean(true).isTrue())
+		    			: Expressions.asBoolean(true).isTrue())
 		    	.or(QSupplySheet.supplySheet.worker.part.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.worker.part.subPart != null ? QSupplySheet.supplySheet.worker.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
-		    	.or(QSupplySheet.supplySheet.worker.part.subPart.mainPart != null ? QSupplySheet.supplySheet.worker.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
+		    	.or(QSupplySheet.supplySheet.worker.part.subPart != null ?
+		    			QSupplySheet.supplySheet.worker.part.subPart.id.eq(partId)
+		    			.or(QSupplySheet.supplySheet.worker.part.subPart.mainPart != null ?
+		    					QSupplySheet.supplySheet.worker.part.subPart.mainPart.id.eq(partId)
+		    					: Expressions.asBoolean(true).isTrue())
+		    			: Expressions.asBoolean(true).isTrue())
 		    	.or(QSupplySheet.supplySheet.approver.part.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.approver.part.subPart != null ? QSupplySheet.supplySheet.approver.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
-		    	.or(QSupplySheet.supplySheet.approver.part.subPart.mainPart != null ? QSupplySheet.supplySheet.approver.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue());
+		    	.or(QSupplySheet.supplySheet.approver.part.subPart != null ?
+		    			QSupplySheet.supplySheet.approver.part.subPart.id.eq(partId)
+		    			.or(QSupplySheet.supplySheet.approver.part.subPart.mainPart != null ?
+		    					QSupplySheet.supplySheet.approver.part.subPart.mainPart.id.eq(partId)
+		    					: Expressions.asBoolean(true).isTrue())
+		    			: Expressions.asBoolean(true).isTrue())
+		    	;
 		}
 	    
 	    private BooleanExpression searchWorkerEquals(Membership membership) {
