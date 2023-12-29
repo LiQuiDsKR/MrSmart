@@ -30,6 +30,9 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	        this.queryFactory = new JPAQueryFactory(entityManager);
 	    }
 
+	    /**
+	     * @deprecated
+	     */
 	    private BooleanExpression searchRoleEquals(Role searchRole){
 	        return searchRole == null ? null : QMembership.membership.role.eq(searchRole);
 	    }
@@ -37,15 +40,15 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	    private BooleanExpression searchPartEquals(Long partId) {
 	    	return (partId == null || partId == 0) ? null :
 	    		QSupplySheet.supplySheet.leader.part.id.eq(partId)
-		    	.or(QSupplySheet.supplySheet.leader.part.subPart.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.leader.part.subPart.mainPart.id.eq(partId))
+		    	.or(QSupplySheet.supplySheet.leader.part.subPart != null ? QSupplySheet.supplySheet.leader.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
+		    	.or(QSupplySheet.supplySheet.leader.part.subPart.mainPart != null ? QSupplySheet.supplySheet.leader.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
 		    	.or(QSupplySheet.supplySheet.worker.part.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.worker.part.subPart.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.worker.part.subPart.mainPart.id.eq(partId))
+		    	.or(QSupplySheet.supplySheet.worker.part.subPart != null ? QSupplySheet.supplySheet.worker.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
+		    	.or(QSupplySheet.supplySheet.worker.part.subPart.mainPart != null ? QSupplySheet.supplySheet.worker.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
 		    	.or(QSupplySheet.supplySheet.approver.part.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.approver.part.subPart.id.eq(partId))
-		    	.or(QSupplySheet.supplySheet.approver.part.subPart.mainPart.id.eq(partId));
-	    }
+		    	.or(QSupplySheet.supplySheet.approver.part.subPart != null ? QSupplySheet.supplySheet.approver.part.subPart.id.eq(partId) : Expressions.asBoolean(true).isTrue())
+		    	.or(QSupplySheet.supplySheet.approver.part.subPart.mainPart != null ? QSupplySheet.supplySheet.approver.part.subPart.mainPart.id.eq(partId) : Expressions.asBoolean(true).isTrue());
+		}
 	    
 	    private BooleanExpression searchWorkerEquals(Membership membership) {
 	    	return membership == null? null :
@@ -76,8 +79,7 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	    
 	    //supplyTool join하고 사용합시다.
 	    private BooleanExpression searchToolEquals(Tool tool) {
-	    	return tool == null ? null :
-	    		QSupplyTool.supplyTool.tool.eq(tool);
+	    	return tool == null ? Expressions.asBoolean(true).isTrue() : QSupplyTool.supplyTool.tool.eq(tool);
 	    }
 
 		@Override
