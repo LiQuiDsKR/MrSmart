@@ -47,9 +47,7 @@ public class SupplyToolService {
 	private final SupplyToolRepository repository;
 	private final ToolRepository toolRepository;
 	private final StockStatusService stockStatusService;
-	private final SupplyToolRepository supplyToolRepository;
 	private final MembershipRepository membershipRepository;
-	private final ToolboxRepository toolboxRepository;
 	private final PartRepository partRepository;
 	private final SubPartRepository subPartRepository;
 	private final MainPartRepository mainPartRepository;
