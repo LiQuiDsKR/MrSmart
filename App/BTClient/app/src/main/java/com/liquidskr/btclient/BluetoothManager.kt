@@ -171,15 +171,24 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             sendMsg += ",".toByteArray(Charsets.UTF_8)
             sendMsg += params.toByteArray(Charsets.UTF_8)
 
+            val messageSize = sendMsg.size
+            val bufferSize = 1024
+            var offset = 0
+            while (offset < messageSize) {
+                val end =
+                    if (offset + bufferSize < messageSize) offset + bufferSize else messageSize
+                val chunk = sendMsg.copyOfRange(offset, end)
 
-            val sizeBytes = ByteBuffer.allocate(4).putInt(sendMsg.size).array() // 크기를 4바이트로 변환
+                val sizeBytes = ByteBuffer.allocate(4).putInt(chunk.size).array() // 크기를 4바이트로 변환
+                val finalMessage = sizeBytes + chunk
+                Log.d("finalMessage", byteArrayToHex(finalMessage))
 
-            val finalMessage = sizeBytes + sendMsg
-            Log.d("finalMessage", byteArrayToHex(finalMessage))
+                outputStream.write(finalMessage)
+                outputStream.flush()
 
-            outputStream.write(finalMessage)
-            outputStream.flush()
-            Log.d("SEND", type.name)
+                offset += bufferSize
+                Log.d("SEND", String(finalMessage))
+            }
         } catch (e: Exception) {
             // 전송 중 에러
             callback.onError(e)
@@ -208,7 +217,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private fun processData(data: ByteArray) {
 
         val receivedString = String(data, Charsets.UTF_8)
-
         val (type, jsonString) = parseInputString(receivedString)
 
 
@@ -322,6 +330,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
             RequestType.TAG_GROUP.name -> {
                 val type: Type = object : TypeToken<TagDto>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
+                val type: Type = object : TypeToken<OutstandingRentalSheetDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
         }

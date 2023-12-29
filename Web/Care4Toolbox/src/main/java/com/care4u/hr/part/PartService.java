@@ -114,7 +114,10 @@ public class PartService {
 
 	public List<PartDto> getByName(String name) {
 		List<Part> list = repository.findByNameContaining(name);
+		List<SubPart> sList = subPartRepository.findByNameContaining(name);
+		for (SubPart s : sList) {
+			list.addAll(repository.findAllBySubPartOrderByNameAsc(s));
+		}
 		return getDtoList(list);
 	}
-
 }

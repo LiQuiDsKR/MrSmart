@@ -4,13 +4,16 @@ import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +35,8 @@ class ManagerReturnFragment() : Fragment() {
     private lateinit var bluetoothManager: BluetoothManager
     lateinit var searchSheetEdit: EditText
     lateinit var sheetSearchBtn: ImageButton
+    lateinit var qrCodeBtn: LinearLayout
+    lateinit var qrEditText: EditText
     lateinit var outStandingRentalSheetList: List<OutstandingRentalSheetDto>
     var selectedCategory = "리더명"
     val gson = Gson()
@@ -45,6 +50,8 @@ class ManagerReturnFragment() : Fragment() {
         searchTypeSpinner = view.findViewById(R.id.SearchTypeSpinner)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
+        qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
+        qrEditText = view.findViewById(R.id.QREditText)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
@@ -61,6 +68,35 @@ class ManagerReturnFragment() : Fragment() {
             if (selectedCategory == "작업자명") filterByWorker(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
             if (selectedCategory == "공기구명") filterByToolName(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
 
+        }
+        qrCodeBtn.setOnClickListener {
+            if (!qrEditText.isFocused) {
+                qrEditText.requestFocus()
+            }
+        }
+        qrEditText.setOnEditorActionListener { _, actionId, event ->
+            Log.d("tst","textEditted")
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val tag = qrEditText.text.toString().replace("\n", "")
+                bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{\"tag\":${tag}}",object:BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
+                        val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerView, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+
+                return@setOnEditorActionListener true
+            }
+            false
         }
 
         val category1Data = arrayOf("리더명", "작업자명", "공기구명")

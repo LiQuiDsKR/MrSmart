@@ -358,8 +358,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				String tag = jsonObj.getString("tag");
 				
-				OutstandingRentalSheetDto sheetList = outstandingRentalSheetService.get(tag);
-				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+				OutstandingRentalSheetDto sheet = outstandingRentalSheetService.get(tag);
+				handler.sendData(keyword + GsonUtils.toJson(sheet));
 			}
 			break;
 		case RETURN_SHEET_REQUEST:

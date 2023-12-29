@@ -45,6 +45,8 @@ class ToolFindFragment() : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
+        sharedViewModel.rentalRequestToolIdList.clear()
+
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
         val adapter = ToolAdapter(tools) {
@@ -56,7 +58,6 @@ class ToolFindFragment() : Fragment() {
                 toolIdList.add(tool.id) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
             }
             sharedViewModel.rentalRequestToolIdList.addAll(toolIdList)
-
             requireActivity().supportFragmentManager.popBackStack()
         }
         searchBtn.setOnClickListener {
