@@ -20,7 +20,7 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RentalRequestToolViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_rentaltool, parent, false)
+            .inflate(R.layout.fragment_rentalrequesttool, parent, false)
         return RentalRequestToolViewHolder(itemView)
     }
 
