@@ -40,5 +40,9 @@ public class SupplySheetController {
     public String supplySheet(Model model) {
     	return "supply/sheet";
     }
+    @GetMapping(value = "sheet/tool")
+    public String supplyTool(Model model) {
+    	return "supply/sheet_tool";
+    }
     
 }
