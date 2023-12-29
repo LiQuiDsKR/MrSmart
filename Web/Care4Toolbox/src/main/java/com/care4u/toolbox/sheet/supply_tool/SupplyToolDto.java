@@ -30,13 +30,13 @@ public class SupplyToolDto {
 	
 	private LocalDate replacementDate;
 	
-	private MembershipDto worker;
+	private MembershipDto workerDto;
 	
-	private MembershipDto leader;
+	private MembershipDto leaderDto;
 	
-	private MembershipDto approver;
+	private MembershipDto approverDto;
 	
-	private ToolboxDto toolbox;
+	private ToolboxDto toolboxDto;
 	
 	private LocalDateTime eventTimestamp;
 	
@@ -53,10 +53,10 @@ public class SupplyToolDto {
 		this.toolDto = new ToolDto(supplyTool.getTool());
 		this.count = supplyTool.getCount();
 		this.replacementDate = supplyTool.getReplacementDate();
-		this.worker = new MembershipDto(supplyTool.getSupplySheet().getWorker());
-		this.leader = new MembershipDto(supplyTool.getSupplySheet().getLeader());
-		this.approver = new MembershipDto(supplyTool.getSupplySheet().getApprover());
-		this.toolbox = new ToolboxDto(supplyTool.getSupplySheet().getToolbox());
+		this.workerDto = new MembershipDto(supplyTool.getSupplySheet().getWorker());
+		this.leaderDto = new MembershipDto(supplyTool.getSupplySheet().getLeader());
+		this.approverDto = new MembershipDto(supplyTool.getSupplySheet().getApprover());
+		this.toolboxDto = new ToolboxDto(supplyTool.getSupplySheet().getToolbox());
 		this.eventTimestamp = supplyTool.getSupplySheet().getEventTimestamp();
 	}
 	
