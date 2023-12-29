@@ -83,15 +83,15 @@ public class PartsRestController {
     	
         Pageable pageable = PageRequest.of(page,size);
         List<PartDto> partList = partService.getByName(name);
-        List<SubPartDto> subPartList = subPartService.getByName(name);
-        List<MainPartDto> mainPartList = mainPartService.getByName(name);
+        //List<SubPartDto> subPartList = subPartService.getByName(name);
+        //List<MainPartDto> mainPartList = mainPartService.getByName(name);
         List<PartWrapperDto> partsList = new ArrayList<PartWrapperDto>();
-        for (MainPartDto p : mainPartList) {
-        	partsList.add(new PartWrapperDto(p));
-        }
-        for (SubPartDto p : subPartList) {
-        	partsList.add(new PartWrapperDto(p));
-        }
+//        for (MainPartDto p : mainPartList) {
+//        	partsList.add(new PartWrapperDto(p));
+//        }
+//        for (SubPartDto p : subPartList) {
+//        	partsList.add(new PartWrapperDto(p));
+//        }
         for (PartDto p : partList) {
         	partsList.add(new PartWrapperDto(p));
         }

@@ -34,6 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
+            	.antMatchers("/css/**","/js/**","/img/**","/plugins/**","/fonts/**","/bootstrap/**","/images/**","/sass/**").permitAll()
             	.antMatchers("/membership/login","/membership/login/error").permitAll()
                 .antMatchers("/**").hasAnyRole(Role.USER.name(),Role.ADMIN.name(),Role.MANAGER.name())
                 .anyRequest().authenticated()
@@ -49,11 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutRequestMatcher(new AntPathRequestMatcher("/membership/logout"))
                 .logoutSuccessUrl("/")
             ;
-    }
-    
-    @Override
-    public void configure(WebSecurity web) throws Exception{
-    	web.ignoring().antMatchers("/css/**","/js/**","/img/**","/plugins/**","/fonts/**","/bootstrap/**","/images/**","/sass/**");
     }
     
     @Override

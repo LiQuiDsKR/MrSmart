@@ -3,9 +3,12 @@ package com.care4u.toolbox.sheet.supply_sheet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 
+import org.apache.log4j.Logger;
 import org.hibernate.sql.Select;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -13,8 +16,12 @@ import org.springframework.data.domain.Pageable;
 
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.Role;
+import com.care4u.hr.main_part.QMainPart;
 import com.care4u.hr.membership.Membership;
+import com.care4u.hr.membership.MembershipRestController;
 import com.care4u.hr.membership.QMembership;
+import com.care4u.hr.part.QPart;
+import com.care4u.hr.sub_part.QSubPart;
 import com.care4u.toolbox.sheet.supply_tool.QSupplyTool;
 import com.care4u.toolbox.tool.Tool;
 import com.querydsl.core.types.Projections;
@@ -25,6 +32,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	  private final JPAQueryFactory queryFactory;
+	  
+	  private static final Logger logger = Logger.getLogger(SupplySheetRepositoryImpl.class);
 
 	    public SupplySheetRepositoryImpl(EntityManager entityManager) {
 	        this.queryFactory = new JPAQueryFactory(entityManager);
@@ -44,47 +53,32 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 		    			QSupplySheet.supplySheet.leader.part.subPart.id.eq(partId) 
 		    			.or(QSupplySheet.supplySheet.leader.part.subPart.mainPart != null ?
 		    					QSupplySheet.supplySheet.leader.part.subPart.mainPart.id.eq(partId)
-		    					: Expressions.asBoolean(true).isTrue())
-		    			: Expressions.asBoolean(true).isTrue())
+		    					: Expressions.asBoolean(false).isTrue())
+		    			: Expressions.asBoolean(false).isTrue())
 		    	.or(QSupplySheet.supplySheet.worker.part.id.eq(partId))
 		    	.or(QSupplySheet.supplySheet.worker.part.subPart != null ?
 		    			QSupplySheet.supplySheet.worker.part.subPart.id.eq(partId)
 		    			.or(QSupplySheet.supplySheet.worker.part.subPart.mainPart != null ?
 		    					QSupplySheet.supplySheet.worker.part.subPart.mainPart.id.eq(partId)
-		    					: Expressions.asBoolean(true).isTrue())
-		    			: Expressions.asBoolean(true).isTrue())
+		    					: Expressions.asBoolean(false).isTrue())
+		    			: Expressions.asBoolean(false).isTrue())
 		    	.or(QSupplySheet.supplySheet.approver.part.id.eq(partId))
 		    	.or(QSupplySheet.supplySheet.approver.part.subPart != null ?
 		    			QSupplySheet.supplySheet.approver.part.subPart.id.eq(partId)
 		    			.or(QSupplySheet.supplySheet.approver.part.subPart.mainPart != null ?
 		    					QSupplySheet.supplySheet.approver.part.subPart.mainPart.id.eq(partId)
-		    					: Expressions.asBoolean(true).isTrue())
-		    			: Expressions.asBoolean(true).isTrue())
+		    					: Expressions.asBoolean(false).isTrue())
+		    			: Expressions.asBoolean(false).isTrue())
 		    	;
 		}
-	    
-	    private BooleanExpression searchWorkerEquals(Membership membership) {
-	    	return membership == null? null :
-	    		QSupplySheet.supplySheet.worker.eq(membership);
-	    }
-	    
-	    private BooleanExpression searchLeaderEquals(Membership membership) {
-	    	return membership == null? null :
-	    		QSupplySheet.supplySheet.leader.eq(membership);
-	    }
-	    
-	    private BooleanExpression searchApproverEquals(Membership membership) {
-	    	return membership == null? null :
-	    		QSupplySheet.supplySheet.approver.eq(membership);
-	    }
 	    
 	    private BooleanExpression searchMembershipEquals(Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover) {
 	    	if (membership == null) {
 	    		return Expressions.asBoolean(true).isTrue();
 	    	}else {
-		    	BooleanExpression worker = isWorker? searchWorkerEquals(membership) : Expressions.asBoolean(true).isTrue();
-		    	BooleanExpression leader = isLeader? searchLeaderEquals(membership) : Expressions.asBoolean(true).isTrue();
-		    	BooleanExpression approver = isApprover? searchApproverEquals(membership) : Expressions.asBoolean(true).isTrue();
+		    	BooleanExpression worker = isWorker? QSupplySheet.supplySheet.worker.eq(membership) : Expressions.asBoolean(false).isTrue();
+		    	BooleanExpression leader = isLeader? QSupplySheet.supplySheet.leader.eq(membership) : Expressions.asBoolean(false).isTrue();
+		    	BooleanExpression approver = isApprover? QSupplySheet.supplySheet.approver.eq(membership) : Expressions.asBoolean(false).isTrue();
 		    	
 		    	return worker.or(leader).or(approver);
 	    	}
@@ -100,6 +94,8 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 				Boolean isLeader, Boolean isApprover, Tool tool, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
 			QSupplySheet sSheet = QSupplySheet.supplySheet;
 			QSupplyTool sTool = QSupplyTool.supplyTool;
+			QSubPart sSubPart = QSubPart.subPart;
+			QMainPart sMainPart = QMainPart.mainPart;
 			
 			List<SupplySheet> content = queryFactory
                 .selectDistinct(sSheet)
