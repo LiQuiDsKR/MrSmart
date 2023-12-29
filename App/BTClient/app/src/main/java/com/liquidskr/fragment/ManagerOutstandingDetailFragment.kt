@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -47,6 +48,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
 
     lateinit var qrEditText: EditText
     lateinit var qrcodeBtn: LinearLayout
+    private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
@@ -66,6 +68,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
 
         qrEditText = view.findViewById((R.id.QR_EditText))
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
+        backButton = view.findViewById(R.id.backButton)
 
         returnerName.text = "반납자: " + outstandingSheet.rentalSheetDto.workerDto.name
         workerName.text = "대여자: " + outstandingSheet.rentalSheetDto.workerDto.name
@@ -156,6 +159,9 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
             false
         }
 
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
         confirmBtn.setOnClickListener {
             var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->

@@ -18,14 +18,16 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
-class WorkerLobbyFragment(worker: Membership) : Fragment() {
+class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
+    lateinit var refreshBtn: ImageButton
+
     val worker = worker
 
     lateinit var welcomeMessage: TextView
@@ -41,6 +43,7 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
+        refreshBtn = view.findViewById(R.id.refreshBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -53,7 +56,9 @@ class WorkerLobbyFragment(worker: Membership) : Fragment() {
                 .commit()
         }
         recyclerView.adapter = adapter
-
+        refreshBtn.setOnClickListener {
+            getOutstandingRentalSheetList()
+        }
 
         rentalBtn.setOnClickListener {
             val lobbyActivity = activity as? LobbyActivity

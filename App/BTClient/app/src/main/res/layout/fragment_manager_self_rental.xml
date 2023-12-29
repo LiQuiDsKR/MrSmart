@@ -32,7 +32,7 @@
                     android:orientation="horizontal">
 
                     <ImageButton
-                        android:id="@+id/imageButton"
+                        android:id="@+id/backButton"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="#00FFFFFF"
@@ -188,23 +188,41 @@
                     android:padding="15dp">
 
                     <LinearLayout
-                        android:id="@+id/qr_scantBtn"
+                        android:id="@+id/QRcodeBtn"
                         android:layout_width="150dp"
                         android:layout_height="48dp"
                         android:layout_marginLeft="10dp"
+                        android:background="@drawable/edittext_rounded_bg"
+                        android:backgroundTint="#FEA039"
                         android:gravity="center"
                         android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView4"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="10dp"
+                            app:srcCompat="@drawable/scan" />
+
+                        <TextView
+                            android:id="@+id/textView5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:text="QR 코드"
+                            android:textColor="#FFFFFF" />
 
 
                     </LinearLayout>
 
                     <EditText
-                        android:id="@+id/QR_EditText"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:id="@+id/QREditText"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
                         android:background="#00FFFFFF"
                         android:ems="10"
-                        android:inputType="text"
+                        android:inputType="textMultiLine"
                         android:textColor="#00000000"
                         android:textSize="0sp" />
 

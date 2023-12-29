@@ -14,9 +14,9 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.mrsmart.standard.membership.Membership
+import com.mrsmart.standard.membership.MembershipDto
 
-class ManagerLobbyFragment(manager: Membership) : Fragment() {
+class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
     lateinit var rentalBtn: ImageButton
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton

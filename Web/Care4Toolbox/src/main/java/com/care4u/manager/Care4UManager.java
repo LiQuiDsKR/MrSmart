@@ -1,15 +1,12 @@
 package com.care4u.manager;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -25,31 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.care4u.common.GlobalConstants;
 import com.care4u.common.GsonUtils;
 import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
-import com.care4u.constant.EmploymentState;
 import com.care4u.constant.RequestType;
-import com.care4u.constant.Role;
 import com.care4u.constant.SheetState;
-import com.care4u.domain.Message;
-import com.care4u.hr.main_part.MainPartService;
-import com.care4u.hr.membership.MembershipDto;
-import com.care4u.hr.membership.MembershipSearchDto;
 import com.care4u.hr.membership.MembershipService;
-import com.care4u.hr.part.PartService;
-import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.service.LogWriterService;
-import com.care4u.toolbox.group.main_group.MainGroupDto;
-import com.care4u.toolbox.group.main_group.MainGroupService;
-import com.care4u.toolbox.group.sub_group.SubGroupService;
-import com.care4u.toolbox.stock_status.StockStatusService;
-import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
@@ -58,18 +38,13 @@ import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDt
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverIdDto;
-import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
-import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelDto;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 
 import lombok.RequiredArgsConstructor;
 
@@ -79,31 +54,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Care4UManager.class);
 	
-	private final LogWriterService mLogWriterService;
-	
-	@Autowired
-	private MainPartService mainPartService;
-	
-	@Autowired
-	private SubPartService subPartService;
-	
-	@Autowired
-	private PartService partService;
-	
 	@Autowired
 	private MembershipService membershipService;
 	
 	@Autowired
-	private MainGroupService mainGroupService;
-	
-	@Autowired
-	private SubGroupService subGroupService;
-	
-	@Autowired
 	private ToolService toolService;
-	
-	@Autowired
-	private StockStatusService stockStatusService;
 	
 	@Autowired
 	private RentalRequestSheetService rentalRequestSheetService;
@@ -128,18 +83,17 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		@Override
 		public void onConnected(StreamConnection connection) {
 			// TODO Auto-generated method stub
-			BluetoothCommunicationHandler communicationHandler = new BluetoothCommunicationHandler("macaddress", connection, bluetoothCommunicationHandlerListener); // connection 이 정의되므로 communicationHandler를 정의함
+			new BluetoothCommunicationHandler("macaddress", connection, bluetoothCommunicationHandlerListener); // connection 이 정의되므로 communicationHandler를 정의함
 			logger.debug("클라이언트 연결됨: " + connection.toString());
 		}
 	};
 		
-	private List<BluetoothCommunicationHandler> workersPool = new CopyOnWriteArrayList<BluetoothCommunicationHandler>();
 	private BluetoothCommunicationHandler.Listener bluetoothCommunicationHandlerListener = new BluetoothCommunicationHandler.Listener() {
 		
 		@Override
 		public void onException(BluetoothCommunicationHandler handler, String message) {
 			// TODO Auto-generated method stub
-			
+			logger.error("Error : " + handler.getMacaddress() + ", " + message);
 		}
 		
 		@Override
@@ -150,302 +104,23 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		}
 		
 		@Override
-		public void onDataSent(BluetoothCommunicationHandler handler, int size, String data) {
+		public void onDataSent(BluetoothCommunicationHandler handler, String data) {
 			// TODO Auto-generated method stub
 			logger.info("Sent: " + data);
 		}
 		
 		@Override
-		public void onDataArrived(BluetoothCommunicationHandler handler, int size, String data) {
-			
-			logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
-			String[] datas = data.split(",",2);
-			RequestType type = RequestType.valueOf(datas[0]);
-			String paramJson = null;
-			if (datas.length>1) {				
-				paramJson = datas[1];
-			}
-			String keyword = type.name() + ",";
-			switch(type) {
-			case MEMBERSHIP_ALL_COUNT:
-				handler.sendData(keyword+GsonUtils.toJson(keyword+membershipService.getMembershipCount()));
-				break;
-			case MEMBERSHIP_ALL:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					int page = jsonObj.getInt("page");
-					int pageSize = jsonObj.getInt("size");
-					
-					Pageable pageable = PageRequest.of(page,pageSize);
-					handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipPage(pageable)));
-				}
-				break;
-			case TOOL_ALL_COUNT:
-				handler.sendData(keyword+GsonUtils.toJson(keyword+toolService.getToolCount()));
-				break;
-			case TOOL_ALL:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					int page = jsonObj.getInt("page");
-					int pageSize = jsonObj.getInt("size");
-					
-					Pageable pageable = PageRequest.of(page,pageSize);
-					handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
-				}
-				break;
-			case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					int page = jsonObj.getInt("page");
-					int pageSize = jsonObj.getInt("size");
-					long toolboxId = jsonObj.getLong("toolboxId");
-
-			        Pageable pageable = PageRequest.of(page,pageSize);
-			        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
-					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
-				}
-				break;
-			case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolboxId = jsonObj.getLong("toolboxId");
-
-			        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
-					handler.sendData(keyword + GsonUtils.toJson(sheetList));
-				}
-				break;
-			case RENTAL_REQUEST_SHEET_FORM:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					RentalRequestSheetFormDto formDto;
-			    	try {
-						formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
-			    		rentalRequestSheetService.addNew(formDto);
-			    		handler.sendData(keyword + "good");
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case RENTAL_REQUEST_SHEET_APPROVE:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					RentalRequestSheetWithApproverIdDto mainDto;
-			    	try {
-						mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverIdDto.class);
-						RentalRequestSheetDto sheetDto = mainDto.getRentalRequestSheetDto();
-						long approverId = mainDto.getApproverId();
-						
-			            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
-			            
-			    		handler.sendData(keyword + "good");
-			    	}catch(IllegalStateException e) {
-			    		handler.sendData(keyword + "bad");
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
-				break;
-			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					int page = jsonObj.getInt("page");
-					int pageSize = jsonObj.getInt("size");
-					long membershipId = jsonObj.getLong("membershipId");
-		    		String startDate = jsonObj.getString("startDate");
-					String endDate = jsonObj.getString("endDate");
-
-			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-			        Pageable pageable = PageRequest.of(page,pageSize);
-			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
-			        
-					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
-				}
-				break;
-			case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long membershipId = jsonObj.getLong("membershipId");
-		    		//String startDate = jsonObj.getString("startDate");
-					//String endDate = jsonObj.getString("endDate");
-
-			        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
-			        
-					handler.sendData(keyword + GsonUtils.toJson(sheetList));
-				}
-				break;	
-			case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					int page = jsonObj.getInt("page");
-					int pageSize = jsonObj.getInt("size");
-					long toolboxId = jsonObj.getLong("toolboxId");
-		    		String startDate = jsonObj.getString("startDate");
-					String endDate = jsonObj.getString("endDate");
-
-			        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-			        Pageable pageable = PageRequest.of(page,pageSize);
-			        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
-					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
-				}
-				break;
-			case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolboxId = jsonObj.getLong("toolboxId");
-		    		//String startDate = jsonObj.getString("startDate");
-					//String endDate = jsonObj.getString("endDate");
-
-			        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-			        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-			        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
-					handler.sendData(keyword + GsonUtils.toJson(sheetList));
-				}
-				break;
-			case OUTSTANDING_RENTAL_SHEET_BY_TAG:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					String tag = jsonObj.getString("tag");
-					
-			        OutstandingRentalSheetDto sheetList = outstandingRentalSheetService.get(tag);
-					handler.sendData(keyword + GsonUtils.toJson(sheetList));
-				}
-				break;
-			case RETURN_SHEET_REQUEST:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
-			    	try {
-			    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
-			    		handler.sendData(keyword + "good");
-			    	}catch(IllegalStateException e) {
-			    		handler.sendData(keyword + "bad");
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case RETURN_SHEET_FORM:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-			    	ReturnSheetFormDto formDto;
-			    	try {
-						formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
-			    		returnSheetService.addNew(formDto);
-			    		handler.sendData(keyword + "good");
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case TOOLBOX_TOOL_LABEL_FORM:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolId = jsonObj.getLong("toolId");
-					long toolboxId = jsonObj.getLong("toolboxId");
-					String qrcode = jsonObj.getString("qrcode");
-			    	try {
-						toolboxToolLabelService.register(toolId, toolboxId, qrcode);
-			    		handler.sendData(keyword + "good");
-			    	}catch(IllegalArgumentException e) {
-			    		handler.sendData(e.getMessage());
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case TAG_FORM:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolId = jsonObj.getLong("toolId");
-					long toolboxId = jsonObj.getLong("toolboxId");
-					String tagGroup = jsonObj.getString("tagGroup");
-					JSONArray tagListArray = jsonObj.getJSONArray("tagList");
-			        List<String> tagList = new ArrayList<String>();
-			        for (int i = 0; i < tagListArray.length(); i++) {
-			            tagList.add(tagListArray.getString(i));
-			        }
-
-			    	try {
-						tagService.register(toolId, toolboxId, tagList, tagGroup);
-			    		handler.sendData(keyword + "good");
-			    	}catch(IllegalArgumentException e) {
-			    		handler.sendData(keyword + e.getMessage());
-			    	}catch(Exception e) {
-			    		handler.sendData(keyword + "bad");
-			    	}
-				}
-				break;
-			case TOOLBOX_TOOL_LABEL:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolId = jsonObj.getLong("toolId");
-					long toolboxId = jsonObj.getLong("toolboxId");
-					
-					if (toolboxToolLabelService.get(toolId, toolboxId) == null) {
-						handler.sendData(keyword + "null");
-					}					
-					else {	
-						String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
-						handler.sendData(keyword + result);
-					}
-				}
-				break;
-			case TAG_LIST:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					String tagString = jsonObj.getString("tag");				
-					if (tagService.getSiblings(tagString) != null) {
-						List<String> strings= tagService.getSiblings(tagString)
-								.stream()
-								.map(e->e.getMacaddress())
-								.collect(Collectors.toList());
-						handler.sendData(keyword + GsonUtils.toJson(strings));
-					} else {
-						handler.sendData(keyword + "null");
-					}
-					
-				}
-				break;
-			case TAG_ALL:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolboxId = jsonObj.getLong("toolboxId");
-			        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
-					handler.sendData(keyword + GsonUtils.toJson(tagList));
-				}
-				break;
-			case TOOLBOX_TOOL_LABEL_ALL:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					long toolboxId = jsonObj.getLong("toolboxId");
-			        List<ToolboxToolLabelDto> tagList = toolboxToolLabelService.listByToolboxId(toolboxId);
-					handler.sendData(keyword + GsonUtils.toJson(tagList));
-				}
-				break;
-			case TAG_GROUP:
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					JSONObject jsonObj = new JSONObject(paramJson);
-					String tagString = jsonObj.getString("tag");
-					handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
-				}
-			}
+		public void onDataArrived(BluetoothCommunicationHandler handler, String data) {			
+			process(handler, data);
 		}
 		
 		@Override
-		public void onConnected(BluetoothCommunicationHandler handler) {
-			logger.info(handler.toString());
-			
+		public void onConnected(BluetoothCommunicationHandler handler) {			
 			// TODO Auto-generated method stub
-			/*
+			logger.info(handler.toString());
 			workersPool.add(handler);
+			
+			/*
 			sendMembership(handler);
 			handler.sendData("RESPONSE_FINISH");
 			sendTool(handler);
@@ -458,6 +133,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			Message command = new Message(GlobalConstants.REQUEST_TOOL_LIST, toolDtoList);
 			handler.send(command);
 		}*/
+	};
+	
+	private final List<BluetoothCommunicationHandler> workersPool = new CopyOnWriteArrayList<BluetoothCommunicationHandler>();
+	
+	private Timer timer;
+	private final TimerTask timerTask = new TimerTask(){
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			Iterator<BluetoothCommunicationHandler> iterator = workersPool.iterator();
+			BluetoothCommunicationHandler worker = null;
+			while(iterator.hasNext()) {
+				worker = iterator.next();
+				if (!worker.isValid()) {
+					worker.disconnect();
+					workersPool.remove(worker);
+				}
+			}
+		}
 	};
 	
 	@Override
@@ -480,6 +174,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//membershipService.updatePasswords();
 		//membershipService.downdatePasswords();
 		
+		timer = new Timer();
+		timer.schedule(timerTask, 10 * 1000, 1000);
+		
 		logger.info("Care4UManager  afterPropertiesSet... ");
 	}
 	
@@ -489,64 +186,302 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		
 		logger.info("Care4UManager destroy... ");
 		
+		if (timer != null) {
+		    timer.cancel();
+		    timer = null;
+		}
+		
 		bluetoothServer.destroy();
 		
 		Iterator<BluetoothCommunicationHandler> iterator = workersPool.iterator();
 		while(iterator.hasNext()) {
-			iterator.next().destroy();
+			iterator.next().disconnect();
+		}
+		workersPool.clear();
+	}
+	
+	private void process(BluetoothCommunicationHandler handler, String data) {
+		logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
+		String[] datas = data.split(",",2);
+		RequestType type = RequestType.valueOf(datas[0]);
+		String paramJson = null;
+		if (datas.length>1) {				
+			paramJson = datas[1];
+		}
+		String keyword = type.name() + ",";
+		switch(type) {
+		case MEMBERSHIP_ALL_COUNT:
+			handler.sendData(keyword+GsonUtils.toJson(membershipService.getMembershipCount()));
+			break;
+		case MEMBERSHIP_ALL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				
+				Pageable pageable = PageRequest.of(page,pageSize);
+				handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipPage(pageable)));
+			}
+			break;
+		case TOOL_ALL_COUNT:
+			handler.sendData(keyword+GsonUtils.toJson(toolService.getToolCount()));
+			break;
+		case TOOL_ALL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				
+				Pageable pageable = PageRequest.of(page,pageSize);
+				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				long toolboxId = jsonObj.getLong("toolboxId");
+
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+
+		        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
+				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_FORM:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				RentalRequestSheetFormDto formDto;
+		    	try {
+					formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
+		    		rentalRequestSheetService.addNew(formDto);
+		    		handler.sendData(keyword + "good");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_APPROVE:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				RentalRequestSheetWithApproverIdDto mainDto;
+		    	try {
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverIdDto.class);
+					RentalRequestSheetDto sheetDto = mainDto.getRentalRequestSheetDto();
+					long approverId = mainDto.getApproverId();
+					
+		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
+		            
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
+			break;
+		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				long membershipId = jsonObj.getLong("membershipId");
+	    		String startDate = jsonObj.getString("startDate");
+				String endDate = jsonObj.getString("endDate");
+
+		        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+		        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
+		        
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
+		case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long membershipId = jsonObj.getLong("membershipId");
+	    		//String startDate = jsonObj.getString("startDate");
+				//String endDate = jsonObj.getString("endDate");
+
+		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
+		        
+				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+			}
+			break;	
+		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				long toolboxId = jsonObj.getLong("toolboxId");
+	    		String startDate = jsonObj.getString("startDate");
+				String endDate = jsonObj.getString("endDate");
+
+		        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+		        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
+		case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+	    		//String startDate = jsonObj.getString("startDate");
+				//String endDate = jsonObj.getString("endDate");
+
+		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
+				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+			}
+			break;
+		case OUTSTANDING_RENTAL_SHEET_BY_TAG:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				String tag = jsonObj.getString("tag");
+				
+				OutstandingRentalSheetDto sheetList = outstandingRentalSheetService.get(tag);
+				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+			}
+			break;
+		case RETURN_SHEET_REQUEST:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
+		    	try {
+		    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RETURN_SHEET_FORM:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+		    	ReturnSheetFormDto formDto;
+		    	try {
+					formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
+		    		returnSheetService.addNew(formDto);
+		    		handler.sendData(keyword + "good");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case TOOLBOX_TOOL_LABEL_FORM:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolId = jsonObj.getLong("toolId");
+				long toolboxId = jsonObj.getLong("toolboxId");
+				String qrcode = jsonObj.getString("qrcode");
+		    	try {
+					toolboxToolLabelService.register(toolId, toolboxId, qrcode);
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalArgumentException e) {
+		    		handler.sendData(e.getMessage());
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case TAG_FORM:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolId = jsonObj.getLong("toolId");
+				long toolboxId = jsonObj.getLong("toolboxId");
+				String tagGroup = jsonObj.getString("tagGroup");
+				JSONArray tagListArray = jsonObj.getJSONArray("tagList");
+		        List<String> tagList = new ArrayList<String>();
+		        for (int i = 0; i < tagListArray.length(); i++) {
+		            tagList.add(tagListArray.getString(i));
+		        }
+
+		    	try {
+					tagService.register(toolId, toolboxId, tagList, tagGroup);
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalArgumentException e) {
+		    		handler.sendData(keyword + e.getMessage());
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case TOOLBOX_TOOL_LABEL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolId = jsonObj.getLong("toolId");
+				long toolboxId = jsonObj.getLong("toolboxId");
+				
+				if (toolboxToolLabelService.get(toolId, toolboxId) == null) {
+					handler.sendData(keyword + "null");
+				}					
+				else {	
+					String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
+					handler.sendData(keyword + result);
+				}
+			}
+			break;
+		case TAG_LIST:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				String tagString = jsonObj.getString("tag");				
+				if (tagService.getSiblings(tagString) != null) {
+					List<String> strings= tagService.getSiblings(tagString)
+							.stream()
+							.map(e->e.getMacaddress())
+							.collect(Collectors.toList());
+					handler.sendData(keyword + GsonUtils.toJson(strings));
+				} else {
+					handler.sendData(keyword + "null");
+				}
+				
+			}
+			break;
+		case TAG_ALL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+		        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
+				handler.sendData(keyword + GsonUtils.toJson(tagList));
+			}
+			break;
+		case TOOLBOX_TOOL_LABEL_ALL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+		        List<ToolboxToolLabelDto> tagList = toolboxToolLabelService.listByToolboxId(toolboxId);
+				handler.sendData(keyword + GsonUtils.toJson(tagList));
+			}
+			break;
+		case TAG_GROUP:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				String tagString = jsonObj.getString("tag");
+				handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
+			}
 		}
 	}
 	
 	
-	private void writeDeviceMonitorDto(MainGroupDto dto) {
-		
-		File directoryFile = new File(GlobalConstants.DEVICE_MONITOR_HOME_DIRECTORY);
-		if (!directoryFile.exists()) {
-			directoryFile.mkdir();
-		}
-		
-		String filename = dto.getName().trim();
-		String filepath = directoryFile.getAbsolutePath() + GlobalConstants.FILE_SEPERATOR + filename + "_" + Calendar.getInstance().getTimeInMillis() +".log";
-		
-		FileWriter fw = null;
-		BufferedWriter bw = null;
-		try {
-			fw = new FileWriter(filepath, true);
-			bw = new BufferedWriter(fw);
-			bw.write(GsonUtils.toJson(dto));
-			bw.flush();
-			logger.debug("save : " + filepath);
-			logger.debug("save DeviceMonitorDto : " + dto.toString());
-		} catch (Exception e) {
-			logger.error("Write Error SensorKit File : " + filepath, e);
-			mLogWriterService.write(GlobalConstants.SERVER_LOG, "Error!!! write SensorKit File : " + filepath + ", " + e.toString());
-		} finally{
-			if (bw != null) try{bw.close();} catch (IOException e) {}
-			if (fw != null) try{fw.close();} catch (IOException e) {}
-		}
-	}
-	
-	public String getMembership(BluetoothCommunicationHandler handler) {
-	    List<MembershipDto> memberDtoList = membershipService.list();
-	    Message message = new Message(GlobalConstants.REQUEST_MEMBER_LIST, memberDtoList);	  
-	    logger.info(GsonUtils.toJson(message));
-	    //handler.sendData(GsonUtils.toJson(message));
-	    return GsonUtils.toJson(message);
-	}
-	public String getTool(BluetoothCommunicationHandler handler) {
-		List<ToolDto> toolDtoList = toolService.list();
-	    Message message = new Message(GlobalConstants.REQUEST_TOOL_LIST, toolDtoList);	 
-	    logger.info(GsonUtils.toJson(message));    
-	    //handler.sendData(GsonUtils.toJson(message));
-	    return GsonUtils.toJson(message);
-	}
-	public void sendSize(BluetoothCommunicationHandler handler, String sendingMessage) { // 쓸모없어서 삭제예정
-		int size = sendingMessage.getBytes().length;
-		handler.sendData(Integer.toString(size));
-		logger.info(Integer.toString(size));
-	}
-	public void sendMessage(BluetoothCommunicationHandler handler, String sendingMessage) { // 쓸모없어서 삭제예정
-		handler.sendData(sendingMessage);
-	}
 }
 

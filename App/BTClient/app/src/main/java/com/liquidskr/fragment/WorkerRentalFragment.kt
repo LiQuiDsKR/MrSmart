@@ -40,6 +40,7 @@ class WorkerRentalFragment() : Fragment() {
     lateinit var selectAllBtn: ImageButton
     lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: ImageButton
+    lateinit var backButton: ImageButton
 
 
     lateinit var workerName: TextView
@@ -69,12 +70,15 @@ class WorkerRentalFragment() : Fragment() {
         selectAllBtn = view.findViewById(R.id.SelectAllBtn)
         confirmBtn = view.findViewById(R.id.confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
+        backButton = view.findViewById(R.id.backButton)
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val adapter = RentalToolAdapter(emptyList())
 
         worker = sharedViewModel.loginWorker
         workerName.text = sharedViewModel.loginWorker.name
@@ -84,6 +88,9 @@ class WorkerRentalFragment() : Fragment() {
         Log.d("asdf", worker.toString())
         Log.d("asdf", sharedViewModel.worker.toString())
 
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
         leaderSearchBtn.setOnClickListener {
             val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
@@ -105,8 +112,18 @@ class WorkerRentalFragment() : Fragment() {
                 try {
                     if (!(dbHelper.getToolByTBT(tbt).id in sharedViewModel.rentalRequestToolIdList)) {
                         sharedViewModel.rentalRequestToolIdList.add(dbHelper.getToolByTBT(tbt).id)
+                    } else { // ##########################################
+                        for (tool: ToolDtoSQLite in adapter.tools) {
+                            Log.d("wrf",tool.name)
+                            val holder = recyclerView.findViewHolderForAdapterPosition(adapter.tools.indexOf(tool)) as? RentalToolAdapter.RentalToolViewHolder
+                            var toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
+                            Log.d("wrf",toolCount.toString())
+                            toolCount += 1
+                            holder?.toolCount?.text = toolCount.toString()
+
+                        }
                     }
-                    recyclerViewUpdate()
+                    recyclerViewUpdate(adapter)
 
                     Log.d("tst","tooladded")
                 } catch (e: UninitializedPropertyAccessException) {
@@ -181,13 +198,10 @@ class WorkerRentalFragment() : Fragment() {
         clearBtn.setOnClickListener {
             sharedViewModel.rentalRequestToolIdList.clear()
             var toolList: List<ToolDtoSQLite> = listOf()
-            for (id in sharedViewModel.rentalRequestToolIdList) {
-                toolList = toolList.plus(dbHelper.getToolById(id))
-            }
             val adapter = RentalToolAdapter(toolList)
             recyclerView.adapter = adapter
         }
-        recyclerViewUpdate()
+        recyclerViewUpdate(adapter)
         return view
     }
     fun fixCode(input: String): String {
@@ -207,13 +221,13 @@ class WorkerRentalFragment() : Fragment() {
         }
         return correctedText.toString()
     }
-    fun recyclerViewUpdate() {
+    fun recyclerViewUpdate(adapter: RentalToolAdapter) {
         var dbHelper = DatabaseHelper(requireContext())
         var toolList: List<ToolDtoSQLite> = listOf()
         for (id in sharedViewModel.rentalRequestToolIdList) {
             toolList = toolList.plus(dbHelper.getToolById(id))
         }
-        val adapter = RentalToolAdapter(toolList)
+        adapter.updateList(toolList)
         recyclerView.adapter = adapter
     }
     companion object {
