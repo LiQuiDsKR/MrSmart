@@ -24,5 +24,5 @@ enum class RequestType {
     TAG_ALL,
     TOOLBOX_TOOL_LABEL_ALL,
     TAG_GROUP,
-
+    OUTSTANDING_RENTAL_SHEET_BY_TAG,
 }
