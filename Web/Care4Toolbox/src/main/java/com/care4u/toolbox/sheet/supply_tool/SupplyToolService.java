@@ -47,7 +47,6 @@ public class SupplyToolService {
 	private final SupplyToolRepository repository;
 	private final ToolRepository toolRepository;
 	private final StockStatusService stockStatusService;
-	private final SupplyToolService supplyToolService;
 	private final SupplyToolRepository supplyToolRepository;
 	private final MembershipRepository membershipRepository;
 	private final ToolboxRepository toolboxRepository;
@@ -117,9 +116,8 @@ public class SupplyToolService {
 			tool=toolOptional.get();
 		}
 		
-		Page<SupplySheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		Page<SupplyTool> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		
 		return page.map(e -> new SupplyToolDto(e));
-		return null;
 	}
 }
