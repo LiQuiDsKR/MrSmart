@@ -33,8 +33,10 @@ class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<Ou
         var toolListString = ""
         for (tool: RentalToolDto in currentOutstandingRentalSheet.rentalSheetDto.toolList) {
             val toolName: String = tool.toolDto.name
-            val toolCount: String = tool.count.toString()
-            toolListString = toolListString.plus("$toolName($toolCount)  ")
+            val toolCount: Int = tool.outstandingCount
+            if (toolCount > 0) {
+                toolListString = toolListString.plus("$toolName($toolCount)  ")
+            }
         }
         holder.toolListTextView.text = toolListString
         holder.itemView.setOnClickListener {

@@ -22,6 +22,7 @@ import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipDto
@@ -98,6 +99,7 @@ class SettingsFragment() : Fragment() {
         closeBtn.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
+        val handler = Handler(Looper.getMainLooper())
         setServerPCName.setOnClickListener {
             var currentPCName = bluetoothManager.pcName
             showTextDialog(requireContext(), "정비실 노트북(PC)의 이름을 입력하세요.", currentPCName) { string ->
@@ -134,62 +136,9 @@ class SettingsFragment() : Fragment() {
             }
         }
         importQRData.setOnClickListener {
-            try {
-                showPopup2() // progressBar appear
-                handler.postDelayed(progressRunnable2, 300)
-                progressText2.text = ""
-                bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
-                    BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        dbHelper.clearTBTTable()
-                        var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
-                        for (tbt in tbtList) {
-                            val id = tbt.id
-                            val toolbox = tbt.toolboxDto.id
-                            val location = tbt.location
-                            val tool = tbt.toolDto.id
-                            val qrcode = tbt.qrcode
-
-                            dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
-                        }
-                        bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
-                            BluetoothManager.RequestCallback{
-                            override fun onSuccess(result: String, type: Type) {
-                                dbHelper.clearTagTable()
-                                var tagList: List<TagDto> = gson.fromJson(result, type)
-                                for (tag in tagList) {
-                                    val id = tag.id
-                                    val macaddress = tag.macaddress
-                                    val tool = tag.toolDto.id
-                                    val taggroup = tag.tagGroup
-
-                                    dbHelper.insertTagData(id, macaddress, tool, taggroup)
-                                }
-                                dbHelper.close()
-                                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
-                                requireActivity().runOnUiThread {
-                                    hidePopup2() // progressBar hide
-                                    Toast.makeText(activity, "QR코드 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-
-                            override fun onError(e: Exception) {
-                                e.printStackTrace()
-                            }
-                        })
-                    }
-
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
-                    }
-                })
-            } catch (e: Exception) {
-                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
-                requireActivity().runOnUiThread {
-                    hidePopup2() // progressBar hide
-                    Toast.makeText(activity, "QR코드 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                }
-            }
+            showPopup2()
+            progressText2.text = ""
+            importTag(dbHelper)
 
         }
         importStandard.setOnClickListener {
@@ -200,7 +149,56 @@ class SettingsFragment() : Fragment() {
 
         return view
     }
+    private fun importTBT(dbHelper: DatabaseHelper) {
+        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
+            BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                dbHelper.clearTBTTable()
+                var tbtList: List<ToolboxToolLabelDto> = gson.fromJson(result, type)
+                for (tbt in tbtList) {
+                    val id = tbt.id
+                    val toolbox = tbt.toolboxDto.id
+                    val location = tbt.location
+                    val tool = tbt.toolDto.id
+                    val qrcode = tbt.qrcode
 
+                    dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
+                }
+
+            }
+
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
+    private fun importTag(dbHelper: DatabaseHelper) {
+        bluetoothManager.requestData(RequestType.TAG_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
+            BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                dbHelper.clearTagTable()
+                var tagList: List<TagDto> = gson.fromJson(result, type)
+                for (tag in tagList) {
+                    val id = tag.id
+                    val macaddress = tag.macaddress
+                    val tool = tag.toolDto.id
+                    val taggroup = tag.tagGroup
+
+                    dbHelper.insertTagData(id, macaddress, tool, taggroup)
+                }
+                dbHelper.close()
+                handler.removeCallbacks(progressRunnable2) // progressBar callback remove
+                hidePopup2() // progressBar hide
+                handler.post {
+                    Toast.makeText(requireActivity(), "QR코드 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
     private fun importTool(dbHelper: DatabaseHelper) {
         var toolCnt = 0
         bluetoothManager.requestData(RequestType.TOOL_ALL_COUNT,"",object: BluetoothManager.RequestCallback{
@@ -240,13 +238,17 @@ class SettingsFragment() : Fragment() {
                             }
                             if (page.pageable.page == toolCnt / 10) {
                                 hidePopup()
-                                Toast.makeText(activity, "기준정보를 성공적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                                handler.post {
+                                    Toast.makeText(requireActivity(), "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                                }
+
+
                             }
                         }
                         override fun onError(e: Exception) {
-                            requireActivity().runOnUiThread {
-                                hidePopup() // progressBar hide
-                                Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            hidePopup() // progressBar hide
+                            handler.post {
+                                Toast.makeText(requireActivity(), "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     })
@@ -298,9 +300,9 @@ class SettingsFragment() : Fragment() {
                             }
                         }
                         override fun onError(e: Exception) {
-                            requireActivity().runOnUiThread {
-                                hidePopup() // progressBar hide
-                                Toast.makeText(activity, "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            hidePopup() // progressBar hide
+                            handler.post {
+                                Toast.makeText(requireActivity(), "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     })

@@ -78,7 +78,7 @@ public class Translator {
 			if (mDataIndex < reveivedDatas.length){				
 				byte[] nextDatas = new byte[datas.length - mDataIndex];
 				System.arraycopy(datas, mDataIndex, nextDatas, 0, nextDatas.length);
-				
+					
 				logger.info("start next datas...");				
 				initialize();
 				return nextDatas;
@@ -105,12 +105,12 @@ public class Translator {
 		mReadSizeInfo = true;
 		int length = byte2int(mSizeDataHolder.datas, 0);
 		logger.info("readBodyDataSize=" + length + ", data index=" + mDataIndex);
-		
+		/*
 		if (length > 1024) {
 			logger.error("readSizeInfo : Too Long Data Size = " + length);
 			if (mListener != null) mListener.onException(new Exception("readSizeInfo : Too Long Data Size = " + length));
 			return false;
-		}
+		}*/
 		
 		mBodyDataHolder.datas = new byte[length];
 		return true;

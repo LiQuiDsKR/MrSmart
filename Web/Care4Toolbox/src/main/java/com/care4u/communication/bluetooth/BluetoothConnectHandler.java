@@ -64,8 +64,8 @@ public class BluetoothConnectHandler extends Thread {
             	if (size > 0) {
             		byte[] readDatas = new byte[size];
             		dataInputStream.read(readDatas, 0, size);
-    				logger.info("Received : " + new String(readDatas)); // debug     		
-            		logger.debug("received datas : " + ModbusUtil.toHex(readDatas));
+    				logger.info("Received size: " + size); // debug     		
+            		logger.info("received datas : " + ModbusUtil.toHex(readDatas));
             		if (listener != null) listener.onDataArrived(readDatas);
             	}else if (size == 0) {
             		try {Thread.sleep(100);}catch(InterruptedException e) {}

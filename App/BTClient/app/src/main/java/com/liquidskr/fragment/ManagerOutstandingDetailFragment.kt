@@ -70,16 +70,23 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
-        returnerName.text = "반납자: " + outstandingSheet.rentalSheetDto.workerDto.name
-        workerName.text = "대여자: " + outstandingSheet.rentalSheetDto.workerDto.name
-        leaderName.text = "리더: " + outstandingSheet.rentalSheetDto.leaderDto.name
-        timeStamp.text = "대여일시: " + outstandingSheet.rentalSheetDto.eventTimestamp
+        returnerName.text = outstandingSheet.rentalSheetDto.workerDto.name
+        workerName.text = outstandingSheet.rentalSheetDto.workerDto.name
+        leaderName.text = outstandingSheet.rentalSheetDto.leaderDto.name
+        timeStamp.text = outstandingSheet.rentalSheetDto.eventTimestamp
 
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = OutstandingDetailAdapter(toolList)
+        var existToolList: MutableList<RentalToolDto> = mutableListOf() // 0인 항목 미표시
+        for (rentalTool in toolList) {
+            if (rentalTool.outstandingCount > 0) {
+                existToolList.add(rentalTool)
+            }
+        }
+
+        val adapter = OutstandingDetailAdapter(existToolList)
         recyclerView.adapter = adapter
 
         var sheetForTag: List<RentalRequestToolDto> = listOf()

@@ -54,10 +54,10 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         confirmBtn = view.findViewById(R.id.confirmBtn)
         backButton = view.findViewById(R.id.backButton)
 
-        returnerName.text = "반납자: " + outstandingRentalSheet.rentalSheetDto.workerDto.name
-        workerName.text = "대여자: " + outstandingRentalSheet.rentalSheetDto.workerDto.name
-        leaderName.text = "리더: " + outstandingRentalSheet.rentalSheetDto.leaderDto.name
-        timeStamp.text = "대여일시: " + outstandingRentalSheet.rentalSheetDto.eventTimestamp
+        returnerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
+        workerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
+        leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
+        timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
 
         confirmBtn.setOnClickListener {
             recyclerView.adapter?.let { adapter ->
@@ -84,7 +84,14 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = WorkerOutstandingDetailAdapter(toolList)
+        var existToolList: MutableList<RentalToolDto> = mutableListOf() // 0인 항목 미표시
+        for (rentalTool in toolList) {
+            if (rentalTool.outstandingCount > 0) {
+                existToolList.add(rentalTool)
+            }
+        }
+
+        val adapter = WorkerOutstandingDetailAdapter(existToolList)
         recyclerView.adapter = adapter
 
         return view

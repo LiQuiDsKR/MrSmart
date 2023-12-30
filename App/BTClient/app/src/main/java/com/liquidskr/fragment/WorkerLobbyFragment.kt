@@ -62,7 +62,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
 
         rentalBtn.setOnClickListener {
             val lobbyActivity = activity as? LobbyActivity
-            val workerRentalFragment = lobbyActivity?.workerRentalFragment
 
             // managerRentalFragment가 null이 아니라면 프래그먼트 교체
             sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")

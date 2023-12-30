@@ -9,6 +9,7 @@ import com.mrsmart.standard.rental.RentalToolDto
 
 class WorkerOutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) :
     RecyclerView.Adapter<WorkerOutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
+
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
         var toolCount: TextView = itemView.findViewById(R.id.ToolCount)

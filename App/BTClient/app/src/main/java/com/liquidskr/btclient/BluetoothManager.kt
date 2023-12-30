@@ -101,25 +101,62 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             receiveThread = Thread {
                 try {
                     inputStream = bluetoothSocket.inputStream
-
+                    var dataSize = -1
+                    val outputStream = ByteArrayOutputStream() // 최종 byteStream
                     while (bluetoothSocket.isConnected) {
+                        val size = inputStream.available()
+                        if (size > 0) {
+                            val readDatas = ByteArray(size)
+                            inputStream.read(readDatas, 0, size)
+                            Log.d("datas_readData",byteArrayToHex(readDatas))
+                            outputStream.write(readDatas)
+                            if (dataSize == -1 && outputStream.size() > 4) {
+                                dataSize = ByteBuffer.wrap(outputStream.toByteArray(), 0, 4).int
+                                val remainingBytes = outputStream.toByteArray().drop(4).toByteArray()
+                                if (remainingBytes.isNotEmpty()) {
+                                    Log.d("datas",byteArrayToHex(remainingBytes))
+                                    outputStream.reset()
+                                    if (remainingBytes.isNotEmpty()) {
+                                        outputStream.write(remainingBytes)
+                                        outputStream.flush()
+                                    }
+                                }
+                            }
+                            if (dataSize > -1 && outputStream.size() >= (dataSize)) {
+                                var datas = ByteBuffer.wrap(outputStream.toByteArray(), 0, dataSize)
+                                Log.d("datas",byteArrayToHex(datas.array()))
+                                val remainingBytes = outputStream.toByteArray().drop(dataSize).toByteArray()
+                                outputStream.reset()
+                                if (remainingBytes.isNotEmpty()) {
+                                    outputStream.write(remainingBytes)
+                                    outputStream.flush()
+                                }
+                                //clearSendingState()
+                                processData(datas.array())
+                                dataSize = -1
+                            }
+                        } else if (size == 0) {
+                            continue
+                        } else {
+                            Log.d("bluetoothDisconnected", "블루투스 연결 끊김")
+                        }
+                        /*
+
                         val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
                         inputStream.read(lengthBuffer, 0, 4)
                         val dataSize = ByteBuffer.wrap(lengthBuffer).int
+
                         Log.d("test", dataSize.toString())
-                        totalBytes = dataSize // progressBar
 
                         val dataBuffer = ByteArray(1024) // 한 번에 받을 byteArray 단위
-                        val byteStream = ByteArrayOutputStream() // 최종 byteStream
+
                         var bytesRead = 0
 
                         while (bytesRead < dataSize) {
-                            val result = inputStream.read(dataBuffer, 0, 1024)
-
+                            val result = inputStream.read(dataBuffer, bytesRead, 1024)
                             byteStream.write(dataBuffer, 0, result) // 이 부분 추가
                             bytesRead += result
 
-                            currentBytes = bytesRead // progressBar
                             if (bytesRead == dataSize) {
                                 break
                             }
@@ -131,7 +168,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         if (byteArray.isNotEmpty()) {
                             clearSendingState() // 다음 큐로 넘김
                             processData(byteArray) // 데이터 처리 함수 호출
-                        }
+                        }*/
                     }
                 } catch (e: Exception) {
                     Log.d("Exception", e.toString())
@@ -149,12 +186,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     }
 
     fun requestData(type:RequestType, params:String, callback:RequestCallback){
+        performSend(type, params, callback)
+        /*
         if (!isSending) {
             performSend(type, params, callback)
         } else {
             // 메시지 전송 중일 때는 큐에 추가
             messageQueue.offer(BluetoothMessage(type, params, callback))
-        }
+        }*/
     }
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
         if (!bluetoothSocket.isConnected) {
@@ -162,32 +201,54 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             return
         }
 
-        isSending = true
+        //isSending = true
         try {
             // 앱에서 서버로 type 전송.
+
             outputStream = bluetoothSocket.outputStream
             var sendMsg: ByteArray = byteArrayOf()
             sendMsg += type.name.toByteArray(Charsets.UTF_8)
             sendMsg += ",".toByteArray(Charsets.UTF_8)
             sendMsg += params.toByteArray(Charsets.UTF_8)
 
-            val messageSize = sendMsg.size
-            val bufferSize = 1024
+            val dataSize = sendMsg.size
+
+            val byteBuffer = ByteBuffer.allocate(4)
+            byteBuffer.putInt(dataSize)
+            val sizeByte = byteBuffer.array()
+
+            val finalMessage = sizeByte + sendMsg
+
+            var buffer = ByteBuffer.allocate(1024)
+            var chunkSize = 0
             var offset = 0
-            while (offset < messageSize) {
-                val end =
-                    if (offset + bufferSize < messageSize) offset + bufferSize else messageSize
-                val chunk = sendMsg.copyOfRange(offset, end)
+            while (offset < finalMessage.size) {
+                chunkSize = minOf(buffer.remaining(), finalMessage.size - offset)
+                buffer.put(finalMessage, offset, chunkSize)
 
-                val sizeBytes = ByteBuffer.allocate(4).putInt(chunk.size).array() // 크기를 4바이트로 변환
-                val finalMessage = sizeBytes + chunk
-                Log.d("finalMessage", byteArrayToHex(finalMessage))
+                offset += chunkSize
 
-                outputStream.write(finalMessage)
+                if (!buffer.hasRemaining()) {
+
+                    buffer.flip()
+                    val byteArray = ByteArray(buffer.remaining())
+                    buffer.get(byteArray)
+                    outputStream.write(byteArray)
+
+                    /*buffer.flip()
+                    outputStream.write(buffer.array())*/
+                    outputStream.flush()
+                    Log.d("bluetooth_SendData", byteArrayToHex(buffer.array()))
+                    buffer.clear()
+                }
+            }
+            if (buffer.position() > 0) {
+                buffer.flip()
+                val byteArray = ByteArray(buffer.remaining())
+                buffer.get(byteArray)
+                outputStream.write(byteArray)
                 outputStream.flush()
-
-                offset += bufferSize
-                Log.d("SEND", String(finalMessage))
+                Log.d("bluetooth_SendData_Last", byteArrayToHex(buffer.array()))
             }
         } catch (e: Exception) {
             // 전송 중 에러
@@ -222,10 +283,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
         Log.d("bluetooth", type)
         Log.d("bluetooth", jsonString)
-
-        if ("{\"total\":774,\"content\":[{\"id\":71,\"name\":\"박영인\"," in jsonString) {
-            Log.d("bluetooth", "Breakpoint")
-        }
 
         when (type) {
             RequestType.MEMBERSHIP_ALL.name -> {
@@ -337,15 +394,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
         }
-
-    }
+    }/*
     private fun clearSendingState() {
         isSending = false
         if (messageQueue.isNotEmpty()) {
             val nextMessage = messageQueue.poll()
             performSend(nextMessage.type, nextMessage.params, nextMessage.callback)
         }
-    }
+    }*/
     private fun parseInputString(input: String): Pair<String, String> {
         val index = input.indexOf(',')
         if (index != -1) {

@@ -32,14 +32,13 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
             showNumberDialog(holder.toolCount, currentRentalRequestTool.count)
         }
-        holder.itemView.setOnClickListener{// 항목 자체를 눌렀을 때
-            if (!(currentRentalRequestTool.id in selectedToolsToRental)) {
-                selectedToolsToRental.add(currentRentalRequestTool.id)
-                holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
-            } else {
-                selectedToolsToRental.remove(currentRentalRequestTool.id)
-                holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
-            }
+        holder.itemView.setOnClickListener {
+            handleSelection(currentRentalRequestTool)
+        }
+        if (isSelected(currentRentalRequestTool)) {
+            holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
+        } else {
+            holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
         }
     }
 
@@ -68,6 +67,31 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
         }
 
         builder.show()
+    }
+    fun handleSelection(currentRentalRequestTool: RentalRequestToolDto) {
+        if (!isSelected(currentRentalRequestTool)) {
+            addToSelection(currentRentalRequestTool)
+
+        } else {
+            removeFromSelection(currentRentalRequestTool)
+        }
+        notifyDataSetChanged() // 변경된 데이터를 알림
+    }
+    fun tagAdded(currentRentalRequestTool: RentalRequestToolDto) {
+        addToSelection(currentRentalRequestTool)
+    }
+
+    private fun isSelected(currentRentalRequestTool: RentalRequestToolDto): Boolean {
+        return currentRentalRequestTool.id in selectedToolsToRental
+    }
+
+    private fun addToSelection(currentRentalRequestTool: RentalRequestToolDto) {
+        selectedToolsToRental.add(currentRentalRequestTool.id)
+
+    }
+
+    private fun removeFromSelection(currentRentalRequestTool: RentalRequestToolDto) {
+        selectedToolsToRental.remove(currentRentalRequestTool.id)
     }
 
 }

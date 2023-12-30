@@ -4,6 +4,7 @@ import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -49,6 +50,7 @@ class WorkerRentalFragment() : Fragment() {
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     var gson = Gson()
 
@@ -169,39 +171,38 @@ class WorkerRentalFragment() : Fragment() {
                 .commit()
         }
         confirmBtn.setOnClickListener {
-            recyclerView.adapter?.let { adapter ->
-                if (adapter is RentalToolAdapter) {
-                    if (!adapter.tools.isEmpty()) {
-                        val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
-                        for (toolwithCnt in adapter.tools) {
-                            rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolwithCnt.tool.id, toolwithCnt.count))
-                        }
-                        if (!(worker!!.code.equals(""))) {
-                            if (!(leader!!.code.equals(""))) {
-                                val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                                bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
-                                    BluetoothManager.RequestCallback{
-                                    override fun onSuccess(result: String, type: Type) {
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
-                                        }
-                                        sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                                        sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                                        sharedViewModel.rentalRequestToolIdList.clear()
-                                        sharedViewModel.toolWithCountList.clear()
-                                        requireActivity().supportFragmentManager.popBackStack()
+            Log.d("adapter", adapter.toString())
+            if (adapter is RentalToolAdapter) {
+                if (!adapter.tools.isEmpty()) {
+                    val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
+                    for (toolwithCnt in adapter.tools) {
+                        rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolwithCnt.tool.id, toolwithCnt.count))
+                    }
+                    if (!(worker!!.code.equals(""))) {
+                        if (!(leader!!.code.equals(""))) {
+                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
+                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                                BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    handler.post {
+                                        Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    override fun onError(e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                })
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolIdList.clear()
+                                    sharedViewModel.toolWithCountList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
+                                }
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
 
-                            } else {
-                                Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
-                            }
                         } else {
-                            Toast.makeText(requireContext(), "작업자를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }
+                    } else {
+                        Toast.makeText(requireContext(), "작업자를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                     }
                 }
             }

@@ -71,9 +71,9 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
 
 
 
-        workerName.text = "대여자: " + rentalRequestSheet.workerDto.name
-        leaderName.text = "리더: " + rentalRequestSheet.leaderDto.name
-        timeStamp.text = "신청일시: " + rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        workerName.text = rentalRequestSheet.workerDto.name
+        leaderName.text = rentalRequestSheet.leaderDto.name
+        timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         var newToolList: MutableList<RentalRequestToolDto> = mutableListOf()
         for (tool in toolList) {
@@ -123,6 +123,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                     requireActivity().runOnUiThread {
                                         Toast.makeText(activity, "${taggedTool.name} 에 ${tag} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
                                     }
+                                    adapter.tagAdded(modifiedRentalRequestTool)
                                 } else {
                                     val tags = tool.Tags.toString().split(",")
                                     if (tag in tags) {
