@@ -223,7 +223,7 @@ public class StockStatusService {
 			return null;
 		}
 		
-		StockStatus findStock=repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		StockStatus findStock=repository.findByToolIdAndToolboxIdAndCurrentDay(toolId, toolboxId, LocalDate.now());
 		if (findStock!=null) {
 			logger.error("already exists! : "+toolId+","+toolboxId);
 			return null;
