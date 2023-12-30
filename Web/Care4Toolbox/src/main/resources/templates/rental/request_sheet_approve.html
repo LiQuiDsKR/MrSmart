@@ -269,6 +269,8 @@
 					membershipId: mainData.membership.id,
 					isWorker: true,
 					isLeader: true,
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
 				}
 			).then(data => {
 				mainTempData = {data: data, toolboxId: toolboxId};
@@ -796,8 +798,7 @@
 				$('#end-date').datepicker('show');
 			});
 		}
-
-
+		
 		function formatDate(inputDate) {
 			const dateObject = new Date(inputDate);
 			const year = dateObject.getFullYear();
@@ -810,7 +811,6 @@
 
 			return formattedDate;
 		}
-
 	</script>
 </th:block>
 

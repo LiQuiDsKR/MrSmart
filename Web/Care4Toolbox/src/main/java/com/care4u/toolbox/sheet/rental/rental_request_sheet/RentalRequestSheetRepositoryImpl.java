@@ -1,5 +1,7 @@
 package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,7 +40,7 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
 	    
 	    
 		@Override
-		public Page<RentalRequestSheet> findBySearchQuery(SheetState status, Membership membership, Boolean isWorker, Boolean isLeader, Toolbox toolbox, Pageable pageable) {
+		public Page<RentalRequestSheet> findBySearchQuery(SheetState status, Membership membership, Boolean isWorker, Boolean isLeader, Toolbox toolbox, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
 			QRentalRequestSheet sSheet = QRentalRequestSheet.rentalRequestSheet;
 			
 			List<RentalRequestSheet> content = queryFactory
@@ -48,6 +50,7 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
                 		searchMembershipEquals(membership,isWorker,isLeader)
                 		.and(sSheet.toolbox.eq(toolbox))
                 		.and(sSheet.status.eq(status))
+                		.and(sSheet.eventTimestamp.between(startDate, endDate))
                 )
                 .orderBy(sSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())

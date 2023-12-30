@@ -1,6 +1,8 @@
 package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -92,7 +94,7 @@ public class RentalRequestSheetService {
 		return page.map(e->convertToDto(e));
 	}
 	@Transactional(readOnly=true)
-	public Page<RentalRequestSheetDto> getPage(SheetState status, long membershipId, Boolean isWorker, Boolean isLeader, long toolboxId, Pageable pageable) {
+	public Page<RentalRequestSheetDto> getPage(SheetState status, long membershipId, Boolean isWorker, Boolean isLeader, long toolboxId, LocalDate startDate , LocalDate endDate, Pageable pageable) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (membership.isEmpty()) {
@@ -104,7 +106,7 @@ public class RentalRequestSheetService {
 			return null;
 		}
 
-		Page<RentalRequestSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(), pageable);	
+		Page<RentalRequestSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	
@@ -253,7 +255,7 @@ public class RentalRequestSheetService {
 		
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetDto.getId());
 		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getId(),sheetDto.getToolboxDto().getId());
+			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheetDto.getToolboxDto().getId());
 			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
 		}
 		
@@ -273,7 +275,7 @@ public class RentalRequestSheetService {
 		
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetId);
 		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getId(),sheet.getToolbox().getId());
+			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheet.getToolbox().getId());
 			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
 		}
 		

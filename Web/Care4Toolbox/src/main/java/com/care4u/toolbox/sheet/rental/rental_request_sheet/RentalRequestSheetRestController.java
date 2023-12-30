@@ -68,13 +68,19 @@ public class RentalRequestSheetRestController {
             @RequestParam(name = "toolboxId") long toolboxId,
             @RequestParam(name = "membershipId") long membershipId,
             @RequestParam(name="isWorker") Boolean isWorker,
-    		@RequestParam(name="isLeader") Boolean isLeader
+    		@RequestParam(name="isLeader") Boolean isLeader,
+    		@RequestParam(name="startDate") String startDate,
+    		@RequestParam(name="endDate") String endDate
             ){
 
     	logger.info("page=" + page + ", size=" + size);
     	
+
+        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+    	
         Pageable pageable = PageRequest.of(page,size);
-        Page<RentalRequestSheetDto> rentalRequestSheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST, membershipId, isWorker, isLeader, toolboxId, pageable);
+        Page<RentalRequestSheetDto> rentalRequestSheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST, membershipId, isWorker, isLeader, toolboxId, startLocalDate, endLocalDate, pageable);
         
         for (RentalRequestSheetDto item : rentalRequestSheetPage.getContent()) {
         	logger.info(item.toString());
