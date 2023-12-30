@@ -17,7 +17,6 @@ import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
 class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
-    lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
@@ -35,7 +34,6 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_lobby, container, false)
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
-        connectBtn = view.findViewById(R.id.ConnectBtn)
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
         standbyBtn = view.findViewById(R.id.StandbyBtn)

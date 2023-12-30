@@ -42,7 +42,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
-        connectBtn = view.findViewById(R.id.connectBtn)
         rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
         refreshBtn = view.findViewById(R.id.refreshBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
