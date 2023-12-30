@@ -79,7 +79,22 @@ public class StockStatusService {
 		return stockPage.map(e->new StockStatusDto(e));
 	}
 	
-	
+	@Transactional
+	public StockStatusDto requestItems(long id, int count) {
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		if (count>stock.getGoodCount()) {
+			logger.error("재고 없음" + stock.getGoodCount()+")");
+			return null;
+		}
+		stock.rentUpdate(count);
+		return new StockStatusDto(repository.save(stock));
+	}
 	@Transactional
 	public StockStatusDto rentItems(long id, int count) {
 		StockStatus stock;
