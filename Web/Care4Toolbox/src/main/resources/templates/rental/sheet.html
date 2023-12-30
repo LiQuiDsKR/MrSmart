@@ -32,83 +32,106 @@
 					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-4">
 
 						<h4 class="font-30 m-3">공기구 대여 기록</h4>
-						<!-- Btn header -->
-						<div class="col-12 col-sm-2 d-flex align-items-center">
-							<!-- Add New Contact Btn -->
-							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
-							<div class="add-new-contact">
-								<a href="#" class="btn" data-toggle="modal" data-target="#contactAddModal" hidden>
-									<img th:src="@{/img/svg/plus_white.svg}" alt="" class="svg" />
-									<span>추가</span>
-								</a>
+						<div class="d-flex row align-items-center ml-auto">
+							<div class="col-4">
+								<div class="d-flex align-items-center flex-nowrap mr-4"style="box-sizing: content-box;">
+									<div class="custom-select style--two mr-4" style="max-width:200px;">
+										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
+											<option value="part">부서</option>
+											<option value="membership" selected>작업자/리더</option>
+											<option value="leader" hidden>리더</option>
+											<option value="tool">공기구</option>
+										</select>
+									</div>
+									<div id="searchByForm" style="width: 200px;">
+										<div id="partForm" class="justify-content-between d-none">											
+											<div id="part">
+												선택
+											</div>
+											<div>
+												<span id="partEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#partEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+										<div id="membershipForm" class="d-flex justify-content-between">											
+											<div id="membership">
+												선택
+											</div>
+											<div>
+												<span id="membershipEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#membershipEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+										<div id="toolForm" class="justify-content-between d-none">											
+											<div id="tool">
+												선택
+											</div>
+											<div>
+												<span id="toolEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#toolEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
-							<!-- End Add New Contact Btn -->
+
+							<!-- Search header -->
+							<div
+								class="d-flex col-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+								<!-- layer 1 -->
+								<div class="row flex-nowrap">
+
+
+									<!-- Form Group -->
+									<div class="form-group mr-2">
+										<label class="mb-2 font-14 bold">시작 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="start-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="start-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+									<!-- Form Group -->
+									<div class="form-group">
+										<label class="mb-2 font-14 bold">종료 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="end-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="end-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+
+									<!-- 새로고침 / 알림? 등등 -->
+
+								</div>
+
+								<!-- layer 2 -->
+								<!-- Search Condition header -->
+
+								<!-- End Search Condition -->
+							</div>
+							<!-- End Contact Header -->
 						</div>
-						<!-- Search header -->
-						<form
-							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0">
-							<!-- layer 1 -->
-							<div class="row" style="width:100%; box-sizing: content-box;">
-
-
-								<!-- Form Group -->
-								<div class="form-group m-2">
-									<label class="mb-2 font-14 bold">시작 날짜</label>
-
-									<!-- Date Picker -->
-									<div class="dashboard-date style--four">
-										<span id="start-date-btn" class="input-group-addon">
-											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
-										</span>
-
-										<input type="text" id="start-date" placeholder="Select Date" />
-									</div>
-									<!-- End Date Picker -->
-								</div>
-								<!-- End Form Group -->
-
-								<!-- Form Group -->
-								<div class="form-group m-2 mr-4">
-									<label class="mb-2 font-14 bold">종료 날짜</label>
-
-									<!-- Date Picker -->
-									<div class="dashboard-date style--four">
-										<span id="end-date-btn" class="input-group-addon">
-											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
-										</span>
-
-										<input type="text" id="end-date" placeholder="Select Date" />
-									</div>
-									<!-- End Date Picker -->
-								</div>
-								<!-- End Form Group -->
-
-
-
-
-								<!-- Search Form -->
-								<div class="search-form d-flex align-items-center"
-									style="width:50%; box-sizing: content-box;" hidden>
-									<div class="theme-input-group style--two" hidden>
-										<input id="searchInput" type="text" class="theme-input-style"
-											placeholder="검색" />
-										<button id="searchBtn" type="submit">
-											<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
-										</button>
-									</div>
-								</div>
-								<!-- End Search Form -->
-
-
-
-								<!-- 새로고침 / 알림? 등등 -->
-
-							</div>
-
-							<!-- layer 2 -->
-							<!-- Search Condition header -->
-
-							<!-- End Search Condition -->
 					</div>
 					<!-- End Contact Header -->
 
@@ -157,7 +180,7 @@
 				{
 					membershipId: membershipId,
 					page: 0,
-					size: 10,
+					size: 100,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}

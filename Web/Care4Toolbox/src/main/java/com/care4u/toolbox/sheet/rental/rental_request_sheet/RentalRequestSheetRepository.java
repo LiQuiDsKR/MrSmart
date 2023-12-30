@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.care4u.constant.SheetState;
 
-public interface RentalRequestSheetRepository extends JpaRepository<RentalRequestSheet, Long> {
+public interface RentalRequestSheetRepository extends JpaRepository<RentalRequestSheet, Long>, RentalRequestSheetRepositoryCustom{
 	
 	Page<RentalRequestSheet> findAllByStatusAndToolboxIdOrderByEventTimestampAsc(SheetState status, long toolboxId, Pageable pageable);
 	
