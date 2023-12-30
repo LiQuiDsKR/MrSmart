@@ -139,6 +139,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             continue
                         } else {
                             Log.d("bluetoothDisconnected", "블루투스 연결 끊김")
+                            
                         }
                         /*
 

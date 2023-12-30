@@ -1,5 +1,6 @@
 package com.care4u.toolbox.tag;
 
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,12 +69,20 @@ public class TagService {
 		return getDtoList(list);
 	}
 	
+	@Transactional
 	private List<TagDto> getDtoList(List<Tag> list){
 		List<TagDto> dtoList = new ArrayList<TagDto>();
 		for (Tag item : list) {
 			dtoList.add(convertToDto(item));
 		}
 		return dtoList;
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<TagDto> pageByToolboxId(Pageable pageable) {
+		Page<Tag> tagPage = repository.findAllByToolboxId(pageable);
+		logger.info("tag total page : " + tagPage.getTotalPages() + ", current page : " + tagPage.getNumber());
+		return tagPage.map(TagDto::new);
 	}
 	
 	@Transactional

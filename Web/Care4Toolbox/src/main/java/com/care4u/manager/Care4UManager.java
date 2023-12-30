@@ -461,8 +461,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
-		        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(tagList));
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");				
+				Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<TagDto> tagPage = tagService.pageByToolboxId(pageable);
+				handler.sendData(keyword + GsonUtils.toJson(tagPage));
 			}
 			break;
 		case TOOLBOX_TOOL_LABEL_ALL:
