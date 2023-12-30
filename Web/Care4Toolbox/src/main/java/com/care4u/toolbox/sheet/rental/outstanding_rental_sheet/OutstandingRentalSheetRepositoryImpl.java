@@ -86,4 +86,12 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 					.fetch();
 			return content;
 		}
+
+		@Override
+		public Page<OutstandingRentalSheet> findBySearchQuery(OutstandingState status, long membershipId,
+				Boolean isWorker, Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate,
+				Pageable pageable) {
+			
+			return null;
+		}
 }

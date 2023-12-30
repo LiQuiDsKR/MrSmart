@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
+import com.care4u.hr.membership.Membership;
+import com.care4u.hr.membership.MembershipRepository;
+import com.care4u.toolbox.Toolbox;
+import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -40,6 +44,8 @@ public class OutstandingRentalSheetService {
 
 	private final OutstandingRentalSheetRepository repository;
 	private final TagRepository tagRepository;
+	private final MembershipRepository membershipRepository;
+	private final ToolboxRepository toolboxRepository;
 	private final RentalToolService rentalToolService;
 
 	@Transactional(readOnly = true)
@@ -190,5 +196,25 @@ public class OutstandingRentalSheetService {
 		repository.save(sheet);
 		
 		return "outstandingRentalSheet Id : "+sheet.getId()+" OutstandingStatus changed to" + sheet.getOutstandingStatus();
+	}
+
+	public Page<OutstandingRentalSheetDto> getPage(OutstandingState status, long membershipId, Boolean isWorker,
+			Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (membership.isEmpty()) {
+			logger.error("worker : " + membership);
+			return null;
+		}
+		if (toolbox.isEmpty()) {
+			logger.error("toolbox : " + toolbox);
+			return null;
+		}
+
+		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+		Page<OutstandingRentalSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);	
+		Page<OutstandingRentalSheet> page = repository
+				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
 }

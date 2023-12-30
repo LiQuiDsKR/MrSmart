@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
 import com.care4u.hr.membership.MembershipFormDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
@@ -43,9 +44,12 @@ public class OutstandingRentalSheetRestController {
 	
 	@GetMapping(value="/outstanding_rental_sheet/getpage")
     public ResponseEntity<Page<OutstandingRentalSheetDto>> getOutstandingRentalSheetPage(
-    		@RequestParam(name="toolboxId") long toolboxId,
-    		@RequestParam(name="page") int page,
-    		@RequestParam(name="size") int size,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "toolboxId") long toolboxId,
+            @RequestParam(name = "membershipId") long membershipId,
+            @RequestParam(name="isWorker") Boolean isWorker,
+    		@RequestParam(name="isLeader") Boolean isLeader,
     		@RequestParam(name="startDate") String startDate,
     		@RequestParam(name="endDate") String endDate
             ){
@@ -55,7 +59,7 @@ public class OutstandingRentalSheetRestController {
         LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(toolboxId, startLocalDate, endLocalDate, pageable);
+        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(OutstandingState.READY, membershipId, isWorker, isLeader, toolboxId, startLocalDate, endLocalDate, pageable);
         
         for (OutstandingRentalSheetDto item : sheetPage.getContent()) {
         	logger.info(item.toString());

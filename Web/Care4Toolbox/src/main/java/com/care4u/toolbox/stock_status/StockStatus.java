@@ -92,6 +92,12 @@ public class StockStatus extends BaseEntity {
 		this.discardCount = discardCount;
 	}
 	
+	public void requestUpdate(int count) {
+		this.goodCount-=count;
+	}
+	public void requestCancelUpdate(int count) {
+		this.goodCount+=count;
+	}
 	public void rentUpdate(int count) {
 		this.goodCount-=count;
 		this.rentalCount+=count;

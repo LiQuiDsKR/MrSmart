@@ -92,7 +92,19 @@ public class StockStatusService {
 			logger.error("재고 없음" + stock.getGoodCount()+")");
 			return null;
 		}
-		stock.rentUpdate(count);
+		stock.requestUpdate(count);
+		return new StockStatusDto(repository.save(stock));
+	}
+	@Transactional
+	public StockStatusDto requestCancelItems(long id, int count) {
+		StockStatus stock;
+		Optional<StockStatus> stockOptional=repository.findById(id);
+		if (stockOptional.isEmpty()) {
+			logger.error("Invalid StockStatus id : "+id);
+			return null;
+		}
+		stock=stockOptional.get();
+		stock.requestCancelUpdate(count);
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional

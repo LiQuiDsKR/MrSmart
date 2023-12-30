@@ -1,6 +1,8 @@
 package com.care4u.toolbox.sheet.rental.rental_request_sheet;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +27,8 @@ import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolService;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 
@@ -53,6 +57,9 @@ public class RentalRequestSheetService {
 	
 	@Autowired
 	private TagService tagService;
+	
+	@Autowired
+	private StockStatusService stockStatusService;
 	
 	
 	@Transactional(readOnly = true)
@@ -84,6 +91,22 @@ public class RentalRequestSheetService {
 	@Transactional(readOnly=true)
 	public Page<RentalRequestSheetDto> getPage(SheetState status, Long toolboxId, Pageable pageable){
 		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
+		return page.map(e->convertToDto(e));
+	}
+	@Transactional(readOnly=true)
+	public Page<RentalRequestSheetDto> getPage(SheetState status, long membershipId, Boolean isWorker, Boolean isLeader, long toolboxId, LocalDate startDate , LocalDate endDate, Pageable pageable) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (membership.isEmpty()) {
+			logger.error("worker : " + membership);
+			return null;
+		}
+		if (toolbox.isEmpty()) {
+			logger.error("toolbox : " + toolbox);
+			return null;
+		}
+
+		Page<RentalRequestSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	
@@ -188,6 +211,13 @@ public class RentalRequestSheetService {
 	    }
 		
 		rentalRequestSheet=rentalRequestSheetOptional.get();
+		
+		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetDto.getId());
+		for (RentalRequestTool tool : toolList) {
+			StockStatusDto stockDto = stockStatusService.get(tool.getId(),sheetDto.getToolboxDto().getId());
+			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
+		}
+		
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), sheetDto.getStatus(), sheetDto.getEventTimestamp());
 		
 		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
@@ -222,6 +252,13 @@ public class RentalRequestSheetService {
 	    }
 		
 		rentalRequestSheet=rentalRequestSheetOptional.get();
+		
+		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetDto.getId());
+		for (RentalRequestTool tool : toolList) {
+			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheetDto.getToolboxDto().getId());
+			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
+		}
+		
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, sheetDto.getEventTimestamp());
 		
 		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
@@ -235,7 +272,16 @@ public class RentalRequestSheetService {
 	        throw new IllegalArgumentException("Sheet not found");
 	    }
 		sheet=rentalRequestSheetOptional.get();
+		
+		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetId);
+		for (RentalRequestTool tool : toolList) {
+			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheet.getToolbox().getId());
+			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
+		}
+		
 		sheet.update(sheet.getWorker(), sheet.getLeader(), sheet.getToolbox(), SheetState.CANCEL, sheet.getEventTimestamp());
 		return convertToDto(repository.save(sheet));
 	}
+
+
 }
