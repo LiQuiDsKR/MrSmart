@@ -28,10 +28,15 @@ import com.care4u.common.GsonUtils;
 import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
 import com.care4u.constant.RequestType;
 import com.care4u.constant.SheetState;
+import com.care4u.hr.main_part.MainPartService;
 import com.care4u.hr.membership.MembershipService;
+import com.care4u.hr.part.PartService;
+import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.service.LogWriterService;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
+import com.care4u.toolbox.group.main_group.MainGroupService;
+import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
@@ -74,6 +79,21 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	
 	@Autowired
 	private ToolboxToolLabelService toolboxToolLabelService;
+	
+	@Autowired
+	private MainGroupService mainGroupService;
+	
+	@Autowired
+	private SubGroupService subGroupService;
+	
+	@Autowired
+	private MainPartService mainPartService;
+	
+	@Autowired
+	private SubPartService subPartService;
+	
+	@Autowired
+	private PartService partService;
 
 	@Autowired
 	private TagService tagService;
@@ -158,11 +178,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
 
-		//MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
-		//memberParsing.readCsvFile("C:/Temp/Temp/member.csv");
+		MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
+		memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
 		
-		//ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService);
-		//toolParsing.readCsvFile("C:/Temp/Temp/tool.csv");D
+		ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService);
+		toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
@@ -172,7 +192,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		//membershipService.updatePasswords();
-		//membershipService.downdatePasswords();
+		membershipService.downdatePasswords();
 		
 		timer = new Timer();
 		timer.schedule(timerTask, 10 * 1000, 1000);
@@ -454,23 +474,42 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				} else {
 					handler.sendData(keyword + "null");
 				}
-				
 			}
 			break;
 		case TAG_ALL:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
-		        List<TagDto> tagList = tagService.listByToolboxId(toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(tagList));
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<TagDto> tagPage = tagService.getPage(toolboxId,pageable);
+				handler.sendData(keyword + GsonUtils.toJson(tagPage));
+			}
+			break;
+		case TAG_ALL_COUNT:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+				handler.sendData(keyword + GsonUtils.toJson(tagService.getCount(toolboxId)));
 			}
 			break;
 		case TOOLBOX_TOOL_LABEL_ALL:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
-		        List<ToolboxToolLabelDto> tagList = toolboxToolLabelService.listByToolboxId(toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(tagList));
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				Pageable pageable = PageRequest.of(page,pageSize);
+				Page<ToolboxToolLabelDto> labelPage = toolboxToolLabelService.getPage(toolboxId,pageable);
+				handler.sendData(keyword + GsonUtils.toJson(labelPage));
+			}
+			break;
+		case TOOLBOX_TOOL_LABEL_ALL_COUNT:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolboxId = jsonObj.getLong("toolboxId");
+				handler.sendData(keyword + GsonUtils.toJson(toolboxToolLabelService.getCount(toolboxId)));
 			}
 			break;
 		case TAG_GROUP:

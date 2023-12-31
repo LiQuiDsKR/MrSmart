@@ -64,11 +64,13 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		}
 		membership.update(part.get(), membershipDto);
 		
+		/*
 		// Hash the plain password using BCrypt
 		String plainPassword = membership.getPassword();
         String hashedPassword = passwordEncoder.encode(plainPassword);
         membership.updatePassword(hashedPassword);
         logger.info(membership.getCode()+","+membership.getName()+" 회원의 비밀번호가 ["+hashedPassword+"]로 정상 변경되었습니다.");
+		*/
 
 		return new MembershipDto(repository.save(membership));
 	}

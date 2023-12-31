@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.stock_status.StockStatusService;
+import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolRepository;
@@ -242,6 +245,15 @@ public class ToolboxToolLabelService {
 			dtoList.add(new ToolboxToolLabelDto(item));
 		}
 		return dtoList;
+	}
+
+	public long getCount(long toolboxId) {
+		return repository.countByToolboxId(toolboxId);
+	}
+
+	public Page<ToolboxToolLabelDto> getPage(long toolboxId, Pageable pageable) {
+		Page<ToolboxToolLabel> page = repository.findAllByToolboxId(toolboxId,pageable);
+		return page.map(e->new ToolboxToolLabelDto(e));
 	}
 
 }
