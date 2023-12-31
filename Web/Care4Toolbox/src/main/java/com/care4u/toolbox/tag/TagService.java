@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +67,11 @@ public class TagService {
 	public List<TagDto> listByToolboxId(long toolboxId) {
 		List<Tag> list = repository.findAllByToolboxId(toolboxId);
 		return getDtoList(list);
+	}
+	@Transactional(readOnly = true)
+	public Page<TagDto> getPage(long toolboxId, Pageable pageable){
+		Page<Tag> page = repository.findAllByToolboxId(toolboxId,pageable);
+		return page.map(e->convertToDto(e));
 	}
 	
 	private List<TagDto> getDtoList(List<Tag> list){
@@ -251,6 +258,11 @@ public class TagService {
 			return null;
 		}
 		return tag.getTagGroup();
+	}
+	
+	@Transactional(readOnly=true)
+	public long getCount(long toolboxId) {
+		return repository.countByToolboxId(toolboxId);
 	}
 	
 }

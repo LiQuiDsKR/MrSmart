@@ -209,12 +209,9 @@ public class OutstandingRentalSheetService {
 		if (toolbox.isEmpty()) {
 			logger.error("toolbox : " + toolbox);
 			return null;
-		}
+		}	
 
-		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
 		Page<OutstandingRentalSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);	
-		Page<OutstandingRentalSheet> page = repository
-				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
 }

@@ -272,7 +272,7 @@
 			const month = today.getMonth() + 1;
 			const day = today.getDate();
 			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
-			const formattedLastMonthDate = year + '-' + (month < 10 ? '0' : '') + (month - 1) + '-' + (day < 10 ? '0' : '') + day;
+			const lastMonthDate = new Date();lastMonthDate.setDate(today.getDate()-30);const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
 			$('#start-date').val(formattedLastMonthDate);
 			$('#end-date').val(formattedTodayDate);
 
