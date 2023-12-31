@@ -354,6 +354,33 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
+    fun getMembershipById(codeToFind: Long): MembershipSQLite {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_Membership_ID, $COLUMN_Membership_NAME, $COLUMN_Membership_CODE, $COLUMN_Membership_PASSWORD, $COLUMN_Membership_PART, $COLUMN_Membership_SUBPART, $COLUMN_Membership_MAINPART, $COLUMN_Membership_ROLE, $COLUMN_Membership_EMPLOYMENT_STATE FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_ID = ?"
+        val selectionArgs = arrayOf(codeToFind.toString())
+        lateinit var membershipSQLite: MembershipSQLite
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_Membership_ID))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_NAME))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_CODE))
+            val password = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PASSWORD))
+            val part = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_PART))
+            val subPart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_SUBPART))
+            val mainPart = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_MAINPART))
+            val role = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_ROLE))
+            val employmentStatus = cursor.getString(cursor.getColumnIndex(COLUMN_Membership_EMPLOYMENT_STATE))
+
+            membershipSQLite = MembershipSQLite(id, name, code, password, part, subPart, mainPart, role, employmentStatus)
+        }
+
+        cursor.close()
+        db.close()
+        return membershipSQLite
+    }
+
+    @SuppressLint("Range")
     fun getAllMemberships(): List<MembershipSQLite> {
         val membershipList = mutableListOf<MembershipSQLite>()
         val query = "SELECT * FROM $TABLE_Membership_NAME"
@@ -531,6 +558,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
         val selectionArgs = arrayOf("STANDBY", "RETURN")
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+            sheetList.add(Pair(id, json))
+        }
+
+        cursor.close()
+        db.close()
+        return sheetList
+    }
+
+    @SuppressLint("Range")
+    fun getRentalRequestStandby(): List<Pair<Long, String>> {
+        val sheetList = mutableListOf<Pair<Long, String>>()
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ? AND $COLUMN_STANDBY_TYPE = ?"
+        val selectionArgs = arrayOf("STANDBY", "RENTALREQUEST")
 
         val cursor = db.rawQuery(query, selectionArgs)
         while (cursor.moveToNext()) {

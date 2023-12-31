@@ -42,8 +42,8 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
 
-    lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: LinearLayout
+    private lateinit var qrEditText: EditText
+    private lateinit var qrcodeBtn: LinearLayout
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout

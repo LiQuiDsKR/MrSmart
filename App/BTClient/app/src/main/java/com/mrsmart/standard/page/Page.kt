@@ -3,7 +3,7 @@ package com.mrsmart.standard.page
 data class Page(
     val content: Any?,
     val pageable: Pageable,
-    val totalPage: Int,
+    val total: Int,
     val totalElements: Int,
     val last: Boolean,
     val numberOfElements: Int,

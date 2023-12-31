@@ -30,7 +30,6 @@ class LobbyActivity  : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
-
         val gson = Gson()
 
         val context = this

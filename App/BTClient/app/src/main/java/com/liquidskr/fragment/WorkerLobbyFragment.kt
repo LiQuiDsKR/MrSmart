@@ -23,7 +23,7 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
-class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
+class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
     lateinit var refreshBtn: ImageButton
@@ -42,6 +42,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        connectBtn = view.findViewById(R.id.connectBtn)
         rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
         refreshBtn = view.findViewById(R.id.refreshBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
@@ -58,6 +59,10 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
         recyclerView.adapter = adapter
         refreshBtn.setOnClickListener {
             getOutstandingRentalSheetList()
+        }
+
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
         }
 
         rentalBtn.setOnClickListener {
@@ -90,5 +95,11 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment() {
                 e.printStackTrace()
             }
         })
+    }
+
+    override fun onBluetoothDisconnected() {
+        activity?.runOnUiThread {
+            connectBtn.setImageResource(R.drawable.group_11_copy)
+        }
     }
 }

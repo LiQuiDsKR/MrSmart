@@ -46,6 +46,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private val messageQueue: Queue<BluetoothMessage> = LinkedList()
 
     private var bluetoothDataListener: BluetoothDataListener? = null
+    private var bluetoothConnectionListener: BluetoothConnectionListener? = null
+
+    fun setBluetoothConnectionListener(listener: BluetoothConnectionListener) {
+        this.bluetoothConnectionListener = listener
+    }
 
     fun setBluetoothDataListener(listener: BluetoothDataListener) {
         this.bluetoothDataListener = listener
@@ -59,6 +64,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
+    interface BluetoothConnectionListener {
+        fun onBluetoothDisconnected()
+    }
+
 
     var gson = Gson()
     fun bluetoothOpen() {
@@ -97,7 +106,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             } else {
                 Toast.makeText(context, "페어링된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
             }
-            standbyProcess()
             receiveThread = Thread {
                 try {
                     inputStream = bluetoothSocket.inputStream
@@ -138,6 +146,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         } else if (size == 0) {
                             continue
                         } else {
+                            bluetoothConnectionListener?.onBluetoothDisconnected()
                             Log.d("bluetoothDisconnected", "블루투스 연결 끊김")
                         }
                         /*
@@ -378,11 +387,19 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             RequestType.TAG_ALL.name -> {
-                val type: Type = object : TypeToken<List<TagDto>>() {}.type
+                val type: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             RequestType.TOOLBOX_TOOL_LABEL_ALL.name -> {
-                val type: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
+                val type: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TOOLBOX_TOOL_LABEL_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             RequestType.TAG_GROUP.name -> {
@@ -418,6 +435,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         var dbHelper = DatabaseHelper(context)
         val rentalList = dbHelper.getRentalStandby()
         val returnList = dbHelper.getReturnStandby()
+        val rentalRequestList = dbHelper.getReturnStandby()
         for ((id, json) in rentalList) {
             try {
                 requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, json, object:

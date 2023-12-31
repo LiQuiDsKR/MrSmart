@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
+import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.StandbyDto
 import com.mrsmart.standard.rental.StandbyParam
@@ -18,6 +19,7 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
 
     private val Rental = 1
     private val Return = 2
+    private val RentalRequest = 3
     val gson = Gson()
 
     override fun getItemViewType(position: Int): Int {
@@ -26,6 +28,7 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
         return when (sheetPair.type) {
             "RENTAL" -> Rental
             "RETURN" -> Return
+            "RENTALREQUEST" -> RentalRequest
             else -> throw IllegalArgumentException("Invalid data type at position $position")
         }
     }
@@ -40,6 +43,10 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
             Return -> {
                 val itemView = inflater.inflate(R.layout.fragment_outstanding_rentalsheet, parent, false)
                 Type2ViewHolder(itemView)
+            }
+            RentalRequest -> {
+                val itemView = inflater.inflate(R.layout.fragment_rentalrequestsheet, parent, false)
+                Type3ViewHolder(itemView)
             }
             else -> throw IllegalArgumentException("Invalid view type: $viewType")
         }
@@ -62,6 +69,16 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
                     val detail = sheets[position].detail
                     val returnSheetForm = gson.fromJson(json, ReturnSheetFormDto::class.java)
                     holder.bind(returnSheetForm, detail)
+                } else {
+                    throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
+                }
+            }
+            RentalRequest -> {
+                if (holder is Type3ViewHolder) {
+                    val json = sheets[position].json
+                    val detail = sheets[position].detail
+                    val rentalRequestSheetForm = gson.fromJson(json, RentalRequestSheetFormDto::class.java)
+                    holder.bind(rentalRequestSheetForm, detail)
                 } else {
                     throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
                 }
@@ -104,6 +121,27 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
             val currentReturnSheetFormDto = item
             val dbData = gson.fromJson(detail, StandbyParam::class.java)
 
+            workerName.text = dbData.workerName
+            leaderName.text = dbData.leaderName
+            timeStamp.text = dbData.timestamp
+            var toolListString = ""
+            for (pair in dbData.toolList) {
+                val toolName: String = pair.first
+                val toolCount: String = pair.second.toString()
+                toolListString = toolListString.plus("$toolName($toolCount)  ")
+            }
+            toolListTextView.text = toolListString
+        }
+    }
+
+    inner class Type3ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var workerName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
+        var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
+        var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
+        var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
+
+        fun bind(item: RentalRequestSheetFormDto, detail: String) {
+            val dbData = gson.fromJson(detail, StandbyParam::class.java)
             workerName.text = dbData.workerName
             leaderName.text = dbData.leaderName
             timeStamp.text = dbData.timestamp

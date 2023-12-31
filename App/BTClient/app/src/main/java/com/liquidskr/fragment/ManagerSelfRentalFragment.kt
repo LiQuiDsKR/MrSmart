@@ -29,8 +29,12 @@ import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
+import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.tool.ToolWithCount
 import java.lang.reflect.Type
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var workerSearchBtn: LinearLayout
@@ -177,6 +181,7 @@ class ManagerSelfRentalFragment() : Fragment() {
                 .commit()
         }
         confirmBtn.setOnClickListener {
+            var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
                 if (adapter is RentalToolAdapter) {
                     if (!adapter.tools.isEmpty()) {
@@ -200,7 +205,14 @@ class ManagerSelfRentalFragment() : Fragment() {
                                         requireActivity().supportFragmentManager.popBackStack()
                                     }
                                     override fun onError(e: Exception) {
-                                        e.printStackTrace()
+                                        if (!standbyAlreadySent) {
+                                            requireActivity().runOnUiThread {
+                                                Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                            }
+                                            handleBluetoothError(gson.toJson(rentalRequestSheet))
+                                            e.printStackTrace()
+                                            requireActivity().supportFragmentManager.popBackStack()
+                                        }
                                     }
                                 })
 
@@ -236,5 +248,34 @@ class ManagerSelfRentalFragment() : Fragment() {
         }
         adapter.updateList(toolList)
         recyclerView.adapter = adapter
+    }/*
+    private fun handleBluetoothError(json: String) {
+        Log.d("STANDBY","STANDBY ACCESS")
+        var dbHelper = DatabaseHelper(requireContext())
+        dbHelper.insertStandbyData(gson.toJson(json), "RENTALREQUEST","STANDBY","")
+        dbHelper.close()
+    }*/
+    private fun handleBluetoothError(json: String) {
+        Log.d("STANDBY","STANDBY ACCESS")
+
+        val rentalRequestSheetForm = gson.fromJson(json, RentalRequestSheetFormDto::class.java)
+        val toolList = rentalRequestSheetForm.toolList
+        var dbHelper = DatabaseHelper(requireContext())
+        val names: Pair<String, String> = Pair(dbHelper.getMembershipById(rentalRequestSheetForm.workerDtoId).name ,dbHelper.getMembershipById(rentalRequestSheetForm.leaderDtoId).name)
+        // 출력 형식 지정 (선택 사항)
+        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+
+        var pairToolList = listOf<Pair<String,Int>>()
+        for (tool in toolList) {
+            val name = dbHelper.getToolById(tool.toolDtoId).name
+            val count = tool.count
+            val pair = Pair(name, count)
+            pairToolList = pairToolList.plus(pair)
+        }
+        val detail = gson.toJson(StandbyParam(0, names.first, names.second, timestamp, pairToolList))
+
+        dbHelper.insertStandbyData(gson.toJson(json), "RENTALREQUEST","STANDBY", detail)
+        dbHelper.close()
     }
 }

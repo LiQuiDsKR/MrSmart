@@ -22,7 +22,6 @@ import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipDto
@@ -138,7 +137,7 @@ class SettingsFragment() : Fragment() {
         importQRData.setOnClickListener {
             showPopup2()
             progressText2.text = ""
-            importTag(dbHelper)
+            //importTag(dbHelper)
 
         }
         importStandard.setOnClickListener {
@@ -150,7 +149,59 @@ class SettingsFragment() : Fragment() {
         return view
     }
     private fun importTBT(dbHelper: DatabaseHelper) {
-        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
+        var TBTCount = 0
+
+        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"",object: BluetoothManager.RequestCallback {
+            override fun onSuccess(result: String, type: Type) {
+                try {
+                    TBTCount = result.toInt()
+                    progressBar.max = TBTCount / 10
+                    dbHelper.clearTBTTable()
+                } catch (e: Exception) {
+
+                }
+                for (i in 0 until TBTCount / 10 + 1) {
+                    bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"size\":${10},\"page\":${i}}",object: BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            var page: Page = gson.fromJson(result, type)
+                            val TBTListType: Type = object : TypeToken<List<ToolboxToolLabelDto>>() {}.type
+                            val TBTList: List<ToolboxToolLabelDto> = gson.fromJson(gson.toJson(page.content), TBTListType)
+                            var index = 0
+                            for (tbt in TBTList) {
+                                index++
+                                val id = tbt.id
+                                val toolbox = tbt.toolboxDto.id
+                                val location = tbt.location
+                                val tool = tbt.toolDto.id
+                                val qrcode = tbt.qrcode
+
+                                dbHelper.insertTBTData(id, toolbox, location, tool, qrcode)
+                            }
+                            requireActivity().runOnUiThread {
+                                progressBar.progress = page.pageable.page
+                                if (page.total != 0) {
+                                    progressText.text = "선반 코드 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
+                                }
+                            }
+                            if (page.pageable.page == TBTCount / 10) {
+                                handler.postDelayed({importTool(dbHelper)}, 1000)
+                            }
+                        }
+                        override fun onError(e: Exception) {
+                            hidePopup() // progressBar hide
+                            handler.post {
+                                Toast.makeText(requireActivity(), "선반 코드를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    })
+                }
+            }
+            override fun onError(e: Exception) {
+
+            }
+        })
+        //############==
+        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL_COUNT,"{\"toolboxId\":${sharedViewModel.toolBoxId}}",object:
             BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 dbHelper.clearTBTTable()
@@ -199,18 +250,78 @@ class SettingsFragment() : Fragment() {
             }
         })
     }
+
+    private fun importMembership(dbHelper: DatabaseHelper) {
+        var membershipCnt = 0
+        bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL_COUNT,"",object: BluetoothManager.RequestCallback {
+            override fun onSuccess(result: String, type: Type) {
+                try {
+                    membershipCnt = result.toInt()
+                    progressBar.max = membershipCnt / 10
+                    dbHelper.clearMembershipTable()
+                } catch (e: Exception) {
+
+                }
+                for (i in 0 until membershipCnt / 10 + 1) {
+                    bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${i}}",object: BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            var page: Page = gson.fromJson(result, type)
+                            val membershipListType: Type = object : TypeToken<List<MembershipDto>>() {}.type
+                            val membershipList: List<MembershipDto> = gson.fromJson(gson.toJson(page.content), membershipListType)
+                            var index = 0
+                            for (member in membershipList) {
+                                index++
+                                val id = member.id
+                                val code = member.code
+                                val password = member.password
+                                val name = member.name
+                                val part = member.partDto.name
+                                val subPart = member.partDto.subPartDto.name
+                                val mainPart = member.partDto.subPartDto.mainPartDto.name
+                                val role = member.role.toString()
+                                val employmentStatus = member.employmentStatus.toString()
+                                dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
+                            }
+                            requireActivity().runOnUiThread {
+                                progressBar.progress = page.pageable.page
+                                if (page.total != 0) {
+                                    progressText.text = "사원 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
+                                }
+                            }
+                            if (page.pageable.page == membershipCnt / 10) {
+                                handler.postDelayed({importTool(dbHelper)}, 1000)
+                            }
+                        }
+                        override fun onError(e: Exception) {
+                            hidePopup() // progressBar hide
+                            handler.post {
+                                Toast.makeText(requireActivity(), "사원 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    })
+                }
+            }
+            override fun onError(e: Exception) {
+                hidePopup() // progressBar hide
+                handler.post {
+                    Toast.makeText(requireActivity(), "사원 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
     private fun importTool(dbHelper: DatabaseHelper) {
         var toolCnt = 0
         bluetoothManager.requestData(RequestType.TOOL_ALL_COUNT,"",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     toolCnt = result.toInt()
-                    progressBar.max = toolCnt
+                    progressBar.max = toolCnt / 10
                     dbHelper.clearToolTable()
                 } catch (e: Exception) {
 
                 }
-                for (i in 0 until toolCnt / 10 + 1 + 1) {
+                for (i in 0 until toolCnt / 10 + 1) {
                     bluetoothManager.requestData(RequestType.TOOL_ALL,"{\"size\":${10},\"page\":${i}}",object: BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             var page: Page = gson.fromJson(result, type)
@@ -231,15 +342,18 @@ class SettingsFragment() : Fragment() {
                                 val replacementCycle = tool.replacementCycle
                                 val buyCode = ""
                                 dbHelper.insertToolData(id, mainGroup, subGroup, code, krName, engName, spec, unit, price, replacementCycle, buyCode)
-                                requireActivity().runOnUiThread {
-                                    progressBar.progress = (i-1) * 10 + index
-                                    progressText.text = "공기구 정보 다운로드 중, ${(i-1) * 10 + index}/${toolCnt}, ${((i-1) * 10 + index) * 100 / toolCnt}%"
+
+                            }
+                            requireActivity().runOnUiThread {
+                                progressBar.progress = page.pageable.page
+                                if (page.total != 0) {
+                                    progressText.text = "공기구 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                                 }
                             }
                             if (page.pageable.page == toolCnt / 10) {
                                 hidePopup()
                                 handler.post {
-                                    Toast.makeText(requireActivity(), "기준정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireActivity(), "공기구 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
                                 }
 
 
@@ -248,68 +362,17 @@ class SettingsFragment() : Fragment() {
                         override fun onError(e: Exception) {
                             hidePopup() // progressBar hide
                             handler.post {
-                                Toast.makeText(requireActivity(), "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireActivity(), "공기구 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     })
                 }
             }
             override fun onError(e: Exception) {
-
-            }
-        })
-    }
-
-    private fun importMembership(dbHelper: DatabaseHelper) {
-        var membershipCnt = 0
-        bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL_COUNT,"",object: BluetoothManager.RequestCallback {
-            override fun onSuccess(result: String, type: Type) {
-                try {
-                    membershipCnt = result.toInt()
-                    progressBar.max = membershipCnt
-                    dbHelper.clearMembershipTable()
-                } catch (e: Exception) {
-
+                hidePopup() // progressBar hide
+                handler.post {
+                    Toast.makeText(requireActivity(), "공기구 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
-                for (i in 0 until membershipCnt / 10 + 1 + 1) {
-                    bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${i}}",object: BluetoothManager.RequestCallback{
-                        override fun onSuccess(result: String, type: Type) {
-                            var page: Page = gson.fromJson(result, type)
-                            val membershipListType: Type = object : TypeToken<List<MembershipDto>>() {}.type
-                            val membershipList: List<MembershipDto> = gson.fromJson(gson.toJson(page.content), membershipListType)
-                            var index = 0
-                            for (member in membershipList) {
-                                index++
-                                val id = member.id
-                                val code = member.code
-                                val password = member.password
-                                val name = member.name
-                                val part = member.partDto.name
-                                val subPart = member.partDto.subPartDto.name
-                                val mainPart = member.partDto.subPartDto.mainPartDto.name
-                                val role = member.role.toString()
-                                val employmentStatus = member.employmentStatus.toString()
-                                dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                                requireActivity().runOnUiThread {
-                                    progressBar.progress = (i-1) * 10 + index
-                                    progressText.text = "사원 정보 다운로드 중, ${(i-1) * 10 + index}/${membershipCnt}, ${((i-1) * 10 + index) * 100 / membershipCnt}%"
-                                }
-                            }
-                            if (page.pageable.page == membershipCnt / 10) {
-                                handler.postDelayed({importTool(dbHelper)}, 1000)
-                            }
-                        }
-                        override fun onError(e: Exception) {
-                            hidePopup() // progressBar hide
-                            handler.post {
-                                Toast.makeText(requireActivity(), "기준정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    })
-                }
-            }
-            override fun onError(e: Exception) {
-
             }
         })
     }

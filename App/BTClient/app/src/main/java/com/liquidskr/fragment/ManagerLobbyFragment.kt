@@ -16,7 +16,8 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
-class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
+class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
+    lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
@@ -34,6 +35,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_lobby, container, false)
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        connectBtn = view.findViewById(R.id.ConnectBtn)
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
         standbyBtn = view.findViewById(R.id.StandbyBtn)
@@ -41,7 +43,6 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
         bluetoothManager = BluetoothManager(requireContext(), requireActivity())
 
         welcomeMessage.text = manager.name + "님 환영합니다."
-
 
         rentalBtn.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
@@ -52,6 +53,10 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .commit()
+        }
+
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
         }
 
         returnBtn.setOnClickListener {
@@ -101,5 +106,11 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment() {
         }*/
 
         return view
+    }
+
+    override fun onBluetoothDisconnected() {
+        activity?.runOnUiThread {
+            connectBtn.setImageResource(R.drawable.group_11_copy)
+        }
     }
 }
