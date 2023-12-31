@@ -3,6 +3,7 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -26,11 +27,14 @@ import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
+import com.mrsmart.standard.rental.RentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
+import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolState
 import java.lang.reflect.Type
@@ -52,6 +56,7 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
+    private val handler = Handler(Looper.getMainLooper())
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -86,10 +91,8 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
             }
         }
 
-        val adapter = OutstandingDetailAdapter(existToolList)
+        val adapter = OutstandingDetailAdapter(recyclerView, existToolList)
         recyclerView.adapter = adapter
-
-        var sheetForTag: List<RentalRequestToolDto> = listOf()
 
         qrcodeBtn.setOnClickListener {
             if (!qrEditText.isFocused) {
@@ -100,59 +103,87 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = fixCode(qrEditText.text.toString().replace("\n", ""))
                 try {
-                    var dbHelper = DatabaseHelper(requireContext())
-                    var taggedTool = dbHelper.getToolByTag(tag).toToolDto()
+                    lateinit var taggedTool: ToolDto
+                    bluetoothManager.requestData(RequestType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                        override fun onSuccess(result: String, type: Type) {
+                            if (result != "null") {
+                                val tag: TagDto = gson.fromJson(result, type)
+                                taggedTool = tag.toolDto
 
-                    var toolDtoList = listOf<ToolDto>()
-                    for (rentalToolDto: RentalToolDto in outstandingSheet.rentalSheetDto.toolList) {
-                        toolDtoList = toolDtoList.plus(rentalToolDto.toolDto)
-                    }
-                    var toolIdList = listOf<Long>()
-                    for (tool in toolDtoList) {
-                        toolIdList = toolIdList.plus(tool.id)
-                    }
+                                var toolDtoList = listOf<ToolDto>()
+                                for (rentalToolDto: RentalToolDto in outstandingSheet.rentalSheetDto.toolList) {
+                                    toolDtoList = toolDtoList.plus(rentalToolDto.toolDto)
+                                }
+                                var toolIdList = listOf<Long>()
+                                for (tool in toolDtoList) {
+                                    toolIdList = toolIdList.plus(tool.id)
+                                }
+                                Log.d("Tst", "imhereStartvv")
+                                if (taggedTool.id in toolIdList) {
+                                    val rentalToolList: MutableList<RentalToolDto> = mutableListOf()
+                                    for (tool: RentalToolDto in outstandingSheet.rentalSheetDto.toolList) {
+                                        var modifiedRentalTool = RentalToolDto(tool.id, outstandingSheet.rentalSheetDto, tool.toolDto, tool.count, tool.outstandingCount, tool.Tags?:"null")
+                                        var modifiedTag = ""
+                                        if (tool.toolDto.id == taggedTool.id) {
+                                            if (tool.Tags == null || tool.Tags == "") {
+                                                modifiedTag = tag.macaddress
+                                                handler.post {
+                                                    Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                }
+                                                Log.d("Tst", "imhereStart")
+                                                adapter.tagAdded(modifiedRentalTool)
+                                            } else {
+                                                if ("," in tool.Tags) { // 여러개 있다면
+                                                    val tags = tool.Tags.split(",")
+                                                    if (!(tag.macaddress in tags)) {
+                                                        modifiedTag = tool.Tags + "," + tag
+                                                        handler.post {
+                                                            Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    } else {
+                                                        modifiedTag = tag.macaddress
+                                                    }
+                                                } else { // 한개 있다면
+                                                    if (!(tool.Tags == tag.macaddress)) {
+                                                        modifiedTag = tool.Tags + "," + tag
+                                                        handler.post {
+                                                            Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    } else {
+                                                        modifiedTag = tool.Tags
+                                                    }
+                                                }
 
-                    if (taggedTool.id in toolIdList) {
-                        val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
-                        for (tool: RentalToolDto in outstandingSheet.rentalSheetDto.toolList) {
-                            var modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, tool.Tags)
-                            if (tool.toolDto.id == taggedTool.id) {
-                                var modifiedTag = ""
-                                if (tool.Tags == null) {
-                                    modifiedTag = tag
-                                    requireActivity().runOnUiThread {
-                                        Toast.makeText(activity, "${taggedTool.name} 에 ${tag} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } else {
+                                            if (tool.Tags == null) {
+                                                modifiedTag = ""
+                                            } else {
+                                                modifiedTag = tool.Tags
+                                            }
+                                        }
+                                        modifiedRentalTool = RentalToolDto(tool.id, outstandingSheet.rentalSheetDto, tool.toolDto, tool.count, tool.outstandingCount, modifiedTag)
+                                        rentalToolList.add(modifiedRentalTool)
                                     }
+                                    val rentalSheet = RentalSheetDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto, outstandingSheet.rentalSheetDto.leaderDto, outstandingSheet.rentalSheetDto.approverDto, outstandingSheet.rentalSheetDto.toolboxDto, outstandingSheet.rentalSheetDto.eventTimestamp, rentalToolList)
+                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingSheet.id, rentalSheet, outstandingSheet.totalCount, outstandingSheet.totalOutstandingCount,outstandingSheet.outstandingStatus)
+                                    Log.d("newRentalSheet",outStandingRentalSheetDto.toString())
+                                    outstandingSheet = outStandingRentalSheetDto
                                 } else {
-                                    val tags = tool.Tags.toString().split(",")
-                                    if (tag in tags) {
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(activity, "이미 ${taggedTool.name} 에 ${tag} 를 확인했습니다.", Toast.LENGTH_SHORT).show()
-                                        }
-                                    } else {
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(activity, "${taggedTool.name} 에 ${tag} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                        }
-                                        modifiedTag = tool.Tags + "," + tag
+                                    handler.post {
+                                        Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
-                                modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, modifiedTag)
-                                //rentalRequestToolDtoList.add(modifiedRentalRequestTool)
-                                sheetForTag = sheetForTag.plus(modifiedRentalRequestTool)
                             }
                         }
+                        override fun onError(e: Exception) {
 
-
-                        val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingSheet.id, outstandingSheet.rentalSheetDto, outstandingSheet.totalCount, outstandingSheet.totalOutstandingCount,outstandingSheet.outstandingStatus)
-                        Log.d("a",outStandingRentalSheetDto.toString())
-                        outstandingSheet = outStandingRentalSheetDto
-                    } else {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    })
                 } catch (e: UninitializedPropertyAccessException) {
-                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    handler.post {
+                        Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 qrEditText.text.clear()
 
@@ -171,50 +202,49 @@ class ManagerOutstandingDetailFragment(outstandingSheet: OutstandingRentalSheetD
         }
         confirmBtn.setOnClickListener {
             var standbyAlreadySent = false
-            recyclerView.adapter?.let { adapter ->
-                if (adapter is OutstandingDetailAdapter) {
-                    val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
-                    for (toolId in adapter.selectedToolsToReturn) {
-                        for (tool in outstandingSheet.rentalSheetDto.toolList) {
-                            if (tool.id == toolId) {
-                                for (i in adapter.selectedToolsToReturn.indices) {
-                                    if (tool.id == adapter.selectedToolsToReturn[i]) {
-                                        val holder = recyclerView.findViewHolderForAdapterPosition(adapter.outstandingRentalTools.indexOf(tool)) as? OutstandingDetailAdapter.OutstandingRentalToolViewHolder
-                                        val count = holder?.toolCount?.text.toString().toInt()
-                                        var currentTags = ""
-                                        for (currenttool in sheetForTag) {
-                                            if (currenttool.toolDto.id == tool.toolDto.id) {
-                                                currentTags = currenttool.Tags.toString()
-                                            }
-                                        }
-                                        returnToolFormDtoList.add(ReturnToolFormDto(tool.id, tool.toolDto.id, count, ToolState.GOOD, currentTags)) //
-                                    }
+            if (adapter is OutstandingDetailAdapter) {
+                val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
+                for (toolId in adapter.selectedToolsToReturn) {
+                    for (tool in outstandingSheet.rentalSheetDto.toolList) {
+                        if (tool.id == toolId) {
+                            for (i in adapter.selectedToolsToReturn.indices) {
+                                if (tool.id == adapter.selectedToolsToReturn[i]) {
+                                    val holder = recyclerView.findViewHolderForAdapterPosition(adapter.outstandingRentalTools.indexOf(tool)) as? OutstandingDetailAdapter.OutstandingRentalToolViewHolder
+                                    val count = holder?.toolCount?.text.toString().toInt()
+                                    returnToolFormDtoList.add(ReturnToolFormDto(tool.id, tool.toolDto.id, count, ToolState.GOOD, tool.Tags)) //Good아닐수도
                                 }
                             }
                         }
                     }
-                    val returnSheetForm = ReturnSheetFormDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto.id, outstandingSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
-                    bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
-                        BluetoothManager.RequestCallback{
-                        override fun onSuccess(result: String, type: Type) {
-                            requireActivity().runOnUiThread {
+                }
+                val returnSheetForm = ReturnSheetFormDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto.id, outstandingSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
+                bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
+                    BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        if (result == "good") {
+                            handler.post {
                                 Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
                             }
                             requireActivity().supportFragmentManager.popBackStack()
-                        }
-
-                        override fun onError(e: Exception) {
-                            if (!standbyAlreadySent) {
-                                requireActivity().runOnUiThread {
-                                    Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                                handleBluetoothError(gson.toJson(returnSheetForm))
-                                e.printStackTrace()
-                                requireActivity().supportFragmentManager.popBackStack()
+                        } else {
+                            handler.post {
+                                Toast.makeText(activity, "반납 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                             }
+                            requireActivity().supportFragmentManager.popBackStack()
                         }
-                    })
-                }
+                    }
+
+                    override fun onError(e: Exception) {
+                        if (!standbyAlreadySent) {
+                            handler.post {
+                                Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            handleBluetoothError(gson.toJson(returnSheetForm))
+                            e.printStackTrace()
+                            requireActivity().supportFragmentManager.popBackStack()
+                        }
+                    }
+                })
             }
             standbyAlreadySent = true
         }

@@ -33,7 +33,7 @@ import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolWithCount
 import java.lang.reflect.Type
 
-class WorkerRentalFragment() : Fragment() {
+class WorkerRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     lateinit var leaderSearchBtn: LinearLayout
     lateinit var qrEditText: EditText
     lateinit var qrcodeBtn: LinearLayout
@@ -86,7 +86,7 @@ class WorkerRentalFragment() : Fragment() {
             newToolList.add(toolWithCount)
         }
         
-        val adapter = RentalToolAdapter(toolList)
+        val adapter = RentalToolAdapter(toolList, this)
         var finalToolList: MutableList<ToolWithCount> = toolList
         finalToolList.addAll(newToolList)
         adapter.updateList(finalToolList)
@@ -198,6 +198,8 @@ class WorkerRentalFragment() : Fragment() {
                     } else {
                         Toast.makeText(requireContext(), "작업자를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                     }
+                } else {
+                    Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -234,5 +236,9 @@ class WorkerRentalFragment() : Fragment() {
             val fragment = WorkerRentalFragment()
             return fragment
         }
+    }
+
+    override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
+        sharedViewModel.toolWithCountList = list
     }
 }

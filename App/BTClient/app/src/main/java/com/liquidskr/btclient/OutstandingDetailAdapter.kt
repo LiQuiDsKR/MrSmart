@@ -1,15 +1,18 @@
 package com.liquidskr.btclient
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalToolDto
 
-class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) :
+class OutstandingDetailAdapter(private val recyclerView: RecyclerView, val outstandingRentalTools: List<RentalToolDto>) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,14 +35,13 @@ class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) 
             showNumberDialog(holder.toolCount, currentOutstandingRentalTool.outstandingCount)
         }
         holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
-        holder.itemView.setOnClickListener{// 항목 자체를 눌렀을 때
-            if (!(currentOutstandingRentalTool.id in selectedToolsToReturn)) {
-                selectedToolsToReturn.add(currentOutstandingRentalTool.id)
-                holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
-            } else {
-                selectedToolsToReturn.remove(currentOutstandingRentalTool.id)
-                holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
-            }
+        holder.itemView.setOnClickListener {
+            handleSelection(currentOutstandingRentalTool)
+        }
+        if (isSelected(currentOutstandingRentalTool)) {
+            holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
+        } else {
+            holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
         }
     }
 
@@ -69,5 +71,35 @@ class OutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) 
         }
 
         builder.show()
+    }
+    fun handleSelection(currentRentalTool: RentalToolDto) {
+        if (!isSelected(currentRentalTool)) {
+            addToSelection(currentRentalTool)
+        } else {
+            removeFromSelection(currentRentalTool)
+        }
+        notifyDataSetChanged() // 변경된 데이터를 알림
+    }
+    fun tagAdded(currentRentalTool: RentalToolDto) {
+        Log.d("Tst", "imhere")
+        addToSelection(currentRentalTool)
+        Log.d("Tst", "imhere2")
+        recyclerView.post {
+            notifyDataSetChanged()
+        }
+        Log.d("Tst", "imhere3")
+    }
+
+    private fun isSelected(currentRentalTool: RentalToolDto): Boolean {
+        return currentRentalTool.id in selectedToolsToReturn
+    }
+
+    private fun addToSelection(currentRentalTool: RentalToolDto) {
+        selectedToolsToReturn.add(currentRentalTool.id)
+
+    }
+
+    private fun removeFromSelection(currentRentalTool: RentalToolDto) {
+        selectedToolsToReturn.remove(currentRentalTool.id)
     }
 }

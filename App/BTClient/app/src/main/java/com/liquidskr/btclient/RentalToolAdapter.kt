@@ -10,8 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.tool.ToolWithCount
 
-class RentalToolAdapter(var tools: MutableList<ToolWithCount>) :
+class RentalToolAdapter(var tools: MutableList<ToolWithCount>, private val onDeleteItemClickListener: OnDeleteItemClickListener) :
     RecyclerView.Adapter<RentalToolAdapter.RentalToolViewHolder>() {
+
+    interface OnDeleteItemClickListener {
+        fun onDeleteItemClicked(list: MutableList<ToolWithCount>)
+    }
 
     class RentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var id: Long = 0
@@ -44,6 +48,7 @@ class RentalToolAdapter(var tools: MutableList<ToolWithCount>) :
             newList.removeAt(holder.adapterPosition)
             tools = newList
             notifyDataSetChanged()
+            onDeleteItemClickListener.onDeleteItemClicked(newList)
         }
     }
 

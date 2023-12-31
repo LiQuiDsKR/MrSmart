@@ -79,6 +79,7 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
     }
     fun tagAdded(currentRentalRequestTool: RentalRequestToolDto) {
         addToSelection(currentRentalRequestTool)
+        notifyDataSetChanged()
     }
 
     private fun isSelected(currentRentalRequestTool: RentalRequestToolDto): Boolean {
