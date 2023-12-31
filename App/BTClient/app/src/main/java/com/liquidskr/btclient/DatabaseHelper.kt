@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -631,25 +630,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return tagGroup
-    }
-
-    @SuppressLint("Range")
-    fun getTagByToolId(id: Long): Boolean {
-        var tag = ""
-        val db = this.readableDatabase
-        val query = "SELECT $COLUMN_TAG_MACADDRESS FROM $TABLE_TAG_NAME WHERE $COLUMN_TAG_TOOL_ID = ?"
-        val selectionArgs = arrayOf(id.toString())
-        try {
-            val cursor = db.rawQuery(query, selectionArgs)
-            while (cursor.moveToNext()) {
-                tag = cursor.getString(cursor.getColumnIndex(COLUMN_TAG_MACADDRESS))
-            }
-            cursor.close()
-        } catch(e: Exception) {
-            Log.d("dbError", e.toString())
-        }
-        db.close()
-        return tag != ""
     }
     @SuppressLint("Range")
     fun getToolByTag(tag: String): ToolDtoSQLite {

@@ -67,6 +67,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
+<<<<<<< HEAD
         val dbHelper = DatabaseHelper(requireContext())
 
 
@@ -74,18 +75,13 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         workerName.text = rentalRequestSheet.workerDto.name
         leaderName.text = rentalRequestSheet.leaderDto.name
         timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+=======
+        workerName.text = "대여자: " + rentalRequestSheet.workerDto.name
+        leaderName.text = "리더: " + rentalRequestSheet.leaderDto.name
+        timeStamp.text = "신청일시: " + rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+>>>>>>> parent of b0b937f (20231229)
 
-        var newToolList: MutableList<RentalRequestToolDto> = mutableListOf()
-        for (tool in toolList) {
-            if (dbHelper.getTagByToolId(tool.toolDto.id)) {
-                for (i in 0 until tool.count) {
-                    newToolList.add(RentalRequestToolDto(tool.id, tool.toolDto, 1, ""))
-                }
-            } else {
-                newToolList.add(RentalRequestToolDto(tool.id, tool.toolDto, tool.count, tool.Tags))
-            }
-        }
-        var adapter = RentalRequestToolAdapter(newToolList)
+        var adapter = RentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
 
         backButton.setOnClickListener {
