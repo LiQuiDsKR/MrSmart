@@ -517,6 +517,12 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				String tagString = jsonObj.getString("tag");
+				handler.sendData(keyword + GsonUtils.toJson(tagService.getSiblings(tagString)));
+			}
+		case TAG:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				String tagString = jsonObj.getString("tag");
 				handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
 			}
 		}
