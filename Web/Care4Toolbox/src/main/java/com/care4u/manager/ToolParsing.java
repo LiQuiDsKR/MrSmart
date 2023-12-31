@@ -3,6 +3,8 @@ package com.care4u.manager;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -54,6 +56,7 @@ public class ToolParsing {
 									.engName(datas[5].trim())
 									.spec(datas[6].trim())
 									.unit(datas[7].trim())
+									//.price(datas[8].trim().isEmpty()?0:Integer.parseInt(datas[8].trim()))
 									.subGroupDto(subGroupDto)									
 									.build();
 					toolService.update(subGroupDto.getId(), tool);
@@ -86,6 +89,34 @@ public class ToolParsing {
 		}
 		
 		return subGroupDto;
+	}
+	
+	
+	public void checkCsvFile(String csvFilePath) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+			String line;
+			
+			// 라인 단위로 읽어오기
+			int count = 1;
+			List<String> results = new ArrayList<String> ();
+			while ((line = reader.readLine()) != null) {
+				// ','로 구분된 데이터 파싱
+				String[] datas = line.split(",");
+				ToolDto toolDto = toolService.getByCode(datas[3].trim());
+				if (toolDto==null) {
+					logger.info(count + " : NULL");
+					results.add(count + " : NULL");
+				}else {
+					logger.info(count + " : " + toolDto.getCode()+" , "+toolDto.getName()+" , "+toolDto.getSpec());
+				}
+				count++;
+			}
+			for (String s : results) {				
+				logger.debug(s);
+			}
+		} catch (IOException e) {
+			logger.error(e.toString());
+		}
 	}
 
 }

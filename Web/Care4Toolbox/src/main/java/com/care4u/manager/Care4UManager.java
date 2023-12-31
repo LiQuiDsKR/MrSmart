@@ -178,11 +178,12 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
 
-		MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
-		memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
+		//MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
+		//memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
 		
 		ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService);
-		toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
+		//toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
+		toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
@@ -192,7 +193,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		//membershipService.updatePasswords();
-		membershipService.downdatePasswords();
+		//membershipService.downdatePasswords();
 		
 		timer = new Timer();
 		timer.schedule(timerTask, 10 * 1000, 1000);
