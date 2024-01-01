@@ -37,6 +37,9 @@ import com.care4u.toolbox.sheet.rental.rental_tool.RentalTool;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolService;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheet;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetDto;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.sheet.supply_sheet.SupplySheetService;
 import com.care4u.toolbox.sheet.supply_tool.SupplyTool;
 import com.care4u.toolbox.tag.Tag;
@@ -223,5 +226,15 @@ public class RentalSheetService {
 		// 2. RentalSheet를 addNew
 		return addNew(sheetDto, approverId);
 	}
-
+	
+	@Transactional
+	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetDto sheetDto, long approverId,LocalDateTime eventTimestamp) {
+		RentalSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("RentalSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			return updateAndAddNewInTransaction(sheetDto,approverId);
+		}
+	}
 }

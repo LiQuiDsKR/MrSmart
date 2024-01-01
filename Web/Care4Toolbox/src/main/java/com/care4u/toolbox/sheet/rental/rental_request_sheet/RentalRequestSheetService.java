@@ -27,6 +27,9 @@ import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolService;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheet;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetDto;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.stock_status.StockStatusDto;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.TagDto;
@@ -283,5 +286,15 @@ public class RentalRequestSheetService {
 		return convertToDto(repository.save(sheet));
 	}
 
+	@Transactional
+	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, LocalDateTime eventTimestamp) {
+		RentalRequestSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("returnSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			return addNew(formDto);
+		}
+	}
 
 }

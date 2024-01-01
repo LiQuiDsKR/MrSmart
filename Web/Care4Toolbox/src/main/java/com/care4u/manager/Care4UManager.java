@@ -1,6 +1,8 @@
 package com.care4u.manager;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,16 +44,20 @@ import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRenta
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormWithTimestampDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverAndTimestampDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverIdDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
+import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormWithTimestampDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.ToolService;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelDto;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelService;
+import com.google.gson.reflect.TypeToken;
 
 import lombok.RequiredArgsConstructor;
 
@@ -296,6 +302,46 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		case RENTAL_REQUEST_SHEET_FORM_STANDBY:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				RentalRequestSheetFormWithTimestampDto mainDto;
+		    	try {
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormWithTimestampDto.class);
+					RentalRequestSheetFormDto formDto = mainDto.getSheet();
+					String timeString = mainDto.getTimestamp();
+					
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+			        
+		    		rentalRequestSheetService.addNew(formDto,eventTimestamp);
+		    		handler.sendData(keyword + "good");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_APPROVE_STANDBY:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				RentalRequestSheetWithApproverAndTimestampDto mainDto;
+		    	try {
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverAndTimestampDto.class);
+					RentalRequestSheetDto sheetDto = mainDto.getSheet().getRentalRequestSheetDto();
+					long approverId = mainDto.getSheet().getApproverId();
+					String timeString = mainDto.getTimestamp();
+					
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+					
+		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId, eventTimestamp);
+		            
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
 		case RENTAL_REQUEST_SHEET_APPROVE:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetWithApproverIdDto mainDto;
@@ -409,6 +455,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	try {
 					formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
 		    		returnSheetService.addNew(formDto);
+		    		handler.sendData(keyword + "good");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RETURN_SHEET_FORM_STANDBY:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+		    	ReturnSheetFormWithTimestampDto mainDto;
+		    	try {
+					mainDto = GsonUtils.fromJson(paramJson, ReturnSheetFormWithTimestampDto.class);
+					ReturnSheetFormDto formDto = mainDto.getSheet();
+					String timeString = mainDto.getTimestamp();
+					
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+			        
+					
+		    		returnSheetService.addNew(formDto,eventTimestamp);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");

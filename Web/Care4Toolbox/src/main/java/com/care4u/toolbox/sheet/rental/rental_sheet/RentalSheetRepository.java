@@ -29,4 +29,6 @@ public interface RentalSheetRepository extends JpaRepository<RentalSheet, Long>,
 			@Param("endDate") LocalDateTime endDate,
 			Pageable pageable
 			);
+
+	RentalSheet findByEventTimestamp(LocalDateTime eventTimestamp);
 }

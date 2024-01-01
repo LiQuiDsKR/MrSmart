@@ -208,4 +208,15 @@ public class ReturnSheetService {
 		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e->convertToDto(e));
 	}
+	
+	@Transactional
+	public ReturnSheetDto addNew(ReturnSheetFormDto formDto,LocalDateTime eventTimestamp) {
+		ReturnSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("returnSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			return addNew(formDto);
+		}
+	}
 }

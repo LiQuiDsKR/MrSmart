@@ -30,4 +30,6 @@ public interface ReturnSheetRepository extends JpaRepository<ReturnSheet, Long> 
 			@Param("endDate") LocalDateTime endDate,
 			Pageable pageable
 			);
+
+	ReturnSheet findByEventTimestamp(LocalDateTime eventTimestamp);
 }

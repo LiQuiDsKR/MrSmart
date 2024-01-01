@@ -30,5 +30,7 @@ public interface RentalRequestSheetRepository extends JpaRepository<RentalReques
 	        @Param("id1") long workerId, @Param("id2") long leaderId,
 	        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
 
+	RentalRequestSheet findByEventTimestamp(LocalDateTime eventTimestamp);
+
 	
 }
