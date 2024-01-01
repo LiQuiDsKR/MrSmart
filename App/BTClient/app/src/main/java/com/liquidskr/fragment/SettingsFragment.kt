@@ -37,7 +37,6 @@
 
     class SettingsFragment(context: Context) : Fragment() {
         lateinit var importStandard: LinearLayout
-        lateinit var importQRData: LinearLayout
         lateinit var setServerPCName: LinearLayout
         lateinit var setToolBox: LinearLayout
         lateinit var closeBtn: LinearLayout
@@ -46,16 +45,12 @@
         private lateinit var bluetoothManager: BluetoothManager
 
         private lateinit var popupLayout: View
-        private lateinit var popupLayout2: View
         private lateinit var progressBar: ProgressBar
         private lateinit var progressText: TextView
-        private lateinit var progressBar2: ProgressBar
-        private lateinit var progressText2: TextView
 
         private val handler = Handler(Looper.getMainLooper())
         private val gson = Gson()
         private var isPopupVisible = false
-        private var isPopupVisible2 = false
 
         private lateinit var membershipRequest: MembershipRequest
         private lateinit var toolRequest: ToolRequest
@@ -99,9 +94,10 @@
 
             override fun onLastPageArrived() {
                 handler.post {
+                    hidePopup()
                     Toast.makeText(requireActivity(), "기준 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                    showCustomModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
                 }
-                showCustomModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
             }
 
             override fun onError(e: Exception) {
@@ -141,24 +137,18 @@
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             val view = inflater.inflate(R.layout.fragment_settings, container, false)
             popupLayout = view.findViewById(R.id.popupLayout)
-            popupLayout2 = view.findViewById(R.id.popupLayout2)
             progressBar = view.findViewById(R.id.progressBar)
             progressText = view.findViewById(R.id.progressText)
-            progressBar2 = view.findViewById(R.id.progressBar2)
-            progressText2 = view.findViewById(R.id.progressText2)
             importStandard = view.findViewById(R.id.importStandard)
-            importQRData = view.findViewById(R.id.importQRData)
             setServerPCName = view.findViewById(R.id.setServerPCName)
             setToolBox = view.findViewById(R.id.setToolBox)
             closeBtn = view.findViewById(R.id.closeBtn)
             popupLayout.setOnTouchListener { _, _ -> true }
-            popupLayout2.setOnTouchListener { _, _ -> true }
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
             closeBtn.setOnClickListener {
                 requireActivity().supportFragmentManager.popBackStack()
             }
-            val handler = Handler(Looper.getMainLooper())
             setServerPCName.setOnClickListener {
                 var currentPCName = bluetoothManager.pcName
                 showTextDialog(requireContext(), "정비실 노트북(PC)의 이름을 입력하세요.", currentPCName) { string ->
@@ -201,12 +191,6 @@
                 showPopup() // progressBar appear
                 progressText.text = ""
                 importMembership(dbHelper)
-            }
-            importQRData.setOnClickListener {
-                showPopup2()
-                progressText2.text = ""
-                importTBT(dbHelper)
-
             }
 
             return view
@@ -278,7 +262,7 @@
                     }
                 }
                 override fun onError(e: Exception) {
-                    hidePopup2() // progressBar hide
+                    hidePopup() // progressBar hide
                     handler.post {
                         Toast.makeText(requireActivity(), "선반 코드 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
@@ -302,7 +286,7 @@
                     }
                 }
                 override fun onError(e: Exception) {
-                    hidePopup2() // progressBar hide
+                    hidePopup() // progressBar hide
                     handler.post {
                         Toast.makeText(requireActivity(), "태그 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
@@ -398,21 +382,10 @@
             // Show the popup layout
             popupLayout.visibility = View.VISIBLE
         }
-        private fun showPopup2() {
-            isPopupVisible2 = true
-            // Show the popup layout
-            popupLayout2.visibility = View.VISIBLE
-        }
         private fun hidePopup() {
             isPopupVisible = false
             // Hide the popup layout
             popupLayout.visibility = View.GONE
-
-        }
-        private fun hidePopup2() {
-            isPopupVisible2 = false
-            // Hide the popup layout
-            popupLayout2.visibility = View.GONE
 
         }
         fun showTextDialog(context: Context, title: String, defaultText: String, callback: (String) -> Unit) {

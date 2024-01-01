@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- res/layout/modal_layout.xml -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:background="#00E3CBCB"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="공기구 상태 설정"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="양호"
+                        android:textSize="20sp" />
+
+                    <FrameLayout
+                        android:id="@+id/incrementGood"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/goodCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="34sp" />
+
+                    <FrameLayout
+                        android:id="@+id/decrementGood"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="고장"
+                        android:textSize="20sp" />
+
+                    <FrameLayout
+                        android:id="@+id/incrementFault"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/faultCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="34sp" />
+
+                    <FrameLayout
+                        android:id="@+id/decrementFault"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="파손"
+                        android:textSize="20sp" />
+
+                    <FrameLayout
+                        android:id="@+id/incrementDamage"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/damageCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="34sp" />
+
+                    <FrameLayout
+                        android:id="@+id/decrementDamage"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="망실"
+                        android:textSize="20sp" />
+
+                    <FrameLayout
+                        android:id="@+id/incrementLoss"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/lossCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="34sp" />
+
+                    <FrameLayout
+                        android:id="@+id/decrementLoss"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="폐기"
+                        android:textSize="20sp" />
+
+                    <FrameLayout
+                        android:id="@+id/incrementDiscard"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/discardCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="34sp" />
+
+                    <FrameLayout
+                        android:id="@+id/decrementDiscard"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:background="#00BCD4"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 나머지 상태에 대한 UI는 이어서 작성 -->
+
+            <!-- 나머지 UI 구성 요소들은 이어서 작성 -->
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

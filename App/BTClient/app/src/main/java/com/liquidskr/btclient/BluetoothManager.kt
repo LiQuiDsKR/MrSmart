@@ -414,6 +414,18 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val type: Type = object : TypeToken<TagDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
+            RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RETURN_SHEET_FORM_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
         }
     }/*
     private fun clearSendingState() {
@@ -439,13 +451,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         var dbHelper = DatabaseHelper(context)
         val rentalList = dbHelper.getRentalStandby()
         val returnList = dbHelper.getReturnStandby()
-        val rentalRequestList = dbHelper.getReturnStandby()
+        val rentalRequestList = dbHelper.getRentalRequestStandby()
         for ((id, json) in rentalList) {
             try {
-                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, json, object:
+                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, json, object:
                     BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
-                        dbHelper.updateStandbyStatus(id)
+                        if (result == "good") dbHelper.updateStandbyStatus(id)
                     }
                     override fun onError(e: Exception) {
                         e.printStackTrace()
@@ -457,10 +469,26 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
         for ((id, json) in returnList) {
             try {
-                requestData(RequestType.RETURN_SHEET_FORM, json, object:
+                requestData(RequestType.RETURN_SHEET_FORM_STANDBY, json, object:
                     BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
-                        dbHelper.updateStandbyStatus(id)
+                        if (result == "good") dbHelper.updateStandbyStatus(id)
+                    }
+
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                    }
+                })
+            } catch (e: IOException) {
+                Log.d("standby","cannot send return standby")
+            }
+        }
+        for ((id, json) in rentalRequestList) {
+            try {
+                requestData(RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY, json, object:
+                    BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        if (result == "good") dbHelper.updateStandbyStatus(id)
                     }
 
                     override fun onError(e: Exception) {
