@@ -35,9 +35,19 @@ public class SupplySheetController {
 	
 	@Autowired
 	private ToolboxService toolboxService;
+	@Autowired
+	private SubGroupService subGroupService;
+	@Autowired
+	private MainGroupService mainGroupService;
 	
     @GetMapping(value = "sheet")
     public String supplySheet(Model model) {
+    	try {
+    		model.addAttribute("subGroupList",subGroupService.listByMainGroupId(mainGroupService.get("소모자재").getId()));
+    	}catch(Exception e) {
+    		logger.error(e.getMessage());
+    		model.addAttribute("subGroupList",null);
+    	}
     	return "supply/sheet";
     }
     @GetMapping(value = "sheet/tool")
