@@ -99,8 +99,8 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	    	if (membership == null) {
 	    		return Expressions.asBoolean(true).isTrue();
 	    	}else {
-		    	BooleanExpression worker = isWorker? QRentalRequestSheet.rentalRequestSheet.worker.eq(membership) : Expressions.asBoolean(false).isTrue();
-		    	BooleanExpression leader = isLeader? QRentalRequestSheet.rentalRequestSheet.leader.eq(membership) : Expressions.asBoolean(false).isTrue();
+		    	BooleanExpression worker = isWorker? QOutstandingRentalSheet.outstandingRentalSheet.rentalSheet.worker.eq(membership) : Expressions.asBoolean(false).isTrue();
+		    	BooleanExpression leader = isLeader? QOutstandingRentalSheet.outstandingRentalSheet.rentalSheet.leader.eq(membership) : Expressions.asBoolean(false).isTrue();
 		    	
 		    	return worker.or(leader);
 	    	}
@@ -117,8 +117,8 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
                 .selectDistinct(sSheet)
                 .from(sSheet)
                 .where(
-                		(searchMembershipEquals(membership,isWorker,isLeader)
-                		.and(sSheet.rentalSheet.toolbox.eq(toolbox)))
+                		searchMembershipEquals(membership,isWorker,isLeader)
+                		.and(sSheet.rentalSheet.toolbox.eq(toolbox))
                 		.and(sSheet.outstandingStatus.eq(status))
                 		.and(sSheet.rentalSheet.eventTimestamp.between(startDate, endDate))
                 )
