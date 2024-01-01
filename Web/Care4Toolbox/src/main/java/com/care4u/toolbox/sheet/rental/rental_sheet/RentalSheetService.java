@@ -124,7 +124,7 @@ public class RentalSheetService {
 		Page<RentalSheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool,
 				LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);
 
-		return null;
+		return page.map(e->convertToDto(e));
 	}
 
 	@Transactional(readOnly = true)
