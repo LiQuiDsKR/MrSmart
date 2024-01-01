@@ -210,7 +210,6 @@ public class OutstandingRentalSheetService {
 			logger.error("toolbox : " + toolbox);
 			return null;
 		}	
-
 		Page<OutstandingRentalSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);	
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}

@@ -16,5 +16,5 @@ public interface OutstandingRentalSheetRepositoryCustom {
 	List<OutstandingRentalSheet> findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(long membershipId, LocalDateTime startDate, LocalDateTime endDate);
 	List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState status, long membershipId);
 	Page<OutstandingRentalSheet> findBySearchQuery(OutstandingState status, Membership membership, Boolean isWorker,
-			Boolean isLeader, Toolbox toolbox, LocalDateTime localDateTime, LocalDateTime localDateTime2, Pageable pageable);
+			Boolean isLeader, Toolbox toolbox, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

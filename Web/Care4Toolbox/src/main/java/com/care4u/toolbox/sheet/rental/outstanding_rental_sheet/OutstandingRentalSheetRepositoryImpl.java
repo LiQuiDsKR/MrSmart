@@ -118,7 +118,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
                 .from(sSheet)
                 .where(
                 		searchMembershipEquals(membership,isWorker,isLeader)
-                		.and(sSheet.rentalSheet.toolbox.eq(toolbox))
+                		.or(sSheet.rentalSheet.toolbox.eq(toolbox))
                 		.and(sSheet.outstandingStatus.eq(status))
                 		.and(sSheet.rentalSheet.eventTimestamp.between(startDate, endDate))
                 )
