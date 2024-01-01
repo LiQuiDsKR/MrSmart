@@ -63,6 +63,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
 
         connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
 
         rentalBtn.setOnClickListener {

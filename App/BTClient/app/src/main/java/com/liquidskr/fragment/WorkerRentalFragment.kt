@@ -179,7 +179,7 @@ class WorkerRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickLi
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     handler.post {
-                                        Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     }
                                     sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                                     sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )

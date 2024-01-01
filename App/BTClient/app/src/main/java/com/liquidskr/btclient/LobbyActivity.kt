@@ -74,7 +74,9 @@ class LobbyActivity : AppCompatActivity() {
         }
 
         bluetoothBtn.setOnClickListener {
+            bluetoothManager.bluetoothClose()
             bluetoothManager.bluetoothOpen()
+            bluetoothManager = getBluetoothManagerOnActivity()
         }
         settingBtn.setOnClickListener {
             val fragment = SettingsFragment(context)

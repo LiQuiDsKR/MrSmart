@@ -193,15 +193,33 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
-                                    handler.post {
-                                        Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                                    if  (result == "good") {
+                                        handler.post {
+                                            Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                                        }
+                                        sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                        sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                        sharedViewModel.rentalRequestToolIdList.clear()
+                                        requireActivity().supportFragmentManager.popBackStack()
+                                    } else {
+                                        handler.post {
+                                            Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        requireActivity().supportFragmentManager.popBackStack()
                                     }
-                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                                    sharedViewModel.rentalRequestToolIdList.clear()
-                                    requireActivity().supportFragmentManager.popBackStack()
+
                                 }
                                 override fun onError(e: Exception) {
+                                    if (!standbyAlreadySent) {
+                                        handler.post {
+                                            Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                                        val standbyString = "{sheet:${rentalRequestSheet},timestamp:\"${timestamp}\"}"
+                                        handleBluetoothError(gson.toJson(standbyString))
+                                        e.printStackTrace()
+                                        requireActivity().supportFragmentManager.popBackStack()
+                                    }
                                     e.printStackTrace()
                                 }
                             })

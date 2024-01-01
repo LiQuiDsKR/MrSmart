@@ -5,20 +5,29 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.tool.ToolWithCount
 
-class OutstandingDetailAdapter(private val recyclerView: RecyclerView, val outstandingRentalTools: List<RentalToolDto>) :
+class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outstandingRentalTools: List<RentalToolDto>,
+                               private val onSetToolStateClick: (RentalToolDto, Int) -> Unit, private val onToolCountClick: (MutableList<ToolWithCount>) -> Unit) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
+    val tools: List<RentalToolDto> = outstandingRentalTools
+
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val setToolState: LinearLayout = itemView.findViewById(R.id.toolStateSet)
+        val selectSpace: LinearLayout = itemView.findViewById(R.id.selectSpace)
+
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
         var toolCount: TextView = itemView.findViewById(R.id.ToolCount)
         var toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
+        var toolState: TextView = itemView.findViewById(R.id.ToolState)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OutstandingRentalToolViewHolder {
@@ -32,10 +41,13 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, val outst
         holder.toolName.text = currentOutstandingRentalTool.toolDto.name
         holder.toolCount.text = currentOutstandingRentalTool.outstandingCount.toString()
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
-            showNumberDialog(holder.toolCount, currentOutstandingRentalTool.outstandingCount)
+            showNumberDialog(holder.toolCount, currentOutstandingRentalTool.outstandingCount, currentOutstandingRentalTool)
         }
         holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
-        holder.itemView.setOnClickListener {
+        holder.setToolState.setOnClickListener{
+            onSetToolStateClick(currentOutstandingRentalTool, currentOutstandingRentalTool.outstandingCount)
+        }
+        holder.selectSpace.setOnClickListener {
             handleSelection(currentOutstandingRentalTool)
         }
         if (isSelected(currentOutstandingRentalTool)) {
@@ -49,7 +61,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, val outst
         return outstandingRentalTools.size
     }
 
-    private fun showNumberDialog(textView: TextView, maxCount: Int) {
+    private fun showNumberDialog(textView: TextView, maxCount: Int, rentalTool: RentalToolDto) {
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
@@ -64,6 +76,16 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, val outst
             val newValue = input.value.toString()
             // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
             textView.text = newValue
+            var newOutstandingRentalTools: MutableList<ToolWithCount> = mutableListOf()
+            for (currentRentalTool in tools) {
+                if (currentRentalTool.id == rentalTool.id) {
+                    val tags = rentalTool.Tags ?: ""
+                    newOutstandingRentalTools.add(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(),currentRentalTool.outstandingCount))
+                } else {
+                    newOutstandingRentalTools.add(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(),currentRentalTool.outstandingCount))
+                }
+            }
+            onToolCountClick(newOutstandingRentalTools) // 이 변수를 Fragment로 올릴수 없을까?
         }
 
         builder.setNegativeButton("취소") { dialog, _ ->

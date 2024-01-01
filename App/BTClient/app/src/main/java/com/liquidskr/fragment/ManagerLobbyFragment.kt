@@ -61,6 +61,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
 
         connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
 
         returnBtn.setOnClickListener {
