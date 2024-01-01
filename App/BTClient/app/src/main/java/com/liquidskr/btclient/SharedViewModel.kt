@@ -15,4 +15,6 @@ class SharedViewModel : ViewModel() {
     val rentalRequestToolIdList: MutableList<Long> = mutableListOf()
     var toolWithCountList : MutableList<ToolWithCount> = mutableListOf()
 
+    var qrScannerText: String = ""
+
 }

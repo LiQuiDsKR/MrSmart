@@ -4,6 +4,7 @@ import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -30,13 +31,14 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.rental.StandbyParam
-import com.mrsmart.standard.returns.ReturnSheetFormDto
+
+import com.mrsmart.standard.tool.ToolDtoSQLite
 import com.mrsmart.standard.tool.ToolWithCount
 import java.lang.reflect.Type
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
-class ManagerSelfRentalFragment() : Fragment() {
+class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     private lateinit var workerSearchBtn: LinearLayout
     private lateinit var leaderSearchBtn: LinearLayout
     private lateinit var addToolBtn: LinearLayout
@@ -50,6 +52,7 @@ class ManagerSelfRentalFragment() : Fragment() {
     private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
+    private val handler = Handler(Looper.getMainLooper())
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
@@ -62,7 +65,7 @@ class ManagerSelfRentalFragment() : Fragment() {
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_self_rental, container, false)
-        val dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper(requireContext())
 
         workerSearchBtn = view.findViewById(R.id.BorrowerSearchBtn)
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
@@ -80,19 +83,22 @@ class ManagerSelfRentalFragment() : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
-        toolList.addAll(sharedViewModel.toolWithCountList)
 
+        var toolList: MutableList<ToolWithCount> = mutableListOf()
+        for (toolWithCount in sharedViewModel.toolWithCountList) {
+            toolList.add(ToolWithCount(toolWithCount.tool, toolWithCount.count))
+        }
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
         for (id in sharedViewModel.rentalRequestToolIdList) { // 중복체크안되어잇음
             val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
             newToolList.add(toolWithCount)
         }
+        var finalToolList: MutableList<ToolWithCount> = mutableListOf()
+        finalToolList.addAll(toolList)
+        finalToolList.addAll(newToolList)
 
-        val adapter = RentalToolAdapter(newToolList)
-        //var finalToolList: MutableList<ToolWithCount> = toolList
-        //finalToolList.addAll(newToolList)
-        //adapter.updateList(newToolList)
+        val adapter = RentalToolAdapter(finalToolList, this)
+        recyclerView.adapter = adapter
         sharedViewModel.toolWithCountList = adapter.tools
 
         worker = sharedViewModel.worker
@@ -135,7 +141,9 @@ class ManagerSelfRentalFragment() : Fragment() {
                     recyclerView.adapter = adapter
 
                 } catch (e: UninitializedPropertyAccessException) {
-                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    handler.post {
+                        Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 qrEditText.text.clear()
 
@@ -148,10 +156,7 @@ class ManagerSelfRentalFragment() : Fragment() {
             }
             false
         }
-
         workerSearchBtn.setOnClickListener {
-            sharedViewModel.toolWithCountList = adapter.tools
-
             val fragment = MembershipFindFragment.newInstance(1) // type = 1
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
@@ -160,8 +165,6 @@ class ManagerSelfRentalFragment() : Fragment() {
         }
 
         leaderSearchBtn.setOnClickListener {
-            sharedViewModel.toolWithCountList = adapter.tools
-
             val fragment = MembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
@@ -169,91 +172,72 @@ class ManagerSelfRentalFragment() : Fragment() {
                 .commit()
         }
         addToolBtn.setOnClickListener {
-
-            printFragmentStack()
-            sharedViewModel.toolWithCountList = adapter.tools
-
             val fragment = ToolFindFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
+                .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
                 .commit()
         }
         confirmBtn.setOnClickListener {
-            // var standbyAlreadySent = false
-            recyclerView.adapter?.let { adapter ->
-                if (adapter is RentalToolAdapter) {
-                    if (!adapter.tools.isEmpty()) {
-                        val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
-                        for (toolwithCnt in adapter.tools) {
-                            rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolwithCnt.tool.id, toolwithCnt.count))
-                        }
-                        if (!(worker!!.code.equals(""))) {
-                            if (!(leader!!.code.equals(""))) {
-                                val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                                bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
-                                    BluetoothManager.RequestCallback{
-                                    override fun onSuccess(result: String, type: Type) {
-                                        requireActivity().runOnUiThread {
-                                            Toast.makeText(requireContext(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
-                                        }
-                                        sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                                        sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
-                                        sharedViewModel.rentalRequestToolIdList.clear()
-                                        sharedViewModel.toolWithCountList.clear()
-                                        requireActivity().supportFragmentManager.popBackStack()
+            var standbyAlreadySent = false
+            if (adapter is RentalToolAdapter) {
+                if (!adapter.tools.isEmpty()) {
+                    val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
+                    for (toolWithCount: ToolWithCount in adapter.tools) {
+                        val toolCount = toolWithCount.count
+                        rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolWithCount.tool.id, toolCount))
+                    }
+                    if (!(worker!!.code.equals(""))) {
+                        if (!(leader!!.code.equals(""))) {
+                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
+                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                                BluetoothManager.RequestCallback{
+                                override fun onSuccess(result: String, type: Type) {
+                                    handler.post {
+                                        Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    override fun onError(e: Exception) {
-                                        e.printStackTrace()
-                                        /*
-                                        if (!standbyAlreadySent) {
-                                            requireActivity().runOnUiThread {
-                                                Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
-                                            }
-                                            handleBluetoothError(gson.toJson(rentalRequestSheet))
-                                            e.printStackTrace()
-                                            requireActivity().supportFragmentManager.popBackStack()
-                                        }*/
-                                    }
-                                })
+                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.rentalRequestToolIdList.clear()
+                                    requireActivity().supportFragmentManager.popBackStack()
+                                }
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
 
-                            } else {
+                        } else {
+                            handler.post {
                                 Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                             }
-                        } else {
+                        }
+                    } else {
+                        handler.post {
                             Toast.makeText(requireContext(), "작업자를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                         }
                     }
+                } else {
+                    handler.post {
+                        Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
+                    }
                 }
+
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolIdList.clear()
             sharedViewModel.toolWithCountList.clear()
-            sharedViewModel.toolWithCountList = adapter.tools
             var toolList: MutableList<ToolWithCount> = mutableListOf()
             adapter.updateList(toolList)
         }
 
-        recyclerView.adapter = adapter
         return view
     }
-    fun printFragmentStack() {
-        val activity = requireActivity()
-        val fragmentManager = activity.supportFragmentManager
-        val backStackCount = fragmentManager.backStackEntryCount
 
-        for (i in 0 until backStackCount) {
-            val fragmentName = fragmentManager.getBackStackEntryAt(i).javaClass.simpleName
-            Log.d("FragmentStack", "position : ${fragmentName}")
-        }
-    }
-    /*
     fun recyclerViewUpdate(adapter: RentalToolAdapter) {
         var dbHelper = DatabaseHelper(requireContext())
         var toolList: MutableList<ToolWithCount> = mutableListOf()
         for (id in sharedViewModel.rentalRequestToolIdList) {
-            toolList = adapter.tools
+            toolList.add(ToolWithCount(dbHelper.getToolById(id),1))
         }
         adapter.updateList(toolList)
         recyclerView.adapter = adapter
@@ -281,5 +265,8 @@ class ManagerSelfRentalFragment() : Fragment() {
 
         dbHelper.insertStandbyData(gson.toJson(json), "RENTALREQUEST","STANDBY", detail)
         dbHelper.close()
-    }*/
+    }
+    override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
+        sharedViewModel.toolWithCountList = list
+    }
 }

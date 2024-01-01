@@ -190,7 +190,7 @@
 							throw error("no toolbox");
 						} else{
 							toolboxId=toolboxData.id;
-							resolved(toolboxData.id);
+							resolved(membershipId);
 						}
 					})
 					.catch(error=>{
@@ -202,18 +202,18 @@
 					});
 				});
 			})
-			.then(toolboxId=>{
-				load(toolboxId);
+			.then(membershipId=>{
+				load(membershipId);
 			})
 		});
 
 		//fetch
-		function load(toolboxId) {
+		function load(membershipId) {
 						
 				abcHttp.get(
 					`/outstanding_rental_sheet/getpage`,
 					{
-						toolboxId: toolboxId,
+						membershipId: membershipId,
 						page: 0,
 						size: 10,
 						startDate: $('#start-date').val(),
@@ -395,11 +395,11 @@
 			$('#end-date').val(formattedTodayDate);
 
 			$('#start-date').on('change', function () {
-				load(toolboxId);
+				load(membershipId);
 				console.log('start changed')
 			});
 			$('#end-date').on('change', function () {
-				load(toolboxId);
+				load(membershipId);
 				console.log('end changed')
 			})
 
@@ -407,7 +407,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load(toolboxId);
+					load(membershipId);
 					console.log('start changed')
 				}
 			});
@@ -418,7 +418,7 @@
 				language: 'en',
 				dateFormat: 'yyyy-mm-dd',
 				onSelect: function () {
-					load(toolboxId);
+					load(membershipId);
 					console.log('end changed')
 				}
 			});

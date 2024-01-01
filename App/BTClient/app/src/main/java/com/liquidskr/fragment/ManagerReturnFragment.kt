@@ -15,6 +15,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,6 +29,7 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
+import java.security.Key
 
 class ManagerReturnFragment() : Fragment() {
     lateinit var searchTypeSpinner: Spinner
@@ -40,9 +42,14 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var outStandingRentalSheetList: List<OutstandingRentalSheetDto>
     var selectedCategory = "리더명"
     val gson = Gson()
+
+    interface KeyListener {
+        fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean
+    }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
@@ -79,7 +86,7 @@ class ManagerReturnFragment() : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = qrEditText.text.toString().replace("\n", "")
                 bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{\"tag\":${tag}}",object:BluetoothManager.RequestCallback{
+                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{tag:\"${tag}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
                         val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
@@ -115,11 +122,11 @@ class ManagerReturnFragment() : Fragment() {
                 // 아무것도 선택되지 않았을 때의 동작을 정의할 수 있습니다.
             }
         }
-
-
         getOutstandingRentalSheetList()
+        qrEditText.requestFocus()
         return view
     }
+
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{

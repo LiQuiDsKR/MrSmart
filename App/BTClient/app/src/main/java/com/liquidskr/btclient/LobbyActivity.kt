@@ -4,19 +4,22 @@ import SharedViewModel
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.fragment.ManagerFragment
+import com.liquidskr.fragment.ManagerOutstandingDetailFragment
+import com.liquidskr.fragment.ManagerRentalDetailFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
 import com.liquidskr.fragment.SettingsFragment
 import com.liquidskr.fragment.WorkerFragment
 import com.liquidskr.fragment.WorkerRentalFragment
 
-class LobbyActivity  : AppCompatActivity() {
+class LobbyActivity : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
     lateinit var managerBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
@@ -35,16 +38,6 @@ class LobbyActivity  : AppCompatActivity() {
     interface ModalListener {
         fun onConfirmButtonClicked()
         fun onCancelButtonClicked()
-    }
-
-    fun checkFragment() {
-        val fragmentManager = supportFragmentManager
-        val backStackCount = fragmentManager.backStackEntryCount
-
-        for (i in 0 until backStackCount) {
-            val fragmentName = fragmentManager.getBackStackEntryAt(i).name
-            Log.d("FragmentStack", "position : ${fragmentName}")
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,16 +104,6 @@ class LobbyActivity  : AppCompatActivity() {
 
         val dialog = builder.create()
         dialog.show()
-    }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-        } else if (workerFragment != null) {
-            workerFragment?.popBackStack()
-        } else {
-            super.onBackPressed()
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
