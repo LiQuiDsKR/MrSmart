@@ -284,8 +284,8 @@ public class StockStatusService {
 		List<Toolbox> toolboxList = toolboxRepository.findAll();
 		Random random = new Random();
 		int toolboxSize= toolboxList.size();
-		int minValue = 1;
-        int maxValue = 20;
+		int minValue = 100;
+        int maxValue = 100;
         int debugCount = 0;
 		for (Tool tool : toolList) {
 	        int randomI = random.nextInt(toolboxSize);

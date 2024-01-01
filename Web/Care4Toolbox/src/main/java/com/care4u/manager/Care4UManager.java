@@ -35,6 +35,7 @@ import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.service.LogWriterService;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
+import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
@@ -47,6 +48,7 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetService;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.ToolService;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelDto;
 import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelService;
@@ -94,6 +96,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	
 	@Autowired
 	private PartService partService;
+	@Autowired
+	private StockStatusService stockStatusService;
+	@Autowired
+	private ToolboxService toolboxService;
 
 	@Autowired
 	private TagService tagService;
@@ -181,16 +187,16 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
 		//memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
 		
-		ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService);
+		ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService, stockStatusService, toolboxService);
 		//toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
-		toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
+		//toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		
 		bluetoothServer = new BluetoothServer(bluetoothServerListener);
 		
-		//stockStatusService.addMock();
+		stockStatusService.addMock();
 		//tagService.addMock();
 		//membershipService.updatePasswords();
 		//membershipService.downdatePasswords();

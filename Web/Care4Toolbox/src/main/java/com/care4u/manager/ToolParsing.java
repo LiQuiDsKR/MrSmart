@@ -34,10 +34,12 @@ public class ToolParsing {
 	private StockStatusService stockStatusService;
 	private ToolboxService toolboxService;
 	
-	public ToolParsing(MainGroupService mainGroupService, SubGroupService subGroupService, ToolService toolService) {
+	public ToolParsing(MainGroupService mainGroupService, SubGroupService subGroupService, ToolService toolService, StockStatusService stockStatusService, ToolboxService toolboxService) {
 		this.mainGroupService = mainGroupService;
 		this.subGroupService = subGroupService;
 		this.toolService = toolService;
+		this.stockStatusService = stockStatusService;
+		this.toolboxService = toolboxService;
 	}
 	
 	public void readCsvFile(String csvFilePath) {
@@ -68,11 +70,11 @@ public class ToolParsing {
 									//.price(datas[8].trim().isEmpty()?0:Integer.parseInt(datas[8].trim()))
 									.subGroupDto(subGroupDto)									
 									.build();
-					toolService.update(subGroupDto.getId(), tool);
+					ToolDto resultTool = toolService.update(subGroupDto.getId(), tool);
 					logger.info(count + " : " + tool.toString());
 
 					if (datas.length>9) {
-						StockStatusDto stockDto = parseStock(tool.getId(),datas[9].trim());
+						StockStatusDto stockDto = parseStock(resultTool.getId(),datas[9].trim());
 						stockStatusService.buyItems(stockDto.getToolDto().getId(),stockDto.getToolboxDto().getId(), Integer.parseInt(datas[8].trim()));
 					}
 					
