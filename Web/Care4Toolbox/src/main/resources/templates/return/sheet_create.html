@@ -5,7 +5,6 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 	<style>
-	}
 		.td_btn,
 		.th_btn {
 			text-align: end;
@@ -84,7 +83,7 @@
 									style="box-sizing: content-box;">
 									<div class="custom-select style--two mr-4" style="max-width:200px;">
 										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
-								 			<option value="membership" selected>작업자/리더</option>
+											<option value="membership" selected>작업자/리더</option>
 										</select>
 									</div>
 									<div id="searchByForm" style="width: 200px;">
@@ -516,6 +515,158 @@
 		}
 
 
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"membership": {
+				"id": 0,
+				"name": ""
+			}
+		}
+
+		// =============== Membership Search Modal ===============
+
+		//작업자 수정
+		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
+			document.getElementById("membershipId").value = mainData.membership.id;
+			document.getElementById("membershipInput").value = mainData.membership.name;
+			getMembershipById(mainData.membership.id)
+				.then(data => {
+					document.getElementById("membershipLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("membershipLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("membershipLabel").hidden = true;
+				});
+			document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+		});
+		//membership 수정 -> membership 수정 모달
+		document.getElementById("membershipSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("membershipInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("membershipId").value = v.id;
+							document.getElementById("membershipInput").value = v.name;
+							document.getElementById("membershipLabel").hidden = false;
+							const dataString =
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById("membershipLabel").textContent = dataString;
+							document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#membershipEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//membership 수정 모달 -> 검색
+		document.getElementById("membershipInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("membershipSearchBtn").click();
+			}
+		});
+		//membership 수정 모달 -> 모달 내용 저장
+		document.getElementById("membershipSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("membershipId").value;
+			const name = document.getElementById("membershipInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.membership.id = id;
+			mainData.membership.name = name;
+			document.getElementById("membership").textContent = mainData.membership.name;
+			$("#membershipEditModal").modal("hide");
+			load(toolboxId);
+		});
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
 		function formatDate(inputDate) {
 			const dateObject = new Date(inputDate);
 			const year = dateObject.getFullYear();

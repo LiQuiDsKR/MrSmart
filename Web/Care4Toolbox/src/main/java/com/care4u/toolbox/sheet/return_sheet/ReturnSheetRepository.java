@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 
-public interface ReturnSheetRepository extends JpaRepository<ReturnSheet, Long> {
+public interface ReturnSheetRepository extends JpaRepository<ReturnSheet, Long> , ReturnSheetRepositoryCustom{
 	
 	Page<ReturnSheet> findAllByEventTimestampBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	

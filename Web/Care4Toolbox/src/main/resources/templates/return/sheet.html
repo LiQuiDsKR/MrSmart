@@ -5,11 +5,10 @@
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
 	<style>
-		
-	.td_btn,
-	.th_btn{
-		text-align: end;
-	}
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
 	</style>
 </th:block>
 <!-- Main Content -->
@@ -23,86 +22,109 @@
 					<div class="contact-header d-flex align-items-sm-center flex-row bg-white mb-4">
 
 						<h4 class="font-30 m-3">공기구 반납 기록</h4>
-						<!-- Btn header -->
-						<div class="col-12 col-sm-2 d-flex align-items-center">
-							<!-- Add New Contact Btn -->
-							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
-							<div class="add-new-contact">
-								<a href="#" class="btn" data-toggle="modal" data-target="#contactAddModal" hidden>
-									<img th:src="@{/img/svg/plus_white.svg}" alt="" class="svg" />
-									<span>추가</span>
-								</a>
+						<div class="d-flex row align-items-center ml-auto">
+							<div class="col-4">
+								<div class="d-flex align-items-center flex-nowrap mr-4"
+									style="box-sizing: content-box;">
+									<div class="custom-select style--two mr-4" style="max-width:200px;">
+										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
+											<option value="part">부서</option>
+											<option value="membership" selected>작업자/리더</option>
+											<option value="leader" hidden>리더</option>
+											<option value="tool">공기구</option>
+										</select>
+									</div>
+									<div id="searchByForm" style="width: 200px;">
+										<div id="partForm" class="justify-content-between d-none">
+											<div id="part">
+												선택
+											</div>
+											<div>
+												<span id="partEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#partEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+										<div id="membershipForm" class="d-flex justify-content-between">
+											<div id="membership">
+												선택
+											</div>
+											<div>
+												<span id="membershipEditModalBtn" class="contact-edit"
+													data-toggle="modal" data-target="#membershipEditModal"
+													style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+										<div id="toolForm" class="justify-content-between d-none">
+											<div id="tool">
+												선택
+											</div>
+											<div>
+												<span id="toolEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#toolEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
-							<!-- End Add New Contact Btn -->
+
+							<!-- Search header -->
+							<div class="d-flex col-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+								<!-- layer 1 -->
+								<div class="row flex-nowrap">
+
+
+									<!-- Form Group -->
+									<div class="form-group mr-2">
+										<label class="mb-2 font-14 bold">시작 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="start-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="start-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+									<!-- Form Group -->
+									<div class="form-group">
+										<label class="mb-2 font-14 bold">종료 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="end-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="end-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+
+									<!-- 새로고침 / 알림? 등등 -->
+
+								</div>
+
+								<!-- layer 2 -->
+								<!-- Search Condition header -->
+
+								<!-- End Search Condition -->
+							</div>
+							<!-- End Contact Header -->
 						</div>
-						<!-- Search header -->
-						<form
-							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0">
-							<!-- layer 1 -->
-							<div class="row" style="width:100%; box-sizing: content-box;">
-
-
-								<!-- Form Group -->
-								<div class="form-group m-2">
-									<label class="mb-2 font-14 bold">시작 날짜</label>
-
-									<!-- Date Picker -->
-									<div class="dashboard-date style--four">
-										<span id="start-date-btn" class="input-group-addon">
-											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
-										</span>
-
-										<input type="text" id="start-date" placeholder="Select Date" />
-									</div>
-									<!-- End Date Picker -->
-								</div>
-								<!-- End Form Group -->
-
-								<!-- Form Group -->
-								<div class="form-group m-2 mr-4">
-									<label class="mb-2 font-14 bold">종료 날짜</label>
-
-									<!-- Date Picker -->
-									<div class="dashboard-date style--four">
-										<span id="end-date-btn" class="input-group-addon">
-											<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
-										</span>
-
-										<input type="text" id="end-date" placeholder="Select Date" />
-									</div>
-									<!-- End Date Picker -->
-								</div>
-								<!-- End Form Group -->
-
-
-
-
-								<!-- Search Form -->
-								<div class="search-form d-flex align-items-center"
-									style="width:50%; box-sizing: content-box;" hidden>
-									<div class="theme-input-group style--two" hidden>
-										<input id="searchInput" type="text" class="theme-input-style"
-											placeholder="검색" />
-										<button id="searchBtn" type="submit">
-											<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
-										</button>
-									</div>
-								</div>
-								<!-- End Search Form -->
-
-
-
-								<!-- 새로고침 / 알림? 등등 -->
-
-							</div>
-
-							<!-- layer 2 -->
-							<!-- Search Condition header -->
-
-							<!-- End Search Condition -->
 					</div>
 					<!-- End Contact Header -->
-
 
 					<div id="containerdiv"></div>
 
@@ -119,24 +141,24 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-		var membershipId=1;
+		var membershipId = 1;
 		$(document).ready(function () {
 			initializeDatepicker();
 			abcHttp.get(
 				'/membership/getbycode',
 				{
-					code:parseInt(document.getElementById("user-code").textContent)
+					code: parseInt(document.getElementById("user-code").textContent)
 				}
-			).then(data=>{
-				return new Promise((resolved,rejected)=>{
-					if (data==null){
+			).then(data => {
+				return new Promise((resolved, rejected) => {
+					if (data == null) {
 						rejected();
-					}else{		
-						membershipId=data.id;
+					} else {
+						membershipId = data.id;
 						resolved(data.id);
 					}
 				});
-			}).then(membershipId=>{	
+			}).then(membershipId => {
 				load(membershipId);
 			});
 		});
@@ -146,16 +168,21 @@
 			abcHttp.get(
 				`/return/sheet/getpage`,
 				{
-					membershipId: membershipId,
+					partId: $('#searchBySelect').val()==="part"?mainData.part.id:0,
+					membershipId:$('#searchBySelect').val()==="membership"?mainData.membership.id:0,
+					toolId: $('#searchBySelect').val()==="tool"?mainData.tool.id:0,
+					isWorker: $('#searchBySelect').val()==="membership",
+					isLeader: $('#searchBySelect').val()==="membership",
+					isApprover: $('#searchBySelect').val()==="membership",
 					page: 0,
-					size: 10,
+					size: 100,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
 			).then(data => {
 				console.log(data);
 				const containerDiv = document.getElementById("containerdiv");
-				containerDiv.innerHTML='';
+				containerDiv.innerHTML = '';
 				let htmlString = ``
 				if (data.empty) {
 					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
@@ -225,14 +252,14 @@
 										<td class="toolbox">${element.toolboxDto.name}</td>
 										<td class="name">${tool.rentalToolDto.toolDto.name}</td>
 										<td class="spec">${tool.rentalToolDto.toolDto.spec}</td>
-										<td class="rentalcount">${tool.rentalToolDto.count <1?'':tool.rentalToolDto.count}</td>
-										<td class="outstandingcount" hidden>${tool.rentalToolDto.outstandingCount<1?'':tool.rentalToolDto.outstandingCount}</td>
-										<td class="count">${tool.count<1?'':tool.count}</td>
-										<td class="goodcount">${tool.goodCount<1?'':tool.goodCount}</td>
-										<td class="faultcount">${tool.faultCount<1?'':tool.faultCount}</td>
-										<td class="damagecount">${tool.damageCount<1?'':tool.damageCount}</td>
-										<td class="losscount">${tool.lossCount<1?'':tool.lossCount}</td>
-										<td class="discardcount">${tool.discardCount<1?'':tool.discardCount}</td>
+										<td class="rentalcount">${tool.rentalToolDto.count < 1 ? '' : tool.rentalToolDto.count}</td>
+										<td class="outstandingcount" hidden>${tool.rentalToolDto.outstandingCount < 1 ? '' : tool.rentalToolDto.outstandingCount}</td>
+										<td class="count">${tool.count < 1 ? '' : tool.count}</td>
+										<td class="goodcount">${tool.goodCount < 1 ? '' : tool.goodCount}</td>
+										<td class="faultcount">${tool.faultCount < 1 ? '' : tool.faultCount}</td>
+										<td class="damagecount">${tool.damageCount < 1 ? '' : tool.damageCount}</td>
+										<td class="losscount">${tool.lossCount < 1 ? '' : tool.lossCount}</td>
+										<td class="discardcount">${tool.discardCount < 1 ? '' : tool.discardCount}</td>
 									</tr>
 					`;
 					}
@@ -244,7 +271,7 @@
 					  <!-- End Sheet -->`;
 
 					var outerDiv = document.createElement('div');
-					outerDiv.innerHTML=htmlString;
+					outerDiv.innerHTML = htmlString;
 					containerDiv.appendChild(outerDiv);
 					const dataObj = JSON.parse(JSON.stringify(element));
 
@@ -255,13 +282,13 @@
 			});
 		}
 		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
-		function initializeDatepicker(){
+		function initializeDatepicker() {
 			const today = new Date();
 			const year = today.getFullYear();
 			const month = today.getMonth() + 1;
 			const day = today.getDate();
 			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
-			const lastMonthDate = new Date();lastMonthDate.setDate(today.getDate()-30);const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 30); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
 			$('#start-date').val(formattedLastMonthDate);
 			$('#end-date').val(formattedTodayDate);
 
@@ -297,8 +324,8 @@
 				$('#end-date').datepicker('show');
 			});
 		}
-		
-		
+
+
 		//아직 생각 안했는데 이미 반납된거면 반납 신청 버튼을 '반납됨'으로 바꾸고 disabled할거임
 		function activateApproveBtn() {
 			const sheet = this.closest("div.sheet");
@@ -319,6 +346,505 @@
 					})
 				});
 				element.classList.add("listener-added");
+			});
+		}
+
+		document.getElementById("searchBySelect").addEventListener("change",function(){
+			const membership = document.getElementById("membershipForm");
+			const part = document.getElementById("partForm");
+			const tool = document.getElementById("toolForm");
+			switch (this.value){
+				case "part":
+					membership.classList.toggle("d-flex",false);
+					membership.classList.toggle("d-none",true);
+					part.classList.toggle("d-flex",true);
+					part.classList.toggle("d-none",false);
+					tool.classList.toggle("d-flex",false);
+					tool.classList.toggle("d-none",true);
+				break;
+				case "worker":
+				case "leader":
+				case "membership":
+					membership.classList.toggle("d-flex",true);
+					membership.classList.toggle("d-none",false);
+					part.classList.toggle("d-flex",false);
+					part.classList.toggle("d-none",true);
+					tool.classList.toggle("d-flex",false);
+					tool.classList.toggle("d-none",true);
+				break;
+				case "tool":
+					membership.classList.toggle("d-flex",false);
+					membership.classList.toggle("d-none",true);
+					part.classList.toggle("d-flex",false);
+					part.classList.toggle("d-none",true);
+					tool.classList.toggle("d-flex",true);
+					tool.classList.toggle("d-none",false);
+				break;
+			}
+		});
+
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"membership": {
+				"id": 0,
+				"name": "",
+				//"type": "worker"
+			},
+			"tool":{
+				"id":0,
+				"name":"",
+			},
+			"part":{
+				"id":0,
+				"name":"",
+			},
+		}
+		
+		// =============== Membership Search Modal ===============
+		
+		//작업자 수정
+		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
+			document.getElementById("membershipId").value = mainData.membership.id;
+			document.getElementById("membershipInput").value = mainData.membership.name;
+			getMembershipById(mainData.membership.id)
+				.then(data => {
+					document.getElementById("membershipLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("membershipLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("membershipLabel").hidden = true;
+				});
+			document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+		});
+		//membership 수정 -> membership 수정 모달
+		document.getElementById("membershipSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("membershipInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("membershipId").value = v.id;
+							document.getElementById("membershipInput").value = v.name;
+							document.getElementById("membershipLabel").hidden = false;
+							const dataString =
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById("membershipLabel").textContent = dataString;
+							document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#membershipEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//membership 수정 모달 -> 검색
+		document.getElementById("membershipInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("membershipSearchBtn").click();
+			}
+		});
+		//membership 수정 모달 -> 모달 내용 저장
+		document.getElementById("membershipSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("membershipId").value;
+			const name = document.getElementById("membershipInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.membership.id = id;
+			mainData.membership.name = name;
+			document.getElementById("membership").textContent = mainData.membership.name;
+			$("#membershipEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		
+		// =============== Part Search Modal ===============
+		
+		//부서 수정
+		document.getElementById("partEditModalBtn").addEventListener("click", function () {
+			document.getElementById("partId").value = mainData.part.id;
+			document.getElementById("partInput").value = mainData.part.name;
+			getMembershipById(mainData.part.id)
+				.then(data => {
+					document.getElementById("partLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("partLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("partLabel").hidden = true;
+				});
+			document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+		});
+		//part 수정 -> part 수정 모달
+		document.getElementById("partSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("partInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getPartsPageByName(searchName)
+				.then(data => {
+						console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 분류 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						const dtoType={
+							"MAIN_PART":"mainPartDto",
+							"SUB_PART":"subPartDto",
+							"PART":"partDto"
+						};
+						const nameType={
+							"MAIN_PART":"메인부서",
+							"SUB_PART":"서브부서",
+							"PART":"부서"
+						}
+						let newRowString = "";
+						newRowString += "<td>" + nameType[v.type] + "</td>";
+						newRowString += "<td>" + v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" ) + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							const dtoType={
+								"MAIN_PART":"mainPartDto",
+								"SUB_PART":"subPartDto",
+								"PART":"partDto"
+							};
+							document.getElementById("partId").value = v[dtoType[v.type]].id;
+							document.getElementById("partInput").value = v[dtoType[v.type]].name;
+							document.getElementById("partLabel").hidden = false;
+							const dataString =
+								v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" )
+							document.getElementById("partLabel").textContent = dataString;
+							document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#partEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//part 수정 모달 -> 검색
+		document.getElementById("partInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("partSearchBtn").click();
+			}
+		});
+		//part 수정 모달 -> 모달 내용 저장
+		document.getElementById("partSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("partId").value;
+			const name = document.getElementById("partInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "부서 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.part.id = id;
+			mainData.part.name = name;
+			document.getElementById("part").textContent = mainData.part.name;
+			$("#partEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getPartsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/get',
+					{
+						partId: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getPartsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		
+		// =============== Tool Search Modal ===============
+		
+		//부서 수정
+		document.getElementById("toolEditModalBtn").addEventListener("click", function () {
+			document.getElementById("toolId").value = mainData.tool.id;
+			document.getElementById("toolInput").value = mainData.tool.name;
+			getMembershipById(mainData.tool.id)
+				.then(data => {
+					document.getElementById("toolLabel").hidden = false;
+					const dataString = 
+						"품목번호 : " + data.code + " , " +
+						"분류 : " + data.subGroupDto.mainGroupDto.name +
+						"/" + data.subToolDto.name + " , " +
+						"규격 : " + data.spec;
+					document.getElementById("toolLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("toolLabel").hidden = true;
+				});
+			document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+		});
+		//tool 수정 -> tool 수정 모달
+		document.getElementById("toolSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("toolInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getToolsPageByName(searchName)
+				.then(data => {
+						console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 이름 </th><th> 규격 </th><th> 분류 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.spec + "</td>";
+						newRowString += "<td>" + v.subGroupDto.mainGroupDto.name + " / " + v.subGroupDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("toolId").value = v.id;
+							document.getElementById("toolInput").value = v.name;
+							document.getElementById("toolLabel").hidden = false;
+							const dataString =
+								"품목번호 : " + v.code + " , " +
+								"분류 : " + v.subGroupDto.mainGroupDto.name +
+								"/" + v.subGroupDto.name + " , " +
+								"규격 : " + v.spec;
+							document.getElementById("toolLabel").textContent = dataString;
+							document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#toolEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//tool 수정 모달 -> 검색
+		document.getElementById("toolInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("toolSearchBtn").click();
+			}
+		});
+		//tool 수정 모달 -> 모달 내용 저장
+		document.getElementById("toolSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("toolId").value;
+			const name = document.getElementById("toolInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "공기구 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.tool.id = id;
+			mainData.tool.name = name;
+			document.getElementById("tool").textContent = mainData.tool.name;
+			$("#toolEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getToolsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getToolsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
 			});
 		}
 
