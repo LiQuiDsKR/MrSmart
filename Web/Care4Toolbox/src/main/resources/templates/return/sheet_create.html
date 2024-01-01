@@ -163,6 +163,45 @@
 
 				</div>
 				<!-- End Card -->
+				<!-- Membership Edit PopUp -->
+				<div id="membershipEditModal" class="modal fade p-4">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<div class="media flex-column flex-sm-row">
+									<div class="contact-account-setting media-body">
+										<h4 id="membershipModalHeader" class="font-20 mb-3">사원명을 입력하세요</h4>
+										<div class="form-group mb-3">
+											<label id="membershipLabel">사번 : 120022 / 부서 :
+												선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+											<div class="search-form" style="width:100%; box-sizing: content-box;">
+												<div class="theme-input-group style--two">
+													<input id="membershipInput" type="text" class="theme-input-style"
+														placeholder="검색" />
+													<button id="membershipSearchBtn">
+														<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+													</button>
+												</div>
+											</div>
+											<input type="text" id="membershipId" hidden />
+										</div>
+										<div class="table-responsive mb-3">
+
+										</div>
+										<div>
+											<button id="membershipSubmitBtn" class="btn listener-added mr-4" type="button">저장</button>
+											<a href="#" class="cancel text-danger font-14 bold"
+												data-dismiss="modal">취소</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Membership Edit PopUp -->
 
 			</div>
 		</div>
