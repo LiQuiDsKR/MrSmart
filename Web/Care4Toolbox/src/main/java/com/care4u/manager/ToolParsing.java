@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -99,6 +101,7 @@ public class ToolParsing {
 			// 라인 단위로 읽어오기
 			int count = 1;
 			List<String> results = new ArrayList<String> ();
+			Map<String, Integer> resultMap = new HashMap<>();
 			while ((line = reader.readLine()) != null) {
 				// ','로 구분된 데이터 파싱
 				String[] datas = line.split(",");
@@ -108,6 +111,16 @@ public class ToolParsing {
 					results.add(count + " : NULL");
 				}else {
 					logger.info(count + " : " + toolDto.getCode()+" , "+toolDto.getName()+" , "+toolDto.getSpec());
+					String key = toolDto.getCode();
+					if (resultMap.containsKey(key)) {
+			            // 현재 value에 1 추가
+			            int currentValue = resultMap.get(key);
+			            resultMap.put(key, currentValue + 1);
+			            results.add(count + " : "+resultMap.get(key));
+			        } else {
+			            // key가 존재하지 않으면 1로 초기화
+			            resultMap.put(key, 1);
+			        }
 				}
 				count++;
 			}
