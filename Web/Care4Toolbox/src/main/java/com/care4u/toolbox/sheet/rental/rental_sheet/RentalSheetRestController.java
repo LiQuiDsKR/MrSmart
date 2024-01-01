@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.care4u.constant.SheetState;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
+import com.care4u.toolbox.sheet.supply_sheet.SupplySheetDto;
 import com.google.gson.Gson;
 
 @RestController
@@ -33,6 +34,7 @@ public class RentalSheetRestController {
 	@Autowired
 	private RentalSheetService rentalSheetService;
 
+	/*
     @GetMapping(value="/rental/sheet/getpage")
     public ResponseEntity<Page<RentalSheetDto>> getRentalSheetPage(
     		@RequestParam(name="membershipId") long membershipId,
@@ -52,6 +54,32 @@ public class RentalSheetRestController {
         for (RentalSheetDto item : rentalSheetPage.getContent()) {
         	logger.info(item.toString());
         }
+        return ResponseEntity.ok(rentalSheetPage);
+    }
+    */
+
+    @GetMapping(value="/rental/sheet/getpage")
+    public ResponseEntity<Page<RentalSheetDto>> getReturnSheetPage(
+    		@RequestParam(name="partId") Long partId,
+    		@RequestParam(name="membershipId") Long membershipId,
+    		@RequestParam(name="toolId") Long toolId,
+    		@RequestParam(name="isWorker") Boolean isWorker,
+    		@RequestParam(name="isLeader") Boolean isLeader,
+    		@RequestParam(name="isApprover") Boolean isApprover,
+    		@RequestParam(name="page") int page,
+    		@RequestParam(name="size") int size,
+    		@RequestParam(name="startDate") String startDate,
+    		@RequestParam(name="endDate") String endDate
+            ){
+    	logger.info("page=" + page + ", size=" + size);
+    	
+        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+    		
+        Pageable pageable = PageRequest.of(page,size);
+        
+        Page<RentalSheetDto> rentalSheetPage = rentalSheetService.getPage(partId, membershipId, isWorker, isLeader, isApprover, toolId, startLocalDate, endLocalDate, pageable);
+        
         return ResponseEntity.ok(rentalSheetPage);
     }
 }

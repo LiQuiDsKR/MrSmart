@@ -63,6 +63,7 @@ public class StockStatusService {
 		StockStatus status= repository.findByToolIdAndToolboxIdAndCurrentDay(toolId, toolboxId, date);
 		if (status==null) {
 			logger.error("Invalid StockStatus id : "+toolId+","+toolboxId);
+			return null;
 		}
 	
 		return new StockStatusDto(status);

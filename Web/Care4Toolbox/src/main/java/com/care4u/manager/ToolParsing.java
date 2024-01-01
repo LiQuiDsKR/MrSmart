@@ -10,10 +10,15 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.care4u.toolbox.Toolbox;
+import com.care4u.toolbox.ToolboxDto;
+import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.group.main_group.MainGroupDto;
 import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
 
@@ -26,6 +31,8 @@ public class ToolParsing {
 	private MainGroupService mainGroupService;
 	private SubGroupService subGroupService;
 	private ToolService toolService;
+	private StockStatusService stockStatusService;
+	private ToolboxService toolboxService;
 	
 	public ToolParsing(MainGroupService mainGroupService, SubGroupService subGroupService, ToolService toolService) {
 		this.mainGroupService = mainGroupService;
@@ -62,7 +69,13 @@ public class ToolParsing {
 									.subGroupDto(subGroupDto)									
 									.build();
 					toolService.update(subGroupDto.getId(), tool);
-					logger.info(count + " : " + tool.toString());                	
+					logger.info(count + " : " + tool.toString());
+
+					if (datas.length>9) {
+						StockStatusDto stockDto = parseStock(tool.getId(),datas[9].trim());
+						stockStatusService.buyItems(stockDto.getToolDto().getId(),stockDto.getToolboxDto().getId(), Integer.parseInt(datas[8].trim()));
+					}
+					
 					count++;
 				}
 			}
@@ -93,6 +106,23 @@ public class ToolParsing {
 		return subGroupDto;
 	}
 	
+	private StockStatusDto parseStock(long toolId, String toolboxName) {
+		ToolboxDto toolboxDto = toolboxService.get(toolboxName);
+		if (toolboxDto == null) {
+			logger.debug(toolboxName + " toolbox is NULL");
+			toolboxDto = ToolboxDto.builder()
+					.name(toolboxName)
+					.build();
+			toolboxDto = toolboxService.update(toolboxDto);
+		}
+
+		StockStatusDto stock= stockStatusService.get(toolId, toolboxDto.getId());
+		if (stock == null) {
+			return new StockStatusDto(stockStatusService.addNew(toolId, toolboxDto.getId(), 0));
+		}else {
+			return stock;
+		}
+	}
 	
 	public void checkCsvFile(String csvFilePath) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {

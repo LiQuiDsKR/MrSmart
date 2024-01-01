@@ -132,7 +132,7 @@
 
 		</div>
 
-		<div class="row" hidden>
+		<div class="row">
 
 			<div class="col-md-4 col-12">
 				<!-- Card -->
@@ -140,22 +140,20 @@
 					<div class="card-body">
 						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
 							<div class="">
-								<h3 class="mb-1">금일 공기구 대여 현황</h3>
+								<h3 class="mb-1">금일 공기구 반납 현황</h3>
 								<p class="font-16 date-today">
 									2023-12-10
 								</p>
 							</div>
 						</div>
 
-						<div id="sector4">
-						 	No Data
-						</div>
+						<div id="sector4"></div>
 					</div>
 				</div>
 				<!-- End Card -->
 			</div>
 			
-			<div class="col-md-4 col-12">
+			<div class="col-md-4 col-12" hidden >
 				<!-- Card -->
 				<div class="card mb-30 bg-white">
 					<div class="card-body">
@@ -169,6 +167,26 @@
 						</div>
 
 						<div id="sector5">
+							No Data
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+			<div class="col-md-4 col-12" hidden>
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">금일 공기구 반납 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+
+						<div id="sector6">
 							No Data
 						</div>
 					</div>
@@ -193,7 +211,7 @@
 		var chart1 = initializeChart1();
 		var chart2 = initializeChart2();
 		var chart3 = initializeChart3();
-		//var chart4 = initializeChart4();
+		var chart4 = initializeChart4();
 		abcHttp.get(
 			'/membership/getbycode',
 			{
@@ -230,7 +248,7 @@
 				loadChart1.apply(chart1, [toolboxId]);
 				loadChart2.apply(chart2, [toolboxId]);
 				loadChart3.apply(chart3, [toolboxId]);
-				//loadChart4.apply(chart4, [toolboxId]);
+				loadChart4.apply(chart4, [toolboxId]);
 			});
 
 		const toolboxSelect = document.getElementById("toolboxSelect");
@@ -243,7 +261,8 @@
 			loadChart1.apply(chart1, [toolboxId]);
 			loadChart2.apply(chart2, [toolboxId]);
 			loadChart3.apply(chart3, [toolboxId]);
-		}
+			loadChart3.apply(chart4, [toolboxId]);
+	}
 
 
 		function initializeChart1() {
@@ -674,97 +693,126 @@
 			});
 		}
 
-/*
 		function initializeChart4() {
-			var options = {
-			  series: [
-			  {
-				name: "대여량",
-				data: [2]
-			},
-			{
-				name: "잔여량",
-				data: [2]
-			}
-			],
-			  chart: {
-			    type: 'donut',
-			    fontFamily: 'PT Sans, sans-serif', // Set the font family to PT Sans
-			  },
-			  stroke: {
-			    show: true,
-			    width: 2,
-			    colors: ['transparent']
-			  },
-			  fill: {
-			    colors:undefined
-			  },
-			  plotOptions: {
-			    pie: {
-			      donut: {
-			        size: '65%',
-			        background: 'transparent',
-			        labels: {
-			          show: true,
-			          name: {
-			            show: true,
-			            fontSize: '22px', // Adjust the font size as needed
-			            fontFamily: 'PT Sans, sans-serif',
-			            color: undefined,
-			          },
-			          value: {
-			            show: true,
-			            fontSize: '26px', // Increased font size for the central value
-			            fontFamily: 'PT Sans, sans-serif',
-			            color: undefined,
-			            offsetY: 16,
-			            formatter: function (val) {
-			              return val + '%';
-			            }
-			          },
-			          total: {
-			            show: true,
-			            label: 'Total',
-			            color: '#373d3f',
-					  	formatter: function (w) {
-			              return w.globals.seriesTotals.reduce((a, b) => {
-			                return a + b;
-			              }, 0) + '%';
-						}
-			          }
-			        }
-			      }
-			    }
-			  },
-			  legend: {
-			    show: true,
-			    position: 'bottom',
-			    horizontalAlign: 'center', // Align the legend to the center at the bottom
-			    floating: false,
-			    fontSize: '14px', // Adjust the legend font size as needed
-			    fontFamily: 'PT Sans, sans-serif',
-			    offsetX: 0,
-			    offsetY: 10 // Adjust the offset if needed
-			  },
-			  responsive: [{
-			    breakpoint: 480,
-			    options: {
-			      chart: {
-			        width: 200
-			      },
-			      legend: {
-			        position: 'bottom',
-			        horizontalAlign: 'center', // Ensure the legend alignment for responsive design
-			        offsetX: 0,
-			        offsetY: 0
-			      }
-			    }
-			  }]
+			var column_options = {
+				series: [
+					{
+						name: "자산성",
+						data: [2]
+					},
+					{
+						name: "소모성",
+						data: [2]
+					},
+					{
+						name: "내구성",
+						data: [2]
+					},
+				],
+				chart: {
+					type: 'bar',
+					height: 389,
+					toolbar: {
+						show: false,
+					},
+				},
+				colors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shade: 'light',
+						type: 'vertical',
+						shadeIntensity: 0.5,
+						gradientToColors: ['#76B0FF', '#67CF94', '#0AD1DE'],
+						inverseColors: false,
+						opacityFrom: 1,
+						opacityTo: 0.6,
+						stops: [0, 80],
+					},
+				},
+				plotOptions: {
+					bar: {
+						horizontal: false,
+						columnWidth: '55%',
+						endingShape: 'rounded',
+					},
+				},
+				dataLabels: {
+					enabled: true,
+					formatter: function (val) {
+						return val;
+					},
+					textAnchor: 'middle',
+					style: {
+						fontSize: '20px',
+						fontFamily: '"PT Sans", "sans-serif"',
+						colors: ["#000000"]
+					}
+				},
+				stroke: {
+					show: true,
+					width: 2,
+					colors: ['transparent'],
+				},
+				xaxis: {
+					categories: [
+						'입고 현황'
+					],
+				},
+				yaxis: {
+					tickAmount: 4,
+					title: {
+						text: '',
+					},
+				},
+				legend: {
+					position: 'top',
+					horizontalAlign: 'right',
+					fontSize: '12px',
+					fontFamily: '"PT Sans", sans-serif',
+					offsetY: 0,
+					height: 60,
+					labels: {
+						colors: '#727272',
+					},
+					itemMargin: {
+						horizontal: 5,
+						vertical: 20,
+					},
+					markers: {
+						width: 17,
+						height: 11,
+						radius: 0,
+					},
+				},
+				tooltip: {
+				},
+				responsive: [
+					{
+						breakpoint: 576,
+						options: {
+							legend: {
+								position: 'top',
+								horizontalAlign: 'left',
+								height: 0,
+								itemMargin: {
+									horizontal: 5,
+									vertical: 10,
+								},
+							},
+						},
+					},
+				],
 			};
-			var chart = new ApexCharts(document.querySelector("#sector4"), options);
-			chart.render();
 
-			return chart;
+			var columnChart = new ApexCharts(
+				document.querySelector('#sector4'),
+				column_options
+			);
+
+			columnChart.render();
+
+			return columnChart;
 		}
 		function loadChart4(toolboxId) {
 			abcHttp.get(
@@ -777,32 +825,17 @@
 				console.log(data);
 				series = [];
 				for (item of data) {
-					if (item.mainGroupName=="소모자재"){
 					series.push({
-						name: '대여량',
-						data: [item.rentalCount]
-					},
-					{
-						name: '잔여량',
-						data: [item.totalCount-item.rentalCount]
+						name: item.mainGroupName,
+						data: [item.returnCount]
 					});
-					}else{
-						return;
-					}
 				}
+				console.log(series)
 				this.updateOptions({
 					series: series
 				});
 			});
 		}
-*/
-
-
-
-
-
-
-
 
 
 

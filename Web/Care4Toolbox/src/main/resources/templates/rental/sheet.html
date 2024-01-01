@@ -142,7 +142,121 @@
 
 				</div>
 				<!-- End Card -->
+<!-- Membership Edit PopUp -->
+				<div id="membershipEditModal" class="modal fade p-4">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<div class="media flex-column flex-sm-row">
+									<div class="contact-account-setting media-body">
+										<h4 id="membershipModalHeader" class="font-20 mb-3">사원명을 입력하세요</h4>
+										<div class="form-group mb-3">
+											<label id="membershipLabel">사번 : 120022 / 부서 :
+												선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+											<div class="search-form" style="width:100%; box-sizing: content-box;">
+												<div class="theme-input-group style--two">
+													<input id="membershipInput" type="text" class="theme-input-style"
+														placeholder="검색" />
+													<button id="membershipSearchBtn">
+														<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+													</button>
+												</div>
+											</div>
+											<input type="text" id="membershipId" hidden />
+										</div>
+										<div class="table-responsive mb-3">
 
+										</div>
+										<div>
+											<button id="membershipSubmitBtn" class="btn mr-4" type="button">저장</button>
+											<a href="#" class="cancel text-danger font-14 bold"
+												data-dismiss="modal">취소</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Membership Edit PopUp -->
+				<!-- Part Edit PopUp -->
+				<div id="partEditModal" class="modal fade p-4">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<div class="media flex-column flex-sm-row">
+									<div class="contact-account-setting media-body">
+										<h4 class="font-20 mb-3">부서명을 입력하세요</h4>
+										<div class="form-group mb-3">
+											<label id="partLabel">부서 : 선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+											<div class="search-form" style="width:100%; box-sizing: content-box;">
+												<div class="theme-input-group style--two">
+													<input id="partInput" type="text" class="theme-input-style"
+														placeholder="검색" />
+													<button id="partSearchBtn">
+														<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+													</button>
+												</div>
+											</div>
+											<input type="text" id="partId" hidden />
+										</div>
+										<div class="table-responsive mb-3">
+
+										</div>
+										<div>
+											<button id="partSubmitBtn" class="btn mr-4" type="button">저장</button>
+											<a href="#" class="cancel text-danger font-14 bold"
+												data-dismiss="modal">취소</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Part Edit PopUp -->
+				<!-- Tool Edit PopUp -->
+				<div id="toolEditModal" class="modal fade p-4">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<div class="media flex-column flex-sm-row">
+									<div class="contact-account-setting media-body">
+										<h4 class="font-20 mb-3">공기구명을 입력하세요</h4>
+										<div class="form-group mb-3">
+											<label id="toolLabel">품목코드 : 72 / 규격 : asdf1234</label>
+											<div class="search-form" style="width:100%; box-sizing: content-box;">
+												<div class="theme-input-group style--two">
+													<input id="toolInput" type="text" class="theme-input-style"
+														placeholder="검색" />
+													<button id="toolSearchBtn">
+														<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+													</button>
+												</div>
+											</div>
+											<input type="text" id="toolId" hidden />
+										</div>
+										<div class="table-responsive mb-3">
+
+										</div>
+										<div>
+											<button id="toolSubmitBtn" class="btn mr-4" type="button">저장</button>
+											<a href="#" class="cancel text-danger font-14 bold"
+												data-dismiss="modal">취소</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Tool Edit PopUp -->
 			</div>
 		</div>
 	</div>
@@ -152,6 +266,7 @@
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
 		var membershipId=1;
+		var toolboxId = 5222;
 		$(document).ready(function () {
 			initializeDatepicker();
 			abcHttp.get(
@@ -178,7 +293,12 @@
 			abcHttp.get(
 				`/rental/sheet/getpage`,
 				{
-					membershipId: membershipId,
+					partId: $('#searchBySelect').val()==="part"?mainData.part.id:0,
+					membershipId:$('#searchBySelect').val()==="membership"?mainData.membership.id:0,
+					toolId: $('#searchBySelect').val()==="tool"?mainData.tool.id:0,
+					isWorker: $('#searchBySelect').val()==="membership",
+					isLeader: $('#searchBySelect').val()==="membership",
+					isApprover: $('#searchBySelect').val()==="membership",
 					page: 0,
 					size: 100,
 					startDate: $('#start-date').val(),
@@ -330,6 +450,506 @@
 					})
 				});
 				element.classList.add("listener-added");
+			});
+		}
+		
+		
+		document.getElementById("searchBySelect").addEventListener("change",function(){
+			const membership = document.getElementById("membershipForm");
+			const part = document.getElementById("partForm");
+			const tool = document.getElementById("toolForm");
+			switch (this.value){
+				case "part":
+					membership.classList.toggle("d-flex",false);
+					membership.classList.toggle("d-none",true);
+					part.classList.toggle("d-flex",true);
+					part.classList.toggle("d-none",false);
+					tool.classList.toggle("d-flex",false);
+					tool.classList.toggle("d-none",true);
+				break;
+				case "worker":
+				case "leader":
+				case "membership":
+					membership.classList.toggle("d-flex",true);
+					membership.classList.toggle("d-none",false);
+					part.classList.toggle("d-flex",false);
+					part.classList.toggle("d-none",true);
+					tool.classList.toggle("d-flex",false);
+					tool.classList.toggle("d-none",true);
+				break;
+				case "tool":
+					membership.classList.toggle("d-flex",false);
+					membership.classList.toggle("d-none",true);
+					part.classList.toggle("d-flex",false);
+					part.classList.toggle("d-none",true);
+					tool.classList.toggle("d-flex",true);
+					tool.classList.toggle("d-none",false);
+				break;
+			}
+		});
+
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"membership": {
+				"id": 0,
+				"name": "",
+				//"type": "worker"
+			},
+			"tool":{
+				"id":0,
+				"name":"",
+			},
+			"part":{
+				"id":0,
+				"name":"",
+			},
+		}
+		
+		// =============== Membership Search Modal ===============
+		
+		//작업자 수정
+		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
+			document.getElementById("membershipId").value = mainData.membership.id;
+			document.getElementById("membershipInput").value = mainData.membership.name;
+			getMembershipById(mainData.membership.id)
+				.then(data => {
+					document.getElementById("membershipLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("membershipLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("membershipLabel").hidden = true;
+				});
+			document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+		});
+		//membership 수정 -> membership 수정 모달
+		document.getElementById("membershipSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("membershipInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("membershipId").value = v.id;
+							document.getElementById("membershipInput").value = v.name;
+							document.getElementById("membershipLabel").hidden = false;
+							const dataString =
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById("membershipLabel").textContent = dataString;
+							document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#membershipEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//membership 수정 모달 -> 검색
+		document.getElementById("membershipInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("membershipSearchBtn").click();
+			}
+		});
+		//membership 수정 모달 -> 모달 내용 저장
+		document.getElementById("membershipSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("membershipId").value;
+			const name = document.getElementById("membershipInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.membership.id = id;
+			mainData.membership.name = name;
+			document.getElementById("membership").textContent = mainData.membership.name;
+			$("#membershipEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		
+		// =============== Part Search Modal ===============
+		
+		//부서 수정
+		document.getElementById("partEditModalBtn").addEventListener("click", function () {
+			document.getElementById("partId").value = mainData.part.id;
+			document.getElementById("partInput").value = mainData.part.name;
+			getMembershipById(mainData.part.id)
+				.then(data => {
+					document.getElementById("partLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("partLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("partLabel").hidden = true;
+				});
+			document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+		});
+		//part 수정 -> part 수정 모달
+		document.getElementById("partSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("partInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getPartsPageByName(searchName)
+				.then(data => {
+						console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 분류 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						const dtoType={
+							"MAIN_PART":"mainPartDto",
+							"SUB_PART":"subPartDto",
+							"PART":"partDto"
+						};
+						const nameType={
+							"MAIN_PART":"메인부서",
+							"SUB_PART":"서브부서",
+							"PART":"부서"
+						}
+						let newRowString = "";
+						newRowString += "<td>" + nameType[v.type] + "</td>";
+						newRowString += "<td>" + v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" ) + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							const dtoType={
+								"MAIN_PART":"mainPartDto",
+								"SUB_PART":"subPartDto",
+								"PART":"partDto"
+							};
+							document.getElementById("partId").value = v[dtoType[v.type]].id;
+							document.getElementById("partInput").value = v[dtoType[v.type]].name;
+							document.getElementById("partLabel").hidden = false;
+							const dataString =
+								v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" )
+							document.getElementById("partLabel").textContent = dataString;
+							document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#partEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//part 수정 모달 -> 검색
+		document.getElementById("partInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("partSearchBtn").click();
+			}
+		});
+		//part 수정 모달 -> 모달 내용 저장
+		document.getElementById("partSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("partId").value;
+			const name = document.getElementById("partInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "부서 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.part.id = id;
+			mainData.part.name = name;
+			document.getElementById("part").textContent = mainData.part.name;
+			$("#partEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getPartsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/get',
+					{
+						partId: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getPartsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		
+		// =============== Tool Search Modal ===============
+		
+		//부서 수정
+		document.getElementById("toolEditModalBtn").addEventListener("click", function () {
+			document.getElementById("toolId").value = mainData.tool.id;
+			document.getElementById("toolInput").value = mainData.tool.name;
+			getMembershipById(mainData.tool.id)
+				.then(data => {
+					document.getElementById("toolLabel").hidden = false;
+					const dataString = 
+						"품목번호 : " + data.code + " , " +
+						"분류 : " + data.subGroupDto.mainGroupDto.name +
+						"/" + data.subToolDto.name + " , " +
+						"규격 : " + data.spec;
+					document.getElementById("toolLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("toolLabel").hidden = true;
+				});
+			document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+		});
+		//tool 수정 -> tool 수정 모달
+		document.getElementById("toolSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("toolInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getToolsPageByName(searchName)
+				.then(data => {
+						console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 이름 </th><th> 규격 </th><th> 분류 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.spec + "</td>";
+						newRowString += "<td>" + v.subGroupDto.mainGroupDto.name + " / " + v.subGroupDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("toolId").value = v.id;
+							document.getElementById("toolInput").value = v.name;
+							document.getElementById("toolLabel").hidden = false;
+							const dataString =
+								"품목번호 : " + v.code + " , " +
+								"분류 : " + v.subGroupDto.mainGroupDto.name +
+								"/" + v.subGroupDto.name + " , " +
+								"규격 : " + v.spec;
+							document.getElementById("toolLabel").textContent = dataString;
+							document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#toolEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//tool 수정 모달 -> 검색
+		document.getElementById("toolInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("toolSearchBtn").click();
+			}
+		});
+		//tool 수정 모달 -> 모달 내용 저장
+		document.getElementById("toolSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("toolId").value;
+			const name = document.getElementById("toolInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "공기구 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.tool.id = id;
+			mainData.tool.name = name;
+			document.getElementById("tool").textContent = mainData.tool.name;
+			$("#toolEditModal").modal("hide");
+			load();
+		});
+
+		//fetch
+		function getToolsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getToolsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
 			});
 		}
 
