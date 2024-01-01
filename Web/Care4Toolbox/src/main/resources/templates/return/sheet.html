@@ -155,6 +155,7 @@
 						rejected();
 					} else {
 						membershipId = data.id;
+						mainData.membership.id=membershipId;
 						resolved(data.id);
 					}
 				});

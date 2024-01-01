@@ -79,7 +79,6 @@ public class ReturnSheetRepositoryImpl implements ReturnSheetRepositoryCustom {
 	    	}
 	    }
 	    
-	    //supplyTool join하고 사용합시다.
 	    private BooleanExpression searchToolEquals(Tool tool) {
 	    	return tool == null ? Expressions.asBoolean(true).isTrue() : QReturnTool.returnTool.rentalTool.tool.eq(tool);
 	    }
