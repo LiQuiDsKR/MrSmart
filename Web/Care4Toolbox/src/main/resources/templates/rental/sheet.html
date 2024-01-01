@@ -279,7 +279,8 @@
 					if (data==null){
 						rejected();
 					}else{						
-						membershipId=data.id;
+						membershipId = data.id;
+						mainData.membership.id = membershipId;
 						resolved(data.id);
 					}
 				});

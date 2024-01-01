@@ -117,8 +117,8 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
                 .selectDistinct(sSheet)
                 .from(sSheet)
                 .where(
-                		searchMembershipEquals(membership,isWorker,isLeader)
-                		.and(sSheet.rentalSheet.toolbox.eq(toolbox))
+                		(searchMembershipEquals(membership,isWorker,isLeader)
+                		.or(sSheet.rentalSheet.toolbox.eq(toolbox)))
                 		.and(sSheet.outstandingStatus.eq(status))
                 		.and(sSheet.rentalSheet.eventTimestamp.between(startDate, endDate))
                 )
