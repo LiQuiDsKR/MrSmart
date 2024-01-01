@@ -189,6 +189,8 @@ public class StockStatusService {
 	        				.lossCount(0)
 	        				.rentalCount(former.getRentalCount())
 	        				.totalCount(former.getTotalCount())
+	        				.returnCount(0)
+	        				.supplyCount(0)
 	        				.currentDay(latterDate)
 	        				.build();
 	        		repository.save(latter);
@@ -253,6 +255,8 @@ public class StockStatusService {
 		.lossCount(0)
 		.rentalCount(0)
 		.totalCount(count)
+		.returnCount(0)
+		.supplyCount(0)
 		.currentDay(LocalDate.now())
 		.build();
 		
@@ -306,6 +310,8 @@ public class StockStatusService {
 						.faultCount(0)
 						.lossCount(0)
 						.rentalCount(0)
+						.returnCount(0)
+						.supplyCount(0)
 						.tool(tool)
 						.toolbox(toolbox)
 						.build()
