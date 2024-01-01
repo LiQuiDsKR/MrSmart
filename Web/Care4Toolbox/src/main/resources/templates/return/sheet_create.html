@@ -185,6 +185,7 @@
 			)
 				.then(data => {
 					membershipId = data.id;
+					mainData.membership.id = membershipId;
 					return new Promise((resolved, rejected) => {
 						abcHttp.get(
 							'/toolbox/getbyname',
