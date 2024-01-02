@@ -42,7 +42,7 @@ public class ToolRepositoryCustomImpl implements ToolRepositoryCustom {
 			conditions.add(condition);
 		}
 
-		BooleanExpression finalCondition = Expressions.anyOf(conditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalCondition = Expressions.allOf(conditions.toArray(new BooleanExpression[0]));
 
 		List<Tool> content = queryFactory.selectFrom(QTool.tool).where(finalCondition)
 				.orderBy(QTool.tool.id.desc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
