@@ -197,7 +197,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
-                        android:text="QR코드 정보 불러오기"
+                        android:text="품목코드 정보 불러오기"
                         android:textColor="#32345E"
                         android:textSize="16sp" />
 

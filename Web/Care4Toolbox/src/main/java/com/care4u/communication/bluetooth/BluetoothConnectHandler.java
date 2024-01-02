@@ -115,7 +115,7 @@ public class BluetoothConnectHandler extends Thread {
 					dataOutputStream.write(sendDatas);
 					dataOutputStream.flush();
 					
-					logger.info("sent datas : " + ModbusUtil.toHex(sendDatas));
+					logger.debug("sent datas : " + ModbusUtil.toHex(sendDatas));
 					buffer.clear();
 				}
 			}

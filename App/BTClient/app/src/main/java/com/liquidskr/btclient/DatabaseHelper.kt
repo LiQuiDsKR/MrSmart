@@ -541,8 +541,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         while (cursor.moveToNext()) {
             val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
-            json = json.replace("\\\"", "\"")
-            json = json.replace("\\\\", "\\")
             json = removeFirstAndLastQuotes(json)
             sheetList.add(Pair(id, json))
         }
@@ -564,6 +562,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
+            json = json.replace("\\\"", "\"")
             json = removeFirstAndLastQuotes(json)
             sheetList.add(Pair(id, json))
         }
@@ -586,6 +585,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
+            json = json.replace("\\\"", "\"")
             json = removeFirstAndLastQuotes(json)
             sheetList.add(Pair(id, json))
         }
@@ -752,6 +752,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun clearRSTable() {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_RENTALSHEET_NAME")
+        db.close()
+    }
+
+    fun clearStandbyTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_STANDBY_NAME")
         db.close()
     }
 }

@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -24,9 +26,11 @@ import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
 class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
-    lateinit var connectBtn: ImageButton
-    lateinit var rentalBtn: ImageButton
-    lateinit var refreshBtn: ImageButton
+    private lateinit var connectBtn: ImageView
+    private lateinit var rentalBtn: ImageView
+    private lateinit var returnBtn: ImageButton
+    private lateinit var rentalBtnField: LinearLayout
+    private lateinit var returnBtnField: LinearLayout
 
     val worker = worker
 
@@ -43,8 +47,10 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         connectBtn = view.findViewById(R.id.connectBtn)
-        rentalBtn = view.findViewById(R.id.LobbyRentalBtn)
-        refreshBtn = view.findViewById(R.id.refreshBtn)
+        rentalBtn = view.findViewById(R.id.RentalBtn)
+        returnBtn = view.findViewById(R.id.ReturnBtn)
+        rentalBtnField  = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -57,8 +63,24 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
                 .commit()
         }
         recyclerView.adapter = adapter
-        refreshBtn.setOnClickListener {
-            getOutstandingRentalSheetList()
+
+        rentalBtnField.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
+            val fragment = WorkerRentalListFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .commit()
+        }
+
+        returnBtnField.setOnClickListener {
+            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
+            returnBtn.setImageResource(R.drawable.ic_menu_on_02)
+
+            val fragment = WorkerReturnListFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, fragment)
+                .commit()
         }
 
         connectBtn.setOnClickListener{
@@ -73,11 +95,16 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
             sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
             sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
             sharedViewModel.rentalRequestToolIdList.clear()
-            val fragment = WorkerRentalFragment()
+            val fragment = WorkerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
+        }
+
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
         getOutstandingRentalSheetList()
         return view

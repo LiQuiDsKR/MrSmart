@@ -13,6 +13,7 @@ class ToolRegisterAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (Tool
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val toolName: TextView = itemView.findViewById(R.id.RegisterToolList_Name)
         val toolSpec: TextView = itemView.findViewById(R.id.RegisterToolList_Spec)
+        val toolCode: TextView = itemView.findViewById(R.id.RegisterToolList_Code)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToolViewHolder {
@@ -25,6 +26,7 @@ class ToolRegisterAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (Tool
         val currentTool = tools[position]
         holder.toolName.text = currentTool.name
         holder.toolSpec.text = currentTool.spec
+        holder.toolCode.text = currentTool.code
 
         holder.itemView.setOnClickListener {
             onItemClick(currentTool)

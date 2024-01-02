@@ -13,6 +13,7 @@ data class ToolDto(
     val buyCode: String
 ) {
     fun toToolDtoSQLite (): ToolDtoSQLite {
+        val buyCode = buyCode ?: ""
         return ToolDtoSQLite(id, subGroupDto.name, subGroupDto.mainGroupDto.name, code, name, engName, spec, unit, price, replacementCycle, buyCode)
     }
 }

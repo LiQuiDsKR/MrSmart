@@ -37,6 +37,7 @@
 
     class SettingsFragment(context: Context) : Fragment() {
         lateinit var importStandard: LinearLayout
+        lateinit var removeSTANDBY: LinearLayout
         lateinit var setServerPCName: LinearLayout
         lateinit var setToolBox: LinearLayout
         lateinit var closeBtn: LinearLayout
@@ -79,7 +80,11 @@
             }
 
             override fun onLastPageArrived() {
-                importTBT(dbHelper)
+                handler.post {
+                    hidePopup()
+                    Toast.makeText(requireActivity(), "기준 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                    showAlertModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
+                }
             }
 
             override fun onError(e: Exception) {
@@ -96,7 +101,7 @@
                 handler.post {
                     hidePopup()
                     Toast.makeText(requireActivity(), "기준 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
-                    showCustomModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
+                    showAlertModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
                 }
             }
 
@@ -118,7 +123,16 @@
 
         }
 
-        private val modalListener = object : LobbyActivity.ModalListener {
+        private val alertModalListener = object : LobbyActivity.AlertModalListener {
+            override fun onConfirmButtonClicked() {
+
+            }
+
+            override fun onCancelButtonClicked() {
+
+            }
+        }
+        private val customModalLisener = object : LobbyActivity.CustomModalListener {
             override fun onConfirmButtonClicked() {
 
             }
@@ -131,7 +145,10 @@
             ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         }
         private fun showCustomModal(title: String, content: String) {
-            lobbyActivity.showCustomModal(title, content, modalListener)
+            lobbyActivity.showCustomModal(title, content, customModalLisener)
+        }
+        private fun showAlertModal(title: String, content: String) {
+            lobbyActivity.showAlertModal(title, content, alertModalListener)
         }
         @SuppressLint("MissingInflatedId")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -140,6 +157,7 @@
             progressBar = view.findViewById(R.id.progressBar)
             progressText = view.findViewById(R.id.progressText)
             importStandard = view.findViewById(R.id.importStandard)
+            removeSTANDBY = view.findViewById(R.id.importQRData)
             setServerPCName = view.findViewById(R.id.setServerPCName)
             setToolBox = view.findViewById(R.id.setToolBox)
             closeBtn = view.findViewById(R.id.closeBtn)
@@ -191,6 +209,10 @@
                 showPopup() // progressBar appear
                 progressText.text = ""
                 importMembership(dbHelper)
+            }
+            removeSTANDBY.setOnClickListener{
+                showPopup() // progressBar appear
+                importTBT(dbHelper)
             }
 
             return view
@@ -258,7 +280,6 @@
                         requestToolboxToolLabel(0)
                     } catch (e: Exception) {
                         Log.d("importToolboxToolLabel", e.toString())
-
                     }
                 }
                 override fun onError(e: Exception) {

@@ -28,7 +28,10 @@ import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
+import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.StandbySheet
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import org.threeten.bp.LocalDateTime
@@ -71,9 +74,6 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         qrEditText = view.findViewById((R.id.QR_EditText))
         qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
-
-
-        val dbHelper = DatabaseHelper(requireContext())
 
         workerName.text = rentalRequestSheet.workerDto.name
         leaderName.text = rentalRequestSheet.leaderDto.name
@@ -208,7 +208,6 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                         rentalRequestToolDtoList.add(RentalRequestToolDto(tool.id, tool.toolDto, toolCount, tool.Tags))
                                     }
                                 }
-
                             }
                         }
                     }
@@ -237,10 +236,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                     }
-                                    val timestamp = LocalDateTime.now().toString().format(
-                                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                                    val standbyString = "{sheet:${rentalRequestSheetApprove},timestamp:\"${timestamp}\"}"
-                                    handleBluetoothError(gson.toJson(standbyString))
+                                    handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
                                     e.printStackTrace()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
@@ -256,27 +252,13 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
 
         return view
     }
-    fun fixCode(input: String): String {
-        val typoMap = mapOf(
-            'ㅁ' to 'A',
-            'ㅠ' to 'B',
-            'ㅊ' to 'C',
-            'ㅇ' to 'D',
-            'ㄷ' to 'E',
-            'ㄹ' to 'F',
-            'ㅎ' to 'G'
-        )
-        val correctedText = StringBuilder()
-        for (char in input) {
-            val correctedChar = typoMap[char] ?: char
-            correctedText.append(correctedChar)
-        }
-        return correctedText.toString()
-    }
     private fun handleBluetoothError(json: String) {
         Log.d("STANDBY","STANDBY ACCESS")
         var dbHelper = DatabaseHelper(requireContext())
-        dbHelper.insertStandbyData(gson.toJson(json), "RENTAL","STANDBY","")
+        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        val standbySheet = StandbySheet(json,timestamp)
+        var final = gson.toJson(standbySheet)
+        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", "")
         dbHelper.close()
     }
 }
