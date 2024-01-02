@@ -16,4 +16,5 @@ import com.care4u.toolbox.tool.Tool;
 public interface RentalRequestSheetRepositoryCustom {
 	Page<RentalRequestSheet> findBySearchQuery(SheetState status, Membership membership, Boolean isWorker, Boolean isLeader, Toolbox toolbox, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	Page<RentalRequestSheet> findByMembership(SheetState status, Membership membership, Pageable pageable);
+	long countByMembership(SheetState status, Membership membership);
 }

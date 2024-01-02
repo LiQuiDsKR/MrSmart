@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.care4u.constant.SheetState;
+import com.care4u.hr.membership.Membership;
 
 public interface RentalRequestSheetRepository extends JpaRepository<RentalRequestSheet, Long>, RentalRequestSheetRepositoryCustom{
 	
@@ -30,7 +31,5 @@ public interface RentalRequestSheetRepository extends JpaRepository<RentalReques
 	        @Param("id1") long workerId, @Param("id2") long leaderId,
 	        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
 
-	RentalRequestSheet findByEventTimestamp(LocalDateTime eventTimestamp);
-
-	
+	RentalRequestSheet findByEventTimestamp(LocalDateTime eventTimestamp);	
 }

@@ -107,15 +107,25 @@ public class RentalRequestSheetService {
 		return page.map(e->convertToDto(e));
 	}
 	@Transactional(readOnly=true)
+	public Long getCountByMembership(SheetState status, Long membershipId){
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("Invalid membership : " + membershipId);
+			return null;
+		}
+		long count = repository.countByMembership(status, membership.get());	
+		return count;
+	}
+	@Transactional(readOnly=true)
 	public Page<RentalRequestSheetDto> getPage(SheetState status, long membershipId, Boolean isWorker, Boolean isLeader, long toolboxId, LocalDate startDate , LocalDate endDate, Pageable pageable) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (membership.isEmpty()) {
-			logger.error("worker : " + membership);
+			logger.error("Invalid membership : " + membershipId);
 			return null;
 		}
 		if (toolbox.isEmpty()) {
-			logger.error("toolbox : " + toolbox);
+			logger.error("Invalid toolbox : " + toolboxId);
 			return null;
 		}
 

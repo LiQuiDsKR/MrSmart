@@ -17,4 +17,6 @@ public interface OutstandingRentalSheetRepositoryCustom {
 	List<OutstandingRentalSheet> findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState status, long membershipId);
 	Page<OutstandingRentalSheet> findBySearchQuery(OutstandingState status, Membership membership, Boolean isWorker,
 			Boolean isLeader, Toolbox toolbox, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	Page<OutstandingRentalSheet> findByMembership(OutstandingState status, Membership membership, Pageable pageable);
+	Long countByMembership(OutstandingState status, Membership membership);
 }
