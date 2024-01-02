@@ -92,8 +92,18 @@ public class RentalRequestSheetService {
 	}
 
 	@Transactional(readOnly=true)
-	public Page<RentalRequestSheetDto> getPage(SheetState status, Long toolboxId, Pageable pageable){
+	public Page<RentalRequestSheetDto> getPageByToolbox(SheetState status, Long toolboxId, Pageable pageable){
 		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
+		return page.map(e->convertToDto(e));
+	}
+	@Transactional(readOnly=true)
+	public Page<RentalRequestSheetDto> getPageByMembership(SheetState status, Long membershipId, Pageable pageable){
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("worker : " + membership);
+			return null;
+		}
+		Page<RentalRequestSheet> page= repository.findByMembership(status, membership.get() , pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	@Transactional(readOnly=true)

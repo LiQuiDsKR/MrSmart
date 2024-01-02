@@ -39,14 +39,23 @@ public class RentalRequestSheetController {
 	@Autowired
 	private RentalRequestSheetService rentalRequestSheetService;
 	
-    @GetMapping(value = "request_sheet/create")
-    public String createRequestSheet(Model model){
+    @GetMapping(value = "request_sheet/manager/create")
+    public String createRequestSheetManager(Model model){
     	
     	List<ToolboxDto> toolboxList = toolboxService.list();
     	
     	model.addAttribute("toolboxList",toolboxList);
 
-        return "rental/request_sheet_create";
+        return "rental/request_sheet_create_manager";
+    }
+    @GetMapping(value = "request_sheet/user/create")
+    public String createRequestSheetUser(Model model){
+    	
+    	List<ToolboxDto> toolboxList = toolboxService.list();
+    	
+    	model.addAttribute("toolboxList",toolboxList);
+
+        return "rental/request_sheet_create_user";
     }
     
     @GetMapping(value = "request_sheet/approve")

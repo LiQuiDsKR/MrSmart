@@ -269,6 +269,18 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
 			}
 			break;
+		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_TOOLBOX:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				long membershipId = jsonObj.getLong("membershipId");
+
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.READY,membershipId,pageable);
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -277,7 +289,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				long toolboxId = jsonObj.getLong("toolboxId");
 
 		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
+		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.REQUEST,toolboxId,pageable);
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
@@ -352,6 +364,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					
 		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
 		            
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_CANCEL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long sheetId = jsonObj.getLong("rentalRequestSheetId");
+		    	try {
+		    		rentalRequestSheetService.cancel(sheetId);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");

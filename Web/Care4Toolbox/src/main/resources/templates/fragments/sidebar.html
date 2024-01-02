@@ -50,8 +50,14 @@
 				</a>
 			</li>
 			<li class="nav-category">공기구 대여</li>
-			<li class="">
-				<a th:href="@{/rental/request_sheet/create}">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/rental/request_sheet/manager/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('USER')">
+				<a th:href="@{/rental/request_sheet/user/create}">
 					<i class="icofont-navigation-menu"></i>
 					<span class="link-title">신청</span>
 				</a>
