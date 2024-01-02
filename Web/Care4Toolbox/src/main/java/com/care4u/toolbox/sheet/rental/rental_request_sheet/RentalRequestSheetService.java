@@ -85,16 +85,24 @@ public class RentalRequestSheetService {
 		return convertToDto(item.get());
 	}
 	
-	@Transactional(readOnly = true)
-	public Page<RentalRequestSheetDto> getPage( Long toolboxId, Pageable pageable ) {
-		Page<RentalRequestSheet> page = repository.findAllByToolboxId(toolboxId, pageable);	
-		return page.map(e->convertToDto(e));
-	}
-
 	@Transactional(readOnly=true)
 	public Page<RentalRequestSheetDto> getPageByToolbox(SheetState status, Long toolboxId, Pageable pageable){
-		Page<RentalRequestSheet> page= repository.findAllByStatusAndToolboxIdOrderByEventTimestampAsc(status, toolboxId, pageable);	
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolbox : " + toolboxId);
+			return null;
+		}
+		Page<RentalRequestSheet> page= repository.findByToolbox(status, toolbox.get(), pageable);	
 		return page.map(e->convertToDto(e));
+	}
+	public Long getCountByToolbox(SheetState status, long toolboxId) {
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolbox : " + toolboxId);
+			return null;
+		}
+		long count = repository.countByToolbox(status, toolbox.get());	
+		return count;
 	}
 	@Transactional(readOnly=true)
 	public Page<RentalRequestSheetDto> getPageByMembership(SheetState status, Long membershipId, Pageable pageable){
@@ -316,5 +324,6 @@ public class RentalRequestSheetService {
 			return addNew(formDto);
 		}
 	}
+
 
 }

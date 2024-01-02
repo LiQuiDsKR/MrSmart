@@ -89,6 +89,34 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
 			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.status.eq(status))).fetchOne();
 			return total;
 		}
+
+		@Override
+		public Page<RentalRequestSheet> findByToolbox(SheetState status, Toolbox toolbox, Pageable pageable) {
+			QRentalRequestSheet sSheet = QRentalRequestSheet.rentalRequestSheet;
+			
+			List<RentalRequestSheet> content = queryFactory
+                .selectDistinct(sSheet)
+                .from(sSheet)
+                .where(
+                		sSheet.toolbox.eq(toolbox)
+                		.and(sSheet.status.eq(status))
+                )
+                .orderBy(sSheet.eventTimestamp.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(sSheet.toolbox.eq(toolbox).and(sSheet.status.eq(status))).fetchOne();
+			
+	        return new PageImpl<>(content, pageable, total);
+		}
+
+		@Override
+		public long countByToolbox(SheetState status, Toolbox toolbox) {
+			QRentalRequestSheet sSheet = QRentalRequestSheet.rentalRequestSheet;
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(sSheet.toolbox.eq(toolbox).and(sSheet.status.eq(status))).fetchOne();
+			return total;
+		}
 		
 		
 }
