@@ -31,6 +31,7 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.StandbySheet
 
 import com.mrsmart.standard.tool.ToolDtoSQLite
 import com.mrsmart.standard.tool.ToolWithCount
@@ -215,8 +216,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                             Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                         }
                                         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                                        val standbyString = "{sheet:${rentalRequestSheet},timestamp:\"${timestamp}\"}"
-                                        handleBluetoothError(gson.toJson(standbyString))
+
+                                        handleBluetoothError(gson.toJson(rentalRequestSheet))
                                         e.printStackTrace()
                                         requireActivity().supportFragmentManager.popBackStack()
                                     }
@@ -280,8 +281,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             pairToolList = pairToolList.plus(pair)
         }
         val detail = gson.toJson(StandbyParam(0, names.first, names.second, timestamp, pairToolList))
-
-        dbHelper.insertStandbyData(gson.toJson(json), "RENTALREQUEST","STANDBY", detail)
+        val standbySheet = StandbySheet(json,timestamp)
+        dbHelper.insertStandbyData(gson.toJson(standbySheet), "RENTALREQUEST","STANDBY", detail)
         dbHelper.close()
     }
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {

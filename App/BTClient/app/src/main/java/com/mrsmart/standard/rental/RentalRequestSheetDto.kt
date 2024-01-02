@@ -4,11 +4,11 @@ import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.tool.ToolboxDto
 
 data class RentalRequestSheetDto(
-    val id: Long,
-    val workerDto: MembershipDto,
-    val leaderDto: MembershipDto,
-    val toolboxDto: ToolboxDto,
-    val status: SheetStatus,
-    val eventTimestamp: String,
-    val toolList: List<RentalRequestToolDto>
+    var id: Long,
+    var workerDto: MembershipDto,
+    var leaderDto: MembershipDto,
+    var toolboxDto: ToolboxDto,
+    var status: SheetStatus,
+    var eventTimestamp: String,
+    var toolList: List<RentalRequestToolDto>
 )

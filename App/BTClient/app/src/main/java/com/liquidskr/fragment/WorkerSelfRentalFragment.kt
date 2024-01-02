@@ -33,7 +33,7 @@ import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolWithCount
 import java.lang.reflect.Type
 
-class WorkerRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
+class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     lateinit var leaderSearchBtn: LinearLayout
     lateinit var qrEditText: EditText
     lateinit var qrcodeBtn: LinearLayout
@@ -59,7 +59,7 @@ class WorkerRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickLi
     }
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_worker_rental, container, false)
+        val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
         val dbHelper = DatabaseHelper(requireContext())
 
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
@@ -232,8 +232,8 @@ class WorkerRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickLi
         return correctedText.toString()
     }
     companion object {
-        fun newInstance(): WorkerRentalFragment {
-            val fragment = WorkerRentalFragment()
+        fun newInstance(): WorkerSelfRentalFragment {
+            val fragment = WorkerSelfRentalFragment()
             return fragment
         }
     }

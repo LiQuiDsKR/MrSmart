@@ -48,10 +48,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private var bluetoothDataListener: BluetoothDataListener? = null
     private var bluetoothConnectionListener: BluetoothConnectionListener? = null
 
-    fun setBluetoothConnectionListener(listener: BluetoothConnectionListener) {
-        this.bluetoothConnectionListener = listener
-    }
-
     fun setBluetoothDataListener(listener: BluetoothDataListener) {
         this.bluetoothDataListener = listener
     }
@@ -423,6 +419,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             RequestType.RETURN_SHEET_FORM_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }

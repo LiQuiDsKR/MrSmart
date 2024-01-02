@@ -95,10 +95,12 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                 existToolList.add(rentalTool)
             }
         }
+
         var rentalToolList: MutableList<RentalToolDto> = outstandingSheet.rentalSheetDto.toolList.toMutableList()
         var returnToolFormList: MutableList<ReturnToolFormDto> = mutableListOf()
         var finalReturnToolFormList: MutableList<ReturnToolFormDto> = mutableListOf()
         var toolWithCountList: MutableList<ToolWithCount> = mutableListOf()
+
         for (a in rentalToolList) {
             toolWithCountList.add(ToolWithCount(a.toolDto.toToolDtoSQLite(), a.outstandingCount))
         }

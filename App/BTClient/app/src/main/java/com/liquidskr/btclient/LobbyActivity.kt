@@ -3,7 +3,6 @@ package com.liquidskr.btclient
 import SharedViewModel
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
@@ -11,13 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.fragment.ManagerFragment
-import com.liquidskr.fragment.ManagerOutstandingDetailFragment
-import com.liquidskr.fragment.ManagerRentalDetailFragment
 import com.liquidskr.fragment.ManagerRentalFragment
 import com.liquidskr.fragment.ManagerReturnFragment
 import com.liquidskr.fragment.SettingsFragment
+import com.liquidskr.fragment.ToolRegisterFragment
 import com.liquidskr.fragment.WorkerFragment
-import com.liquidskr.fragment.WorkerRentalFragment
+import com.liquidskr.fragment.WorkerSelfRentalFragment
 
 class LobbyActivity : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
@@ -27,7 +25,7 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var bluetoothManager: BluetoothManager
     lateinit var managerRentalFragment: ManagerRentalFragment
     lateinit var managerReturnFragment: ManagerReturnFragment
-    lateinit var workerRentalFragment: WorkerRentalFragment
+    lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
     private var workerFragment: WorkerFragment? = null
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(this).get(SharedViewModel::class.java)
@@ -35,7 +33,11 @@ class LobbyActivity : AppCompatActivity() {
 
 
 
-    interface ModalListener {
+    interface CustomModalListener {
+        fun onConfirmButtonClicked()
+        fun onCancelButtonClicked()
+    }
+    interface AlertModalListener {
         fun onConfirmButtonClicked()
         fun onCancelButtonClicked()
     }
@@ -49,7 +51,7 @@ class LobbyActivity : AppCompatActivity() {
         bluetoothManager = BluetoothManager(this, this)
         managerRentalFragment = ManagerRentalFragment()
         managerReturnFragment = ManagerReturnFragment()
-        workerRentalFragment = WorkerRentalFragment()
+        workerSelfRentalFragment = WorkerSelfRentalFragment()
 
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
@@ -74,7 +76,6 @@ class LobbyActivity : AppCompatActivity() {
         }
 
         bluetoothBtn.setOnClickListener {
-            bluetoothManager.bluetoothClose()
             bluetoothManager.bluetoothOpen()
             bluetoothManager = getBluetoothManagerOnActivity()
         }
@@ -87,7 +88,40 @@ class LobbyActivity : AppCompatActivity() {
         }
 
     }
-    fun showCustomModal(title: String, content: String, listener: ModalListener) {
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event?.action == KeyEvent.ACTION_DOWN) {
+            val currentFragment = supportFragmentManager.findFragmentByTag("ToolRegisterFragment")
+            if (currentFragment is ToolRegisterFragment) {
+                currentFragment.handleKeyEvent(event.keyCode)
+            }
+        }
+
+        return super.onKeyDown(keyCode, event)
+    }
+
+    fun showCustomModal(title: String, content: String, listener: CustomModalListener) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setMessage(content)
+
+        // 확인 버튼을 눌렀을 때의 동작 정의
+        builder.setPositiveButton("확인") { _, _ ->
+            // 모달 확인 버튼을 눌렀을 때, Listener의 메서드 호출
+            listener.onConfirmButtonClicked()
+        }
+
+        // 취소 버튼을 눌렀을 때의 동작 정의
+        builder.setNegativeButton("취소") { _, _ ->
+            // 모달 취소 버튼을 눌렀을 때, Listener의 메서드 호출
+            listener.onCancelButtonClicked()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    fun showAlertModal(title: String, content: String, listener: AlertModalListener) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
         builder.setMessage(content)

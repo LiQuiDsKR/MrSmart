@@ -55,6 +55,18 @@
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
+                        <TextView
+                            android:id="@+id/RegisterToolList_Code"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="20dp"
+                            android:layout_weight="1"
+                            android:gravity="left|center_vertical"
+                            android:text="이름"
+                            android:textColor="#32345E"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
                     </LinearLayout>
 
                     <TextView

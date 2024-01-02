@@ -59,23 +59,22 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
                 .commit()
         }
 
-        connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        }
-
         returnBtn.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_on_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
             registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val lobbyActivity = activity as? LobbyActivity
-            val managerReturnFragment = lobbyActivity?.managerReturnFragment
 
             val fragment = ManagerReturnFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .commit()
+        }
+
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
 
         standbyBtn.setOnClickListener {
@@ -96,7 +95,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
             registerBtn.setImageResource(R.drawable.ic_menu_on_04)
             val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainerView, fragment, "ToolRegisterFragment")
                 .commit()
         }
 /*

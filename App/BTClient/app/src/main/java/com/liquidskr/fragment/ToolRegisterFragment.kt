@@ -2,11 +2,16 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +31,8 @@ class ToolRegisterFragment() : Fragment() {
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
+    private val handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable? = null
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -42,7 +49,6 @@ class ToolRegisterFragment() : Fragment() {
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        confirmBtn = view.findViewById(R.id.ConfirmBtn)
 
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
@@ -70,4 +76,95 @@ class ToolRegisterFragment() : Fragment() {
         }
         adapter.updateList(newList)
     }
+    fun handleKeyEvent(keyCode: Int) {
+        if (sharedViewModel.qrScannerText == "") {
+            scheduleTask(300) {
+                try {
+                    val dbHelper = DatabaseHelper(requireContext())
+                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto())
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                    sharedViewModel.qrScannerText = ""
+                } catch (e:Exception) {
+                    handler.post {
+                        Toast.makeText(requireContext(), "입력한 품목코드에 해당하는 공기구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    sharedViewModel.qrScannerText = ""
+                }
+            }
+        }
+        val num: Int
+        if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+            num = keyCode - KeyEvent.KEYCODE_0
+            sharedViewModel.qrScannerText += num.toString()
+        } else {
+            cancelTimer()
+        }
+    }
+    fun scheduleTask(delaySeconds: Long, task: () -> Unit) {
+        runnable = Runnable {
+            task.invoke()
+        }
+        handler.postDelayed(runnable!!, delaySeconds)
+    }
+    fun cancelTimer() {
+        runnable?.let {
+            handler.removeCallbacks(it)
+            runnable = null
+        }
+        sharedViewModel.qrScannerText = ""
+    }
+    /*
+    fun handleKeyEvent(event: KeyEvent) {
+        val num: Int
+        if (sharedViewModel.qrScannerText == "") {
+            scheduleTask(400) {
+                try {
+                    val dbHelper = DatabaseHelper(requireContext())
+                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto())
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                    sharedViewModel.qrScannerText = ""
+                } catch (e:Exception) {
+                    handler.post {
+                        Toast.makeText(requireContext(), "입력한 품목코드에 해당하는 공기구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    sharedViewModel.qrScannerText = ""
+                }
+            }
+        }
+        if (event.keyCode >= KeyEvent.KEYCODE_0 && event.keyCode <= KeyEvent.KEYCODE_9) {
+            num = event.keyCode - KeyEvent.KEYCODE_0
+            sharedViewModel.qrScannerText += num.toString()
+        } else if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
+            handler.post {
+                Toast.makeText(requireContext(), "ENTER", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+        else {
+            num = -1
+            sharedViewModel.qrScannerText = ""
+            cancelTimer()
+            handler.post {
+                Toast.makeText(requireContext(), "코드에 숫자가 아닌 문자가 포함되어 있습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    fun scheduleTask(delaySeconds: Long, task: () -> Unit) {
+        runnable = Runnable {
+            task.invoke()
+        }
+        handler.postDelayed(runnable!!, delaySeconds)
+    }
+    fun cancelTimer() {
+        runnable?.let {
+            handler.removeCallbacks(it)
+            runnable = null
+        }
+    }*/
 }
