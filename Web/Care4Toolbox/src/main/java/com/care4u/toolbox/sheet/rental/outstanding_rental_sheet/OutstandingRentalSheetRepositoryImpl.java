@@ -13,12 +13,14 @@ import org.springframework.data.domain.Pageable;
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
 import com.care4u.hr.membership.Membership;
+import com.care4u.hr.membership.QMembership;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.QRentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSheetRepositoryCustom {
@@ -129,4 +131,31 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 
 	        return new PageImpl<>(content, pageable, content.size());
 		}
+
+		@Override
+		public Page<OutstandingRentalSheet> findByMembership(OutstandingState status, Membership membership,Pageable pageable) {
+			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			List<OutstandingRentalSheet> content = queryFactory
+	                .selectDistinct(sSheet)
+	                .from(sSheet)
+	                .where(
+	                		searchMembershipEquals(membership,true,true)
+	                		.and(sSheet.outstandingStatus.eq(status))
+	                )
+	                .orderBy(sSheet.rentalSheet.eventTimestamp.desc())
+	                .offset(pageable.getOffset())
+	                .limit(pageable.getPageSize())
+	                .fetch();
+
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.outstandingStatus.eq(status))).fetchOne();
+		        return new PageImpl<>(content, pageable, total);
+		}
+
+		@Override
+		public Long countByMembership(OutstandingState status, Membership membership) {
+			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.outstandingStatus.eq(status))).fetchOne();
+	        return total;
+		}
+		
 }

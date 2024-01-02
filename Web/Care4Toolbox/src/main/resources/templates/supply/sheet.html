@@ -33,6 +33,12 @@
 
 						<h4 class="font-30 m-3">공기구 지급 기록</h4>
 						<div class="d-flex row align-items-center ml-auto">
+							<div class="custom-select style--two mr-4" style="max-width:200px;">
+								<select class="theme-input-style" id="subGroupSelect">
+									<option th:each="subGroup : ${subGroupList}" th:value="${subGroup.id}"
+										th:text="${subGroup.name}">name?</option>
+								</select>
+							</div>
 							<div class="col-4">
 								<div class="d-flex align-items-center flex-nowrap mr-4"style="box-sizing: content-box;">
 									<div class="custom-select style--two mr-4" style="max-width:200px;">

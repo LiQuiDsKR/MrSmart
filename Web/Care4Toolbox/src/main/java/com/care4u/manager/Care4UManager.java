@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import com.care4u.common.GsonUtils;
 import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
+import com.care4u.constant.OutstandingState;
 import com.care4u.constant.RequestType;
 import com.care4u.constant.SheetState;
 import com.care4u.hr.main_part.MainPartService;
@@ -193,7 +194,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
 		//memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
 		
-		ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService, stockStatusService, toolboxService);
+		//ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService, stockStatusService, toolboxService);
 		//toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
 		//toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
 		
@@ -269,6 +270,26 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
 			}
 			break;
+		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+				long membershipId = jsonObj.getLong("membershipId");
+
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByMembership(SheetState.READY,membershipId,pageable);
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long membershipId = jsonObj.getLong("membershipId");
+		        Long count = rentalRequestSheetService.getCountByMembership(SheetState.READY,membershipId);
+				handler.sendData(keyword + GsonUtils.toJson(count));
+			}
+			break;
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -277,19 +298,19 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				long toolboxId = jsonObj.getLong("toolboxId");
 
 		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPage(SheetState.REQUEST,toolboxId,pageable);
+		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.REQUEST,toolboxId,pageable);
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
-		case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long toolboxId = jsonObj.getLong("toolboxId");
-
-		        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(sheetList));
-			}
-			break;
+//		case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
+//			if (!(paramJson.isEmpty() || paramJson==null)) {
+//				JSONObject jsonObj = new JSONObject(paramJson);
+//				long toolboxId = jsonObj.getLong("toolboxId");
+//
+//		        List<RentalRequestSheetDto> sheetList = rentalRequestSheetService.getList(SheetState.REQUEST,toolboxId);
+//				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+//			}
+//			break;
 		case RENTAL_REQUEST_SHEET_FORM:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetFormDto formDto;
@@ -360,6 +381,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		case RENTAL_REQUEST_SHEET_CANCEL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long sheetId = jsonObj.getLong("rentalRequestSheetId");
+		    	try {
+		    		rentalRequestSheetService.cancel(sheetId);
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
 		case RETURN_SHEET_PAGE_BY_MEMBERSHIP:
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
@@ -368,33 +403,36 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
 				long membershipId = jsonObj.getLong("membershipId");
-	    		String startDate = jsonObj.getString("startDate");
-				String endDate = jsonObj.getString("endDate");
-
-		        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-		        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
 		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, startLocalDate, endLocalDate, pageable);
+		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(OutstandingState.READY,membershipId, pageable);
 		        
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
-		case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
+		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long membershipId = jsonObj.getLong("membershipId");
-	    		//String startDate = jsonObj.getString("startDate");
-				//String endDate = jsonObj.getString("endDate");
-
-		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
+		       	Long count = outstandingRentalSheetService.getCountByMembershipId(OutstandingState.READY,membershipId);
 		        
-				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
-			break;	
+			break;
+//		case OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP:
+//			if (!(paramJson.isEmpty() || paramJson==null)) {
+//				JSONObject jsonObj = new JSONObject(paramJson);
+//				long membershipId = jsonObj.getLong("membershipId");
+//	    		//String startDate = jsonObj.getString("startDate");
+//				//String endDate = jsonObj.getString("endDate");
+//
+//		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+//		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+//
+//		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByMembershipId(membershipId);
+//		        
+//				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+//			}
+//			break;	
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -412,20 +450,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
-		case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long toolboxId = jsonObj.getLong("toolboxId");
-	    		//String startDate = jsonObj.getString("startDate");
-				//String endDate = jsonObj.getString("endDate");
-
-		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
-		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
-
-		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(sheetList));
-			}
-			break;
+//		case OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX:
+//			if (!(paramJson.isEmpty() || paramJson==null)) {
+//				JSONObject jsonObj = new JSONObject(paramJson);
+//				long toolboxId = jsonObj.getLong("toolboxId");
+//	    		//String startDate = jsonObj.getString("startDate");
+//				//String endDate = jsonObj.getString("endDate");
+//
+//		        //LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+//		        //LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+//
+//		        List<OutstandingRentalSheetDto> sheetList = outstandingRentalSheetService.getListByToolboxId(toolboxId);
+//				handler.sendData(keyword + GsonUtils.toJson(sheetList));
+//			}
+//			break;
 		case OUTSTANDING_RENTAL_SHEET_BY_TAG:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);

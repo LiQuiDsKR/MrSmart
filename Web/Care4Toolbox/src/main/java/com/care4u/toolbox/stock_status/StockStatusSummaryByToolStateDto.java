@@ -20,4 +20,5 @@ public class StockStatusSummaryByToolStateDto {
     private Integer lossCount;
     private Integer discardCount;
     private Integer supplyCount;
+    private Integer returnCount;
 }

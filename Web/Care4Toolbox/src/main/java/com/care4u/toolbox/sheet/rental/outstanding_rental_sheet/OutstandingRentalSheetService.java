@@ -114,29 +114,47 @@ public class OutstandingRentalSheetService {
 				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
-	/**
-	 * @deprecated 앱에서만 쓰는데 date쿼리 필요없어져서 변경. & readyㅋㅋ
-	 */
 	@Transactional(readOnly = true)
-	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate) {
-		List<OutstandingRentalSheet> list = repository
-				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
-		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
-		for (OutstandingRentalSheet item : list) {
-			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+	public Page<OutstandingRentalSheetDto> getPageByMembershipId(OutstandingState status, Long membershipId, Pageable pageable) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("Invalid membership : " + membershipId);
+			return null;
 		}
-		return dtoList;
+		Page<OutstandingRentalSheet> page = repository.findByMembership(status, membership.get(), pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
-	@Transactional(readOnly = true)
-	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId) {
-		List<OutstandingRentalSheet> list = repository
-				.findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState.READY,membershipId);
-		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
-		for (OutstandingRentalSheet item : list) {
-			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+	public Long getCountByMembershipId(OutstandingState status, long membershipId) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("Invalid membership : " + membershipId);
+			return null;
 		}
-		return dtoList;
+		Long count = repository.countByMembership(status, membership.get());
+		return count;
 	}
+	
+//  앱에서도 page로만 받게 되어서 list는 주석처리했습니다.
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate) {
+//		List<OutstandingRentalSheet> list = repository
+//				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId) {
+//		List<OutstandingRentalSheet> list = repository
+//				.findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState.READY,membershipId);
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
 	
 	
 	@Transactional
@@ -213,4 +231,6 @@ public class OutstandingRentalSheetService {
 		Page<OutstandingRentalSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);	
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
+
+	
 }
