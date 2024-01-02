@@ -269,7 +269,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
 			}
 			break;
-		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_TOOLBOX:
+		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
