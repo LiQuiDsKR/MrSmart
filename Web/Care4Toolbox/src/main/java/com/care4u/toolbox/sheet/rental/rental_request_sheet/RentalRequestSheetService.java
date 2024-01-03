@@ -23,6 +23,7 @@ import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
+import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolApproveFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolRepository;
@@ -34,6 +35,9 @@ import com.care4u.toolbox.stock_status.StockStatusDto;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
+import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolDto;
+import com.care4u.toolbox.tool.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,6 +58,9 @@ public class RentalRequestSheetService {
 	
 	@Autowired
 	private final ToolboxRepository toolboxRepository;
+	
+	@Autowired
+	private final ToolRepository toolRepository;
 	
 	@Autowired
 	private RentalRequestToolService rentalRequestToolService;
@@ -293,6 +300,69 @@ public class RentalRequestSheetService {
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, sheetDto.getEventTimestamp());
 		
 		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
+	}
+	@Transactional
+	public RentalRequestSheetDto update(RentalRequestSheetApproveFormDto formDto, SheetState status) {
+		RentalRequestSheet rentalRequestSheet;
+		Optional<RentalRequestSheet> rentalRequestSheetOptional = repository.findById(formDto.getId());
+		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerDtoId());
+		Optional<Membership> leader = membershipRepository.findById(formDto.getLeaderDtoId());
+		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxDtoId());
+
+	    if (rentalRequestSheetOptional.isEmpty()) {
+	        logger.error("Sheet not found");
+	        throw new IllegalArgumentException("Sheet not found");
+	    }
+
+	    if (worker.isEmpty()) {
+	        logger.error("Worker not found");
+	        throw new IllegalArgumentException("Worker not found");
+	    }
+
+	    if (leader.isEmpty()) {
+	        logger.error("Leader not found");
+	        throw new IllegalArgumentException("Leader not found");
+	    }
+
+	    if (toolbox.isEmpty()) {
+	        logger.error("Toolbox not found");
+	        throw new IllegalArgumentException("Toolbox not found");
+	    }
+		
+		rentalRequestSheet=rentalRequestSheetOptional.get();
+		
+		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(formDto.getId());
+		for (RentalRequestTool tool : toolList) {
+			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),formDto.getToolboxDtoId());
+			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
+		}
+		
+		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, rentalRequestSheet.getEventTimestamp());
+		
+		List<RentalRequestToolDto> dtoList = new ArrayList<RentalRequestToolDto>();
+		for (RentalRequestToolApproveFormDto tool : formDto.getToolList()) {
+			Optional<RentalRequestTool> optionalRequestTool = rentalRequestToolRepository.findById(tool.getId());
+			Optional<Tool> optionalTool = toolRepository.findById(tool.getToolDtoId());
+			if (optionalRequestTool.isEmpty()) {
+				logger.error("rental request tool not found");
+		        throw new IllegalArgumentException("rental request tool not found");
+			}
+			if (optionalTool.isEmpty()) {
+				logger.error("tool not found");
+		        throw new IllegalArgumentException("tool not found");
+			}
+			
+			RentalRequestToolDto newDto = RentalRequestToolDto.builder()
+			.id(tool.getId())
+			.count(tool.getCount())
+			.toolDto(new ToolDto(optionalTool.get()))
+			.Tags(tool.getTags())
+			.build();
+			
+			dtoList.add(newDto);
+		}
+		
+		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), dtoList);
 	}
 	@Transactional
 	public RentalRequestSheetDto cancel(long sheetId) {

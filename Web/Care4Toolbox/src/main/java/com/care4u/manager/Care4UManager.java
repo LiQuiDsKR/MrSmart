@@ -47,7 +47,7 @@ import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDt
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormWithTimestampDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
-import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverAndTimestampDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetApproveFormAndTimestampDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverIdDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
@@ -352,9 +352,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case RENTAL_REQUEST_SHEET_APPROVE_STANDBY:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetWithApproverAndTimestampDto mainDto;
+				RentalRequestSheetApproveFormAndTimestampDto mainDto;
 		    	try {
-					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverAndTimestampDto.class);
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormAndTimestampDto.class);
 					RentalRequestSheetDto sheetDto = mainDto.getSheet().getRentalRequestSheetDto();
 					long approverId = mainDto.getSheet().getApproverId();
 					String timeString = mainDto.getTimestamp();

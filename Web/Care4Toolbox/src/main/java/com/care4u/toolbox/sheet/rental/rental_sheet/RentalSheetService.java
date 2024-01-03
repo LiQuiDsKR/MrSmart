@@ -28,7 +28,9 @@ import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetApproveFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -66,6 +68,7 @@ public class RentalSheetService {
 	private final PartRepository partRepository;
 	private final SubPartRepository subPartRepository;
 	private final MainPartRepository mainPartRepository;
+	private final RentalRequestSheetRepository rentalRequestSheetRepository;
 	private final RentalToolService rentalToolService;
 	private final OutstandingRentalSheetService outstandingRentalSheetService;
 	private final RentalRequestSheetService rentalRequestSheetService;
@@ -211,6 +214,7 @@ public class RentalSheetService {
 		}
 	}
 
+
 	/**
 	 * Controller에서 RentalRequestSheet update()와 RentalSheet addNew()를 따로 호출했을 때 생긴
 	 * 문제를 방지하기 위해 하나의 transaction으로 묶어주기 위한 함수입니다.
@@ -226,7 +230,12 @@ public class RentalSheetService {
 		// 2. RentalSheet를 addNew
 		return addNew(sheetDto, approverId);
 	}
-	
+	@Transactional
+	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetApproveFormDto formDto) {
+		RentalRequestSheetDto sheetDto=rentalRequestSheetService.update(formDto, SheetState.APPROVE);
+		return addNew(sheetDto, formDto.getApproverDtoId());
+	}
+
 	@Transactional
 	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetDto sheetDto, long approverId,LocalDateTime eventTimestamp) {
 		RentalSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
@@ -235,6 +244,16 @@ public class RentalSheetService {
 			return null;
 		}else {
 			return updateAndAddNewInTransaction(sheetDto,approverId);
+		}
+	}
+	@Transactional
+	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetApproveFormDto formDto,LocalDateTime eventTimestamp) {
+		RentalSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("RentalSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			return updateAndAddNewInTransaction(formDto);
 		}
 	}
 }
