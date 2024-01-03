@@ -48,7 +48,7 @@ import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFo
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetFormWithTimestampDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetApproveFormAndTimestampDto;
-import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetWithApproverIdDto;
+import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetApproveFormDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
@@ -355,14 +355,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				RentalRequestSheetApproveFormAndTimestampDto mainDto;
 		    	try {
 					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormAndTimestampDto.class);
-					RentalRequestSheetDto sheetDto = mainDto.getSheet().getRentalRequestSheetDto();
-					long approverId = mainDto.getSheet().getApproverId();
+					RentalRequestSheetApproveFormDto formDto = mainDto.getSheet();
 					String timeString = mainDto.getTimestamp();
 
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
 					
-		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId, eventTimestamp);
+		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(formDto,eventTimestamp);
 		            
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
@@ -374,13 +373,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case RENTAL_REQUEST_SHEET_APPROVE:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetWithApproverIdDto mainDto;
+				RentalRequestSheetApproveFormDto mainDto;
 		    	try {
-					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetWithApproverIdDto.class);
-					RentalRequestSheetDto sheetDto = mainDto.getRentalRequestSheetDto();
-					long approverId = mainDto.getApproverId();
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormDto.class);
 					
-		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId);
+		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(mainDto);
 		            
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
