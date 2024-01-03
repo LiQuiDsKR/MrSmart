@@ -7,10 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,8 +18,10 @@ import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
+import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
@@ -31,12 +31,33 @@ class ManagerRentalFragment() : Fragment() {
     lateinit var searchSheetEdit: EditText
     lateinit var sheetSearchBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var rentalRequestSheetList: List<RentalRequestSheetDto>
+    var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+    private lateinit var rentalRequestSheetReadyByMemberReq: RentalRequestSheetReadyByMemberReq
+    private val rentalRequestSheetRequestListener = object: RentalRequestSheetReadyByMemberReq.Listener {
+        override fun onNextPage(pageNum: Int) {
+            requestRentalRequestSheetReady(pageNum)
+        }
+
+        override fun onLastPageArrived() {
+
+        }
+
+        override fun onError(e: Exception) {
+
+        }
+        override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
+            rentalRequestSheetList.addAll(sheetList)
+            requireActivity().runOnUiThread {
+                (recyclerView.adapter as RentalRequestSheetAdapter).updateList(rentalRequestSheetList)
+            }
+        }
+    }
+
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -79,16 +100,34 @@ class ManagerRentalFragment() : Fragment() {
     }
 
     fun getRentalRequestSheetList() {
+        rentalRequestSheetList.clear()
+
+        var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
-                val updatedList: List<RentalRequestSheetDto> = gson.fromJson(result, type)
-                rentalRequestSheetList = updatedList
-                requireActivity().runOnUiThread {
-                    (recyclerView.adapter as RentalRequestSheetAdapter).updateList(updatedList)
+                try {
+                    sheetCount = result.toInt()
+                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
+                    requestRentalRequestSheetReady(0)
+                } catch (e: Exception) {
+                    Log.d("RentalRequestSheetReady", e.toString())
                 }
             }
 
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
+
+    fun requestRentalRequestSheetReady(pageNum: Int) {
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                var page: Page = gson.fromJson(result, type)
+                rentalRequestSheetReadyByMemberReq.process(page)
+            }
             override fun onError(e: Exception) {
                 e.printStackTrace()
             }

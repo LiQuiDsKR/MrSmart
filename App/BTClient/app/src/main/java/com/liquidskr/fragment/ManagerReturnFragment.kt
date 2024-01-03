@@ -27,6 +27,8 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
+import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
+import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 import java.security.Key
@@ -39,7 +41,7 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var sheetSearchBtn: ImageButton
     lateinit var qrCodeBtn: LinearLayout
     lateinit var qrEditText: EditText
-    lateinit var outStandingRentalSheetList: List<OutstandingRentalSheetDto>
+    var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     var selectedCategory = "리더명"
     val gson = Gson()
 
@@ -48,6 +50,27 @@ class ManagerReturnFragment() : Fragment() {
     }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
+
+    private lateinit var outstandingRentalSheetByMemberReq: OutstandingRentalSheetByMemberReq
+    private val outstandingRentalSheetRequestListener = object: OutstandingRentalSheetByMemberReq.Listener {
+        override fun onNextPage(pageNum: Int) {
+            requestOutstandingRentalSheet(pageNum)
+        }
+
+        override fun onLastPageArrived() {
+
+        }
+
+        override fun onError(e: Exception) {
+
+        }
+        override fun onOutstandingRentalSheetUpdated(sheetList: List<OutstandingRentalSheetDto>) {
+            outStandingRentalSheetList.addAll(sheetList)
+            requireActivity().runOnUiThread {
+                (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(outStandingRentalSheetList)
+            }
+        }
     }
 
     @SuppressLint("MissingInflatedId")
@@ -72,8 +95,6 @@ class ManagerReturnFragment() : Fragment() {
 
         sheetSearchBtn.setOnClickListener {
             if (selectedCategory == "리더명") filterByLeader(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
-            if (selectedCategory == "작업자명") filterByWorker(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
-            if (selectedCategory == "공기구명") filterByToolName(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
 
         }
         qrCodeBtn.setOnClickListener {
@@ -128,22 +149,33 @@ class ManagerReturnFragment() : Fragment() {
     }
 
     fun getOutstandingRentalSheetList() {
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
-                outStandingRentalSheetList = updatedList
+        outStandingRentalSheetList.clear()
 
-                val dbhelper = DatabaseHelper(requireContext()) // 여기부터 DB에 RentalSheet 저장
-                dbhelper.clearRSTable()
-                for (sheet in outStandingRentalSheetList) {
-                    dbhelper.insertRSData(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.name, sheet.rentalSheetDto.leaderDto.name, sheet.rentalSheetDto.eventTimestamp)
-                }
-                requireActivity().runOnUiThread {
-                    (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(updatedList)
+        var sheetCount = 0
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                try {
+                    sheetCount = result.toInt()
+                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
+                    requestOutstandingRentalSheet(0)
+                } catch (e: Exception) {
+                    Log.d("RentalRequestSheetReady", e.toString())
                 }
             }
 
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
+    fun requestOutstandingRentalSheet(pageNum: Int) {
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                var page: Page = gson.fromJson(result, type)
+                outstandingRentalSheetByMemberReq.process(page)
+            }
             override fun onError(e: Exception) {
                 e.printStackTrace()
             }
@@ -155,27 +187,6 @@ class ManagerReturnFragment() : Fragment() {
             if (keyword in sheet.rentalSheetDto.leaderDto.name) {
                 newList.add(sheet)
             }
-        }
-        adapter.updateList(newList)
-    }
-    fun filterByWorker(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
-        val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
-        for (sheet in sheets) {
-            if (keyword in sheet.rentalSheetDto.workerDto.name) {
-                newList.add(sheet)
-            }
-        }
-        adapter.updateList(newList)
-    }
-    fun filterByToolName(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
-        val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
-        for (sheet in sheets) {
-            for (tool in sheet.rentalSheetDto.toolList) {
-                if (keyword in tool.toolDto.name) {
-                    newList.add(sheet)
-                }
-            }
-
         }
         adapter.updateList(newList)
     }

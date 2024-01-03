@@ -246,6 +246,9 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
             requireActivity().supportFragmentManager.popBackStack()
         }
         confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
             var standbyAlreadySent = false
             if (adapter is OutstandingDetailAdapter) {
                 val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()

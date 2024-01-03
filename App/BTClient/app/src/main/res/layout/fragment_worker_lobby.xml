@@ -63,16 +63,11 @@
                 android:visibility="visible">
 
                 <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/fragmentContainerView2"
+                    android:id="@+id/fragmentContainerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:listitem="@layout/fragment_outstanding_rentalsheet" />
             </LinearLayout>
 
             <LinearLayout
@@ -90,15 +85,6 @@
                     android:backgroundTint="#00FFFFFF"
                     android:scaleType="fitXY"
                     app:srcCompat="@drawable/manager_lobby_connectionbtn" />
-
-                <ImageButton
-                    android:id="@+id/LobbyRentalBtn"
-                    android:layout_width="120dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/group_8" />
 
             </LinearLayout>
 
@@ -122,6 +108,7 @@
                         android:layout_height="51dp"
                         android:layout_gravity="center"
                         android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
                         android:scaleType="fitCenter"
                         app:srcCompat="@drawable/ic_menu_off_01" />
 
@@ -149,6 +136,7 @@
                         android:layout_height="51dp"
                         android:layout_gravity="center"
                         android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
                         android:scaleType="fitCenter"
                         app:srcCompat="@drawable/ic_menu_off_02" />
 

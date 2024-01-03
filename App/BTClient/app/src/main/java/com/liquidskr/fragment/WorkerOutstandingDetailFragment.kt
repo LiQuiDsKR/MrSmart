@@ -51,36 +51,8 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
-        confirmBtn = view.findViewById(R.id.confirmBtn)
+        confirmBtn = view.findViewById(R.id.return_detail_confirmBtn)
         backButton = view.findViewById(R.id.backButton)
-
-        returnerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
-        workerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
-        leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
-        timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
-
-        confirmBtn.setOnClickListener {
-            recyclerView.adapter?.let { adapter ->
-                if (adapter is WorkerOutstandingDetailAdapter) {
-                    bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
-                        BluetoothManager.RequestCallback{
-                        override fun onSuccess(result: String, type: Type) {
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(requireContext(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        override fun onError(e: Exception) {
-                            e.printStackTrace()
-                        }
-                    })
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-            }
-        }
-        backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -91,8 +63,34 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
             }
         }
 
+        returnerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
+        workerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
+        leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
+        timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
+
         val adapter = WorkerOutstandingDetailAdapter(existToolList)
         recyclerView.adapter = adapter
+
+        confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
+            bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
+                BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
 
         return view
     }

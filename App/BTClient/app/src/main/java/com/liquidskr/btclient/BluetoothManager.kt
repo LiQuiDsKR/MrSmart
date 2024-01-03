@@ -430,6 +430,22 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
+            RequestType.RENTAL_REQUEST_SHEET_CANCEL.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
         }
     }/*
     private fun clearSendingState() {

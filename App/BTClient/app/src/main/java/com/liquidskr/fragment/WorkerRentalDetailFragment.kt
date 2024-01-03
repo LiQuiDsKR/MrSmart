@@ -24,12 +24,13 @@ import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
+import com.liquidskr.btclient.WorkerRentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
+import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.standby.StandbySheet
 import com.mrsmart.standard.tool.TagDto
@@ -49,11 +50,10 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
 
-    private lateinit var qrEditText: EditText
-    private lateinit var qrcodeBtn: LinearLayout
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
+    private lateinit var cancelBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
     private val handler = Handler(Looper.getMainLooper())
 
@@ -68,11 +68,10 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
         confirmBtn = view.findViewById(R.id.rental_detail_confirmBtn)
+        cancelBtn = view.findViewById(R.id.rental_detail_cancelBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        qrEditText = view.findViewById((R.id.QR_EditText))
-        qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
         workerName.text = rentalRequestSheet.workerDto.name
@@ -81,45 +80,37 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
         //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
 
-        var adapter = RentalRequestToolAdapter(toolList)
+        var adapter = WorkerRentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
 
+        cancelBtn.setOnClickListener {
+            sheetCancel()
+        }
+
         confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
             recyclerView.adapter?.let { adapter ->
-                if (adapter is RentalRequestToolAdapter) {
-                    val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
-                    for (toolId in adapter.selectedToolsToRental) {
-                        for (tool in rentalRequestSheet.toolList) {
-                            if (tool.id == toolId) {
-                                for (i in adapter.selectedToolsToRental.indices) {
-                                    if (tool.id == adapter.selectedToolsToRental[i]) {
-                                        val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RentalRequestToolAdapter.RentalRequestToolViewHolder
-                                        val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
-
-                                        Log.d("cnt",holder?.toolName.toString())
-                                        Log.d("cnt",toolCount.toString())
-                                        rentalRequestToolDtoList.add(RentalRequestToolDto(tool.id, tool.toolDto, toolCount, tool.Tags))
-                                    }
-                                }
-
-                            }
-                        }
+                if (adapter is WorkerRentalRequestToolAdapter) {
+                    var rentalRequestToolFormList: MutableList<RentalRequestToolFormDto> = mutableListOf()
+                    for (rentalRequestTool in rentalRequestSheet.toolList) {
+                        rentalRequestToolFormList.add(RentalRequestToolFormDto(rentalRequestTool.toolDto.id, rentalRequestTool.count))
                     }
-                    val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
-                    val rentalRequestSheetApprove = RentalRequestSheetApprove(modifiedRentalRequestSheet, sharedViewModel.loginManager.id)
+                    val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id, rentalRequestSheet.toolboxDto.id, rentalRequestToolFormList)
                     try {
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
+                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    requireActivity().supportFragmentManager.popBackStack()
+                                    sheetCancelAfterForm()
                                 } else {
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
@@ -146,5 +137,63 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
         return view
     }
+    fun sheetCancel() {
+        try {
+            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    if (result == "good") {
+                        handler.post {
+                            Toast.makeText(activity, "대여 삭제 완료", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
+                    } else {
+                        handler.post {
+                            Toast.makeText(activity, "대여 삭제 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
 
+                }
+
+                override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(activity, "대여 삭제 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    }
+                    e.printStackTrace()
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            })
+        } catch(e:Exception) {
+            e.printStackTrace()
+        }
+    }
+    fun sheetCancelAfterForm() {
+        try {
+            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    if (result == "good") {
+                        requireActivity().supportFragmentManager.popBackStack()
+                    } else {
+                        handler.post {
+                            Toast.makeText(activity, "대여 신청 후 기존 정보 삭제 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+
+                }
+
+                override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(activity, "대여 신청 후 기존 정보 삭제 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    }
+                    e.printStackTrace()
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            })
+        } catch(e:Exception) {
+            e.printStackTrace()
+        }
+    }
 }

@@ -36,7 +36,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
 
     lateinit var welcomeMessage: TextView
     val gson = Gson()
-    private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -51,8 +50,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
         returnBtn = view.findViewById(R.id.ReturnBtn)
         rentalBtnField  = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
-        recyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         welcomeMessage.text = worker.name + "님 환영합니다."
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
@@ -62,7 +59,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
                 .addToBackStack(null)
                 .commit()
         }
-        recyclerView.adapter = adapter
 
         rentalBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
@@ -84,31 +80,14 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
         }
 
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        }
-
-        rentalBtn.setOnClickListener {
-            val lobbyActivity = activity as? LobbyActivity
-
-            // managerRentalFragment가 null이 아니라면 프래그먼트 교체
-            sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
-            sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
-            sharedViewModel.rentalRequestToolIdList.clear()
-            val fragment = WorkerSelfRentalFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
-        getOutstandingRentalSheetList()
+
+        //getOutstandingRentalSheetList()
         return view
     }
+    /*
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
@@ -123,7 +102,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
                 e.printStackTrace()
             }
         })
-    }
+    }*/
 
     override fun onBluetoothDisconnected() {
         activity?.runOnUiThread {
