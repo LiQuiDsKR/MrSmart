@@ -321,7 +321,7 @@ public class RentalRequestSheetService {
 			logger.error("returnSheet already exists! : " + eventTimestamp);
 			return null;
 		}else {
-			return addNew(formDto);
+			return addNew(formDto,SheetState.REQUEST);
 		}
 	}
 	@Transactional
