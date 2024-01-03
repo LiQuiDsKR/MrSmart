@@ -16,15 +16,17 @@ class RentalRequestSheetReadyByMemberReq (private val totalPage: Int, private va
         fun onNextPage(pageNum: Int)
         fun onLastPageArrived()
         fun onError(e: Exception)
+        fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>)
     }
 
     fun process(page: Page) {
         try {
             val type: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
-            val rentalRequestSheetList: List<MembershipDto> = gson.fromJson(gson.toJson(page.content), type)
+            val rentalRequestSheetList: List<RentalRequestSheetDto> = gson.fromJson(gson.toJson(page.content), type)
             for (sheet in rentalRequestSheetList) {
 
             }
+            listener?.onRentalRequestSheetListUpdated(rentalRequestSheetList)
             currentCount += rentalRequestSheetList.size
             currentPage++
             if (currentPage >= totalPage) {

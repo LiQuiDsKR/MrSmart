@@ -63,16 +63,11 @@
                 android:visibility="visible">
 
                 <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/fragmentContainerView2"
+                    android:id="@+id/fragmentContainerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:listitem="@layout/fragment_outstanding_rentalsheet" />
             </LinearLayout>
 
             <LinearLayout

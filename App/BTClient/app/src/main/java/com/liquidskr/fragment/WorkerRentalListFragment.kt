@@ -31,11 +31,11 @@ import java.lang.reflect.Type
 
 class WorkerRentalListFragment() : Fragment() {
     lateinit var recyclerView: RecyclerView
-    lateinit var selfRentalBtn: ImageButton
-    lateinit var searchSheetEdit: EditText
-    lateinit var sheetSearchBtn: ImageButton
+    private lateinit var selfRentalBtn: ImageButton
+    private lateinit var searchSheetEdit: EditText
+    private lateinit var sheetSearchBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var rentalRequestSheetList: List<RentalRequestSheetDto>
+    var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -54,13 +54,19 @@ class WorkerRentalListFragment() : Fragment() {
         override fun onError(e: Exception) {
             // 연결 끊고 모달 띄우고 재접속
         }
+        override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
+            rentalRequestSheetList.addAll(sheetList)
+            requireActivity().runOnUiThread {
+                (recyclerView.adapter as RentalRequestSheetAdapter).updateList(sheetList)
+            }
+        }
 
     }
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
+        val view = inflater.inflate(R.layout.fragment_worker_rental_list, container, false)
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
@@ -94,7 +100,6 @@ class WorkerRentalListFragment() : Fragment() {
         }
 
         getRentalRequestSheetList()
-
         return view
     }
 
@@ -102,7 +107,7 @@ class WorkerRentalListFragment() : Fragment() {
         val dbHelper = DatabaseHelper(requireContext())
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.worker.id}}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -112,12 +117,6 @@ class WorkerRentalListFragment() : Fragment() {
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
                 }
-                
-                val updatedList: List<RentalRequestSheetDto> = gson.fromJson(result, type)
-                rentalRequestSheetList = updatedList
-                requireActivity().runOnUiThread {
-                    (recyclerView.adapter as RentalRequestSheetAdapter).updateList(updatedList)
-                }
             }
 
             override fun onError(e: Exception) {
@@ -125,8 +124,9 @@ class WorkerRentalListFragment() : Fragment() {
             }
         })
     }
+
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)
