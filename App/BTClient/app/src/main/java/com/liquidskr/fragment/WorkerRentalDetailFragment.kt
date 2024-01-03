@@ -107,12 +107,12 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
                                     handler.post {
-                                        Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(activity, "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     }
                                     sheetCancelAfterForm()
                                 } else {
                                     handler.post {
-                                        Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(activity, "대여 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                                     }
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
@@ -121,7 +121,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
                             override fun onError(e: Exception) {
                                 handler.post {
-                                    Toast.makeText(activity, "대여 승인 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(activity, "대여 신청 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
                                 }
                                 e.printStackTrace()
                                 requireActivity().supportFragmentManager.popBackStack()

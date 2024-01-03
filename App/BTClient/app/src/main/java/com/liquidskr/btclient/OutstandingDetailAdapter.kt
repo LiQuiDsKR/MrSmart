@@ -15,7 +15,7 @@ import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.tool.ToolWithCount
 
 class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outstandingRentalTools: List<RentalToolDto>,
-                               private val onSetToolStateClick: (RentalToolDto, Int) -> Unit, private val onToolCountClick: (MutableList<ToolWithCount>) -> Unit) :
+                               private val onSetToolStateClick: (RentalToolDto) -> Unit, private val onToolCountClick: (ToolWithCount) -> Unit) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
     val tools: List<RentalToolDto> = outstandingRentalTools
@@ -45,7 +45,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
         }
         holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
         holder.setToolState.setOnClickListener{
-            onSetToolStateClick(currentOutstandingRentalTool, currentOutstandingRentalTool.outstandingCount)
+            onSetToolStateClick(currentOutstandingRentalTool)
         }
         holder.selectSpace.setOnClickListener {
             handleSelection(currentOutstandingRentalTool)
@@ -76,16 +76,12 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
             val newValue = input.value.toString()
             // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
             textView.text = newValue
-            var newOutstandingRentalTools: MutableList<ToolWithCount> = mutableListOf()
             for (currentRentalTool in tools) {
                 if (currentRentalTool.id == rentalTool.id) {
                     val tags = rentalTool.Tags ?: ""
-                    newOutstandingRentalTools.add(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(),currentRentalTool.outstandingCount))
-                } else {
-                    newOutstandingRentalTools.add(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(),currentRentalTool.outstandingCount))
+                    onToolCountClick(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(), input.value))
                 }
             }
-            onToolCountClick(newOutstandingRentalTools) // 이 변수를 Fragment로 올릴수 없을까?
         }
 
         builder.setNegativeButton("취소") { dialog, _ ->

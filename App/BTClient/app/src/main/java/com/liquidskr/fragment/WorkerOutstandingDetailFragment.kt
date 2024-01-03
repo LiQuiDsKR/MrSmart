@@ -2,6 +2,8 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +39,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var backButton: ImageButton
+    private val handler = Handler(Looper.getMainLooper())
 
 
     val gson = Gson()
@@ -78,12 +81,23 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
             bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
+                    if (result == "good") {
+                        handler.post {
+                            Toast.makeText(activity, "반납 신청 완료", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        handler.post {
+                            Toast.makeText(activity, "반납 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
                     }
                 }
                 override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(activity, "반납 신청 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    }
                     e.printStackTrace()
+                    requireActivity().supportFragmentManager.popBackStack()
                 }
             })
             requireActivity().supportFragmentManager.popBackStack()
