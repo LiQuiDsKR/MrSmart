@@ -9,21 +9,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MembershipRequest
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.liquidskr.btclient.RentalRequestSheetReadyByMemberReq
+import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.liquidskr.btclient.RequestType
-import com.liquidskr.btclient.ToolBoxToolLabelRequest
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
@@ -57,7 +53,7 @@ class WorkerRentalListFragment() : Fragment() {
         override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
             rentalRequestSheetList.addAll(sheetList)
             requireActivity().runOnUiThread {
-                (recyclerView.adapter as RentalRequestSheetAdapter).updateList(sheetList)
+                (recyclerView.adapter as RentalRequestSheetAdapter).updateList(rentalRequestSheetList)
             }
         }
     }
@@ -105,6 +101,8 @@ class WorkerRentalListFragment() : Fragment() {
     }
 
     fun getRentalRequestSheetList() {
+        rentalRequestSheetList.clear()
+
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{

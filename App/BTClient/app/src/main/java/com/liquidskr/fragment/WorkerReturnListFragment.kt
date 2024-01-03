@@ -18,17 +18,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
-import com.liquidskr.btclient.OutstandingRentalSheetByMemberReq
+import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.liquidskr.btclient.RentalRequestSheetReadyByMemberReq
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment() : Fragment() {
@@ -63,7 +59,7 @@ class WorkerReturnListFragment() : Fragment() {
         override fun onOutstandingRentalSheetUpdated(sheetList: List<OutstandingRentalSheetDto>) {
             outStandingRentalSheetList.addAll(sheetList)
             requireActivity().runOnUiThread {
-                (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(sheetList)
+                (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(outStandingRentalSheetList)
             }
         }
     }
@@ -126,6 +122,7 @@ class WorkerReturnListFragment() : Fragment() {
     }
 
     fun getOutstandingRentalSheetList() {
+        outStandingRentalSheetList.clear()
 
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()

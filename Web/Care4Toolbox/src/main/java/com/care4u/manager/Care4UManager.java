@@ -302,7 +302,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
-		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_TOOLBOX_COUNT:
+		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
@@ -386,7 +386,6 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "bad");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());
 		    	}
 			}
 			break;
@@ -493,8 +492,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());	
 		    	}
 			}
 			break;

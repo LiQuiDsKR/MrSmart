@@ -72,6 +72,9 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         recyclerView.adapter = adapter
 
         confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
             bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {

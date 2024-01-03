@@ -54,6 +54,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
+    private lateinit var cancelBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
     private val handler = Handler(Looper.getMainLooper())
 
@@ -68,6 +69,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
         confirmBtn = view.findViewById(R.id.rental_detail_confirmBtn)
+        cancelBtn = view.findViewById(R.id.rental_detail_cancelBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -191,6 +193,9 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         }
 
         confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
             var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
                 if (adapter is RentalRequestToolAdapter) {
@@ -249,8 +254,42 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
             }
             standbyAlreadySent = true
         }
+        cancelBtn.setOnClickListener {
+            sheetCancel()
+        }
 
         return view
+    }
+    fun sheetCancel() {
+        try {
+            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    if (result == "good") {
+                        handler.post {
+                            Toast.makeText(activity, "대여 삭제 완료", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
+                    } else {
+                        handler.post {
+                            Toast.makeText(activity, "대여 삭제 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+
+                }
+
+                override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(activity, "대여 삭제 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                    }
+                    e.printStackTrace()
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            })
+        } catch(e:Exception) {
+            e.printStackTrace()
+        }
     }
     private fun handleBluetoothError(json: String) {
         Log.d("STANDBY","STANDBY ACCESS")

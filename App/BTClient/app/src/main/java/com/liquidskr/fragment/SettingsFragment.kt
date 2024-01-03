@@ -19,20 +19,16 @@
     import androidx.fragment.app.Fragment
     import androidx.lifecycle.ViewModelProvider
     import com.google.gson.Gson
-    import com.google.gson.reflect.TypeToken
     import com.liquidskr.btclient.BluetoothManager
     import com.liquidskr.btclient.DatabaseHelper
     import com.liquidskr.btclient.LobbyActivity
-    import com.liquidskr.btclient.MembershipRequest
+    import com.liquidskr.listener.MembershipRequest
     import com.liquidskr.btclient.R
     import com.liquidskr.btclient.RequestType
-    import com.liquidskr.btclient.TagRequest
-    import com.liquidskr.btclient.ToolBoxToolLabelRequest
-    import com.liquidskr.btclient.ToolRequest
+    import com.liquidskr.listener.TagRequest
+    import com.liquidskr.listener.ToolBoxToolLabelRequest
+    import com.liquidskr.listener.ToolRequest
     import com.mrsmart.standard.page.Page
-    import com.mrsmart.standard.tool.TagDto
-    import com.mrsmart.standard.tool.ToolDto
-    import com.mrsmart.standard.tool.ToolboxToolLabelDto
     import java.lang.reflect.Type
 
     class SettingsFragment(context: Context) : Fragment() {

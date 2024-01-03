@@ -92,6 +92,9 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
         }
 
         confirmBtn.setOnClickListener {
+            confirmBtn.isFocusable = false
+            confirmBtn.isClickable = false
+
             recyclerView.adapter?.let { adapter ->
                 if (adapter is WorkerRentalRequestToolAdapter) {
                     var rentalRequestToolFormList: MutableList<RentalRequestToolFormDto> = mutableListOf()
