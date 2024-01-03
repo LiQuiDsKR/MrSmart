@@ -329,7 +329,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
 		    	}
-			}
+			}	
 			break;
 		case RENTAL_REQUEST_SHEET_FORM_STANDBY:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
@@ -509,6 +509,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}
 			}
 			break;
