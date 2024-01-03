@@ -84,19 +84,6 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
             bluetoothManager.bluetoothOpen()
         }
 
-        rentalBtn.setOnClickListener {
-            val lobbyActivity = activity as? LobbyActivity
-
-            // managerRentalFragment가 null이 아니라면 프래그먼트 교체
-            sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
-            sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
-            sharedViewModel.rentalRequestToolIdList.clear()
-            val fragment = WorkerSelfRentalFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
         //getOutstandingRentalSheetList()
         return view
     }

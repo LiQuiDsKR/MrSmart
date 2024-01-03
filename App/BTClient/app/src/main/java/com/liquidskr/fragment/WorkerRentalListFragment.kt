@@ -52,7 +52,7 @@ class WorkerRentalListFragment() : Fragment() {
         }
 
         override fun onError(e: Exception) {
-            // 연결 끊고 모달 띄우고 재접속
+
         }
         override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
             rentalRequestSheetList.addAll(sheetList)
@@ -60,7 +60,6 @@ class WorkerRentalListFragment() : Fragment() {
                 (recyclerView.adapter as RentalRequestSheetAdapter).updateList(sheetList)
             }
         }
-
     }
 
     @SuppressLint("MissingInflatedId")
@@ -74,7 +73,7 @@ class WorkerRentalListFragment() : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
 
         val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
-            val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
+            val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
@@ -88,13 +87,15 @@ class WorkerRentalListFragment() : Fragment() {
 
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
+            val lobbyActivity = activity as? LobbyActivity
 
-            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+            // managerRentalFragment가 null이 아니라면 프래그먼트 교체
+            sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
+            sharedViewModel.leader = MembershipSQLite(0, "", "", "", "", "", "", "", "")
             sharedViewModel.rentalRequestToolIdList.clear()
-            val fragment = ManagerSelfRentalFragment()
+            val fragment = WorkerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -104,7 +105,6 @@ class WorkerRentalListFragment() : Fragment() {
     }
 
     fun getRentalRequestSheetList() {
-        val dbHelper = DatabaseHelper(requireContext())
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
@@ -112,7 +112,7 @@ class WorkerRentalListFragment() : Fragment() {
                 try {
                     sheetCount = result.toInt()
                     val totalPage = Math.ceil(sheetCount / 10.0).toInt()
-                    rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, dbHelper, rentalRequestSheetRequestListener)
+                    rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
                     requestRentalRequestSheetReady(0)
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
