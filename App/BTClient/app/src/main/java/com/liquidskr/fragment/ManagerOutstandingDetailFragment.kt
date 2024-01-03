@@ -291,9 +291,7 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                             handler.post {
                                 Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                             }
-                            val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                            val standbyString = "{sheet:${returnSheetForm},timestamp:\"${timestamp}\"}"
-                            handleBluetoothError(gson.toJson(standbyString))
+                            handleBluetoothError(returnSheetForm)
                             e.printStackTrace()
                             requireActivity().supportFragmentManager.popBackStack()
                         }
@@ -323,10 +321,10 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
         }
         return correctedText.toString()
     }
-    private fun handleBluetoothError(json: String) {
+    private fun handleBluetoothError(sheet: ReturnSheetFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
 
-        val returnSheetForm = gson.fromJson(json, ReturnSheetFormDto::class.java)
+        val returnSheetForm = sheet
         val toolList = returnSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
         val names: Pair<String, String> = dbHelper.getNamesByRSId(returnSheetForm.rentalSheetDtoId)
@@ -341,7 +339,7 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
         }
         val detail = gson.toJson(StandbyParam(returnSheetForm.rentalSheetDtoId, names.first, names.second, timestamp, pairToolList))
 
-        dbHelper.insertStandbyData(gson.toJson(json), "RETURN","STANDBY", detail)
+        dbHelper.insertStandbyData(gson.toJson(sheet), "RETURN","STANDBY", detail)
         dbHelper.close()
     }
 }

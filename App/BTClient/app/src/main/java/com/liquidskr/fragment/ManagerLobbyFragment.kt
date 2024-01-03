@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
@@ -89,6 +90,9 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
         }
 
         registerBtn.setOnClickListener {
+            val dbHelper = DatabaseHelper(requireContext())
+            dbHelper.clearStandbyTable()
+
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_off_03)

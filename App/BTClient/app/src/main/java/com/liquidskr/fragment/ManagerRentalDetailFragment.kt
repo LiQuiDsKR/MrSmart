@@ -31,6 +31,7 @@ import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
 import com.mrsmart.standard.standby.StandbySheet
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
@@ -241,7 +242,7 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                     }
-                                    handleBluetoothError(gson.toJson(rentalRequestSheetApprove))
+                                    handleBluetoothError(rentalRequestSheetApprove)
                                     e.printStackTrace()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
@@ -291,11 +292,11 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
             e.printStackTrace()
         }
     }
-    private fun handleBluetoothError(json: String) {
+    private fun handleBluetoothError(sheet: RentalRequestSheetApprove) {
         Log.d("STANDBY","STANDBY ACCESS")
         var dbHelper = DatabaseHelper(requireContext())
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        val standbySheet = StandbySheet(json,timestamp)
+        val standbySheet = RentalRequestSheetApproveStandbySheet(sheet,timestamp)
         var final = gson.toJson(standbySheet)
         dbHelper.insertStandbyData(final, "RENTAL","STANDBY", "")
         dbHelper.close()

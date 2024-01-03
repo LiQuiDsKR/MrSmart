@@ -31,9 +31,8 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
 import com.mrsmart.standard.rental.StandbyParam
-import com.mrsmart.standard.standby.StandbySheet
+import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
 
-import com.mrsmart.standard.tool.ToolDtoSQLite
 import com.mrsmart.standard.tool.ToolWithCount
 import java.lang.reflect.Type
 import org.threeten.bp.LocalDateTime
@@ -190,8 +189,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                     }
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
-                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                            val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList())
+                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     if  (result == "good") {
@@ -215,9 +214,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                         handler.post {
                                             Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                         }
-                                        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
-                                        handleBluetoothError(gson.toJson(rentalRequestSheet))
+                                        handleBluetoothError(rentalRequestSheetForm)
                                         e.printStackTrace()
                                         requireActivity().supportFragmentManager.popBackStack()
                                     }
@@ -262,16 +260,15 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         recyclerView.adapter = adapter
     }
 
-    private fun handleBluetoothError(json: String) {
+    private fun handleBluetoothError(sheet: RentalRequestSheetFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
 
-        val rentalRequestSheetForm = gson.fromJson(json, RentalRequestSheetFormDto::class.java)
+        val rentalRequestSheetForm = sheet
         val toolList = rentalRequestSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
         val names: Pair<String, String> = Pair(dbHelper.getMembershipById(rentalRequestSheetForm.workerDtoId).name ,dbHelper.getMembershipById(rentalRequestSheetForm.leaderDtoId).name)
         // 출력 형식 지정 (선택 사항)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
 
         var pairToolList = listOf<Pair<String,Int>>()
         for (tool in toolList) {
@@ -281,7 +278,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             pairToolList = pairToolList.plus(pair)
         }
         val detail = gson.toJson(StandbyParam(0, names.first, names.second, timestamp, pairToolList))
-        val standbySheet = StandbySheet(json,timestamp)
+        val standbySheet = RentalRequestSheetFormStandbySheet(sheet, timestamp)
         dbHelper.insertStandbyData(gson.toJson(standbySheet), "RENTALREQUEST","STANDBY", detail)
         dbHelper.close()
     }
