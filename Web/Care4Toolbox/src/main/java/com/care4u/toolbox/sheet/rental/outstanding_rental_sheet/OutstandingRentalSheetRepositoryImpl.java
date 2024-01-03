@@ -133,13 +133,38 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 		}
 
 		@Override
-		public Page<OutstandingRentalSheet> findByMembership(OutstandingState status, Membership membership,Pageable pageable) {
+		public Page<OutstandingRentalSheet> findByMembership(Membership membership,Pageable pageable) {
 			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
 			List<OutstandingRentalSheet> content = queryFactory
 	                .selectDistinct(sSheet)
 	                .from(sSheet)
 	                .where(
 	                		searchMembershipEquals(membership,true,true)
+	                )
+	                .orderBy(sSheet.rentalSheet.eventTimestamp.desc())
+	                .offset(pageable.getOffset())
+	                .limit(pageable.getPageSize())
+	                .fetch();
+
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true)).fetchOne();
+		        return new PageImpl<>(content, pageable, total);
+		}
+
+		@Override
+		public Long countByMembership(Membership membership) {
+			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true)).fetchOne();
+	        return total;
+		}
+
+		@Override
+		public Page<OutstandingRentalSheet> findByToolbox(OutstandingState status, Toolbox toolbox, Pageable pageable) {
+			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
+			List<OutstandingRentalSheet> content = queryFactory
+	                .selectDistinct(sSheet)
+	                .from(sSheet)
+	                .where(
+	                		sSheet.rentalSheet.toolbox.eq(toolbox)
 	                		.and(sSheet.outstandingStatus.eq(status))
 	                )
 	                .orderBy(sSheet.rentalSheet.eventTimestamp.desc())
@@ -147,14 +172,20 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	                .limit(pageable.getPageSize())
 	                .fetch();
 
-			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.outstandingStatus.eq(status))).fetchOne();
-		        return new PageImpl<>(content, pageable, total);
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(
+					sSheet.rentalSheet.toolbox.eq(toolbox)
+            		.and(sSheet.outstandingStatus.eq(status))
+				).fetchOne();
+		    return new PageImpl<>(content, pageable, total);
 		}
 
 		@Override
-		public Long countByMembership(OutstandingState status, Membership membership) {
+		public Long countByToolbox(OutstandingState status, Toolbox toolbox) {
 			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
-			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.outstandingStatus.eq(status))).fetchOne();
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(
+					sSheet.rentalSheet.toolbox.eq(toolbox)
+            		.and(sSheet.outstandingStatus.eq(status))
+				).fetchOne();
 	        return total;
 		}
 		
