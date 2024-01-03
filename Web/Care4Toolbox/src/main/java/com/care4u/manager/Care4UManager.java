@@ -324,7 +324,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				RentalRequestSheetFormDto formDto;
 		    	try {
 					formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
-		    		rentalRequestSheetService.addNew(formDto);
+		    		rentalRequestSheetService.addNew(formDto,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
@@ -339,13 +339,14 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					RentalRequestSheetFormDto formDto = mainDto.getSheet();
 					String timeString = mainDto.getTimestamp();
 					
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
 			        
 		    		rentalRequestSheetService.addNew(formDto,eventTimestamp);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}
 			}
 			break;
@@ -357,8 +358,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					RentalRequestSheetDto sheetDto = mainDto.getSheet().getRentalRequestSheetDto();
 					long approverId = mainDto.getSheet().getApproverId();
 					String timeString = mainDto.getTimestamp();
-					
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
 					
 		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(sheetDto, approverId, eventTimestamp);
@@ -518,8 +519,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					mainDto = GsonUtils.fromJson(paramJson, ReturnSheetFormWithTimestampDto.class);
 					ReturnSheetFormDto formDto = mainDto.getSheet();
 					String timeString = mainDto.getTimestamp();
-					
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
 			        
 					

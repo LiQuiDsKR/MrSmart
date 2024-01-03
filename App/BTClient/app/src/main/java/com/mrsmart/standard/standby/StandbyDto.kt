@@ -1,4 +1,4 @@
-package com.mrsmart.standard.rental
+package com.mrsmart.standard.standby
 
 data class StandbyDto(
     val type: String,

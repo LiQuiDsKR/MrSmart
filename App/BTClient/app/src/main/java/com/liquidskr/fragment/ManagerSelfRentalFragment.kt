@@ -260,6 +260,10 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         recyclerView.adapter = adapter
     }
 
+
+
+
+
     private fun handleBluetoothError(sheet: RentalRequestSheetFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
 
@@ -267,7 +271,6 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         val toolList = rentalRequestSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
         val names: Pair<String, String> = Pair(dbHelper.getMembershipById(rentalRequestSheetForm.workerDtoId).name ,dbHelper.getMembershipById(rentalRequestSheetForm.leaderDtoId).name)
-        // 출력 형식 지정 (선택 사항)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         var pairToolList = listOf<Pair<String,Int>>()

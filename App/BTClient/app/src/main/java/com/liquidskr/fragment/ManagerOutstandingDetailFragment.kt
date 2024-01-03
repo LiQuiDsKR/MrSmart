@@ -35,6 +35,8 @@ import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
+import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
+import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolState
@@ -328,7 +330,7 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
         val toolList = returnSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
         val names: Pair<String, String> = dbHelper.getNamesByRSId(returnSheetForm.rentalSheetDtoId)
-        val timestamp = dbHelper.getTimestampByRSId(returnSheetForm.rentalSheetDtoId)
+        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         var pairToolList = listOf<Pair<String,Int>>()
         for (tool in toolList) {
@@ -338,8 +340,8 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
             pairToolList = pairToolList.plus(pair)
         }
         val detail = gson.toJson(StandbyParam(returnSheetForm.rentalSheetDtoId, names.first, names.second, timestamp, pairToolList))
-
-        dbHelper.insertStandbyData(gson.toJson(sheet), "RETURN","STANDBY", detail)
+        val standbySheet = ReturnSheetFormStandbySheet(sheet, timestamp)
+        dbHelper.insertStandbyData(gson.toJson(standbySheet), "RETURN","STANDBY", detail)
         dbHelper.close()
     }
 }

@@ -9,13 +9,12 @@ import com.google.gson.Gson
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.rental.StandbyDto
+import com.mrsmart.standard.standby.StandbyDto
 import com.mrsmart.standard.rental.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
 import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
 import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
-import com.mrsmart.standard.standby.StandbySheet
 
 
 class StandByAdapter(private var sheets: List<StandbyDto>) :
@@ -72,8 +71,8 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
                 if (holder is Type2ViewHolder) {
                     val json = sheets[position].json
                     val detail = sheets[position].detail
-                    val standbySheet = gson.fromJson(json, StandbySheet::class.java)
-                    val returnSheetForm = gson.fromJson(standbySheet.sheet, ReturnSheetFormStandbySheet::class.java)
+                    val standbySheet = gson.fromJson(json, ReturnSheetFormStandbySheet::class.java)
+                    val returnSheetForm = standbySheet
                     holder.bind(returnSheetForm.sheet, detail)
                 } else {
                     throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
@@ -83,8 +82,8 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
                 if (holder is Type3ViewHolder) {
                     val json = sheets[position].json
                     val detail = sheets[position].detail
-                    val standbySheet = gson.fromJson(json, StandbySheet::class.java)
-                    val rentalRequestSheetForm = gson.fromJson(standbySheet.sheet, RentalRequestSheetFormStandbySheet::class.java)
+                    val standbySheet = gson.fromJson(json, RentalRequestSheetFormStandbySheet::class.java)
+                    val rentalRequestSheetForm = standbySheet
                     holder.bind(rentalRequestSheetForm.sheet, detail)
                 } else {
                     throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
