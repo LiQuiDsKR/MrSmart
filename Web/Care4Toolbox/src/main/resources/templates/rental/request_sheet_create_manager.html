@@ -622,7 +622,7 @@
 			list.splice(index, 1);
 			const row = getTRFromTBodyByIndex(index);
 			row.remove();
-
+			table.draw();
 			stack.push({key: "r", param: id});
 		}
 		//toolId를 통해 해당 tool이 list의 몇번째 index에 위치하는지를 반환합니다.
@@ -1082,7 +1082,7 @@
 							title: "대여 신청 완료",
 							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
 						}).then(result2 => {
-						location.href = '/rental/request_sheet/create';
+						location.href = '/rental/request_sheet/manager/create';
 					})
 					})
 					
