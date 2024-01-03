@@ -9,9 +9,15 @@ import javax.persistence.EntityManager;
 
 import com.care4u.toolbox.group.main_group.QMainGroup;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
+import com.care4u.toolbox.sheet.rental.rental_sheet.QRentalSheet;
+import com.care4u.toolbox.sheet.rental.rental_tool.QRentalTool;
+import com.care4u.toolbox.sheet.return_sheet.QReturnSheet;
+import com.care4u.toolbox.sheet.return_tool.QReturnTool;
 import com.care4u.toolbox.tool.QTool;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -22,10 +28,57 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		this.queryFactory = new JPAQueryFactory(entityManager);
 	}
 
+	private BooleanExpression searchPartEquals(Long partId) {
+    	return (partId == null || partId == 0) ? null :
+    		QReturnSheet.returnSheet.leader.part.id.eq(partId)
+	    	.or(QReturnSheet.returnSheet.leader.part.subPart != null ?
+	    			QReturnSheet.returnSheet.leader.part.subPart.id.eq(partId) 
+	    			.or(QReturnSheet.returnSheet.leader.part.subPart.mainPart != null ?
+	    					QReturnSheet.returnSheet.leader.part.subPart.mainPart.id.eq(partId)
+	    					: Expressions.asBoolean(false).isTrue())
+	    			: Expressions.asBoolean(false).isTrue())
+	    	.or(QReturnSheet.returnSheet.worker.part.id.eq(partId))
+	    	.or(QReturnSheet.returnSheet.worker.part.subPart != null ?
+	    			QReturnSheet.returnSheet.worker.part.subPart.id.eq(partId)
+	    			.or(QReturnSheet.returnSheet.worker.part.subPart.mainPart != null ?
+	    					QReturnSheet.returnSheet.worker.part.subPart.mainPart.id.eq(partId)
+	    					: Expressions.asBoolean(false).isTrue())
+	    			: Expressions.asBoolean(false).isTrue())
+	    	.or(QReturnSheet.returnSheet.approver.part.id.eq(partId))
+	    	.or(QReturnSheet.returnSheet.approver.part.subPart != null ?
+	    			QReturnSheet.returnSheet.approver.part.subPart.id.eq(partId)
+	    			.or(QReturnSheet.returnSheet.approver.part.subPart.mainPart != null ?
+	    					QReturnSheet.returnSheet.approver.part.subPart.mainPart.id.eq(partId)
+	    					: Expressions.asBoolean(false).isTrue())
+	    			: Expressions.asBoolean(false).isTrue())
+	    	;
+	}
+	
 	@Override
 	public List<StockStatusSummaryByToolStateDto> getStockStatusSummary(long toolboxId, LocalDate startDate,
 			LocalDate endDate) {
 		QStockStatus stockStatus = QStockStatus.stockStatus;
+		QRentalSheet rentalSheet = QRentalSheet.rentalSheet;
+		QRentalTool rentalTool = QRentalTool.rentalTool;
+		QReturnSheet returnSheet = QReturnSheet.returnSheet;
+		QReturnTool returnTool = QReturnTool.returnTool;
+		
+		long membershipId=0;
+		
+		Integer rentalCount = queryFactory
+			    .select(rentalTool.count.sum())
+			    .from(rentalSheet)
+			    .join(rentalTool).on(rentalSheet.id.eq(rentalTool.rentalSheet.id))
+			    .where(rentalSheet.worker.id.eq(membershipId))
+			    .fetchOne();
+
+		Integer returnCount = queryFactory
+			    .select(returnTool.count.sum())
+			    .from(returnSheet)
+			    .join(returnTool).on(returnSheet.id.eq(returnTool.returnSheet.id))
+			    .where(returnSheet.worker.id.eq(membershipId))
+			    .fetchOne();
+
 
 		return queryFactory
 				.select(Projections.constructor(StockStatusSummaryByToolStateDto.class, stockStatus.toolbox.name,

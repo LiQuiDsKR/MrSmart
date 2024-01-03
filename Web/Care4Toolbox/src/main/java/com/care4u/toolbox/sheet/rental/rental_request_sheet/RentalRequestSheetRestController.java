@@ -41,7 +41,26 @@ public class RentalRequestSheetRestController {
 	@Autowired
 	private RentalSheetService rentalSheetService;
 	
-	
+	//작업자 저장
+	@PostMapping(value="/rental/request_sheet/save")
+    public ResponseEntity<String> saveRentalRequestSheet(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto, BindingResult bindingResult){
+    	if (bindingResult.hasErrors()) {
+    		List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+			return ResponseEntity.badRequest().body(String.join(" / ", errors));
+    	}
+    	Gson gson = new Gson();
+    	try {
+    		rentalRequestSheetService.addNew(rentalRequestSheetFormDto);
+    	}catch(IllegalStateException e) {
+    		String response = gson.toJson(rentalRequestSheetFormDto);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+    	}
+		String response = gson.toJson(rentalRequestSheetFormDto);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	//관리자 신청
     @PostMapping(value="/rental/request_sheet/apply")
     public ResponseEntity<String> applyRentalRequestSheet(@Valid @RequestBody RentalRequestSheetFormDto rentalRequestSheetFormDto, BindingResult bindingResult){
     	if (bindingResult.hasErrors()) {
@@ -52,7 +71,7 @@ public class RentalRequestSheetRestController {
     	}
     	Gson gson = new Gson();
     	try {
-    		rentalRequestSheetService.addNew(rentalRequestSheetFormDto);
+    		rentalRequestSheetService.addNew(rentalRequestSheetFormDto,SheetState.REQUEST);
     	}catch(IllegalStateException e) {
     		String response = gson.toJson(rentalRequestSheetFormDto);
             return new ResponseEntity<>(response, HttpStatus.OK);

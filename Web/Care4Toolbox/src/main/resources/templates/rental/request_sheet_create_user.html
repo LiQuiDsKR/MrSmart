@@ -1058,7 +1058,7 @@
 		document.getElementById("applyBtn").addEventListener("click", e => {
 			Swal.fire({
 				type: 'question',
-				title: '신청하시겠습니까?',
+				title: '저장하시겠습니까?',
 				html: '<p>' + stringifyList() + '</p>',
 				showCancelButton: true,
 				confirmButtonText: '예',
@@ -1067,7 +1067,7 @@
 			}).then(result => {
 				if (result.value == true) {
 					abcHttp.post(
-						"/rental/request_sheet/apply",
+						"/rental/request_sheet/save",
 						{
 							workName: mainData.workName.name,
 							workerDtoId: mainData.worker.id,
@@ -1079,8 +1079,8 @@
 					.then(data => {
 						Swal.fire({
 							type: "success",
-							title: "대여 신청 완료",
-							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
+							title: "대여 목록 저장 완료",
+							text: "공기구 대여 목록을 정상적으로 저장하였습니다",
 						}).then(result2 => {
 						location.href = '/rental/request_sheet/create';
 					})
@@ -1089,7 +1089,7 @@
 					.catch(error => {
 						Swal.fire({
 							type: "error",
-							title: "대여 신청 실패",
+							title: "대여 목록 저장 실패",
 							text: error,
 						});
 					});

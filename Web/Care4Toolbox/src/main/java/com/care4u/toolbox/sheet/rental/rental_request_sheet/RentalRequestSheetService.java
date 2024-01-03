@@ -196,7 +196,7 @@ public class RentalRequestSheetService {
 		RentalRequestSheet rentalRequestSheet = RentalRequestSheet.builder()
 			.worker(worker.get())
 			.leader(leader.get())
-			.status(SheetState.REQUEST)
+			.status(SheetState.READY)
 			.toolbox(toolbox.get())
 			.eventTimestamp(LocalDateTime.now())
 			.build();
@@ -324,6 +324,9 @@ public class RentalRequestSheetService {
 			return addNew(formDto);
 		}
 	}
-
-
+	@Transactional
+	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, SheetState status) {
+		RentalRequestSheetDto sheetDto = addNew(formDto);
+		return update(sheetDto,status);
+	}
 }

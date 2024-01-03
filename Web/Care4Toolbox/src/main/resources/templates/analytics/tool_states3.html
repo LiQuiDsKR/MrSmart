@@ -560,15 +560,51 @@
 				}
 			).then(data => {
 				console.log(data);
-				const chartData = data.map(item => ({
-					x: new Date(item.currentDay),
-					y: item.rentalCount
-				}));
+				const chartData = [
+					{
+						name: '대여 수량',
+						data: []
+					},
+					{
+						name: '반납 수량',
+						data: []
+					}
+				];
+				for (const item of data){
+					chartData[0].data.push({
+						x: new Date(item.currentDay),
+						y: item.rentalCount
+					});
+					chartData[1].data.push({
+						x: new Date(item.currentDay),
+						y: item.returnCount
+					});
+				}
+				 data.map(item => (
+						{
+							name: '대여 수량',
+							data: {
+								x: new Date(item.currentDay),
+								y: item.rentalCount
+							}
+						},
+						{
+							name: '반납 수량',
+							data: {
+								x: new Date(item.currentDay),
+								y: item.returnCount
+							}
+						}
+					));
 				this.updateOptions({
 					series: [
 						{
 							name: '대여 수량',
 							data: chartData
+						},
+						{
+							name: '반납 수량',
+							data: 
 						}
 					],
 					xaxis: {
