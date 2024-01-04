@@ -27,10 +27,11 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.RentalRequestSheetApprove
+import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetFormDto
+import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
@@ -241,7 +242,15 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                     }
-                                    handleBluetoothError(rentalRequestSheetApprove)
+                                    val mod = modifiedRentalRequestSheet // shorten
+                                    var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
+                                    for (tool in mod.toolList) {
+                                        val tags = tool.Tags ?: ""
+                                        val toolForm = RentalRequestToolApproveFormDto(tool.id, tool.toolDto.id, tool.count, tags)
+                                        toolFormList.add(toolForm)
+                                    }
+                                    val standbySheet = RentalRequestSheetApproveFormDto(mod.id, mod.workerDto.id, mod.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
+                                    handleBluetoothError(standbySheet)
                                     e.printStackTrace()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
@@ -291,13 +300,25 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
             e.printStackTrace()
         }
     }
-    private fun handleBluetoothError(sheet: RentalRequestSheetApprove) {
+    private fun handleBluetoothError(sheet: RentalRequestSheetApproveFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
+        val toolList = sheet.toolList
         var dbHelper = DatabaseHelper(requireContext())
+        val names: Pair<String, String> = Pair(dbHelper.getMembershipById(sheet.workerDtoId).name, dbHelper.getMembershipById(sheet.leaderDtoId).name)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+        var pairToolList = listOf<Pair<String,Int>>()
+        for (tool in toolList) {
+            val name = dbHelper.getToolById(tool.toolDtoId).name
+            val count = tool.count
+            val pair = Pair(name, count)
+            pairToolList = pairToolList.plus(pair)
+        }
+
+        val detail = gson.toJson(StandbyParam(sheet.id, names.first, names.second, timestamp, pairToolList))
         val standbySheet = RentalRequestSheetApproveStandbySheet(sheet,timestamp)
         var final = gson.toJson(standbySheet)
-        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", "")
+        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
         dbHelper.close()
     }
 }

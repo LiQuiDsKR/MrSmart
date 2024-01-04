@@ -1,7 +1,7 @@
-package com.mrsmart.standard.rental
+package com.mrsmart.standard.standby
 
 data class StandbyParam(
-    val rentalSheedId: Long,
+    val rentalSheetId: Long,
     val workerName: String,
     val leaderName: String,
     val timestamp: String,

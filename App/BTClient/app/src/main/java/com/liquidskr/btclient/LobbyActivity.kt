@@ -27,11 +27,10 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
     private var workerFragment: WorkerFragment? = null
+
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(this).get(SharedViewModel::class.java)
     }
-
-
 
     interface CustomModalListener {
         fun onConfirmButtonClicked()
@@ -87,17 +86,6 @@ class LobbyActivity : AppCompatActivity() {
                 .commit()
         }
 
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event?.action == KeyEvent.ACTION_DOWN) {
-            val currentFragment = supportFragmentManager.findFragmentByTag("ToolRegisterFragment")
-            if (currentFragment is ToolRegisterFragment) {
-                currentFragment.handleKeyEvent(event.keyCode)
-            }
-        }
-
-        return super.onKeyDown(keyCode, event)
     }
 
     fun showCustomModal(title: String, content: String, listener: CustomModalListener) {

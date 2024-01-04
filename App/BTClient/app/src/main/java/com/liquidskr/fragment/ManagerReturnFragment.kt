@@ -34,7 +34,6 @@ import java.lang.reflect.Type
 import java.security.Key
 
 class ManagerReturnFragment() : Fragment() {
-    lateinit var searchTypeSpinner: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
     lateinit var searchSheetEdit: EditText
@@ -42,12 +41,8 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var qrCodeBtn: LinearLayout
     lateinit var qrEditText: EditText
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
-    var selectedCategory = "리더명"
     val gson = Gson()
 
-    interface KeyListener {
-        fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean
-    }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -77,7 +72,6 @@ class ManagerReturnFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
 
-        searchTypeSpinner = view.findViewById(R.id.SearchTypeSpinner)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
@@ -94,7 +88,6 @@ class ManagerReturnFragment() : Fragment() {
         recyclerView.adapter = adapter
 
         sheetSearchBtn.setOnClickListener {
-            if (selectedCategory == "리더명") filterByLeader(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
 
         }
         qrCodeBtn.setOnClickListener {
@@ -127,22 +120,6 @@ class ManagerReturnFragment() : Fragment() {
             false
         }
 
-        val category1Data = arrayOf("리더명", "작업자명", "공기구명")
-        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, category1Data)
-        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        searchTypeSpinner.adapter = adapter1
-
-
-        searchTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parentView: AdapterView<*>?, selectedItemView: View?, position: Int, id: Long) {
-                // 선택된 항목을 변수에 저장
-                selectedCategory = category1Data[position]
-                Log.d("T",selectedCategory)
-            }
-            override fun onNothingSelected(parentView: AdapterView<*>?) {
-                // 아무것도 선택되지 않았을 때의 동작을 정의할 수 있습니다.
-            }
-        }
         getOutstandingRentalSheetList()
         qrEditText.requestFocus()
         return view

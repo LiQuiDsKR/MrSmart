@@ -4,13 +4,9 @@ import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,21 +17,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.WorkerRentalRequestToolAdapter
-import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
-import com.mrsmart.standard.rental.StandbyParam
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolDto
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 import java.io.IOException
 import java.lang.reflect.Type
 

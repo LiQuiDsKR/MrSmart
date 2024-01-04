@@ -28,21 +28,16 @@ import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
-import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
-import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
 import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolState
 import com.mrsmart.standard.tool.ToolStateParam
-import com.mrsmart.standard.tool.ToolWithCount
-import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.lang.reflect.Type
@@ -150,13 +145,6 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
             }
             newOutstandingRentalSheet.rentalSheetDto.toolList = existToolList
         })
-
-
-
-
-
-
-
 
         recyclerView.adapter = adapter
 

@@ -6,11 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.mrsmart.standard.rental.RentalRequestSheetApprove
+import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
-import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.standby.StandbyDto
-import com.mrsmart.standard.rental.StandbyParam
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
 import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
@@ -60,9 +59,10 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
             Rental -> {
                 if (holder is Type1ViewHolder) {
                     val json = sheets[position].json
+                    val detail = sheets[position].detail
                     val standbySheet = gson.fromJson(json, RentalRequestSheetApproveStandbySheet::class.java)
                     val rentalRequestSheetApprove = standbySheet
-                    holder.bind(rentalRequestSheetApprove.sheet)
+                    holder.bind(rentalRequestSheetApprove.sheet, detail)
                 } else {
                     throw IllegalArgumentException("Invalid view type: ${holder.itemViewType}")
                 }
@@ -103,15 +103,18 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
 
-        fun bind(item: RentalRequestSheetApprove) {
+        fun bind(item: RentalRequestSheetApproveFormDto, detail: String) {
             val currentRentalRequestSheetApprove = item
-            workerName.text = currentRentalRequestSheetApprove.rentalRequestSheetDto.workerDto.name
-            leaderName.text = currentRentalRequestSheetApprove.rentalRequestSheetDto.leaderDto.name
-            timeStamp.text = currentRentalRequestSheetApprove.rentalRequestSheetDto.eventTimestamp //LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            val dbData = gson.fromJson(detail, StandbyParam::class.java)
+
+            workerName.text = dbData.workerName
+            leaderName.text = dbData.leaderName
+            timeStamp.text = dbData.timestamp
+
             var toolListString = ""
-            for (tool: RentalRequestToolDto in currentRentalRequestSheetApprove.rentalRequestSheetDto.toolList) {
-                val toolName: String = tool.toolDto.name
-                val toolCount: String = tool.count.toString()
+            for (pair in dbData.toolList) {
+                val toolName: String = pair.first
+                val toolCount: String = pair.second.toString()
                 toolListString = toolListString.plus("$toolName($toolCount)  ")
             }
             toolListTextView.text = toolListString
