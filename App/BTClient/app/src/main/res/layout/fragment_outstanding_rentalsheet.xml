@@ -5,9 +5,8 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:focusable="true"
     android:clickable="true"
-    android:background="#FFFFFF">
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -135,7 +134,7 @@
                     <TextView
                         android:id="@+id/ToolListTextView"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dp"
                         android:layout_marginLeft="8dp"
                         android:layout_marginTop="8dp"
                         android:text="toolList"

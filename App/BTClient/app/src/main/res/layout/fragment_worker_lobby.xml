@@ -104,11 +104,12 @@
 
                     <ImageButton
                         android:id="@+id/RentalBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"
                         android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
                         android:scaleType="fitCenter"
                         app:srcCompat="@drawable/ic_menu_off_01" />
 
@@ -132,11 +133,12 @@
 
                     <ImageButton
                         android:id="@+id/ReturnBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"
                         android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
                         android:scaleType="fitCenter"
                         app:srcCompat="@drawable/ic_menu_off_02" />
 

@@ -24,12 +24,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/SearchTypeSpinner"
-                    android:layout_width="83dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/sheet_background" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -39,7 +33,7 @@
 
                     <EditText
                         android:id="@+id/searchSheetEdit"
-                        android:layout_width="200dp"
+                        android:layout_width="330dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
                         android:background="@null"
@@ -116,15 +110,6 @@
                     android:inputType="textMultiLine"
                     android:textColor="#00000000"
                     android:textSize="0sp" />
-
-                <ImageButton
-                    android:id="@+id/Manager_SelfRentalBtn"
-                    android:layout_width="120dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/group_8" />
 
             </LinearLayout>
 

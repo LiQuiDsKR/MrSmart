@@ -88,7 +88,10 @@ class ManagerReturnFragment() : Fragment() {
         recyclerView.adapter = adapter
 
         sheetSearchBtn.setOnClickListener {
-
+            val dbHelper = DatabaseHelper(requireContext())
+            val name = searchSheetEdit.text.toString()
+            val id = dbHelper.getMembershipIdByName(name)
+            getOutstandingRentalSheetListByMembership(id)
         }
         qrCodeBtn.setOnClickListener {
             if (!qrEditText.isFocused) {
@@ -124,7 +127,39 @@ class ManagerReturnFragment() : Fragment() {
         qrEditText.requestFocus()
         return view
     }
+    fun getOutstandingRentalSheetListByMembership(id: Long) {
+        outStandingRentalSheetList.clear()
 
+        var sheetCount = 0
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                try {
+                    sheetCount = result.toInt()
+                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
+                    requestOutstandingRentalSheetByMembership(0)
+                } catch (e: Exception) {
+                    Log.d("RentalRequestSheetReady", e.toString())
+                }
+            }
+
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
+    fun requestOutstandingRentalSheetByMembership(pageNum: Int) {
+        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+                var page: Page = gson.fromJson(result, type)
+                outstandingRentalSheetByMemberReq.process(page)
+            }
+            override fun onError(e: Exception) {
+                e.printStackTrace()
+            }
+        })
+    }
     fun getOutstandingRentalSheetList() {
         outStandingRentalSheetList.clear()
 
@@ -157,14 +192,5 @@ class ManagerReturnFragment() : Fragment() {
                 e.printStackTrace()
             }
         })
-    }
-    fun filterByLeader(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
-        val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
-        for (sheet in sheets) {
-            if (keyword in sheet.rentalSheetDto.leaderDto.name) {
-                newList.add(sheet)
-            }
-        }
-        adapter.updateList(newList)
     }
 }

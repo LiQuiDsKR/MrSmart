@@ -380,6 +380,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
+    fun getMembershipIdByName(codeToFind: String): Long {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_Membership_ID FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_NAME = ?"
+        val selectionArgs = arrayOf(codeToFind)
+        var result: Long = 0
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_Membership_ID))
+            result = id
+        }
+
+        cursor.close()
+        db.close()
+        return result
+    }
+
+    @SuppressLint("Range")
     fun getAllMemberships(): List<MembershipSQLite> {
         val membershipList = mutableListOf<MembershipSQLite>()
         val query = "SELECT * FROM $TABLE_Membership_NAME"
@@ -512,6 +530,39 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         return sheetList
     }
+
+    @SuppressLint("Range")
+    fun getAllStandbyWithId(): List<Pair<Long, StandbyDto>> {
+        val gson = Gson()
+        val db = this.readableDatabase
+        val sheetList = mutableListOf<Pair<Long, StandbyDto>>()
+        val query = "SELECT $COLUMN_STANDBY_JSON, $COLUMN_STANDBY_TYPE, $COLUMN_STANDBY_DETAIL FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
+        val selectionArgs = arrayOf("STANDBY")
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
+            val detail = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_DETAIL)) // workerName, leaderName, toolList
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+
+            try {
+                sheetList.add(Pair(id, StandbyDto(type, json, detail)))
+            } catch (e: Exception) {
+
+            }
+        }
+
+        cursor.close()
+        db.close()
+
+        return sheetList
+    }
+
     @SuppressLint("Range")
     fun updateStandbyStatus(standbyId: Long) {
         val db = this.writableDatabase
