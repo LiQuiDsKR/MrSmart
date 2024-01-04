@@ -15,14 +15,14 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-public class RentalRequestSheetWithApproverAndTimestampDto {
+public class RentalRequestSheetApproveFormAndTimestampDto {
 	@Valid
-	private RentalRequestSheetWithApproverIdDto sheet;
+	private RentalRequestSheetApproveFormDto sheet;
 	@NotNull
 	private String timestamp;
 	
 	@Builder
-	public RentalRequestSheetWithApproverAndTimestampDto(RentalRequestSheetWithApproverIdDto sheet,String timestamp){
+	public RentalRequestSheetApproveFormAndTimestampDto(RentalRequestSheetApproveFormDto sheet,String timestamp){
 		this.sheet =sheet;
 		this.timestamp=timestamp;
 	}
