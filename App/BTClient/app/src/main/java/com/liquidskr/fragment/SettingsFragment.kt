@@ -33,7 +33,7 @@
 
     class SettingsFragment(context: Context) : Fragment() {
         lateinit var importStandard: LinearLayout
-        lateinit var removeSTANDBY: LinearLayout
+        lateinit var importQRData: LinearLayout
         lateinit var setServerPCName: LinearLayout
         lateinit var setToolBox: LinearLayout
         lateinit var closeBtn: LinearLayout
@@ -153,7 +153,7 @@
             progressBar = view.findViewById(R.id.progressBar)
             progressText = view.findViewById(R.id.progressText)
             importStandard = view.findViewById(R.id.importStandard)
-            removeSTANDBY = view.findViewById(R.id.importQRData)
+            importQRData = view.findViewById(R.id.importQRData)
             setServerPCName = view.findViewById(R.id.setServerPCName)
             setToolBox = view.findViewById(R.id.setToolBox)
             closeBtn = view.findViewById(R.id.closeBtn)
@@ -206,7 +206,7 @@
                 progressText.text = ""
                 importMembership(dbHelper)
             }
-            removeSTANDBY.setOnClickListener{
+            importQRData.setOnClickListener{
                 showPopup() // progressBar appear
                 importTBT(dbHelper)
             }

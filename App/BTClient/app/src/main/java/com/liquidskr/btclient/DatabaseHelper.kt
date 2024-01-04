@@ -495,7 +495,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             //val id = cursor.getInt(cursor.getColumnIndex(COLUMN_STANDBY_ID))
             var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
             val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
-            //val status = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_STATUS))
             val detail = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_DETAIL)) // workerName, leaderName, toolList
             json = json.replace("\\\"", "\"")
             json = json.replace("\\\\", "\\")
