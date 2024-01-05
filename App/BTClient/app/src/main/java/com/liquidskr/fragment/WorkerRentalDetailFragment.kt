@@ -91,14 +91,13 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
                     }
                     val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id, rentalRequestSheet.toolboxDto.id, rentalRequestToolFormList)
                     try {
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
+                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPLY, "{SheetId:${rentalRequestSheet.id}}", object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
                                     handler.post {
                                         Toast.makeText(activity, "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    sheetCancelAfterForm()
                                 } else {
                                     handler.post {
                                         Toast.makeText(activity, "대여 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()

@@ -83,7 +83,6 @@ class ManagerRentalFragment() : Fragment() {
 
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
-
             sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
             sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
             sharedViewModel.rentalRequestToolIdList.clear()

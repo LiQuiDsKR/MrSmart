@@ -36,6 +36,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var receiveThread: Thread
     private val handler = Handler(Looper.getMainLooper())
 
+    //var isSending: Boolean = false
+    //private val messageQueue: Queue<BluetoothMessage> = LinkedList()
+
     var pcName: String = "정비실PC이름"
 
     private var bluetoothDataListener: BluetoothDataListener? = null
@@ -49,10 +52,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
+
     interface BluetoothDataListener {
         fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
+
     interface BluetoothConnectionListener {
         fun onBluetoothDisconnected()
     }
@@ -154,8 +159,15 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         bluetoothSocket.close()
     }
 
-    fun requestData(type:RequestType, params:String, callback:RequestCallback){
+    fun requestData(type:RequestType, params:String, callback:RequestCallback) {
         performSend(type, params, callback)
+        /*
+        if (!isSending) {
+            performSend(type, params, callback)
+        } else {
+            // 메시지 전송 중일 때는 큐에 추가
+            messageQueue.offer(BluetoothMessage(type, params, callback))
+        }*/
     }
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
         try {
@@ -203,10 +215,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 Log.d("bluetooth_SendData_Last", byteArrayToHex(buffer.array()))
             }
 
-            if (!bluetoothSocket.isConnected) {
-                bluetoothDataListener?.onError(IOException("Bluetooth socket is not connected"))
-                return
-            }
+            // 전송 완료
 
             setBluetoothDataListener(object : BluetoothDataListener {
                 override fun onSuccess(result: String, type: Type) {
@@ -396,8 +405,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
+            RequestType.RENTAL_REQUEST_SHEET_APPLY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
         }
-    }/*
+    }
+    /*
     private fun clearSendingState() {
         isSending = false
         if (messageQueue.isNotEmpty()) {
