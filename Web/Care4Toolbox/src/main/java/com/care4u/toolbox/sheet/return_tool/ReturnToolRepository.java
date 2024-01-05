@@ -13,6 +13,10 @@ public interface ReturnToolRepository extends JpaRepository<ReturnTool, Long> {
 	
 	List<ReturnTool> findAllByRentalToolId(long rentalToolId);
 
+<<<<<<< Updated upstream
 	ReturnTool findByReturnSheetIdAndRentalToolId(long id, @NotNull Long rentalToolDtoId);
+=======
+	ReturnTool findByReturnSheetIdAndRentalToolId(long id, Long toolDtoId);
+>>>>>>> Stashed changes
 	
 }

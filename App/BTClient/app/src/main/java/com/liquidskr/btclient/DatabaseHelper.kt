@@ -682,6 +682,34 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return tbt
     }
+    @SuppressLint("Range")
+    fun updateQRCodeById(id: Long, newQRCode: String): Int {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_QRCODE, newQRCode)
+
+        val db = this.writableDatabase
+        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
+
+        db.close()
+        return rowsAffected
+    }
+    fun deleteTBTById(id: Long): Int {
+        val db = this.writableDatabase
+        val rowsAffected = db.delete(TABLE_TBT_NAME, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
+
+        db.close()
+        return rowsAffected
+    }
+    fun addTBT(newQRCode: String): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_QRCODE, newQRCode)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_TBT_NAME, null, values)
+
+        db.close()
+        return id
+    }
 
     @SuppressLint("Range")
     fun getTagGroupByTag(tag: String): String {

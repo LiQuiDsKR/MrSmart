@@ -68,7 +68,6 @@
             override fun onError(e: Exception) {
                 // 연결 끊고 모달 띄우고 재접속
             }
-
         }
         private val toolRequestListener = object: ToolRequest.Listener {
             override fun onNextPage(pageNum: Int) {

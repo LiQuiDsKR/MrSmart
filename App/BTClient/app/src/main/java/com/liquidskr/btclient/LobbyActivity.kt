@@ -1,10 +1,18 @@
 package com.liquidskr.btclient
 
 import SharedViewModel
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_0
+import android.view.View
 import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +35,13 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
     private var workerFragment: WorkerFragment? = null
+    private lateinit var scannerListener: MyScannerListener
+
+    private var isPopupVisible = false
+
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(this).get(SharedViewModel::class.java)
@@ -40,17 +55,51 @@ class LobbyActivity : AppCompatActivity() {
         fun onConfirmButtonClicked()
         fun onCancelButtonClicked()
     }
+    interface BluetoothModalListener {
+        fun onConfirmButtonClicked()
+        fun onCancelButtonClicked()
+    }
+    interface ScannerListener {
+        fun onTextChanged(text: String)
+        fun onTextFinished()
+    }
+    /*
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            Log.d("SCANNER", "some key pressed, $event")
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_ENTER -> {
+                    // Dispatch onTextFinished event
+                    scannerListener.onTextFinished()
+                    return true // Consume the event
+                }
+                else -> {
+                    if (event.scanCode >= 2 && event.scanCode <= 10) {
+                        // Modify sharedViewModel.qrScannerText directly
+                        sharedViewModel.qrScannerText += (event.scanCode - 1).toString()
+                        // Dispatch onTextChanged event
+                        scannerListener.onTextChanged(sharedViewModel.qrScannerText)
+                    }
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
         val gson = Gson()
-
         val context = this
+
         bluetoothManager = BluetoothManager(this, this)
         managerRentalFragment = ManagerRentalFragment()
         managerReturnFragment = ManagerReturnFragment()
         workerSelfRentalFragment = WorkerSelfRentalFragment()
+
+        popupLayout = findViewById(R.id.bluetoothPopupLayout)
+        progressBar = findViewById(R.id.bluetoothProgressBar)
+        progressText = findViewById(R.id.bluetoothProgressText)
 
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
@@ -129,6 +178,26 @@ class LobbyActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.show()
     }
+    fun showBluetoothModal(title: String, content: String, listener: BluetoothModalListener) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setMessage(content)
+
+        // 확인 버튼을 눌렀을 때의 동작 정의
+        builder.setPositiveButton("확인") { _, _ ->
+            // 모달 확인 버튼을 눌렀을 때, Listener의 메서드 호출
+            listener.onConfirmButtonClicked()
+        }
+
+        // 취소 버튼을 눌렀을 때의 동작 정의
+        builder.setNegativeButton("취소") { _, _ ->
+            // 모달 취소 버튼을 눌렀을 때, Listener의 메서드 호출
+            listener.onCancelButtonClicked()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -145,5 +214,16 @@ class LobbyActivity : AppCompatActivity() {
     }
     fun getBluetoothManagerOnActivity(): BluetoothManager {
         return bluetoothManager
+    }
+    private fun showPopup() {
+        isPopupVisible = true
+        // Show the popup layout
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        isPopupVisible = false
+        // Hide the popup layout
+        popupLayout.visibility = View.GONE
+
     }
 }
