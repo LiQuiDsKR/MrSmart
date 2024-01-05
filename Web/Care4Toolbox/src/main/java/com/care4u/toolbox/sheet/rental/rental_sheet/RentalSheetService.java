@@ -237,11 +237,6 @@ public class RentalSheetService {
 	}
 	@Transactional
 	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetApproveFormDto formDto) {
-		Optional<RentalRequestSheet> sheet = rentalRequestSheetRepository.findById(formDto.getId());
-		if (sheet.get().getStatus().equals(SheetState.APPROVE)) {
-			logger.debug("Sheet already approved!");
-			return null;
-		}
 		RentalRequestSheetDto sheetDto=rentalRequestSheetService.update(formDto, SheetState.APPROVE);
 		return addNew(sheetDto, formDto.getApproverDtoId());
 	}

@@ -70,7 +70,7 @@ public class ReturnToolService {
 		
 		ReturnTool returnTool;
 		
-		ReturnTool formerReturnTool = repository.findByReturnSheetIdAndToolId(savedReturnSheet.getId(),toolDto.getToolDtoId());
+		ReturnTool formerReturnTool = repository.findByReturnSheetIdAndRentalToolId(savedReturnSheet.getId(),toolDto.getRentalToolDtoId());
 		int goodCount=status.equals(ToolState.GOOD)?count:0;
 		int faultCount=status.equals(ToolState.FAULT)?count:0;
 		int damageCount=status.equals(ToolState.DAMAGE)?count:0;
