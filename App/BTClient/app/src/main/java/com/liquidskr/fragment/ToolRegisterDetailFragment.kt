@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
@@ -78,21 +79,17 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         var adapter = ToolRegisterTagDetailAdapter(emptyList())
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                if (result == "null") {
-                    qrDisplay.text = "미등록"
-                } else {
-                    qrDisplay.text = result
-                    tbt_qrcode = result
-                }
+        qrDisplay.text = "미등록"
+        try {
+            val dbHepler = DatabaseHelper(requireContext())
+            val label = dbHepler.getTBTByToolId(tool.id)
+            qrDisplay.text = label
+        } catch(e: Exception) {
+            e.printStackTrace()
+            handler.post {
+                Toast.makeText(context, "공기구의 라벨 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
             }
-
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
+        }
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -124,7 +121,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         if (result == "null") {
-                            requireActivity().runOnUiThread {
+                            handler.post {
                                 Toast.makeText(context, "해당 태그는 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         } else {

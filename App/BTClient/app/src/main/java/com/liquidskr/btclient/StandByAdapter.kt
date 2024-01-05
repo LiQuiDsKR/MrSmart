@@ -14,6 +14,7 @@ import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
 import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
 import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
+import com.mrsmart.standard.tool.ToolDtoSQLite
 
 
 class StandByAdapter(private var sheets: List<StandbyDto>) :
@@ -162,5 +163,9 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
             }
             toolListTextView.text = toolListString
         }
+    }
+    fun updateList(newList: List<StandbyDto>) {
+        sheets = newList
+        notifyDataSetChanged()
     }
 }

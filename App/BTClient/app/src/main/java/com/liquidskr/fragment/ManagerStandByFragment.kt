@@ -26,18 +26,21 @@ class ManagerStandByFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_standby, container, false)
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        standbySyncBtn = view.findViewById(R.id.standby_SyncBtn)
-
-        standbySyncBtn.setOnClickListener {
-            bluetoothManager.standbyProcess()
-        }
-
         var dbHelper = DatabaseHelper(requireContext())
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = StandByAdapter(dbHelper.getAllStandby())
         recyclerView.adapter = adapter
+
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        standbySyncBtn = view.findViewById(R.id.standby_SyncBtn)
+
+        standbySyncBtn.setOnClickListener {
+            bluetoothManager.standbyProcess()
+            adapter.updateList(dbHelper.getAllStandby())
+        }
+
+
 
         return view
     }

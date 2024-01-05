@@ -317,7 +317,7 @@
                     membershipRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0) {
+                        if (page.total != 0 && page.total >= 10) {
                             progressText.text = "사원 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -337,7 +337,7 @@
                     toolRequest.process(page) //
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0) {
+                        if (page.total != 0 && page.total >= 10) {
                             progressText.text = "공기구 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -358,7 +358,7 @@
                     toolBoxToolLabelRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0) {
+                        if (page.total != 0 && page.total >= 10) {
                             progressText.text = "선반 코드 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }

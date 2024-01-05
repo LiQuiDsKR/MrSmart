@@ -536,7 +536,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val gson = Gson()
         val db = this.readableDatabase
         val sheetList = mutableListOf<Pair<Long, StandbyDto>>()
-        val query = "SELECT $COLUMN_STANDBY_JSON, $COLUMN_STANDBY_TYPE, $COLUMN_STANDBY_DETAIL FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
+        val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON, $COLUMN_STANDBY_TYPE, $COLUMN_STANDBY_DETAIL FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
         val selectionArgs = arrayOf("STANDBY")
 
         val cursor = db.rawQuery(query, selectionArgs)
@@ -666,6 +666,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
+    fun getTBTByToolId(id: Long): String {
+        var tbt = ""
+        lateinit var toolDtoSQLite: ToolDtoSQLite
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TBT_QRCODE FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_TOOL_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            tbt = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_QRCODE))
+        }
+
+        cursor.close()
+        db.close()
+        return tbt
+    }
+
+    @SuppressLint("Range")
     fun getTagGroupByTag(tag: String): String {
         var tagGroup = ""
         val db = this.readableDatabase
@@ -681,6 +699,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return tagGroup
     }
+
     @SuppressLint("Range")
     fun getToolByTag(tag: String): ToolDtoSQLite {
         var toolId = 0
