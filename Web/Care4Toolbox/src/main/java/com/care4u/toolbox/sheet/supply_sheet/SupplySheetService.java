@@ -24,6 +24,8 @@ import com.care4u.hr.sub_part.SubPart;
 import com.care4u.hr.sub_part.SubPartRepository;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.group.sub_group.SubGroup;
+import com.care4u.toolbox.group.sub_group.SubGroupRepository;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -53,6 +55,7 @@ public class SupplySheetService {
 	private final SubPartRepository subPartRepository;
 	private final MainPartRepository mainPartRepository;
 	private final ToolRepository toolRepository;
+	private final SubGroupRepository subGroupRepository; 
 	
 	@Transactional(readOnly = true)
 	public SupplySheetDto get(long id){
@@ -165,7 +168,7 @@ public class SupplySheetService {
 	}
 
 	public Page<SupplySheetDto> getPage(Long partId, Long membershipId, Boolean isWorker, Boolean isLeader,
-			Boolean isApprover, Long toolId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+			Boolean isApprover, Long toolId, Long subGroupId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 		Optional<Part> part = partRepository.findById(partId);
 		if (part.isEmpty()) {
 			Optional<SubPart> subPart = subPartRepository.findById(partId);
@@ -193,8 +196,16 @@ public class SupplySheetService {
 		}else {
 			tool=toolOptional.get();
 		}
+		Optional<SubGroup> subGroupOptional = subGroupRepository.findById(subGroupId);
+		SubGroup subGroup;
+		if (subGroupOptional.isEmpty()) {
+			logger.info("no subGroup : " +subGroupId + " all subGroup selected.");
+			subGroup=null;
+		}else {
+			subGroup=subGroupOptional.get();
+		}
 		
-		Page<SupplySheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		Page<SupplySheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool, subGroup, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		
 		return page.map(e -> convertToDto(e));
 	}

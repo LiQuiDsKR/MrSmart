@@ -91,4 +91,11 @@ public class ToolboxRestController {
     	ToolboxDto toolboxDto = toolboxService.get(name);
     	return ResponseEntity.ok(toolboxDto);
     }
+    @GetMapping(value="/toolbox/getbymanagerid")
+    public ResponseEntity<ToolboxDto> getToolboxByManagerId(
+    		@RequestParam(name="managerId") Long managerId
+    		){
+    	ToolboxDto toolboxDto = toolboxService.getByManagerId(managerId);
+    	return ResponseEntity.ok(toolboxDto);
+    }
 }

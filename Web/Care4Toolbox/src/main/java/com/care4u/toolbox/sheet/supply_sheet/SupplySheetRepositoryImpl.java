@@ -22,7 +22,10 @@ import com.care4u.hr.membership.MembershipRestController;
 import com.care4u.hr.membership.QMembership;
 import com.care4u.hr.part.QPart;
 import com.care4u.hr.sub_part.QSubPart;
+import com.care4u.toolbox.group.sub_group.QSubGroup;
+import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.sheet.supply_tool.QSupplyTool;
+import com.care4u.toolbox.tool.QTool;
 import com.care4u.toolbox.tool.Tool;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -88,23 +91,30 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 	    private BooleanExpression searchToolEquals(Tool tool) {
 	    	return tool == null ? Expressions.asBoolean(true).isTrue() : QSupplyTool.supplyTool.tool.eq(tool);
 	    }
+	    
+	    private BooleanExpression searchSubGroupEquals(SubGroup subGroup) {
+	    	return subGroup == null ? Expressions.asBoolean(true).isTrue() : QSupplyTool.supplyTool.tool.subGroup.eq(subGroup);
+	    }
 
 		@Override
 		public Page<SupplySheet> findBySearchQuery(Long partId, Membership membership, Boolean isWorker,
-				Boolean isLeader, Boolean isApprover, Tool tool, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+				Boolean isLeader, Boolean isApprover, Tool tool, SubGroup subGroup, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
 			QSupplySheet sSheet = QSupplySheet.supplySheet;
 			QSupplyTool sTool = QSupplyTool.supplyTool;
 			QSubPart sSubPart = QSubPart.subPart;
 			QMainPart sMainPart = QMainPart.mainPart;
+			QSubGroup sSubGroup = QSubGroup.subGroup;
 			
 			List<SupplySheet> content = queryFactory
                 .selectDistinct(sSheet)
                 .from(sTool)
                 .join(sTool.supplySheet,sSheet)
+                .join(sTool.tool.subGroup,sSubGroup)
                 .where(
                 		sSheet.eventTimestamp.between(startDate, endDate)
                 		.and(searchMembershipEquals(membership,isWorker,isLeader,isApprover))
                 		.and(searchPartEquals(partId))
+                		.and(searchSubGroupEquals(subGroup))
                 		.and(searchToolEquals(tool))
                 )
                 .orderBy(sTool.replacementDate.asc(),sSheet.eventTimestamp.desc())

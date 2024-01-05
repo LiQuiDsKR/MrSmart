@@ -53,7 +53,8 @@ public class SupplySheetRestController {
     		@RequestParam(name="page") int page,
     		@RequestParam(name="size") int size,
     		@RequestParam(name="startDate") String startDate,
-    		@RequestParam(name="endDate") String endDate
+    		@RequestParam(name="endDate") String endDate,
+    		@RequestParam(name="subGroupId") Long subGroupId
             ){
     	logger.info("page=" + page + ", size=" + size);
     	
@@ -62,7 +63,7 @@ public class SupplySheetRestController {
     		
         Pageable pageable = PageRequest.of(page,size);
         
-        Page<SupplySheetDto> supplySheetPage = supplySheetService.getPage(partId, membershipId, isWorker, isLeader, isApprover, toolId, startLocalDate, endLocalDate, pageable);
+        Page<SupplySheetDto> supplySheetPage = supplySheetService.getPage(partId, membershipId, isWorker, isLeader, isApprover, toolId, subGroupId, startLocalDate, endLocalDate, pageable);
         
         for (SupplySheetDto item : supplySheetPage.getContent()) {
         	logger.info(item.toString());
