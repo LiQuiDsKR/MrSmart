@@ -108,15 +108,18 @@ public class ReturnToolService {
 					logger.error("Tag not found");
 					return null;
 				}
+				List<Tag> tagSiblings = tagRepository.findByTagGroup(tag.getTagGroup());
 				
-				if (!tag.getToolbox().equals(savedReturnSheet.getToolbox())){
-					tag.updateToolbox(savedReturnSheet.getToolbox());
-					tagService.updateToolbox(new TagDto(tag));
+				for (Tag t : tagSiblings) {
+					if (!tag.getToolbox().equals(savedReturnSheet.getToolbox())){
+						tag.updateToolbox(savedReturnSheet.getToolbox());
+						tagService.updateToolbox(new TagDto(tag));
+					}
+					tag.updateRentalTool(null);
+					tagService.updateRentalTool(new TagDto(tag));
+					
+					logger.info("tag ["+tag.getMacaddress() + "] returned.");
 				}
-				tag.updateRentalTool(null);
-				tagService.updateRentalTool(new TagDto(tag));
-				
-				logger.info("tag ["+tag.getMacaddress() + "] returned.");
 			}
 		}
 		
