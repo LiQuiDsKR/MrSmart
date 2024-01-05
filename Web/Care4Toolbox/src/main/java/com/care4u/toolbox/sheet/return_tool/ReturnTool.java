@@ -67,11 +67,11 @@ public class ReturnTool extends BaseEntity {
 	}
 	public void updateCount(int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String Tags) {
 		this.count += goodCount+faultCount+damageCount+lossCount+discardCount;
-		this.goodCount = goodCount;
-		this.faultCount = faultCount;
-		this.damageCount = damageCount;
-		this.lossCount = lossCount;
-		this.discardCount = discardCount;
+		this.goodCount += goodCount;
+		this.faultCount += faultCount;
+		this.damageCount += damageCount;
+		this.lossCount += lossCount;
+		this.discardCount += discardCount;
 		this.Tags+=Tags;
 	}
 }
