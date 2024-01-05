@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import com.care4u.constant.EmploymentState;
+import com.care4u.constant.Role;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -33,5 +34,8 @@ public class MembershipFormDto {
     
     @NotNull(message = "재직 상태는 필수 입력 값입니다.")
     private EmploymentState employmentStatus;
+    
+    @NotNull(message = "직급 정보는 필수 입력 값입니다.")
+    private Role role;
 
 }

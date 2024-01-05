@@ -189,7 +189,8 @@
 
 										</div>
 										<div>
-											<button id="membershipSubmitBtn" class="btn listener-added mr-4" type="button">저장</button>
+											<button id="membershipSubmitBtn" class="btn listener-added mr-4"
+												type="button">저장</button>
 											<a href="#" class="cancel text-danger font-14 bold"
 												data-dismiss="modal">취소</a>
 										</div>
@@ -229,32 +230,54 @@
 					membershipId = data.id;
 					mainData.membership.id = membershipId;
 					return new Promise((resolved, rejected) => {
-						abcHttp.get(
-							'/toolbox/getbyname',
-							{
-								name: data.partDto.subPartDto.mainPartDto.name
-							}
-						)
-							.then(toolboxData => {
-								if (toolboxData == null) {
-									throw error("no toolbox");
-								} else {
-									toolboxId = toolboxData.id;
-									resolved(toolboxData.id);
+						if (data.role === "USER") {
+							abcHttp.get(
+								'/toolbox/getbyname',
+								{
+									name: data.partDto.subPartDto.mainPartDto.name
 								}
-							})
-							.catch(error => {
-								Swal.fire({
-									type: 'error',
-									title: '정비실 없음',
-									text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
-								}).then(() => {rejected();});
-							});
+							)
+								.then(toolboxData => {
+									if (toolboxData == null) {
+										throw error("no toolbox");
+									} else {
+										toolboxId = toolboxData.id;
+										resolved(toolboxData.id);
+									}
+								})
+								.catch(error => {
+									console.log('no toolbox for worker');
+									rejected();
+								});
+						} else if (data.role === "MANAGER" || data.role === "ADMIN") {
+							abcHttp.get(
+								'/toolbox/getbymanagerid',
+								{
+									managerId: data.id
+								}
+							)
+								.then(toolboxData => {
+									if (toolboxData == null || toolboxData?.id==null) {
+										throw error("no toolbox");
+									} else {
+										toolboxId = toolboxData.id;
+										resolved(toolboxData.id);
+									}
+								})
+								.catch(error => {
+									console.log('no toolbox for manager');
+									Swal.fire({
+										type: 'error',
+										title: '정비실 없음',
+										text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+									}).then(() => {rejected();});
+								});
+						}
 					});
 				})
 				.then(toolboxId => {
 					load(toolboxId);
-					
+
 				});
 		});
 
@@ -755,7 +778,7 @@
 			});
 		}
 
-	//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
 		function initializeDatepicker() {
 			const today = new Date();
 			const year = today.getFullYear();
@@ -763,8 +786,8 @@
 			const day = today.getDate();
 			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
 			const lastMonthDate = new Date();
-			lastMonthDate.setDate(today.getDate()-30);
-			const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+			lastMonthDate.setDate(today.getDate() - 30);
+			const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
 			$('#start-date').val(formattedLastMonthDate);
 			$('#end-date').val(formattedTodayDate);
 
@@ -800,7 +823,7 @@
 				$('#end-date').datepicker('show');
 			});
 		}
-		
+
 		function formatDate(inputDate) {
 			const dateObject = new Date(inputDate);
 			const year = dateObject.getFullYear();

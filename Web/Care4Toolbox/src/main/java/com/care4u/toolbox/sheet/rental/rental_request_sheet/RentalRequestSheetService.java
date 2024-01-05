@@ -373,6 +373,10 @@ public class RentalRequestSheetService {
 	        throw new IllegalArgumentException("Sheet not found");
 	    }
 		sheet=rentalRequestSheetOptional.get();
+		if (sheet.getStatus().equals(SheetState.CANCEL)) {
+			logger.debug("Sheet already canceled!");
+			return null;
+		}
 		
 		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetId);
 		for (RentalRequestTool tool : toolList) {

@@ -275,13 +275,15 @@
 					code:parseInt(document.getElementById("user-code").textContent)
 				}
 			).then(data=>{
-				return new Promise((resolved,rejected)=>{
-					if (data==null){
+				return new Promise((resolved, rejected) => {
+					if (data == null) {
 						rejected();
-					}else{						
+					} else {
 						membershipId = data.id;
-						mainData.membership.id = membershipId;
-						resolved(data.id);
+						mainData.membership.id=data.id;
+						mainData.membership.name=data.name;
+						document.getElementById("membership").textContent=data.name;
+						resolved();
 					}
 				});
 			}).then(membershipId=>{	

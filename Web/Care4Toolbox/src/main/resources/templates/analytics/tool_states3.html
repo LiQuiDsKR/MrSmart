@@ -436,25 +436,26 @@
 		)
 			.then(data => {
 				membershipId = data.id;
-				mainData.membership.id=data.id;
-				mainData.membership.name=data.name;
-				document.getElementById("membership").textContent=data.name;
+				mainData.membership.id = data.id;
+				mainData.membership.name = data.name;
+				document.getElementById("membership").textContent = data.name;
 				return new Promise((resolved, rejected) => {
 					abcHttp.get(
-						'/toolbox/getbyname',
+						'/toolbox/getbymanagerid',
 						{
-							name: data.partDto.subPartDto.mainPartDto.name
+							managerId: data.id
 						}
 					)
 						.then(toolboxData => {
-							if (toolboxData == null) {
+							if (toolboxData == null || toolboxData?.id == null) {
 								throw error("no toolbox");
 							} else {
-								toolboxId = toolboxData.id;
+								document.getElementById("toolboxSelect").value = toolboxData.id;
 								resolved(toolboxData.id);
 							}
 						})
 						.catch(error => {
+							console.log('no toolbox for manager');
 							Swal.fire({
 								type: 'error',
 								title: '정비실 없음',
@@ -570,7 +571,7 @@
 						data: []
 					}
 				];
-				for (const item of data){
+				for (const item of data) {
 					chartData[0].data.push({
 						x: new Date(item.currentDay),
 						y: item.rentalCount
@@ -580,33 +581,24 @@
 						y: item.returnCount
 					});
 				}
-				 data.map(item => (
-						{
-							name: '대여 수량',
-							data: {
-								x: new Date(item.currentDay),
-								y: item.rentalCount
-							}
-						},
-						{
-							name: '반납 수량',
-							data: {
-								x: new Date(item.currentDay),
-								y: item.returnCount
-							}
+				data.map(item => (
+					{
+						name: '대여 수량',
+						data: {
+							x: new Date(item.currentDay),
+							y: item.rentalCount
 						}
-					));
+					},
+					{
+						name: '반납 수량',
+						data: {
+							x: new Date(item.currentDay),
+							y: item.returnCount
+						}
+					}
+				));
 				this.updateOptions({
-					series: [
-						{
-							name: '대여 수량',
-							data: chartData
-						},
-						{
-							name: '반납 수량',
-							data: 
-						}
-					],
+					series: chartData,
 					xaxis: {
 						min: new Date($('#start-date').val()).getTime(),
 						max: new Date($('#end-date').val()).getTime(),
@@ -756,6 +748,21 @@
 			loadChart4.apply(chart4, [toolboxId]);
 		}
 
+
+		function formatDate(date) {
+			const year = date.getFullYear();
+			let month = (date.getMonth() + 1).toString();
+			let day = date.getDate().toString();
+
+			if (month.length < 2) {
+				month = '0' + month;
+			}
+			if (day.length < 2) {
+				day = '0' + day;
+			}
+
+			return `${year}-${month}-${day}`;
+		}
 		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
 		function initializeDatepicker() {
 			const today = new Date();
@@ -763,9 +770,14 @@
 			const month = today.getMonth() + 1;
 			const day = today.getDate();
 			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
-			const lastMonthDate = new Date();lastMonthDate.setDate(today.getDate()-30);const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
-			$('#start-date').val(formattedLastMonthDate);
-			$('#end-date').val(formattedTodayDate);
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 36); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+
+			const currentDate = new Date();
+			const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
+			const lastDayOfYear = new Date(currentDate.getFullYear() + 1, 0, 0);
+
+			$('#start-date').val(formatDate(firstDayOfYear));
+			$('#end-date').val(formatDate(lastDayOfYear));
 			$('#today-date').val(formattedTodayDate);
 
 			$('#start-date').on('change', function () {
@@ -838,7 +850,7 @@
 		}
 
 
-// =============== Search Modals ===============
+		// =============== Search Modals ===============
 		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
 		const mainData = {
 			"membership": {
@@ -846,18 +858,18 @@
 				"name": "",
 				"type": "worker"
 			},
-			"tool":{
-				"id":0,
-				"name":"",
+			"tool": {
+				"id": 0,
+				"name": "",
 			},
-			"part":{
-				"id":0,
-				"name":"",
+			"part": {
+				"id": 0,
+				"name": "",
 			},
 		}
-		
+
 		// =============== Membership Search Modal ===============
-		
+
 		//작업자 수정
 		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
 			document.getElementById("membershipId").value = mainData.membership.id;
@@ -999,9 +1011,9 @@
 					});
 			});
 		}
-		
+
 		// =============== Part Search Modal ===============
-		
+
 		//부서 수정
 		document.getElementById("partEditModalBtn").addEventListener("click", function () {
 			document.getElementById("partId").value = mainData.part.id;
@@ -1034,7 +1046,7 @@
 			}
 			getPartsPageByName(searchName)
 				.then(data => {
-						console.log(data.empty)
+					console.log(data.empty)
 					if (data.empty) {
 						throw new Error("검색 결과 없음");
 					}
@@ -1045,19 +1057,19 @@
 					const newTableBody = newTable.querySelector("tbody");
 
 					data.content.forEach(v => {
-						const dtoType={
-							"MAIN_PART":"mainPartDto",
-							"SUB_PART":"subPartDto",
-							"PART":"partDto"
+						const dtoType = {
+							"MAIN_PART": "mainPartDto",
+							"SUB_PART": "subPartDto",
+							"PART": "partDto"
 						};
-						const nameType={
-							"MAIN_PART":"메인부서",
-							"SUB_PART":"서브부서",
-							"PART":"부서"
+						const nameType = {
+							"MAIN_PART": "메인부서",
+							"SUB_PART": "서브부서",
+							"PART": "부서"
 						}
 						let newRowString = "";
 						newRowString += "<td>" + nameType[v.type] + "</td>";
-						newRowString += "<td>" + v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" ) + "</td>";
+						newRowString += "<td>" + v.mainPartDto?.name + (v.subPartDto ? " / " + v.subPartDto.name + (v.partDto ? " / " + v.partDto.name : "") : "") + "</td>";
 						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
 							'<a href="#" class="btn increaseBtn p-2">' +
 							'선택' +
@@ -1067,16 +1079,16 @@
 						newRow.innerHTML = newRowString;
 
 						newRow.querySelector("a").addEventListener("click", function () {
-							const dtoType={
-								"MAIN_PART":"mainPartDto",
-								"SUB_PART":"subPartDto",
-								"PART":"partDto"
+							const dtoType = {
+								"MAIN_PART": "mainPartDto",
+								"SUB_PART": "subPartDto",
+								"PART": "partDto"
 							};
 							document.getElementById("partId").value = v[dtoType[v.type]].id;
 							document.getElementById("partInput").value = v[dtoType[v.type]].name;
 							document.getElementById("partLabel").hidden = false;
 							const dataString =
-								v.mainPartDto?.name + (v.subPartDto? " / " + v.subPartDto.name + (v.partDto? " / "  + v.partDto.name : ""): "" )
+								v.mainPartDto?.name + (v.subPartDto ? " / " + v.subPartDto.name + (v.partDto ? " / " + v.partDto.name : "") : "")
 							document.getElementById("partLabel").textContent = dataString;
 							document.querySelector("#partEditModal .table-responsive").innerHTML = "";
 						})
@@ -1156,9 +1168,9 @@
 					});
 			});
 		}
-		
+
 		// =============== Tool Search Modal ===============
-		
+
 		//부서 수정
 		document.getElementById("toolEditModalBtn").addEventListener("click", function () {
 			document.getElementById("toolId").value = mainData.tool.id;
@@ -1166,7 +1178,7 @@
 			getMembershipById(mainData.tool.id)
 				.then(data => {
 					document.getElementById("toolLabel").hidden = false;
-					const dataString = 
+					const dataString =
 						"품목번호 : " + data.code + " , " +
 						"분류 : " + data.subGroupDto.mainGroupDto.name +
 						"/" + data.subToolDto.name + " , " +
@@ -1191,7 +1203,7 @@
 			}
 			getToolsPageByName(searchName)
 				.then(data => {
-						console.log(data.empty)
+					console.log(data.empty)
 					if (data.empty) {
 						throw new Error("검색 결과 없음");
 					}
@@ -1302,38 +1314,38 @@
 					});
 			});
 		}
-		
-		
-		document.getElementById("searchBySelect").addEventListener("change",function(){
+
+
+		document.getElementById("searchBySelect").addEventListener("change", function () {
 			const membership = document.getElementById("membershipForm");
 			const part = document.getElementById("partForm");
 			const tool = document.getElementById("toolForm");
-			switch (this.value){
+			switch (this.value) {
 				case "part":
-					membership.classList.toggle("d-flex",false);
-					membership.classList.toggle("d-none",true);
-					part.classList.toggle("d-flex",true);
-					part.classList.toggle("d-none",false);
-					tool.classList.toggle("d-flex",false);
-					tool.classList.toggle("d-none",true);
-				break;
+					membership.classList.toggle("d-flex", false);
+					membership.classList.toggle("d-none", true);
+					part.classList.toggle("d-flex", true);
+					part.classList.toggle("d-none", false);
+					tool.classList.toggle("d-flex", false);
+					tool.classList.toggle("d-none", true);
+					break;
 				case "worker":
 				case "leader":
-					membership.classList.toggle("d-flex",true);
-					membership.classList.toggle("d-none",false);
-					part.classList.toggle("d-flex",false);
-					part.classList.toggle("d-none",true);
-					tool.classList.toggle("d-flex",false);
-					tool.classList.toggle("d-none",true);
-				break;
+					membership.classList.toggle("d-flex", true);
+					membership.classList.toggle("d-none", false);
+					part.classList.toggle("d-flex", false);
+					part.classList.toggle("d-none", true);
+					tool.classList.toggle("d-flex", false);
+					tool.classList.toggle("d-none", true);
+					break;
 				case "tool":
-					membership.classList.toggle("d-flex",false);
-					membership.classList.toggle("d-none",true);
-					part.classList.toggle("d-flex",false);
-					part.classList.toggle("d-none",true);
-					tool.classList.toggle("d-flex",true);
-					tool.classList.toggle("d-none",false);
-				break;
+					membership.classList.toggle("d-flex", false);
+					membership.classList.toggle("d-none", true);
+					part.classList.toggle("d-flex", false);
+					part.classList.toggle("d-none", true);
+					tool.classList.toggle("d-flex", true);
+					tool.classList.toggle("d-none", false);
+					break;
 			}
 		});
 

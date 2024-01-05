@@ -471,7 +471,7 @@
 			list.splice(index, 1);
 			const row = getTRFromTBodyByIndex(index);
 			row.remove();
-
+			table.draw();
 			stack.push({key: "r", param: id});
 		}
 		//toolId를 통해 해당 tool이 list의 몇번째 index에 위치하는지를 반환합니다.

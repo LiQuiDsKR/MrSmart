@@ -226,12 +226,22 @@ public class RentalSheetService {
 	@Transactional
 	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetDto sheetDto, long approverId) {
 		// 1. RequestSheet를 Update
+		Optional<RentalRequestSheet> sheet = rentalRequestSheetRepository.findById(sheetDto.getId());
+		if (sheet.get().getStatus().equals(SheetState.APPROVE)) {
+			logger.debug("Sheet already approved!");
+			return null;
+		}
 		rentalRequestSheetService.update(sheetDto, SheetState.APPROVE);
 		// 2. RentalSheet를 addNew
 		return addNew(sheetDto, approverId);
 	}
 	@Transactional
 	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetApproveFormDto formDto) {
+		Optional<RentalRequestSheet> sheet = rentalRequestSheetRepository.findById(formDto.getId());
+		if (sheet.get().getStatus().equals(SheetState.APPROVE)) {
+			logger.debug("Sheet already approved!");
+			return null;
+		}
 		RentalRequestSheetDto sheetDto=rentalRequestSheetService.update(formDto, SheetState.APPROVE);
 		return addNew(sheetDto, formDto.getApproverDtoId());
 	}
