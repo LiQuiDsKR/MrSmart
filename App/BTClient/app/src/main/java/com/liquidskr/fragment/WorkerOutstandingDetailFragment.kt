@@ -4,6 +4,7 @@ import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,19 +83,21 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
+                        Log.d("RETURNSHEET", "GOOD")
                         handler.post {
-                            Toast.makeText(activity, "반납 신청 완료", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireActivity(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         handler.post {
-                            Toast.makeText(activity, "반납 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireActivity(), "반납 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                         }
+                        Log.d("RETURNSHEET", "notgood")
                         requireActivity().supportFragmentManager.popBackStack()
                     }
                 }
                 override fun onError(e: Exception) {
                     handler.post {
-                        Toast.makeText(activity, "반납 신청 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireActivity(), "반납 신청 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
                     }
                     e.printStackTrace()
                     requireActivity().supportFragmentManager.popBackStack()

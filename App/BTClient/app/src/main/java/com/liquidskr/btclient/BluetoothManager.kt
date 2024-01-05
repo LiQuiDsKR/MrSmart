@@ -418,15 +418,27 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     }
     fun standbyProcess() {
         var dbHelper = DatabaseHelper(context)
+        var isReady = true
         var standbyList = dbHelper.getAllStandbyWithId()
         for (standby in standbyList) {
             when (standby.second.type) {
                 "RENTALREQUEST" -> {
                     try {
+                        isReady = false
                         requestData(RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY, standby.second.json, object :
                                 BluetoothManager.RequestCallback {
                                 override fun onSuccess(result: String, type: Type) {
-                                    if (result == "good") dbHelper.updateStandbyStatus(standby.first)
+                                    Log.d("standby",result)
+                                    try {
+                                        if (result == "good") {
+                                            isReady = true
+                                            dbHelper.updateStandbyStatus(standby.first)
+                                        } else {
+                                            Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("standby", "Error updating standby status", e)
+                                    }
                                 }
 
                                 override fun onError(e: Exception) {
@@ -438,11 +450,22 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     }
                 }
                 "RENTAL" -> {
+                    isReady = false
                     try {
                         requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, standby.second.json, object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
-                                if (result == "good") dbHelper.updateStandbyStatus(standby.first)
+                                Log.d("standby",result)
+                                try {
+                                    if (result == "good") {
+                                        isReady = true
+                                        dbHelper.updateStandbyStatus(standby.first)
+                                    } else {
+                                        Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("standby", "Error updating standby status", e)
+                                }
                             }
                             override fun onError(e: Exception) {
                                 e.printStackTrace()
@@ -453,11 +476,22 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     }
                 }
                 "RETURN" -> {
+                    isReady = false
                     try {
                         requestData(RequestType.RETURN_SHEET_FORM_STANDBY, standby.second.json, object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
-                                if (result == "good") dbHelper.updateStandbyStatus(standby.first)
+                                Log.d("standby",result)
+                                try {
+                                    if (result == "good") {
+                                        isReady = true
+                                        dbHelper.updateStandbyStatus(standby.first)
+                                    } else {
+                                        Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("standby", "Error updating standby status", e)
+                                }
                             }
 
                             override fun onError(e: Exception) {
@@ -468,6 +502,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         Log.d("standby","cannot send return standby")
                     }
                 }
+            }
+            while (!isReady) {
+
             }
         }
         dbHelper.close()

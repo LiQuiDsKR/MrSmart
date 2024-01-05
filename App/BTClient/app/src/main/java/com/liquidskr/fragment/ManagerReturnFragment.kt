@@ -138,7 +138,7 @@ class ManagerReturnFragment() : Fragment() {
                     sheetCount = result.toInt()
                     val totalPage = Math.ceil(sheetCount / 10.0).toInt()
                     outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                    requestOutstandingRentalSheetByMembership(0)
+                    requestOutstandingRentalSheetByMembership(0, id)
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
                 }
@@ -149,7 +149,7 @@ class ManagerReturnFragment() : Fragment() {
             }
         })
     }
-    fun requestOutstandingRentalSheetByMembership(pageNum: Int) {
+    fun requestOutstandingRentalSheetByMembership(pageNum: Int, id: Long) {
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)

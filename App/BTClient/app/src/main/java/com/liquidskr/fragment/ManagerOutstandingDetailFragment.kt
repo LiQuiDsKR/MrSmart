@@ -183,8 +183,9 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                                                 modifiedTag = tag.macaddress
                                                 handler.post {
                                                     Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                    adapter.tagAdded(modifiedRentalTool)
                                                 }
-                                                adapter.tagAdded(modifiedRentalTool)
+
                                             } else {
                                                 if ("," in tool.Tags) { // 여러개 있다면
                                                     val tags = tool.Tags.split(",")
@@ -299,7 +300,7 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                             handler.post {
                                 Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                             }
-                            handleBluetoothError(returnSheetForm)
+                            handleBluetoothError(returnSheetForm, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.leaderDto.id)
                             e.printStackTrace()
                             requireActivity().supportFragmentManager.popBackStack()
                         }
@@ -329,13 +330,13 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
         }
         return correctedText.toString()
     }
-    private fun handleBluetoothError(sheet: ReturnSheetFormDto) {
+    private fun handleBluetoothError(sheet: ReturnSheetFormDto, workerId: Long, leaderId: Long) {
         Log.d("STANDBY","STANDBY ACCESS")
 
         val returnSheetForm = sheet
         val toolList = returnSheetForm.toolList
         var dbHelper = DatabaseHelper(requireContext())
-        val names: Pair<String, String> = dbHelper.getNamesByRSId(returnSheetForm.rentalSheetDtoId)
+        val names: Pair<String, String> = Pair(dbHelper.getMembershipById(workerId).name, dbHelper.getMembershipById(leaderId).name)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         var pairToolList = listOf<Pair<String,Int>>()

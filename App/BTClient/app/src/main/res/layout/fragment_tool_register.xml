@@ -45,7 +45,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:background="#00FFFFFF"
-                            android:hint="공기구명 입력" />
+                            android:hint="공기구명 검색 또는 품목코드 스캔" />
 
                         <ImageButton
                             android:id="@+id/SearchBtn"

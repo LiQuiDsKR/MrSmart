@@ -98,6 +98,8 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
         }
 
         registerBtnField.setOnClickListener {
+            val dbHelper = DatabaseHelper(requireContext())
+            dbHelper.clearStandbyTable()
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
