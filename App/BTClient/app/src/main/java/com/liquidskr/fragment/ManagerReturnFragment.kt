@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -30,13 +29,10 @@ import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
-import com.liquidskr.btclient.ScannerListener
-import com.liquidskr.listener.MembershipRequest
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
-import java.security.Key
 
 class ManagerReturnFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -47,14 +43,35 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var qrEditText: EditText
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
-
-    private lateinit var scannerListener: MyScannerListener
+    // private val lobbyActivity = requireActivity() as LobbyActivity
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
+    /*
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            val tag = sharedViewModel.qrScannerText
+            sharedViewModel.qrScannerText = ""
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{tag:\"${tag}\"}",object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
+                    val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
 
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+        }
+    }
+    */
 
     private lateinit var outstandingRentalSheetByMemberReq: OutstandingRentalSheetByMemberReq
     private val outstandingRentalSheetRequestListener = object: OutstandingRentalSheetByMemberReq.Listener {
@@ -80,6 +97,8 @@ class ManagerReturnFragment() : Fragment() {
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
+
+        // lobbyActivity.myScannerListener?.setListener(listener)
 
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)

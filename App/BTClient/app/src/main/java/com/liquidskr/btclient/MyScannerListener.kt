@@ -1,17 +1,17 @@
 package com.liquidskr.btclient
 
-interface ScannerListener {
-    fun onTextChanged(text: String)
-    fun onTextFinished()
-}
+class MyScannerListener() {
+    interface Listener {
+        fun onTextFinished()
+    }
+    private var listener: Listener? = null
 
-class MyScannerListener(private val callback: (String) -> Unit) : ScannerListener {
-    override fun onTextChanged(text: String) {
-        callback.invoke(text)
+    fun setListener(listener: Listener) {
+        this.listener = listener
     }
 
-    override fun onTextFinished() {
-        // Handle text finished event
-        callback.invoke("") // Empty string or provide necessary data
+    fun onEnter() {
+        listener?.onTextFinished()
     }
+
 }

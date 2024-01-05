@@ -197,6 +197,7 @@
                     } else if (string == toolboxArray[4]) { // 선강정비5실
                         sharedViewModel.toolBoxId = 5226
                     }
+                    dbHelper.RefreshToolboxData(sharedViewModel.toolBoxId)
                 }
             }
 

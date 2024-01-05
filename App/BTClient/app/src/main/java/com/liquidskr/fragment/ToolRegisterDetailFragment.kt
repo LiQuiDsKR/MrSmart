@@ -67,19 +67,30 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
-                    handler.post {
-                        Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
-                    }
-                    try {
-                        val dbHelper = DatabaseHelper(context)
-                        dbHelper.updateQRCodeById(tool.id, tbt_qrcode) // << 왜안되는지
-                    } catch (e:Exception) {
+                    if (result == "good") {
                         handler.post {
-                            Toast.makeText(context, "라벨 정보가 DB에 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
-                            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
-                            Log.d("TST", e.toString())
+                            Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
+                        }
+                        try {
+                            val dbHelper = DatabaseHelper(context)
+                            dbHelper.updateQRCodeById(tool.id, tbt_qrcode) // << 왜안되는지
+                        } catch (e:Exception) {
+                            handler.post {
+                                Toast.makeText(context, "라벨 정보가 DB에 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
+                                Log.d("TST", e.toString())
+                            }
+                        }
+                    } else if ("already exists!" in result) {
+                        handler.post {
+                            Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        handler.post {
+                            Toast.makeText(context, "알 수 없는 오류 발생", Toast.LENGTH_SHORT).show()
                         }
                     }
+
                 }
 
                 override fun onError(e: Exception) {

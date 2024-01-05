@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
+import com.mrsmart.standard.rental.SheetState
 
 
 class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
@@ -16,6 +17,7 @@ class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequ
         var workerName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
         var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
+        var sheetState: TextView = itemView.findViewById(R.id.RentalRequestSheet_sheetState)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
     }
 
@@ -30,6 +32,8 @@ class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequ
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
         holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp //LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        if (currentRentalRequestSheet.status == SheetState.READY) holder.sheetState.text = "신청 대기"
+        if (currentRentalRequestSheet.status == SheetState.REQUEST) holder.sheetState.text = "승인 대기"
         var toolListString = ""
         for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
             val toolName: String = tool.toolDto.name

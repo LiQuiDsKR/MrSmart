@@ -127,30 +127,30 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                                         adapter.tagAdded(modifiedRentalRequestTool)
                                                     }
                                                 } else {
-                                                    if ("," in tool.Tags) { // 여러개 있다면
+                                                    modifiedTag = tool.Tags
+                                                    handler.post {
+                                                        Toast.makeText(activity, "기존 태그를 지우고, ${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                    }
+
+                                                    /*
+                                                    if ("," in tool.Tags) { // 여러개 있다면 (여러개 있을수가 없음 (굳이 여러번 등록하지 않는 이상)
                                                         val tags = tool.Tags.split(",")
                                                         if (!(tag.macaddress in tags)) {
-                                                            modifiedTag = tool.Tags + "," + tag
-                                                            handler.post {
-                                                                Toast.makeText(
-                                                                    activity,
-                                                                    "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",
-                                                                    Toast.LENGTH_SHORT
-                                                                ).show()
-                                                            }
-                                                        } else {
-                                                            modifiedTag = tag.macaddress
-                                                        }
-                                                    } else { // 한개 있다면
-                                                        if (!(tool.Tags == tag.macaddress)) {
                                                             modifiedTag = tool.Tags + "," + tag
                                                             handler.post {
                                                                 Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
                                                             }
                                                         } else {
+                                                            modifiedTag = tag.macaddress
+                                                        }
+                                                    } else {
+                                                        if (!(tool.Tags == tag.macaddress)) {
+                                                            modifiedTag = tool.Tags + "," + tag
+                                                        } else {
                                                             modifiedTag = tool.Tags
                                                         }
                                                     }
+                                                    */
                                                 }
                                             } else {
                                                 if (tool.Tags == null) {

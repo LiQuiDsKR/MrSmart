@@ -382,6 +382,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
 		    		logger.info(e.getMessage());

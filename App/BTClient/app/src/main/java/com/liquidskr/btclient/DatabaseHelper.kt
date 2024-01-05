@@ -77,6 +77,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val TABLE_DEVICE_NAME = "Devices"
         private const val COLUMN_DEVICE_ID = "device_id"
         private const val COLUMN_DEVICE_NAME = "device_name"
+
+        private const val TABLE_TOOLBOX_NAME = "Toolbox"
+        private const val COLUMN_TOOLBOX_ID = "toolbox_id"
+        private const val COLUMN_TOOLBOX_NAME = "toolbox_name"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -135,6 +139,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "($COLUMN_DEVICE_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_DEVICE_NAME TEXT)"
 
+        val createToolboxTableQuery = "CREATE TABLE $TABLE_TOOLBOX_NAME " +
+                "($COLUMN_TOOLBOX_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TOOLBOX_NAME TEXT)"
+
 
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
@@ -143,6 +151,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(createTagTableQuery)
         db.execSQL(createRSTableQuery)
         db.execSQL(createDeviceTableQuery)
+        db.execSQL(createToolboxTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -154,6 +163,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TAG_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RENTALSHEET_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_DEVICE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOLBOX_NAME")
 
         onCreate(db)
     }
@@ -177,6 +187,27 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return id
     }
+
+    fun RefreshToolboxData(
+        toolboxId: Long
+    ): Long {
+
+        val values = ContentValues()
+        values.put(COLUMN_TOOLBOX_ID, toolboxId)
+        values.put(COLUMN_TOOLBOX_NAME, "선강정비${toolboxId - 5221}실")
+
+        val db = this.writableDatabase
+        try {
+            db.execSQL("DELETE FROM $TABLE_TOOLBOX_NAME")
+        } catch (e: Exception) {
+
+        }
+        val id = db.insert(TABLE_TOOLBOX_NAME, null, values)
+
+        db.close()
+        return id
+    }
+
     fun insertMembershipData(
         membershipId: Long,
         membershipCode: String,
