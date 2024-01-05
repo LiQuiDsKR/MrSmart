@@ -1,5 +1,5 @@
 package com.mrsmart.standard.rental
 
-enum class SheetStatus {
+enum class SheetState {
     READY, REQUEST, APPROVE, CANCEL
 }

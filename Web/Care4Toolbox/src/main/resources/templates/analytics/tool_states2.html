@@ -220,27 +220,28 @@
 		)
 			.then(data => {
 				return new Promise((resolved, rejected) => {
-					abcHttp.get(
-						'/toolbox/getbyname',
-						{
-							name: data.partDto.subPartDto.mainPartDto.name
+				abcHttp.get(
+					'/toolbox/getbymanagerid',
+					{
+						managerId: data.id
+					}
+				)
+					.then(toolboxData => {
+						if (toolboxData == null || toolboxData?.id==null) {
+							throw error("no toolbox");
+						} else {
+							document.getElementById("toolboxSelect").value=toolboxData.id;
+							resolved(toolboxData.id);
 						}
-					)
-						.then(toolboxData => {
-							if (toolboxData == null) {
-								throw error("no toolbox");
-							} else {
-								toolboxId = toolboxData.id;
-								resolved(toolboxData.id);
-							}
-						})
-						.catch(error => {
-							Swal.fire({
-								type: 'error',
-								title: '정비실 없음',
-								text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
-							}).then(() => {rejected();});
-						});
+					})
+					.catch(error => {
+						console.log('no toolbox for manager');
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(() => {rejected();});
+					});
 				});
 			})
 			.then(toolboxId => {

@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
@@ -32,7 +34,6 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
-
     private lateinit var context: Context
 
     lateinit var scanBtn: LinearLayout
@@ -54,6 +55,59 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+
+    private val lobbyActivity: LobbyActivity
+        get() = requireActivity() as LobbyActivity
+    private fun showBluetoothModal(title: String, content: String) {
+        lobbyActivity.showBluetoothModal(title, content, bluetoothModalListener)
+    }
+    private val bluetoothModalListener = object : LobbyActivity.BluetoothModalListener {
+        override fun onConfirmButtonClicked() {
+            val handler = Handler(Looper.getMainLooper())
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    if (result == "good") {
+                        handler.post {
+                            Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
+                        }
+                        try {
+                            val dbHelper = DatabaseHelper(context)
+                            dbHelper.updateQRCodeById(tool.id, tbt_qrcode) // << 왜안되는지
+                        } catch (e:Exception) {
+                            handler.post {
+                                Toast.makeText(context, "라벨 정보가 DB에 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
+                                Log.d("TST", e.toString())
+                            }
+                        }
+                    } else if ("already exists!" in result) {
+                        handler.post {
+                            Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        handler.post {
+                            Toast.makeText(context, "알 수 없는 오류 발생", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                }
+
+                override fun onError(e: Exception) {
+                    handler.post {
+                        Toast.makeText(context, "공기구 등록 실패", Toast.LENGTH_SHORT).show()
+                    }
+                    e.printStackTrace()
+                }
+            })
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        override fun onCancelButtonClicked() {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_detail, container, false)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
@@ -78,21 +132,18 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
         var adapter = ToolRegisterTagDetailAdapter(emptyList())
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                if (result == "null") {
-                    qrDisplay.text = "미등록"
-                } else {
-                    qrDisplay.text = result
-                    tbt_qrcode = result
-                }
+        qrDisplay.text = "미등록"
+        try {
+            val dbHepler = DatabaseHelper(requireContext())
+            val label = dbHepler.getTBTByToolId(tool.id)
+            qrDisplay.text = label
+            tbt_qrcode = label
+        } catch(e: Exception) {
+            e.printStackTrace()
+            handler.post {
+                Toast.makeText(context, "공기구의 라벨 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
             }
-
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
+        }
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -124,7 +175,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                 bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         if (result == "null") {
-                            requireActivity().runOnUiThread {
+                            handler.post {
                                 Toast.makeText(context, "해당 태그는 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         } else {
@@ -162,22 +213,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
 
         confirmBtn.setOnClickListener {
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    handler.post {
-                        Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onError(e: Exception) {
-                    handler.post {
-                        Toast.makeText(context, "공기구 등록 실패", Toast.LENGTH_SHORT).show()
-                    }
-                    e.printStackTrace()
-                }
-            })
-            requireActivity().supportFragmentManager.popBackStack()
+            showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
         }
         return view
     }

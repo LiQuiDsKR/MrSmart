@@ -77,6 +77,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val TABLE_DEVICE_NAME = "Devices"
         private const val COLUMN_DEVICE_ID = "device_id"
         private const val COLUMN_DEVICE_NAME = "device_name"
+
+        private const val TABLE_TOOLBOX_NAME = "Toolbox"
+        private const val COLUMN_TOOLBOX_ID = "toolbox_id"
+        private const val COLUMN_TOOLBOX_NAME = "toolbox_name"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -135,6 +139,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "($COLUMN_DEVICE_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_DEVICE_NAME TEXT)"
 
+        val createToolboxTableQuery = "CREATE TABLE $TABLE_TOOLBOX_NAME " +
+                "($COLUMN_TOOLBOX_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TOOLBOX_NAME TEXT)"
+
 
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
@@ -143,6 +151,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(createTagTableQuery)
         db.execSQL(createRSTableQuery)
         db.execSQL(createDeviceTableQuery)
+        db.execSQL(createToolboxTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -154,6 +163,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TAG_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RENTALSHEET_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_DEVICE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOLBOX_NAME")
 
         onCreate(db)
     }
@@ -177,6 +187,27 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return id
     }
+
+    fun RefreshToolboxData(
+        toolboxId: Long
+    ): Long {
+
+        val values = ContentValues()
+        values.put(COLUMN_TOOLBOX_ID, toolboxId)
+        values.put(COLUMN_TOOLBOX_NAME, "선강정비${toolboxId - 5221}실")
+
+        val db = this.writableDatabase
+        try {
+            db.execSQL("DELETE FROM $TABLE_TOOLBOX_NAME")
+        } catch (e: Exception) {
+
+        }
+        val id = db.insert(TABLE_TOOLBOX_NAME, null, values)
+
+        db.close()
+        return id
+    }
+
     fun insertMembershipData(
         membershipId: Long,
         membershipCode: String,
@@ -380,6 +411,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
+    fun getMembershipIdByName(codeToFind: String): Long {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_Membership_ID FROM $TABLE_Membership_NAME WHERE $COLUMN_Membership_NAME = ?"
+        val selectionArgs = arrayOf(codeToFind)
+        var result: Long = 0
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_Membership_ID))
+            result = id
+        }
+
+        cursor.close()
+        db.close()
+        return result
+    }
+
+    @SuppressLint("Range")
     fun getAllMemberships(): List<MembershipSQLite> {
         val membershipList = mutableListOf<MembershipSQLite>()
         val query = "SELECT * FROM $TABLE_Membership_NAME"
@@ -512,6 +561,39 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         return sheetList
     }
+
+    @SuppressLint("Range")
+    fun getAllStandbyWithId(): List<Pair<Long, StandbyDto>> {
+        val gson = Gson()
+        val db = this.readableDatabase
+        val sheetList = mutableListOf<Pair<Long, StandbyDto>>()
+        val query = "SELECT $COLUMN_STANDBY_ID, $COLUMN_STANDBY_JSON, $COLUMN_STANDBY_TYPE, $COLUMN_STANDBY_DETAIL FROM $TABLE_STANDBY_NAME WHERE $COLUMN_STANDBY_STATUS = ?"
+        val selectionArgs = arrayOf("STANDBY")
+
+        val cursor = db.rawQuery(query, selectionArgs)
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_STANDBY_ID))
+            var json = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_JSON))
+            val type = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_TYPE))
+            val detail = cursor.getString(cursor.getColumnIndex(COLUMN_STANDBY_DETAIL)) // workerName, leaderName, toolList
+            json = json.replace("\\\"", "\"")
+            json = json.replace("\\\\", "\\")
+            json = removeFirstAndLastQuotes(json)
+
+            try {
+                sheetList.add(Pair(id, StandbyDto(type, json, detail)))
+            } catch (e: Exception) {
+
+            }
+        }
+
+        cursor.close()
+        db.close()
+
+        return sheetList
+    }
+
     @SuppressLint("Range")
     fun updateStandbyStatus(standbyId: Long) {
         val db = this.writableDatabase
@@ -615,6 +697,52 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
+    fun getTBTByToolId(id: Long): String {
+        var tbt = ""
+        lateinit var toolDtoSQLite: ToolDtoSQLite
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TBT_QRCODE FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_TOOL_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
+
+        val cursor = db.rawQuery(query, selectionArgs)
+        while (cursor.moveToNext()) {
+            tbt = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_QRCODE))
+        }
+
+        cursor.close()
+        db.close()
+        return tbt
+    }
+    @SuppressLint("Range")
+    fun updateQRCodeById(id: Long, newQRCode: String): Int {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_QRCODE, newQRCode)
+
+        val db = this.writableDatabase
+        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
+
+        db.close()
+        return rowsAffected
+    }
+    fun deleteTBTById(id: Long): Int {
+        val db = this.writableDatabase
+        val rowsAffected = db.delete(TABLE_TBT_NAME, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
+
+        db.close()
+        return rowsAffected
+    }
+    fun addTBT(newQRCode: String): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_QRCODE, newQRCode)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_TBT_NAME, null, values)
+
+        db.close()
+        return id
+    }
+
+    @SuppressLint("Range")
     fun getTagGroupByTag(tag: String): String {
         var tagGroup = ""
         val db = this.readableDatabase
@@ -630,6 +758,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return tagGroup
     }
+
     @SuppressLint("Range")
     fun getToolByTag(tag: String): ToolDtoSQLite {
         var toolId = 0

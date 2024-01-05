@@ -6,6 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +33,24 @@ public class MainController {
     public String toolState(Model model){
     	model.addAttribute("toolboxList",toolboxService.list());
         return "analytics/tool_states2";
+    }
+	@GetMapping("/")
+    public String showDashboard() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = determineRole(authentication);
+        logger.info(role);
+        switch (role) {
+            case "[ROLE_ADMIN]":
+            case "[ROLE_MANAGER]":
+            	return "redirect:/analytics/tool_states/rental_return";
+            default:
+                return "redirect:/rental/request_sheet/user/create";
+        }
+    }
+
+    private String determineRole(Authentication authentication) {
+        // Extract the role from the Authentication object
+        return authentication.getAuthorities().toString();
     }
     
     @GetMapping(value = "/test")

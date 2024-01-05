@@ -40,7 +40,6 @@ public class RentalRequestToolService {
 			logger.error("Invalid id : " + id);
 			return null;
 		}
-		
 		return new RentalRequestToolDto(item.get());
 	}
 	
@@ -63,9 +62,6 @@ public class RentalRequestToolService {
 				.count(formDto.getCount())
 				.Tags("")
 				.build();
-		
-		StockStatusDto stockDto = stockStatusService.get(rentalRequestTool.getTool().getId(),sheet.getToolbox().getId());
-		stockStatusService.requestItems(stockDto.getId(), rentalRequestTool.getCount());
 		
 		return repository.save(rentalRequestTool);
 	}

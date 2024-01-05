@@ -9,6 +9,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -19,9 +20,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
+import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
+import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import java.lang.reflect.Type
 
 
 class ToolRegisterFragment() : Fragment() {
@@ -61,6 +66,26 @@ class ToolRegisterFragment() : Fragment() {
         }
         searchBtn.setOnClickListener {
             filterByName(adapter, tools, editTextName.text.toString())
+        }
+        editTextName.setOnEditorActionListener { _, actionId, event ->
+            Log.d("tst","textEditted")
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val label = editTextName.text.toString().replace("\n", "")
+                try {
+                    val dbHelper = DatabaseHelper(requireContext())
+                    val tool = dbHelper.getToolByTBT(label)
+                    val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                } catch(e:Exception) {
+
+                }
+
+                return@setOnEditorActionListener true
+            }
+            false
         }
 
         recyclerView.adapter = adapter

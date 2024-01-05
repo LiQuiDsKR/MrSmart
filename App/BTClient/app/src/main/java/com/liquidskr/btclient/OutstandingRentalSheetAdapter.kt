@@ -6,16 +6,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.rental.OutstandingState
 import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.rental.SheetState
 
 
 class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
     RecyclerView.Adapter<OutstandingRentalSheetAdapter.OutstandingRentalSheetViewHolder>() {
 
     class OutstandingRentalSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var workerName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
-        var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
-        var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
+        var workerName: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_WorkerName)
+        var leaderName: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_LeaderName)
+        var timeStamp: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_TimeStamp)
+        var sheetState: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_sheetState)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
     }
 
@@ -30,6 +33,8 @@ class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<Ou
         holder.workerName.text = currentOutstandingRentalSheet.rentalSheetDto.workerDto.name
         holder.leaderName.text = currentOutstandingRentalSheet.rentalSheetDto.leaderDto.name
         holder.timeStamp.text = currentOutstandingRentalSheet.rentalSheetDto.eventTimestamp
+        if (currentOutstandingRentalSheet.outstandingState == OutstandingState.READY) holder.sheetState.text = "신청 대기"
+        if (currentOutstandingRentalSheet.outstandingState == OutstandingState.REQUEST) holder.sheetState.text = "승인 대기"
         var toolListString = ""
         for (tool: RentalToolDto in currentOutstandingRentalSheet.rentalSheetDto.toolList) {
             val toolName: String = tool.toolDto.name

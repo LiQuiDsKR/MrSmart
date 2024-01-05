@@ -68,17 +68,35 @@ public class ReturnToolService {
 		ToolState status = toolDto.getStatus();
 		int count = toolDto.getCount();
 		
-		ReturnTool returnTool = ReturnTool.builder()
-				.returnSheet(savedReturnSheet)
-				.rentalTool(rentalTool.get())
-				.goodCount(status.equals(ToolState.GOOD)?count:0)
-				.faultCount(status.equals(ToolState.FAULT)?count:0)
-				.damageCount(status.equals(ToolState.DAMAGE)?count:0)
-				.lossCount(status.equals(ToolState.LOSS)?count:0)
-				.discardCount(status.equals(ToolState.DISCARD)?count:0)
-				.count(count)
-				.Tags(toolDto.getTags())
-				.build();
+		ReturnTool returnTool;
+		
+		ReturnTool formerReturnTool = repository.findByReturnSheetIdAndRentalToolId(savedReturnSheet.getId(),toolDto.getRentalToolDtoId());
+		int goodCount=status.equals(ToolState.GOOD)?count:0;
+		int faultCount=status.equals(ToolState.FAULT)?count:0;
+		int damageCount=status.equals(ToolState.DAMAGE)?count:0;
+		int lossCount=status.equals(ToolState.LOSS)?count:0;
+		int discardCount=status.equals(ToolState.DISCARD)?count:0;
+		
+		if (formerReturnTool ==null) {
+			
+			returnTool = ReturnTool.builder()
+					.returnSheet(savedReturnSheet)
+					.rentalTool(rentalTool.get())
+					.goodCount(goodCount)
+					.faultCount(faultCount)
+					.damageCount(damageCount)
+					.lossCount(lossCount)
+					.discardCount(discardCount)
+					.count(count)
+					.Tags(toolDto.getTags())
+					.build();
+			
+		} else {
+			
+			returnTool = formerReturnTool;
+			returnTool.updateCount(goodCount, faultCount, damageCount, lossCount, discardCount, toolDto.getTags());
+			
+		}
 		
 		ReturnTool savedReturnTool=repository.save(returnTool);
 		
@@ -90,20 +108,23 @@ public class ReturnToolService {
 					logger.error("Tag not found");
 					return null;
 				}
+				List<Tag> tagSiblings = tagRepository.findByTagGroup(tag.getTagGroup());
 				
-				if (!tag.getToolbox().equals(savedReturnSheet.getToolbox())){
-					tag.updateToolbox(savedReturnSheet.getToolbox());
-					tagService.updateToolbox(new TagDto(tag));
+				for (Tag t : tagSiblings) {
+					if (!tag.getToolbox().equals(savedReturnSheet.getToolbox())){
+						tag.updateToolbox(savedReturnSheet.getToolbox());
+						tagService.updateToolbox(new TagDto(tag));
+					}
+					tag.updateRentalTool(null);
+					tagService.updateRentalTool(new TagDto(tag));
+					
+					logger.info("tag ["+tag.getMacaddress() + "] returned.");
 				}
-				tag.updateRentalTool(null);
-				tagService.updateRentalTool(new TagDto(tag));
-				
-				logger.info("tag ["+tag.getMacaddress() + "] returned.");
 			}
 		}
 		
 		StockStatusDto stockDto = stockStatusService.get(savedReturnTool.getRentalTool().getTool().getId(),savedReturnSheet.getToolbox().getId());
-		stockStatusService.returnItems(stockDto.getId(), savedReturnTool.getGoodCount(), savedReturnTool.getFaultCount(), savedReturnTool.getDamageCount(), savedReturnTool.getDiscardCount(), savedReturnTool.getLossCount());
+		stockStatusService.returnItems(stockDto.getId(), goodCount, faultCount, damageCount, discardCount, lossCount);
 		
 		rentalToolService.returnUpdate(rentalTool.get(),count);
 		

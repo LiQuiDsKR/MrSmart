@@ -5,5 +5,5 @@ data class OutstandingRentalSheetDto(
     var rentalSheetDto: RentalSheetDto,
     var totalCount: Int,
     var totalOutstandingCount: Int,
-    var outstandingStatus: OutstandingStatus
+    var outstandingState: OutstandingState
 )

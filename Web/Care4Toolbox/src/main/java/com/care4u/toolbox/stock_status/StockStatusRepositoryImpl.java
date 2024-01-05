@@ -85,7 +85,7 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 						stockStatus.currentDay, stockStatus.totalCount.sum(), stockStatus.rentalCount.sum(),
 						stockStatus.buyCount.sum(), stockStatus.goodCount.sum(), stockStatus.faultCount.sum(),
 						stockStatus.damageCount.sum(), stockStatus.lossCount.sum(), stockStatus.discardCount.sum(),
-						stockStatus.supplyCount.sum()))
+						stockStatus.supplyCount.sum(), stockStatus.returnCount.sum()))
 				.from(stockStatus)
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.between(startDate, endDate)))
 				.groupBy(stockStatus.currentDay).fetch();
@@ -100,7 +100,7 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 						stockStatus.currentDay, stockStatus.totalCount.sum(), stockStatus.rentalCount.sum(),
 						stockStatus.buyCount.sum(), stockStatus.goodCount.sum(), stockStatus.faultCount.sum(),
 						stockStatus.damageCount.sum(), stockStatus.lossCount.sum(), stockStatus.discardCount.sum(),
-						stockStatus.supplyCount.sum()))
+						stockStatus.supplyCount.sum(),stockStatus.returnCount.sum()))
 				.from(stockStatus)
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.eq(currentDate))).fetchOne();
 	}

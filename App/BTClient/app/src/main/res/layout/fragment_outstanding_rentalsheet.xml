@@ -5,9 +5,8 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:focusable="true"
     android:clickable="true"
-    android:background="#FFFFFF">
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,6 +43,16 @@
                         android:layout_marginTop="8dp"
                         app:srcCompat="@drawable/return_icon" />
 
+                    <TextView
+                        android:id="@+id/OutstandingRentalSheet_sheetState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="상태"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
                     <FrameLayout
                         android:layout_width="140dp"
                         android:layout_height="wrap_content"
@@ -52,7 +61,7 @@
                     </FrameLayout>
 
                     <TextView
-                        android:id="@+id/RentalRequestSheet_TimeStamp"
+                        android:id="@+id/OutstandingRentalSheet_TimeStamp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="8dp"
@@ -91,7 +100,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/RentalRequestSheet_WorkerName"
+                                android:id="@+id/OutstandingRentalSheet_WorkerName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="8dp"
@@ -120,7 +129,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/RentalRequestSheet_LeaderName"
+                                android:id="@+id/OutstandingRentalSheet_LeaderName"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="8dp"
@@ -135,7 +144,7 @@
                     <TextView
                         android:id="@+id/ToolListTextView"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="35dp"
                         android:layout_marginLeft="8dp"
                         android:layout_marginTop="8dp"
                         android:text="toolList"

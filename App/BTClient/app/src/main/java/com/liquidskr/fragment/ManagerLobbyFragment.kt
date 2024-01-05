@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -25,6 +26,11 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
     lateinit var returnBtn: ImageButton
     lateinit var standbyBtn: ImageButton
     lateinit var registerBtn: ImageButton
+
+    lateinit var rentalBtnField: LinearLayout
+    lateinit var returnBtnField: LinearLayout
+    lateinit var standbyBtnField: LinearLayout
+    lateinit var registerBtnField: LinearLayout
     val manager = manager
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
@@ -43,12 +49,19 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
         returnBtn = view.findViewById(R.id.ReturnBtn)
         standbyBtn = view.findViewById(R.id.StandbyBtn)
         registerBtn = view.findViewById(R.id.RegisterBtn)
+
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        registerBtnField = view.findViewById(R.id.RegisterBtnField)
         bluetoothManager = BluetoothManager(requireContext(), requireActivity())
 
         welcomeMessage.text = manager.name + "님 환영합니다."
 
-        printFragmentStack()
-
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
         rentalBtn.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
@@ -60,7 +73,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
                 .commit()
         }
 
-        returnBtn.setOnClickListener {
+        returnBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_on_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
@@ -73,12 +86,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
                 .commit()
         }
 
-        connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        }
-
-        standbyBtn.setOnClickListener {
+        standbyBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_on_03)
@@ -89,10 +97,7 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
                 .commit()
         }
 
-        registerBtn.setOnClickListener {
-            val dbHelper = DatabaseHelper(requireContext())
-            dbHelper.clearStandbyTable()
-
+        registerBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
             standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
@@ -102,16 +107,6 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
                 .replace(R.id.fragmentContainerView, fragment, "ToolRegisterFragment")
                 .commit()
         }
-/*
-        override fun onConnectionStateChanged(newState: Int) {
-            // 연결 상태가 변경될 때 호출되는 코드
-            // newState에는 BluetoothProfile.STATE_CONNECTED 또는 BluetoothProfile.STATE_DISCONNECTED가 전달됩니다.
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                // Bluetooth 연결이 성공한 경우 처리
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                // Bluetooth 연결이 끊어진 경우 처리
-            }
-        }*/
 
         return view
     }
@@ -119,16 +114,6 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
     override fun onBluetoothDisconnected() {
         activity?.runOnUiThread {
             connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
-    }
-    fun printFragmentStack() {
-        val activity = requireActivity()
-        val fragmentManager = activity.supportFragmentManager
-        val backStackCount = fragmentManager.backStackEntryCount
-
-        for (i in 0 until backStackCount) {
-            val fragmentName = fragmentManager.getBackStackEntryAt(i).javaClass.simpleName
-            Log.d("FragmentStack", "position : ${fragmentName}")
         }
     }
 }

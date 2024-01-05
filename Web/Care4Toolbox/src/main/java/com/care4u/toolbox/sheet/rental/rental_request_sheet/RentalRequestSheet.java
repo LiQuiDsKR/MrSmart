@@ -69,5 +69,9 @@ public class RentalRequestSheet extends BaseEntity {
 		this.toolbox = toolbox;
 		this.eventTimestamp = eventTimestamp;
 	}
+
+	public void updateState(SheetState status) {
+		this.status = status;		
+	}
 	
 }

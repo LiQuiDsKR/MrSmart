@@ -342,7 +342,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
 			        
-		    		rentalRequestSheetService.addNew(formDto,eventTimestamp);
+		    		rentalRequestSheetService.addNew(formDto,eventTimestamp,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
@@ -382,8 +382,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		logger.info(e.getMessage());
 		    	}
 			}
 			break;
@@ -393,6 +395,20 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				long sheetId = jsonObj.getLong("rentalRequestSheetId");
 		    	try {
 		    		rentalRequestSheetService.cancel(sheetId);
+		    		handler.sendData(keyword + "good");
+		    	}catch(IllegalStateException e) {
+		    		handler.sendData(keyword + "bad");
+		    	}catch(Exception e) {
+		    		handler.sendData(keyword + "bad");
+		    	}
+			}
+			break;
+		case RENTAL_REQUEST_SHEET_APPLY:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long sheetId = jsonObj.getLong("rentalRequestSheetId");
+		    	try {
+		    		rentalRequestSheetService.updateState(sheetId,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
@@ -542,6 +558,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(e.getMessage());
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		
 		    	}
 			}
 			break;

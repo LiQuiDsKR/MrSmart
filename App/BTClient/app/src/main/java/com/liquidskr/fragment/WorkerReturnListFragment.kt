@@ -25,6 +25,7 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.rental.OutstandingState
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment() : Fragment() {
@@ -75,11 +76,13 @@ class WorkerReturnListFragment() : Fragment() {
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
-            val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
-                .commit()
+            if (outstandingRentalSheet.outstandingState != OutstandingState.REQUEST) {
+                val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
         recyclerView.adapter = adapter
 

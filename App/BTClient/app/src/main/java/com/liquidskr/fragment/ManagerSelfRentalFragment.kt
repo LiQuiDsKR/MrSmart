@@ -83,23 +83,19 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-
-        var toolList: MutableList<ToolWithCount> = mutableListOf()
-        for (toolWithCount in sharedViewModel.toolWithCountList) {
-            toolList.add(ToolWithCount(toolWithCount.tool, toolWithCount.count))
-        }
+        val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
+        toolList.addAll(sharedViewModel.toolWithCountList)
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
         for (id in sharedViewModel.rentalRequestToolIdList) { // 중복체크안되어잇음
             val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
             newToolList.add(toolWithCount)
         }
-        var finalToolList: MutableList<ToolWithCount> = mutableListOf()
-        finalToolList.addAll(toolList)
+        var finalToolList: MutableList<ToolWithCount> = toolList
         finalToolList.addAll(newToolList)
 
         val adapter = RentalToolAdapter(finalToolList, this)
-        recyclerView.adapter = adapter
         sharedViewModel.toolWithCountList = adapter.tools
+        sharedViewModel.rentalRequestToolIdList.clear()
 
         worker = sharedViewModel.worker
         workerName.text = sharedViewModel.worker.name
@@ -172,6 +168,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                 .commit()
         }
         addToolBtn.setOnClickListener {
+            sharedViewModel.toolWithCountList = adapter.tools
+
             val fragment = ToolFindFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
@@ -247,6 +245,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             adapter.updateList(toolList)
         }
 
+        recyclerView.adapter = adapter
         return view
     }
 

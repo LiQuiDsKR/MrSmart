@@ -217,49 +217,25 @@ public class RentalRequestSheetService {
 		}
 		return convertToDto(savedRentalRequestSheet);
 	}
-	
-	
+	// 위를 호출
 	@Transactional
-	public RentalRequestSheetDto update(RentalRequestSheetDto sheetDto) {
-		RentalRequestSheet rentalRequestSheet;
-		
-		Optional<RentalRequestSheet> rentalRequestSheetOptional = repository.findById(sheetDto.getId());
-		Optional<Membership> worker = membershipRepository.findById(sheetDto.getWorkerDto().getId());
-		Optional<Membership> leader = membershipRepository.findById(sheetDto.getLeaderDto().getId());
-		Optional<Toolbox> toolbox = toolboxRepository.findById(sheetDto.getToolboxDto().getId());
-
-	    if (rentalRequestSheetOptional.isEmpty()) {
-	        logger.error("Sheet not found");
-	        throw new IllegalArgumentException("Sheet not found");
-	    }
-
-	    if (worker.isEmpty()) {
-	        logger.error("Worker not found");
-	        throw new IllegalArgumentException("Worker not found");
-	    }
-
-	    if (leader.isEmpty()) {
-	        logger.error("Leader not found");
-	        throw new IllegalArgumentException("Leader not found");
-	    }
-
-	    if (toolbox.isEmpty()) {
-	        logger.error("Toolbox not found");
-	        throw new IllegalArgumentException("Toolbox not found");
-	    }
-		
-		rentalRequestSheet=rentalRequestSheetOptional.get();
-		
-		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetDto.getId());
-		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getId(),sheetDto.getToolboxDto().getId());
-			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
-		}
-		
-		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), sheetDto.getStatus(), sheetDto.getEventTimestamp());
-		
-		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), sheetDto.getToolList());
+	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, SheetState status) {
+		RentalRequestSheetDto sheetDto = addNew(formDto);
+		return update(sheetDto,status);
 	}
+	// 위를 호출
+	@Transactional
+	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, LocalDateTime eventTimestamp, SheetState status) {
+		RentalRequestSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("rntalSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			return addNew(formDto,status);
+		}
+	}
+	
+	
 	@Transactional
 	public RentalRequestSheetDto update(RentalRequestSheetDto sheetDto, SheetState status) {
 		RentalRequestSheet rentalRequestSheet;
@@ -273,6 +249,10 @@ public class RentalRequestSheetService {
 	        logger.error("Sheet not found");
 	        throw new IllegalArgumentException("Sheet not found");
 	    }
+		if (rentalRequestSheetOptional.get().getStatus().equals(status)) {
+			logger.debug("Sheet is already "+status );
+			return null;
+		}
 
 	    if (worker.isEmpty()) {
 	        logger.error("Worker not found");
@@ -290,12 +270,6 @@ public class RentalRequestSheetService {
 	    }
 		
 		rentalRequestSheet=rentalRequestSheetOptional.get();
-		
-		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetDto.getId());
-		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheetDto.getToolboxDto().getId());
-			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
-		}
 		
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, sheetDto.getEventTimestamp());
 		
@@ -313,6 +287,10 @@ public class RentalRequestSheetService {
 	        logger.error("Sheet not found");
 	        throw new IllegalArgumentException("Sheet not found");
 	    }
+		if (rentalRequestSheetOptional.get().getStatus().equals(status)) {
+			logger.debug("Sheet is already "+status );
+			return null;
+		}
 
 	    if (worker.isEmpty()) {
 	        logger.error("Worker not found");
@@ -330,12 +308,6 @@ public class RentalRequestSheetService {
 	    }
 		
 		rentalRequestSheet=rentalRequestSheetOptional.get();
-		
-		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(formDto.getId());
-		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),formDto.getToolboxDtoId());
-			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
-		}
 		
 		rentalRequestSheet.update(worker.get(), leader.get(), toolbox.get(), status, rentalRequestSheet.getEventTimestamp());
 		
@@ -364,6 +336,18 @@ public class RentalRequestSheetService {
 		
 		return new RentalRequestSheetDto(repository.save(rentalRequestSheet), dtoList);
 	}
+	public RentalRequestSheetDto updateState(long sheetId, SheetState status) {
+		Optional<RentalRequestSheet> findSheet = repository.findById(sheetId);
+		if (findSheet.isEmpty()) {
+			logger.error("rentalSheet not exists! : " + sheetId);
+			return null;
+		}
+		RentalRequestSheet sheet = findSheet.get();
+		sheet.updateState(status);
+		return convertToDto(repository.save(sheet));
+	}
+	
+	
 	@Transactional
 	public RentalRequestSheetDto cancel(long sheetId) {
 		RentalRequestSheet sheet;
@@ -373,30 +357,12 @@ public class RentalRequestSheetService {
 	        throw new IllegalArgumentException("Sheet not found");
 	    }
 		sheet=rentalRequestSheetOptional.get();
-		
-		List<RentalRequestTool> toolList = rentalRequestToolRepository.findAllByRentalRequestSheetId(sheetId);
-		for (RentalRequestTool tool : toolList) {
-			StockStatusDto stockDto = stockStatusService.get(tool.getTool().getId(),sheet.getToolbox().getId());
-			stockStatusService.requestCancelItems(stockDto.getId(), tool.getCount());
+		if (sheet.getStatus().equals(SheetState.CANCEL)) {
+			logger.debug("Sheet already canceled!");
+			return null;
 		}
 		
 		sheet.update(sheet.getWorker(), sheet.getLeader(), sheet.getToolbox(), SheetState.CANCEL, sheet.getEventTimestamp());
 		return convertToDto(repository.save(sheet));
-	}
-
-	@Transactional
-	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, LocalDateTime eventTimestamp) {
-		RentalRequestSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
-		if (findSheet != null) {
-			logger.error("returnSheet already exists! : " + eventTimestamp);
-			return null;
-		}else {
-			return addNew(formDto,SheetState.REQUEST);
-		}
-	}
-	@Transactional
-	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, SheetState status) {
-		RentalRequestSheetDto sheetDto = addNew(formDto);
-		return update(sheetDto,status);
 	}
 }

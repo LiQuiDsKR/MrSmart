@@ -311,6 +311,7 @@
 					size: 100,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
+					subGroupId: $('#subGroupSelect').val()
 				}
 			).then(data => {
 				console.log(data);
@@ -473,6 +474,9 @@
 					tool.classList.toggle("d-none",false);
 				break;
 			}
+		});
+document.getElementById("subGroupSelect").addEventListener("change",function(){
+			load(membershipId);
 		});
 
 		// =============== Search Modals ===============

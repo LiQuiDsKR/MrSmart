@@ -108,8 +108,7 @@ public class TagService {
 		}else {	
 			Optional<RentalTool> rentalTool = rentalToolRepository.findById(tagDto.getRentalToolDto().getId());
 			if (rentalTool.isEmpty()) {
-				logger.error("Invalid Id: "+tagDto.getRentalToolDto().getId());
-				return null;
+				logger.error("tag updated : "+tagDto.getRentalToolDto().getId()+"->"+rentalTool.get().getId());
 			}
 			tag.updateRentalTool(rentalTool.get());
 		}

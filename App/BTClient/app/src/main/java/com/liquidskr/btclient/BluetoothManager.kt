@@ -36,14 +36,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private lateinit var receiveThread: Thread
     private val handler = Handler(Looper.getMainLooper())
 
-    var pcName: String = "LQD"
+    //var isSending: Boolean = false
+    //private val messageQueue: Queue<BluetoothMessage> = LinkedList()
 
-    var currentBytes = 0
-    var totalBytes = 0
-    
-
-    var isSending: Boolean = false
-    private val messageQueue: Queue<BluetoothMessage> = LinkedList()
+    var pcName: String = "정비실PC이름"
 
     private var bluetoothDataListener: BluetoothDataListener? = null
     private var bluetoothConnectionListener: BluetoothConnectionListener? = null
@@ -56,10 +52,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
+
     interface BluetoothDataListener {
         fun onSuccess(result: String, type: Type)
         fun onError(e: Exception)
     }
+
     interface BluetoothConnectionListener {
         fun onBluetoothDisconnected()
     }
@@ -68,36 +66,36 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var gson = Gson()
     fun bluetoothOpen() {
         try {
-            try {
-                bluetoothClose()
-            } catch (e: Exception) {
-
-            }
             val dbHelper = DatabaseHelper(context)
             pcName = dbHelper.getDeviceName()
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             val permissionManager = PermissionManager(activity)
             permissionManager.checkAndRequestPermission()
-            var flag = false
             val pairedDevices = bluetoothAdapter.bondedDevices
-            if (pairedDevices.size > 0) { // 서버와 연결 부분
+            if (pairedDevices.size > 0) {
+                var flag = false// 서버와 연결 부분
                 for (device in pairedDevices) {
                     if (device.name == pcName) {
                         bluetoothDevice = device
                         try {
                             val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
                             bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
-                            bluetoothSocket.connect()
+                            if (!bluetoothSocket.isConnected) {
+                                bluetoothSocket.connect()
+                                Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "이미 연결되어 있습니다.", Toast.LENGTH_SHORT).show()
+                            }
                             flag = true
-                            Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
                         } catch (e: IOException) {
                             e.printStackTrace()
+                            Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                         break
                     }
                 }
                 if (!flag) {
-                    Toast.makeText(context, "정비실 노트북 이름이 잘못되었습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "페어링된 기기 목록에서 [${pcName}]을 찾을 수 없습니다..", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(context, "페어링된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
@@ -141,39 +139,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             }
                         } else if (size == 0) {
                             continue
-                        } else {
+                        } else { // 작동하지 않음
                             bluetoothConnectionListener?.onBluetoothDisconnected()
                             Log.d("bluetoothDisconnected", "블루투스 연결 끊김")
                         }
-                        /*
-
-                        val lengthBuffer = ByteArray(4) // 길이는 int로 받겠습니다
-                        inputStream.read(lengthBuffer, 0, 4)
-                        val dataSize = ByteBuffer.wrap(lengthBuffer).int
-
-                        Log.d("test", dataSize.toString())
-
-                        val dataBuffer = ByteArray(1024) // 한 번에 받을 byteArray 단위
-
-                        var bytesRead = 0
-
-                        while (bytesRead < dataSize) {
-                            val result = inputStream.read(dataBuffer, bytesRead, 1024)
-                            byteStream.write(dataBuffer, 0, result) // 이 부분 추가
-                            bytesRead += result
-
-                            if (bytesRead == dataSize) {
-                                break
-                            }
-                        }
-
-                        val byteArray = byteStream.toByteArray()
-
-                        // 정상적으로 데이터를 받았다면
-                        if (byteArray.isNotEmpty()) {
-                            clearSendingState() // 다음 큐로 넘김
-                            processData(byteArray) // 데이터 처리 함수 호출
-                        }*/
                     }
                 } catch (e: Exception) {
                     Log.d("Exception", e.toString())
@@ -190,7 +159,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         bluetoothSocket.close()
     }
 
-    fun requestData(type:RequestType, params:String, callback:RequestCallback){
+    fun requestData(type:RequestType, params:String, callback:RequestCallback) {
         performSend(type, params, callback)
         /*
         if (!isSending) {
@@ -201,15 +170,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }*/
     }
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
-        if (!bluetoothSocket.isConnected) {
-            bluetoothDataListener?.onError(IOException("Bluetooth socket is not connected"))
-            return
-        }
-
-        //isSending = true
         try {
-            // 앱에서 서버로 type 전송.
-
             outputStream = bluetoothSocket.outputStream
             var sendMsg: ByteArray = byteArrayOf()
             sendMsg += type.name.toByteArray(Charsets.UTF_8)
@@ -240,8 +201,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     buffer.get(byteArray)
                     outputStream.write(byteArray)
 
-                    /*buffer.flip()
-                    outputStream.write(buffer.array())*/
                     outputStream.flush()
                     Log.d("bluetooth_SendData", byteArrayToHex(buffer.array()))
                     buffer.clear()
@@ -255,20 +214,20 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 outputStream.flush()
                 Log.d("bluetooth_SendData_Last", byteArrayToHex(buffer.array()))
             }
+
+            // 전송 완료
+
+            setBluetoothDataListener(object : BluetoothDataListener {
+                override fun onSuccess(result: String, type: Type) {
+                    callback.onSuccess(result, type)
+                }
+                override fun onError(e: Exception) {
+                }
+            })
         } catch (e: Exception) {
             // 전송 중 에러
             callback.onError(e)
         }
-        setBluetoothDataListener(object : BluetoothDataListener {
-            override fun onSuccess(result: String, type: Type) {
-                callback.onSuccess(result, type)
-            }
-
-            override fun onError(e: Exception) {
-
-            }
-        })
-
     }
     fun byteArrayToHex(byteArray: ByteArray): String {
         val hexChars = CharArray(byteArray.size * 2)
@@ -446,8 +405,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
+            RequestType.RENTAL_REQUEST_SHEET_APPLY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
         }
-    }/*
+    }
+    /*
     private fun clearSendingState() {
         isSending = false
         if (messageQueue.isNotEmpty()) {
@@ -467,56 +431,94 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
     }
     fun standbyProcess() {
-        // 보류 항목 모두 전송
         var dbHelper = DatabaseHelper(context)
-        val rentalList = dbHelper.getRentalStandby()
-        val returnList = dbHelper.getReturnStandby()
-        val rentalRequestList = dbHelper.getRentalRequestStandby()
-        for ((id, json) in rentalList) {
-            try {
-                requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, json, object:
-                    BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result == "good") dbHelper.updateStandbyStatus(id)
-                    }
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
-                    }
-                })
-            } catch (e: IOException) {
-                Log.d("standby","cannot send rental standby")
-            }
-        }
-        for ((id, json) in returnList) {
-            try {
-                requestData(RequestType.RETURN_SHEET_FORM_STANDBY, json, object:
-                    BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result == "good") dbHelper.updateStandbyStatus(id)
-                    }
+        var isReady = true
+        var standbyList = dbHelper.getAllStandbyWithId()
+        for (standby in standbyList) {
+            when (standby.second.type) {
+                "RENTALREQUEST" -> {
+                    try {
+                        isReady = false
+                        requestData(RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY, standby.second.json, object :
+                                BluetoothManager.RequestCallback {
+                                override fun onSuccess(result: String, type: Type) {
+                                    Log.d("standby",result)
+                                    try {
+                                        if (result == "good") {
+                                            isReady = true
+                                            dbHelper.updateStandbyStatus(standby.first)
+                                        } else {
+                                            Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("standby", "Error updating standby status", e)
+                                    }
+                                }
 
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
+                                override fun onError(e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            })
+                    } catch (e: IOException) {
+                        Log.d("standby", "cannot send return standby")
                     }
-                })
-            } catch (e: IOException) {
-                Log.d("standby","cannot send return standby")
-            }
-        }
-        for ((id, json) in rentalRequestList) {
-            try {
-                requestData(RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY, json, object:
-                    BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result == "good") dbHelper.updateStandbyStatus(id)
+                }
+                "RENTAL" -> {
+                    isReady = false
+                    try {
+                        requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, standby.second.json, object:
+                            BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                Log.d("standby",result)
+                                try {
+                                    if (result == "good") {
+                                        isReady = true
+                                        dbHelper.updateStandbyStatus(standby.first)
+                                    } else {
+                                        Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("standby", "Error updating standby status", e)
+                                }
+                            }
+                            override fun onError(e: Exception) {
+                                e.printStackTrace()
+                            }
+                        })
+                    } catch (e: IOException) {
+                        Log.d("standby","cannot send rental standby")
                     }
+                }
+                "RETURN" -> {
+                    isReady = false
+                    try {
+                        requestData(RequestType.RETURN_SHEET_FORM_STANDBY, standby.second.json, object:
+                            BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                Log.d("standby",result)
+                                try {
+                                    if (result == "good") {
+                                        isReady = true
+                                        dbHelper.updateStandbyStatus(standby.first)
+                                    } else {
+                                        Log.d("standby", "updateStandbyStatus not called because result is not 'good'")
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("standby", "Error updating standby status", e)
+                                }
+                            }
 
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
+                            override fun onError(e: Exception) {
+                                e.printStackTrace()
+                            }
+                        })
+                    } catch (e: IOException) {
+                        Log.d("standby","cannot send return standby")
                     }
-                })
-            } catch (e: IOException) {
-                Log.d("standby","cannot send return standby")
+                }
+            }
+            while (!isReady) {
+
             }
         }
         dbHelper.close()

@@ -86,6 +86,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/RentalBtnField"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -93,6 +94,8 @@
 
                     <ImageButton
                         android:id="@+id/RentalBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"
@@ -112,6 +115,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ReturnBtnField"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -119,6 +123,8 @@
 
                     <ImageButton
                         android:id="@+id/ReturnBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"
@@ -138,6 +144,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/StandbyBtnField"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -145,6 +152,8 @@
 
                     <ImageButton
                         android:id="@+id/StandbyBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"
@@ -164,6 +173,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/RegisterBtnField"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -171,6 +181,8 @@
 
                     <ImageButton
                         android:id="@+id/RegisterBtn"
+                        android:focusable="false"
+                        android:clickable="false"
                         android:layout_width="54dp"
                         android:layout_height="51dp"
                         android:layout_gravity="center"

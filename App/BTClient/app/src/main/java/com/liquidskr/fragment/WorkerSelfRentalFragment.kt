@@ -214,29 +214,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         recyclerView.adapter = adapter
         return view
     }
-    fun fixCode(input: String): String {
-        val typoMap = mapOf(
-            'ㅁ' to 'A',
-            'ㅠ' to 'B',
-            'ㅊ' to 'C',
-            'ㅇ' to 'D',
-            'ㄷ' to 'E',
-            'ㄹ' to 'F',
-            'ㅎ' to 'G'
-        )
-        val correctedText = StringBuilder()
-        for (char in input) {
-            val correctedChar = typoMap[char] ?: char
-            correctedText.append(correctedChar)
-        }
-        return correctedText.toString()
-    }
-    companion object {
-        fun newInstance(): WorkerSelfRentalFragment {
-            val fragment = WorkerSelfRentalFragment()
-            return fragment
-        }
-    }
 
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
         sharedViewModel.toolWithCountList = list
