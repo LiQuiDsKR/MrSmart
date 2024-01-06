@@ -89,7 +89,7 @@ class ManagerRentalFragment() : Fragment() {
         val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
             val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -106,7 +106,7 @@ class ManagerRentalFragment() : Fragment() {
             sharedViewModel.rentalRequestToolIdList.clear()
             val fragment = ManagerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }

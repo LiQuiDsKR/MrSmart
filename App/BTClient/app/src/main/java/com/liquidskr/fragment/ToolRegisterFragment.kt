@@ -15,7 +15,6 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.KeyEventDispatcher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,15 +22,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
-import java.lang.reflect.Type
-import java.security.Key
 
 
 class ToolRegisterFragment() : Fragment() {
@@ -72,7 +65,7 @@ class ToolRegisterFragment() : Fragment() {
         val adapter = ToolRegisterAdapter(tools) { tool ->
             val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -90,7 +83,7 @@ class ToolRegisterFragment() : Fragment() {
                     val tool = dbHelper.getToolByTBT(label)
                     val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, fragment)
+                        .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack(null)
                         .commit()
                 } catch(e:Exception) {
@@ -128,7 +121,7 @@ class ToolRegisterFragment() : Fragment() {
                     val dbHelper = DatabaseHelper(requireContext())
                     val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, fragment)
+                        .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack(null)
                         .commit()
                     sharedViewModel.qrScannerText = ""

@@ -62,49 +62,31 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
             bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
-        rentalBtn.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
-            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
-            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
+        rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .commit()
         }
 
         returnBtnField.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_on_02)
-            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
-            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
-            val lobbyActivity = activity as? LobbyActivity
-
             val fragment = ManagerReturnFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .commit()
         }
 
         standbyBtnField.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
-            standbyBtn.setImageResource(R.drawable.ic_menu_on_03)
-            registerBtn.setImageResource(R.drawable.ic_menu_off_04)
             val fragment = ManagerStandByFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .commit()
         }
 
         registerBtnField.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
-            standbyBtn.setImageResource(R.drawable.ic_menu_off_03)
-            registerBtn.setImageResource(R.drawable.ic_menu_on_04)
             val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment, "ToolRegisterFragment")
+                .replace(R.id.fragmentContainer, fragment, "ToolRegisterFragment")
                 .commit()
         }
 
