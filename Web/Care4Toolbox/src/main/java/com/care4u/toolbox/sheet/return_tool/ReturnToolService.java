@@ -111,14 +111,14 @@ public class ReturnToolService {
 				List<Tag> tagSiblings = tagRepository.findByTagGroup(tag.getTagGroup());
 				
 				for (Tag t : tagSiblings) {
-					if (!tag.getToolbox().equals(savedReturnSheet.getToolbox())){
-						tag.updateToolbox(savedReturnSheet.getToolbox());
-						tagService.updateToolbox(new TagDto(tag));
+					if (!t.getToolbox().equals(savedReturnSheet.getToolbox())){
+						t.updateToolbox(savedReturnSheet.getToolbox());
+						tagService.updateToolbox(new TagDto(t));
 					}
-					tag.updateRentalTool(null);
-					tagService.updateRentalTool(new TagDto(tag));
+					t.updateRentalTool(null);
+					tagService.updateRentalTool(new TagDto(t));
 					
-					logger.info("tag ["+tag.getMacaddress() + "] returned.");
+					logger.info("tag ["+t.getMacaddress() + "] returned.");
 				}
 			}
 		}
