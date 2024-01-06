@@ -328,6 +328,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}	
 			break;
@@ -346,7 +347,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -366,8 +367,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -382,9 +385,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -397,8 +401,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -411,8 +417,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -505,10 +513,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());	
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -521,7 +529,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
-		    		logger.info(e.getMessage());
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -541,6 +549,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}
 			break;
@@ -555,8 +564,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalArgumentException e) {
 		    		handler.sendData(e.getMessage());
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    		
 		    	}
 			}
@@ -578,8 +589,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalArgumentException e) {
 		    		handler.sendData(keyword + e.getMessage());
+		    		e.printStackTrace();
 		    	}catch(Exception e) {
 		    		handler.sendData(keyword + "bad");
+		    		e.printStackTrace();
 		    	}
 			}
 			break;

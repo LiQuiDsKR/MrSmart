@@ -198,7 +198,8 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                                                         modifiedTag = tag.macaddress
                                                     }
                                                 } else { // 한개 있다면
-                                                    if (!(tool.Tags == tag.macaddress)) {
+
+                                                    if (!(tool.Tags == tag.tagGroup)) {
                                                         modifiedTag = tool.Tags + "," + tag
                                                         handler.post {
                                                             Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
@@ -219,7 +220,7 @@ class ManagerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRental
                                         rentalToolList.add(modifiedRentalTool)
                                     }
                                     val rentalSheet = RentalSheetDto(outstandingSheet.rentalSheetDto.id, outstandingSheet.rentalSheetDto.workerDto, outstandingSheet.rentalSheetDto.leaderDto, outstandingSheet.rentalSheetDto.approverDto, outstandingSheet.rentalSheetDto.toolboxDto, outstandingSheet.rentalSheetDto.eventTimestamp, rentalToolList)
-                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingSheet.id, rentalSheet, outstandingSheet.totalCount, outstandingSheet.totalOutstandingCount,outstandingSheet.outstandingStatus)
+                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingSheet.id, rentalSheet, outstandingSheet.totalCount, outstandingSheet.totalOutstandingCount,outstandingSheet.outstandingState)
                                     Log.d("newRentalSheet",outStandingRentalSheetDto.toString())
                                     outstandingSheet = outStandingRentalSheetDto
                                 } else {

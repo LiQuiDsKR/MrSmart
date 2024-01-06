@@ -1,6 +1,6 @@
 package com.mrsmart.standard.rental
 
 data class RentalRequestSheetCall(
-    val sheetStatus: SheetStatus,
+    val sheetState: SheetState,
     val toolboxId: Long
 )

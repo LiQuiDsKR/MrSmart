@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.liquidskr.fragment.ManagerFragment
 import com.liquidskr.fragment.ManagerRentalFragment
@@ -35,7 +36,6 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
     private var workerFragment: WorkerFragment? = null
-    private lateinit var scannerListener: MyScannerListener
 
     private var isPopupVisible = false
 
@@ -59,32 +59,23 @@ class LobbyActivity : AppCompatActivity() {
         fun onConfirmButtonClicked()
         fun onCancelButtonClicked()
     }
-    interface ScannerListener {
-        fun onTextChanged(text: String)
-        fun onTextFinished()
-    }
-    /*
+
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             Log.d("SCANNER", "some key pressed, $event")
-            when (event.keyCode) {
-                KeyEvent.KEYCODE_ENTER -> {
-                    // Dispatch onTextFinished event
-                    scannerListener.onTextFinished()
-                    return true // Consume the event
-                }
-                else -> {
-                    if (event.scanCode >= 2 && event.scanCode <= 10) {
-                        // Modify sharedViewModel.qrScannerText directly
-                        sharedViewModel.qrScannerText += (event.scanCode - 1).toString()
-                        // Dispatch onTextChanged event
-                        scannerListener.onTextChanged(sharedViewModel.qrScannerText)
-                    }
+            if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
+                //myScannerListener!!?.onEnter()
+                // return true
+            } else {
+                if (event.scanCode >= 2 && event.scanCode <= 10) {
+                    sharedViewModel.qrScannerText += (event.scanCode - 1).toString()
+                } else if (event.keyCode == KEYCODE_0) {
+                    sharedViewModel.qrScannerText += "0"
                 }
             }
         }
         return super.dispatchKeyEvent(event)
-    }*/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

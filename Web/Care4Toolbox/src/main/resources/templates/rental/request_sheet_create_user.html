@@ -581,6 +581,17 @@
 						newRowString += "</td>";
 					});
 					newRowString += 
+						'<div class="input-group large col-8 bootstrap-touchspin p-1" style="min-width:200px;">'+
+							'<span class="input-group-btn input-group-prepend bootstrap-touchspin-injected">'+
+								'<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button">-</button>'+
+								'</span>'+
+								'<input id="demo9" type="text" value="1" name="demo0" class="form-control toolCount" style="text-align:center;">'+
+								'<span class="input-group-btn input-group-append bootstrap-touchspin-injected">'+
+									'<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button">+</button>'+
+								'</span>'+
+						'</div>';
+					
+					const backupstring = 
 						'<td class="d-flex justify-content-between align-item-center">' +
 							'<a  class="btn bg-success increaseBtn p-2">' +
 								'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
@@ -597,11 +608,15 @@
 
 					const increaseBtn = newRow.querySelector(".increaseBtn");
 					const decreaseBtn = newRow.querySelector(".decreaseBtn");
+					const toolCount = newRow.querySelector(".toolCount");
 					increaseBtn.addEventListener("click", function () {
 						increaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
 					});
 					decreaseBtn.addEventListener("click", function () {
 						decreaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+					toolCount.addEventListener("change", function () {
+						changeCount.apply(this,[Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr"))]);
 					});
 					stack.push({key: "a", param: id});
 
@@ -673,7 +688,8 @@
 						}
 						list[index].count++;
 						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-						count.textContent = parseInt(count.textContent) + 1;
+						count.value = parseInt(count.value) + 1;
+						console.log(count.value);
 
 						stack.push({key: "i", param: index});
 					}
@@ -690,10 +706,54 @@
 			} else {
 				list[index].count--;
 				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-				count.textContent = parseInt(count.textContent) - 1;
+				count.value = parseInt(count.value) - 1;
 
 				stack.push({key: "d", param: index});
 			}
+		}
+		//대여 신청 수량을 변경.
+		// : toolCount Input을 변경했을 때 실행.
+		function changeCount(index){
+			
+						console.log(this,this.value);
+			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
+				.then(stockData => {
+					if (stockData.goodCount < parseInt(this.value)) {
+						Swal.fire({
+							type: "info",
+							title: "재고 부족",
+							text: "이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
+						}).then(result=>{
+							this.value=stockData.goodCount;
+							list[index].count=this.value;
+						});
+						return;
+					} else {
+						if (index >= list.length) {
+							return "없다 그런거";
+						}
+						if (parseInt(this.value) < 1) {
+							Swal.fire({
+								type: 'question',
+								title: '입력 범위 밖',
+								html: '<p>0 이하의 값을 입력하셨습니다. 목록에서 현재 공기구를 제외하시겠습니까?</p>',
+								showCancelButton: true,
+								confirmButtonText: '예',
+								cancelButtonText: '아니오',
+								buttonStyling: false,
+							}).then(result => {
+								if (result.value == true) {
+									removeTool(list[index].id);
+								}else{
+									this.value=1;
+									list[index].count=this.value;
+								}
+							});
+						} else {
+							list[index].count=this.value;
+						}
+					}
+				})
 		}
 
 		/*

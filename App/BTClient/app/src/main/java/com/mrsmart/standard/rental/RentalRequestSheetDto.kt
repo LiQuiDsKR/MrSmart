@@ -8,7 +8,7 @@ data class RentalRequestSheetDto(
     var workerDto: MembershipDto,
     var leaderDto: MembershipDto,
     var toolboxDto: ToolboxDto,
-    var status: SheetStatus,
+    var status: SheetState,
     var eventTimestamp: String,
     var toolList: List<RentalRequestToolDto>
 )

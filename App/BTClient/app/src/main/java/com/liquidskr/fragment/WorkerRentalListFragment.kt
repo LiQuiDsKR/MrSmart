@@ -23,6 +23,7 @@ import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.rental.SheetState
 import java.lang.reflect.Type
 
 class WorkerRentalListFragment() : Fragment() {
@@ -69,11 +70,14 @@ class WorkerRentalListFragment() : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
 
         val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
-            val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
-                .commit()
+            if (rentalRequestSheet.status != SheetState.REQUEST) {
+                val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+
         }
         recyclerView.adapter = adapter
 

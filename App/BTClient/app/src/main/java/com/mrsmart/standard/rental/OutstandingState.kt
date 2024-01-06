@@ -1,5 +1,5 @@
 package com.mrsmart.standard.rental
 
-enum class OutstandingStatus {
+enum class OutstandingState {
     READY, REQUEST, DONE
 }
