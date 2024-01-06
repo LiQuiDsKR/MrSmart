@@ -41,7 +41,7 @@ class ManagerRentalFragment() : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
-    private val REQUEST_PAGE_SIZE = 10
+    private val REQUEST_PAGE_SIZE = 2
 
     private lateinit var bluetoothManager: BluetoothManager
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
@@ -126,7 +126,7 @@ class ManagerRentalFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
-                    val totalPage = sheetCount
+                    val totalPage = Math.ceil(sheetCount/REQUEST_PAGE_SIZE.toDouble()).toInt()
                     rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
                     if (sheetCount > 0) { // UI블로킹 start
                         requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
@@ -152,8 +152,8 @@ class ManagerRentalFragment() : Fragment() {
                 rentalRequestSheetReadyByMemberReq.process(page)
                 handler.post { // UI블로킹 start
                     progressBar.progress = page.pageable.page
-                    if (page.total > 0) {
-                        progressText.text = "대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total}, ${page.pageable.page * 100 / (page.total)}%"
+                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
+                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
                     }
                 } // UI블로킹 end
             }

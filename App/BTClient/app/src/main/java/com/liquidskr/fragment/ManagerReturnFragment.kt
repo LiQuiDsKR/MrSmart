@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -39,6 +41,14 @@ class ManagerReturnFragment() : Fragment() {
     private lateinit var bluetoothManager: BluetoothManager
     lateinit var searchSheetEdit: EditText
     lateinit var sheetSearchBtn: ImageButton
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // // UI블로킹 end
+    private val REQUEST_PAGE_SIZE = 2
+
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
 
@@ -53,7 +63,7 @@ class ManagerReturnFragment() : Fragment() {
         }
 
         override fun onLastPageArrived() {
-
+            hidePopup()
         }
 
         override fun onError(e: Exception) {
@@ -61,7 +71,7 @@ class ManagerReturnFragment() : Fragment() {
         }
         override fun onOutstandingRentalSheetUpdated(sheetList: List<OutstandingRentalSheetDto>) {
             outStandingRentalSheetList.addAll(sheetList)
-            requireActivity().runOnUiThread {
+            handler.post {
                 (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(outStandingRentalSheetList)
             }
         }
@@ -74,6 +84,12 @@ class ManagerReturnFragment() : Fragment() {
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
+
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressBar = view.findViewById(R.id.progressBar)
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
@@ -98,15 +114,21 @@ class ManagerReturnFragment() : Fragment() {
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()
 
+        showPopup()
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    val totalPage = Math.ceil(sheetCount/REQUEST_PAGE_SIZE.toDouble()).toInt()
                     outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                    requestOutstandingRentalSheetByMembership(0, id)
+                    if (sheetCount>0){
+                        requestOutstandingRentalSheetByMembership(0, id)
+                    } else{
+                        hidePopup()
+                    }
+                    progressBar.max=totalPage
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
                 }
@@ -122,6 +144,12 @@ class ManagerReturnFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)
+                handler.post { // UI블로킹 start
+                    progressBar.progress = page.pageable.page
+                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
+                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
+                    }
+                } // UI블로킹 end
             }
             override fun onError(e: Exception) {
                 e.printStackTrace()
@@ -160,5 +188,27 @@ class ManagerReturnFragment() : Fragment() {
                 e.printStackTrace()
             }
         })
+    }
+
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
 }
