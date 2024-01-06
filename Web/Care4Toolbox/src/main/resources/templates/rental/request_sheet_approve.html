@@ -227,7 +227,7 @@
 			)
 				.then(data => {
 					membershipId = data.id;
-					mainData.membership.id = membershipId;
+					//mainData.membership.id = membershipId;
 					return new Promise((resolved, rejected) => {
 						if (data.role === "USER") {
 							abcHttp.get(

@@ -134,6 +134,17 @@ public class ReturnSheetService {
 
 		return page.map(e->convertToDto(e));
 	}
+	@Transactional(readOnly=true)
+	public Page<ReturnSheetDto> getPage(long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		if(membershipOptional.isEmpty()) {
+			logger.error("invalid membership id : "+membershipId);
+			return null;
+		}
+		Membership member = membershipOptional.get();
+		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e->convertToDto(e));
+	}
 	
 	/**
 	 * 다음 순서로 업데이트 됩니다.
@@ -196,17 +207,6 @@ public class ReturnSheetService {
 		outstandingRentalSheetService.update(resultDto);
 		
 		return resultDto;
-	}
-
-	public Page<ReturnSheetDto> getPage(long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
-		if(membershipOptional.isEmpty()) {
-			logger.error("invalid membership id : "+membershipId);
-			return null;
-		}
-		Membership member = membershipOptional.get();
-		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
-		return page.map(e->convertToDto(e));
 	}
 	
 	@Transactional

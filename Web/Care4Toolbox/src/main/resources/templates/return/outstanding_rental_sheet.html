@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layouts/layout1}">
+	layout:decorate="~{layouts/layout1}"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
@@ -34,7 +35,7 @@
 						<h4 class="font-30 m-3">공기구 미반납 기록</h4>
 						<!-- Btn header -->
 						<div class="d-flex row align-items-center ml-auto">
-							<div class="col-12 col-md-5">
+							<div class="col-12 col-md-5" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 								<div class="d-flex align-items-center flex-nowrap mr-4"style="box-sizing: content-box;">
 									<div class="custom-select style--two mr-4" style="max-width:200px;">
 										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
@@ -59,7 +60,8 @@
 
 							<!-- Search header -->
 							<div
-								class="d-flex col-12 col-md-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+								th:classappend="${#authorization.expression('hasAnyRole(''ADMIN'',''MANAGER'')')} ? 'col-12 col-md-6' : 'col-12'"
+								class="d-flex align-items-center justify-content-end media-body mt-3 mt-sm-0">
 								<!-- layer 1 -->
 								<div class="row flex-wrap">
 

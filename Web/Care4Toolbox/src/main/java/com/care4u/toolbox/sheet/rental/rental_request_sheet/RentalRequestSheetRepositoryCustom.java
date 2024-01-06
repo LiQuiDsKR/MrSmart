@@ -19,4 +19,6 @@ public interface RentalRequestSheetRepositoryCustom {
 	long countByMembership(SheetState status, Membership membership);
 	Page<RentalRequestSheet> findByToolbox(SheetState status, Toolbox toolbox, Pageable pageable);
 	long countByToolbox(SheetState status, Toolbox toolbox);
+	Page<RentalRequestSheet> findByToolboxAndTimestamp(SheetState status, Toolbox toolbox, LocalDateTime startDate,LocalDateTime endDate, Pageable pageable);
+	Page<RentalRequestSheet> findByMembershipAndTimestamp(SheetState status, Membership membership,LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

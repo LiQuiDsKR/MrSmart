@@ -43,13 +43,12 @@ class ManagerReturnFragment() : Fragment() {
     lateinit var qrEditText: EditText
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
-    // private val lobbyActivity = requireActivity() as LobbyActivity
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
-    /*
+
     val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
         override fun onTextFinished() {
             val tag = sharedViewModel.qrScannerText
@@ -71,7 +70,6 @@ class ManagerReturnFragment() : Fragment() {
             })
         }
     }
-    */
 
     private lateinit var outstandingRentalSheetByMemberReq: OutstandingRentalSheetByMemberReq
     private val outstandingRentalSheetRequestListener = object: OutstandingRentalSheetByMemberReq.Listener {
@@ -98,7 +96,8 @@ class ManagerReturnFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
 
-        // lobbyActivity.myScannerListener?.setListener(listener)
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
 
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
@@ -154,6 +153,12 @@ class ManagerReturnFragment() : Fragment() {
         getOutstandingRentalSheetList()
         qrEditText.requestFocus()
         return view
+    }
+
+    override fun onDestroyView() {
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(null)
+        super.onDestroyView()
     }
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()

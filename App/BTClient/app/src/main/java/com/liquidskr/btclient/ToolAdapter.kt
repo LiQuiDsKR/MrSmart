@@ -28,18 +28,30 @@ class ToolAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLit
         val currentTool = tools[position]
         holder.toolName.text = currentTool.name
         holder.toolSpec.text = currentTool.spec
-        var isChecked: Boolean = false
+
+        var isSelected = selectedTools.contains(currentTool)
+        updateViewHolderSelection(holder, isSelected)
+
         holder.itemView.setOnClickListener {
-            isChecked = !isChecked
-            if (isChecked) {
-                holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_on)
+            val newSelectedState = !isSelected
+            updateViewHolderSelection(holder, newSelectedState)
+            if (newSelectedState) {
                 selectedTools.add(currentTool)
+                isSelected = true
             } else {
-                holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_off)
                 selectedTools.remove(currentTool) // 체크해제된 항목은 제거
+                isSelected = false
             }
         }
     }
+    private fun updateViewHolderSelection(holder: ToolViewHolder, isSelected: Boolean) {
+        if (isSelected) {
+            holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_on)
+        } else {
+            holder.toolCheck.setBackgroundResource(R.drawable.icon_choice_ic_choice_round_off)
+        }
+    }
+
     fun getSelectedTools(): List<ToolDtoSQLite> {
         return selectedTools
     }

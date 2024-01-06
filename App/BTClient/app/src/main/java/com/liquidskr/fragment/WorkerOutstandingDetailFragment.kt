@@ -83,7 +83,6 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
-                        Log.d("RETURNSHEET", "GOOD")
                         handler.post {
                             Toast.makeText(requireActivity(), "반납 신청 완료", Toast.LENGTH_SHORT).show()
                         }
@@ -91,7 +90,6 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
                         handler.post {
                             Toast.makeText(requireActivity(), "반납 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                         }
-                        Log.d("RETURNSHEET", "notgood")
                         requireActivity().supportFragmentManager.popBackStack()
                     }
                 }

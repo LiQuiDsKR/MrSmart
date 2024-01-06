@@ -78,23 +78,21 @@
 						<h4 class="font-30 m-3">공기구 반납</h4>
 						<!-- Btn header -->
 						<div class="d-flex row align-items-center ml-auto">
-							<div class="col-4">
-								<div class="d-flex align-items-center flex-nowrap mr-4"
-									style="box-sizing: content-box;">
+							<div class="col-12 col-md-5">
+								<div class="d-flex align-items-center flex-nowrap mr-4"style="box-sizing: content-box;">
 									<div class="custom-select style--two mr-4" style="max-width:200px;">
 										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
 											<option value="membership" selected>작업자/리더</option>
 										</select>
 									</div>
 									<div id="searchByForm" style="width: 200px;">
-										<div id="membershipForm" class="d-flex justify-content-between">
+										<div id="membershipForm" class="d-flex justify-content-between">											
 											<div id="membership">
 												선택
 											</div>
 											<div>
-												<span id="membershipEditModalBtn" class="contact-edit"
-													data-toggle="modal" data-target="#membershipEditModal"
-													style="cursor:pointer;">
+												<span id="membershipEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#membershipEditModal" style="cursor:pointer;">
 													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
 												</span>
 											</div>
@@ -104,13 +102,14 @@
 							</div>
 
 							<!-- Search header -->
-							<div class="d-flex col-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+							<div
+								class="d-flex col-12 col-md-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
 								<!-- layer 1 -->
-								<div class="row flex-nowrap">
+								<div class="row flex-wrap">
 
 
 									<!-- Form Group -->
-									<div class="form-group mr-2">
+									<div class="form-group mr-2 col-12 col-md-5">
 										<label class="mb-2 font-14 bold">시작 날짜</label>
 
 										<!-- Date Picker -->
@@ -126,7 +125,7 @@
 									<!-- End Form Group -->
 
 									<!-- Form Group -->
-									<div class="form-group">
+									<div class="form-group col-12 col-md-5">
 										<label class="mb-2 font-14 bold">종료 날짜</label>
 
 										<!-- Date Picker -->
@@ -224,7 +223,7 @@
 			)
 				.then(data => {
 					membershipId = data.id;
-					mainData.membership.id = membershipId;
+					//mainData.membership.id = membershipId;
 					return new Promise((resolved, rejected) => {
 						abcHttp.get(
 					'/toolbox/getbymanagerid',
@@ -334,17 +333,17 @@
 											<td class="retnalcount">${tool.count}</td>
 											<td class="outstandingcount">${tool.outstandingCount}</td>
 											<td class="returncount">
-												<div class="d-flex justify-content-between align-item-center">
-											        <a  class="btn bg-success increaseBtn p-2">
-											            <img src="/img/svg/plus_white.svg" alt="" class="svg "/>
-											        </a>
-											        <p class="d-flex align-items-center toolCount mb-0">0</p>
-											        <a  class="btn bg-danger decreaseBtn p-2">
-											            <img src="/img/svg/minus_white.svg" alt="" class="svg "/>
-											        </a>
-											    </div>
+												<div class="input-group large col-8 bootstrap-touchspin p-1" style="min-width:200px;">
+													<span class="input-group-btn input-group-prepend bootstrap-touchspin-injected">
+													<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button">+</button>
+													</span>
+													<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount" style="text-align:center;">
+													<span class="input-group-btn input-group-append bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button">-</button>
+													</span>
+												</div>
 											</td>
-											<td class="qrcode"></td>
+											<td class="qrcode">${tool.tags}</td>
 											<td class="toolstate">
 												<div class="custom-select style--two" style="max-width:none">
 													<select class="theme-input-style">
@@ -412,6 +411,12 @@
 					document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
 						element.addEventListener("click", function () {
 							decreaseCount.call(this, dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".toolCount select:not(.listener-added)").forEach(element => {
+						element.addEventListener("change", function () {
+							countChange.call(this, dataObj);
 						});
 						element.classList.add("listener-added");
 					});
@@ -513,13 +518,13 @@
 				Swal.fire({
 					type: "warning",
 					title: "반납 수량 경고",
-					text: "반납 예정 수량이 대여한 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
+					text: "반납 수량이 대여 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
 				});
 				*/
 				return;
 			} else {
 				dataObj.toolList[index].count++;
-				count.textContent = dataObj.toolList[index].count;
+				count.value = dataObj.toolList[index].count;
 			}
 			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
 			activateApproveBtn(this);
@@ -541,11 +546,37 @@
 				return;
 			} else {
 				dataObj.toolList[index].count--;
-				count.textContent = dataObj.toolList[index].count;
+				count.value = dataObj.toolList[index].count;
 			}
 			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
 			activateApproveBtn(this);
 		}
+		//반납 수량을 변경 (<input>)
+		function changeCount(dataObj) {
+			const row = this.closest("tr");
+			const outstandingCount = parseInt(row.querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			if (outstandingCount < this.value) {
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "반납 수량이 대여 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
+				}).then(result=>{
+					this.value = outstandingCount;
+					dataObj.toolList[index].count = outstandingCount;
+				})
+				return;
+			} else if (this.value<1){
+					this.value = 0;
+					dataObj.toolList[index].count = 0;
+			}else{
+				dataObj.toolList[index].count = this.value;
+			}
+			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			activateApproveBtn(this);
+		}
+		
+		
 		//공기구 상태 드롭다운 선택 시.
 		function toolStateChangeHandler(dataObj) {
 			const row = this.closest("tr");

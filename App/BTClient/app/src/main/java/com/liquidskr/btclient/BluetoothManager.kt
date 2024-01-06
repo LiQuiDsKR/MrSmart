@@ -110,10 +110,15 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         if (size > 0) {
                             val readDatas = ByteArray(size)
                             inputStream.read(readDatas, 0, size)
-                            Log.d("datas_readData",byteArrayToHex(readDatas))
+                            Log.d("readData(HEX)",byteArrayToHex(readDatas))
                             outputStream.write(readDatas)
                             if (dataSize == -1 && outputStream.size() > 4) {
-                                dataSize = ByteBuffer.wrap(outputStream.toByteArray(), 0, 4).int
+                                try {
+                                    dataSize = ByteBuffer.wrap(outputStream.toByteArray(), 0, 4).int
+                                } catch (e:Exception) {
+                                    Log.d("datasize_toInt","cannot convert to Int")
+                                }
+                                // dataSize = ByteBuffer.wrap(outputStream.toByteArray(), 0, 4).int
                                 val remainingBytes = outputStream.toByteArray().drop(4).toByteArray()
                                 if (remainingBytes.isNotEmpty()) {
                                     Log.d("datas",byteArrayToHex(remainingBytes))
@@ -406,6 +411,12 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             RequestType.RENTAL_REQUEST_SHEET_APPLY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+
+            // ###################
+            RequestType.TEST.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
