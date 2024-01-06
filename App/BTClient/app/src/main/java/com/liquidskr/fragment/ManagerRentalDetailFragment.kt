@@ -180,6 +180,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         confirmBtn.setOnClickListener {
             confirmBtn.isFocusable = false
             confirmBtn.isClickable = false
+            showPopup()
 
             var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
@@ -217,6 +218,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
+                                    hidePopup()
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
@@ -317,10 +319,24 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     }
     private fun showPopup() {
         isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
         popupLayout.visibility = View.VISIBLE
     }
     private fun hidePopup() {
-        isPopupVisible = false
-        popupLayout.visibility = View.GONE
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
+
 }

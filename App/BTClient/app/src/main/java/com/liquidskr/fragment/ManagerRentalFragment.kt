@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -125,14 +126,12 @@ class ManagerRentalFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / REQUEST_PAGE_SIZE.toDouble()).toInt()
+                    val totalPage = sheetCount
                     rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
                     if (sheetCount > 0) { // UI블로킹 start
                         requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
                     } else {
-                        handler.post {
-                            hidePopup()
-                        }
+                        hidePopup()
                     }
                     progressBar.max = totalPage // UI블로킹 end
                 } catch (e: Exception) {
@@ -166,11 +165,24 @@ class ManagerRentalFragment() : Fragment() {
     // ## 여기서부터 블루투스 송수신 시 UI블로킹 start
     private fun showPopup() {
         isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
         popupLayout.visibility = View.VISIBLE
     }
     private fun hidePopup() {
-        isPopupVisible = false
-        popupLayout.visibility = View.GONE
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
     // UI블로킹 end
 }
