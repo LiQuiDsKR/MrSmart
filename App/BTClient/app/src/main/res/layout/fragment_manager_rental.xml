@@ -27,31 +27,42 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="70dp"
                     android:background="@drawable/tool_background"
-                    android:gravity="right|center_vertical"
-                    android:orientation="horizontal">
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingLeft="35dp"
+                    android:paddingTop="5dp"
+                    android:paddingRight="35dp"
+                    android:paddingBottom="5dp">
 
-                    <EditText
-                        android:id="@+id/searchSheetEdit"
-                        android:layout_width="330dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        android:background="@null"
-                        android:ems="10"
-                        android:inputType="text"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:gravity="clip_horizontal|right"
+                        android:orientation="horizontal">
 
-                    <ImageButton
-                        android:id="@+id/sheetSearchBtn"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginRight="10dp"
-                        android:backgroundTint="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/icon_fix_ic_top_search_copy" />
+                        <EditText
+                            android:id="@+id/searchSheetEdit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:singleLine="true"
+                            android:text="" />
+
+                        <ImageButton
+                            android:id="@+id/sheetSearchBtn"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_gravity="center_vertical"
+                            android:backgroundTint="#00FFFFFF"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/icon_fix_ic_top_search_copy" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>

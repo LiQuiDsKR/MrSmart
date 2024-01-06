@@ -39,8 +39,9 @@ import java.lang.reflect.Type
 class ManagerReturnFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var searchSheetEdit: EditText
-    lateinit var sheetSearchBtn: ImageButton
+    private lateinit var searchSheetEdit: EditText
+    private lateinit var sheetSearchBtn: ImageButton
+    private lateinit var qrEditText: EditText
 
     private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
     private lateinit var popupLayout: View
@@ -84,7 +85,7 @@ class ManagerReturnFragment() : Fragment() {
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
-
+        qrEditText = view.findViewById(R.id.QREditText)
 
         popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
         progressBar = view.findViewById(R.id.progressBar)
@@ -100,14 +101,53 @@ class ManagerReturnFragment() : Fragment() {
         }
         recyclerView.adapter = adapter
 
+        qrEditText.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val qrcode = qrEditText.text.toString().replace("\n", "")
+                qrEditText.text.clear()
+                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG, "{tag:\"${qrcode}\"}", object: BluetoothManager.RequestCallback{
+                    override fun onSuccess(result: String, type: Type) {
+                        try {
+                            val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
+
+                            val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.fragmentContainerView, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        } catch (e: Exception) {
+                            handler.post {
+                                Toast.makeText(activity, "알 수 없는 오류로 인해 반납 전표를 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+
+                    override fun onError(e: Exception) {
+                        handler.post {
+                            Toast.makeText(activity, "해당 태그가 포함된 반납 전표를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
+                return@setOnEditorActionListener true
+            }
+            false
+        }
         sheetSearchBtn.setOnClickListener {
             val dbHelper = DatabaseHelper(requireContext())
             val name = searchSheetEdit.text.toString()
             val id = dbHelper.getMembershipIdByName(name)
             getOutstandingRentalSheetListByMembership(id)
+            qrEditText.requestFocus()
+        }
+
+        searchSheetEdit.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
         }
 
         getOutstandingRentalSheetList()
+        qrEditText.requestFocus()
         return view
     }
 

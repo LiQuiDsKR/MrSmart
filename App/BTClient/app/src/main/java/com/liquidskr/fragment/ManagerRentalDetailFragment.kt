@@ -267,6 +267,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             sheetCancel()
         }
 
+        qrEditText.requestFocus()
         return view
     }
 
