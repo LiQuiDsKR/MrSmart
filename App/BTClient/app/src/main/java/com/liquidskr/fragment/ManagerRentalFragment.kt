@@ -63,7 +63,7 @@ class ManagerRentalFragment() : Fragment() {
         }
         override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
             rentalRequestSheetList.addAll(sheetList)
-            requireActivity().runOnUiThread {
+            handler.post {
                 (recyclerView.adapter as RentalRequestSheetAdapter).updateList(rentalRequestSheetList)
             }
         }
@@ -126,10 +126,12 @@ class ManagerRentalFragment() : Fragment() {
                     sheetCount = result.toInt()
                     val totalPage = Math.ceil(sheetCount / 10.0).toInt()
                     rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
-                    if (sheetCount != 0) { // UI블로킹 start
+                    if (sheetCount > 0) { // UI블로킹 start
                         requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
                     } else {
-                        hidePopup()
+                        handler.post {
+                            hidePopup()
+                        }
                     }
                     progressBar.max = totalPage // UI블로킹 end
                 } catch (e: Exception) {
@@ -144,14 +146,14 @@ class ManagerRentalFragment() : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${1},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)
                 handler.post { // UI블로킹 start
                     progressBar.progress = page.pageable.page
-                    if (page.total != 0) {
-                        progressText.text = "대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
+                    if (page.total > 0) {
+                        progressText.text = "대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total}, ${page.pageable.page * 100 / (page.total)}%"
                     }
                 } // UI블로킹 end
             }

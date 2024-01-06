@@ -15,28 +15,34 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
-class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
+class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragment() {
 
     val tool: ToolDto = tool
+    val tagList: List<String> = tagList
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
     private lateinit var context: Context
+
+    private lateinit var switch_tag: Switch
+    private lateinit var switch_label: Switch
 
     private lateinit var scannerReceiver: LinearLayout
 
@@ -45,10 +51,8 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     lateinit var qrDisplay: TextView
     var tbt_qrcode: String = ""
 
-    lateinit var qr_tagRegisterBtn: LinearLayout
-
-    lateinit var qr_checkScanBtn: LinearLayout
-    lateinit var qr_checkScanEdit: EditText
+    lateinit var recyclerView: RecyclerView
+    lateinit var qrSearchText: EditText
 
     private lateinit var backButton: ImageButton
 
@@ -70,15 +74,16 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         override fun onConfirmButtonClicked() {
             val handler = Handler(Looper.getMainLooper())
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\"}",object:BluetoothManager.RequestCallback{
+            val tagGroup = if (tagList.size > 0) tagList[0] else ""
+            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
-                        handler.post {
-                            Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
-                        }
                         try {
                             val dbHelper = DatabaseHelper(context)
                             dbHelper.updateQRCodeById(tool.id, tbt_qrcode) // << 왜안되는지
+                            handler.post {
+                                Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
+                            }
                         } catch (e:Exception) {
                             handler.post {
                                 Toast.makeText(context, "라벨 정보가 DB에 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
@@ -122,21 +127,23 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 
+        switch_tag = view.findViewById(R.id.switch_tag)
+        switch_label = view.findViewById(R.id.switch_label)
+
         toolName.text = tool.name
         toolSpec.text = tool.spec
         scanBtn = view.findViewById(R.id.qr_scanBtn)
         qrTextEdit = view.findViewById(R.id.qr_textEdit)
         qrDisplay = view.findViewById(R.id.qr_display)
 
-        qr_tagRegisterBtn = view.findViewById(R.id.qr_tagRegisterBtn)
+        recyclerView = view.findViewById(R.id.qrRecyclerView)
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+        var adapter = ToolRegisterTagDetailAdapter(tagList)
 
-        qr_checkScanBtn = view.findViewById(R.id.qr_checkScanBtn)
-        qr_checkScanEdit = view.findViewById(R.id.qr_checkScanEdit)
         backButton = view.findViewById(R.id.backButton)
 
         confirmBtn = view.findViewById(R.id.confirmBtn)
-
-        var adapter = ToolRegisterTagDetailAdapter(emptyList())
 
         qrDisplay.text = "미등록"
         try {
@@ -154,110 +161,56 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        scanBtn.setOnClickListener {
+
+        scanBtn.setOnClickListener {// 삭제 예정
             qrTextEdit.text.clear()
             qrTextEdit.requestFocus()
             qrDisplay.text = "인식 중.."
         }
-
-        qr_checkScanBtn.setOnClickListener{
-            qr_checkScanEdit.text.clear()
-            qr_checkScanEdit.requestFocus()
-            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check)
+        switch_tag.setOnClickListener {
+            switch_label.isChecked = switch_tag.isChecked
+            switch_tag.isChecked = !switch_tag.isChecked
         }
-
-        qr_tagRegisterBtn.setOnClickListener {
-            val fragment = ToolRegisterTagDetailFragment(tool, emptyList(), "")
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        qr_checkScanEdit.setOnEditorActionListener { _, actionId, event ->
-            qr_checkScanBtn.setBackgroundResource(R.drawable.qr_check_ready)
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val qrcode = fixCode(qr_checkScanEdit.text.toString().replace("\n", ""))
-                bluetoothManager.requestData(RequestType.TAG_LIST,"{\"tag\":\"${qrcode}\"}",object:BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result == "null") {
-                            handler.post {
-                                Toast.makeText(context, "해당 태그는 등록되어 있지 않아 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            val tagList: List<String> = gson.fromJson(result, type)
-                            val fragment = ToolRegisterTagDetailFragment(tool, tagList, qrcode) // bluetooth로 받아야함
-                            requireActivity().supportFragmentManager.beginTransaction()
-                                .replace(R.id.fragmentContainerView, fragment)
-                                .addToBackStack(null)
-                                .commit()
-                            qr_checkScanEdit.text.clear()
-                        }
-                    }
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
-                    }
-                })
-
-                return@setOnEditorActionListener true
-            }
-
-            false
+        switch_label.setOnClickListener {
+            switch_tag.isChecked = switch_label.isChecked
+            switch_label.isChecked = !switch_label.isChecked
         }
 
         qrTextEdit.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                tbt_qrcode = fixCode(qrTextEdit.text.toString().replace("\n", ""))
-                // qrcode가 이미 쓰인건지 체크
-                qrDisplay.text = "${tbt_qrcode}"
-                qrTextEdit.text.clear()
-                qrTextEdit.requestFocus()
-                return@setOnEditorActionListener true
+                val qrcode = qrTextEdit.text.toString().replace("\n", "")
+                if (switch_label.isChecked) { // Label 모드
+                    qrTextEdit.requestFocus()
+                    tbt_qrcode = qrcode
+                    // qrcode가 이미 쓰인건지 체크
+                    qrDisplay.text = "${tbt_qrcode}"
+                    qrTextEdit.text.clear()
+                    qrTextEdit.requestFocus()
+                    return@setOnEditorActionListener true
+                } else { // Tag 모드
+                    qrSearchText.requestFocus()
+                    var list = adapter.qrcodes.toMutableList()
+                    if (!(qrcode in list)) {
+                        list.add(qrcode)
+                    } else {
+                        adapter.qrCheck(qrcode)
+                    }
+                    qrSearchText.text.clear()
+                    qrSearchText.requestFocus()
+                }
             }
+
+
 
             false
         }
+
 
         confirmBtn.setOnClickListener {
             showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
         }
 
-        /*
-        var scannerInput = ""
-        var scannerResult = ""
-        scannerReceiver.setOnKeyListener { v, keyCode, event ->
-            when(keyCode) {
-                KEYCODE_0 -> scannerInput += "0"
-                KEYCODE_1 -> scannerInput += "1"
-                KEYCODE_2 -> scannerInput += "2"
-                KEYCODE_3 -> scannerInput += "3"
-                KEYCODE_4 -> scannerInput += "4"
-                KEYCODE_5 -> scannerInput += "5"
-                KEYCODE_6 -> scannerInput += "6"
-                KEYCODE_7 -> scannerInput += "7"
-                KEYCODE_8 -> scannerInput += "8"
-                KEYCODE_9 -> scannerInput += "9"
-                KEYCODE_ENTER -> {
-                    scannerResult = scannerInput
-                    scannerInput = ""
-                    tbt_qrcode = scannerResult
-                    handler.post {
-                        qrDisplay.text = tbt_qrcode
-
-                    }
-                }
-            }
-            qrTextEdit.requestFocus()
-            true
-        }
-        qrTextEdit.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) {
-                Log.d("scannerRec", "LostFocus")
-                handler.postDelayed({
-                    scannerReceiver.requestFocus()
-                }, 1000)
-            }
-        }*/
+        recyclerView.adapter = adapter
 
         qrTextEdit.requestFocus()
         return view

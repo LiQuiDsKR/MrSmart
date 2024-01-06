@@ -12,6 +12,8 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.KeyEventDispatcher
 import androidx.fragment.app.Fragment
@@ -39,8 +41,13 @@ class ToolRegisterFragment() : Fragment() {
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
-    private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // // UI블로킹 end
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -61,8 +68,9 @@ class ToolRegisterFragment() : Fragment() {
 
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
+
         val adapter = ToolRegisterAdapter(tools) { tool ->
-            val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+            val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainerView, fragment)
                 .addToBackStack(null)
@@ -81,7 +89,7 @@ class ToolRegisterFragment() : Fragment() {
                 try {
                     val dbHelper = DatabaseHelper(requireContext())
                     val tool = dbHelper.getToolByTBT(label)
-                    val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+                    val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainerView, fragment)
                         .addToBackStack(null)
@@ -116,7 +124,7 @@ class ToolRegisterFragment() : Fragment() {
             scheduleTask(300) {
                 try {
                     val dbHelper = DatabaseHelper(requireContext())
-                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto())
+                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainerView, fragment)
                         .addToBackStack(null)
