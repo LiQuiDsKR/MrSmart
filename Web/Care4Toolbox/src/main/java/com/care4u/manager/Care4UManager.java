@@ -679,10 +679,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		case TEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
-				long num = jsonObj.getLong("number");
+				String string = jsonObj.getString("string");
 
 		    	try {
-					logger.debug("number : "+num);
+					logger.debug("number : "+string);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalArgumentException e) {
 		    		handler.sendData(keyword + e.getMessage());
@@ -694,9 +694,6 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		}
-		
 	}
-	
-	
 }
 

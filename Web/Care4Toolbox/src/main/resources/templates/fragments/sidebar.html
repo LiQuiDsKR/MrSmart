@@ -144,6 +144,12 @@
 					<span class="link-title">타 공구실 재고 조회</span>
 				</a>
 			</li>
+			<li class="" sec:authorize="hasRole('ADMIN')" >
+				<a th:href="@{/initialize/stock_status}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">재고 초기 설정</span>
+				</a>
+			</li>
 			<!-- 원본 -->
 			<li class="nav-category" hidden>Markets</li>
 			<li class="" hidden>

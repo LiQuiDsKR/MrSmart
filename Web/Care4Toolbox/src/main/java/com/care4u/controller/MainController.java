@@ -58,6 +58,11 @@ public class MainController {
     	return "test";
     }
     
+    @GetMapping(value="/initialize/stock_status")
+    public String initializeStock(Model model) {
+    	return "stock_initialize";
+    }
+    
     /*
     
     @GetMapping(value = "/tool_list")

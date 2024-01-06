@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+		.selected td {
+			background-color: #67CF94;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+			-webkit-transition: 0.2s ease;
+			-o-transition: 0.2s ease;
+			transition: 0.2s ease;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-20">
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white">
+						<h4 class="font-30 m-3">공기구 매입 등록</h4>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="row h-100">
+			<div class="col-12 h-100">
+				<!-- Card -->
+				<div class="card h-100">
+
+
+					<!-- Project Manager Upload -->
+					<div id="file-drop-area-wrappper">
+						<h4 class="font-20 mb-30">File Upload</h4>
+						<!-- Dropzone Start -->
+						<form
+							action="#"
+							id="dropzone01"
+							class="dropzone style--two"
+							method="post"
+							enctype="multipart/form-data">
+							<div
+								class="d-flex justify-content-center flex-column align-items-center align-self-center"
+								data-dz-message>
+								<div class="dz-message bold c2 font-20 mb-3">
+									Click or Drop files here to upload.
+								</div>
+								<div class="upload-icon">
+									<img
+										th:src="@{/img/svg/upload-down.svg}"
+										alt=""
+										class="svg" />
+								</div>
+							</div>
+						</form>
+						<!-- Dropzone End -->
+
+						<!-- End File drop area -->
+					</div>
+					<!-- End Project Manager Upload -->
+				</div>
+				<!-- End Card -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+		var membershipId=1;
+		$(document).ready(function () {
+			initializeDatepicker();
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code:parseInt(document.getElementById("user-code").textContent)
+				}
+			).then(data=>{
+				return new Promise((resolved,rejected)=>{
+					if (data==null){
+						rejected();
+					}else{						
+						membershipId=data.id;
+						resolved(data.id);
+					}
+				});
+			}).then(membershipId=>{	
+				load(membershipId);
+			});
+		});
+
+	</script>
+</th:block>
+
+</html>
