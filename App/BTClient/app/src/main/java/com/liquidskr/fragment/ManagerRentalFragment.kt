@@ -40,6 +40,7 @@ class ManagerRentalFragment() : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
+    private val REQUEST_PAGE_SIZE = 10
 
     private lateinit var bluetoothManager: BluetoothManager
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
@@ -124,7 +125,7 @@ class ManagerRentalFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    val totalPage = Math.ceil(sheetCount / REQUEST_PAGE_SIZE.toDouble()).toInt()
                     rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
                     if (sheetCount > 0) { // UI블로킹 start
                         requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
@@ -146,7 +147,7 @@ class ManagerRentalFragment() : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${1},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)

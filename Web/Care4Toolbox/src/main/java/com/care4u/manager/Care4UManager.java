@@ -703,6 +703,22 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	             }
 	         }
 	         break;
+		case TAG_AND_TOOLBOX_TOOL_LABEL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+	            JSONObject jsonObj = new JSONObject(paramJson);
+	            long toolId = jsonObj.getLong("toolId");
+	            long toolboxId = jsonObj.getLong("toolboxId");
+	            try {
+	            	tagService.listByToolIdAndToolboxId(toolId,toolboxId);
+	             }catch(IllegalArgumentException e) {
+	                handler.sendData(keyword + e.getMessage());
+	                e.printStackTrace();
+	             }catch(Exception e) {
+	                handler.sendData(keyword + "bad");
+	                e.printStackTrace();
+	             }
+	         }
+	         break;
 		case TEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
