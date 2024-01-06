@@ -121,7 +121,7 @@
 		abcHttp.get(
 			'/membership/getbycode',
 			{
-				code:parseInt( document.getElementById("user-code").textContent)
+				code: document.getElementById("user-code").textContent
 			}
 		)
 		.then(data=>{

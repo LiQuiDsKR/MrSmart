@@ -586,7 +586,19 @@
 						}
 					}
 				},
-				{"data": "password"},
+				{
+					"data": "password",
+					"type": String,
+					"render":function(data,type,row){
+						if(type==="display"){
+							if (row.role==="ADMIN") {
+								return "[열람 권한 없음]";
+							}else{
+								return data;
+							}
+						}
+					}
+				},
 				{
 					"data": null,
 					"render": function(data, type, full, meta) {

@@ -60,6 +60,7 @@ public class MainController {
     
     @GetMapping(value="/initialize/stock_status")
     public String initializeStock(Model model) {
+    	model.addAttribute("toolboxList",toolboxService.list());
     	return "stock_initialize";
     }
     

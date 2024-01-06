@@ -28,7 +28,15 @@
 			<div class="col-12">
 				<div class="card mb-20">
 					<div class="contact-header d-flex align-items-sm-center flex-row bg-white">
-						<h4 class="font-30 m-3">공기구 매입 등록</h4>
+						<h4 class="font-30 m-3">재고 초기화</h4>
+						<div class="m-4" style="width:300px;">
+							<div class="custom-select style--two large">
+								<select class="theme-input-style" id="toolboxSelect">
+									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+										th:text="${toolbox.name}">name?</option>
+								</select>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -79,27 +87,6 @@
 <!-- 사용자 script 추가 -->
 <th:block layout:fragment="script">
 	<script th:inline="javascript">
-		var membershipId=1;
-		$(document).ready(function () {
-			initializeDatepicker();
-			abcHttp.get(
-				'/membership/getbycode',
-				{
-					code:parseInt(document.getElementById("user-code").textContent)
-				}
-			).then(data=>{
-				return new Promise((resolved,rejected)=>{
-					if (data==null){
-						rejected();
-					}else{						
-						membershipId=data.id;
-						resolved(data.id);
-					}
-				});
-			}).then(membershipId=>{	
-				load(membershipId);
-			});
-		});
 
 	</script>
 </th:block>

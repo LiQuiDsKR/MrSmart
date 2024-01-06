@@ -66,7 +66,7 @@ public class MembershipRepositoryCustomImpl implements MembershipRepositoryCusto
 						searchRoleEquals(membershipSearchDto.getSearchRole()),
 						searchEmploymentStateEquals(membershipSearchDto.getSearchEmploymentStatus()),
 						searchByLike(membershipSearchDto.getSearchBy(), membershipSearchDto.getSearchQuery()))
-				.orderBy(QMembership.membership.id.desc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
+				.orderBy(QMembership.membership.id.asc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
 				.fetch();
 
 		long total = queryFactory.select(Wildcard.count).from(QMembership.membership).where(// searchRoleEquals(membershipSearchDto.getSearchRole()),
@@ -91,7 +91,7 @@ public class MembershipRepositoryCustomImpl implements MembershipRepositoryCusto
 		BooleanExpression finalCondition = Expressions.anyOf(conditions.toArray(new BooleanExpression[0]));
 
 		List<Membership> content = queryFactory.selectFrom(QMembership.membership).where(finalCondition)
-				.orderBy(QMembership.membership.id.desc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
+				.orderBy(QMembership.membership.id.asc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
 				.fetch();
 
 		long total = queryFactory.select(Wildcard.count).from(QMembership.membership).where(finalCondition).fetchOne();
