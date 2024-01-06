@@ -82,6 +82,29 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
 			
 	        return new PageImpl<>(content, pageable, total);
 		}
+		
+
+		@Override
+		public Page<RentalRequestSheet> findByMembershipAndTimestamp(SheetState status, Membership membership, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+			QRentalRequestSheet sSheet = QRentalRequestSheet.rentalRequestSheet;
+			
+			List<RentalRequestSheet> content = queryFactory
+                .selectDistinct(sSheet)
+                .from(sSheet)
+                .where(
+                		searchMembershipEquals(membership,true,true)
+                		.and(sSheet.status.eq(status))
+                		.and(sSheet.eventTimestamp.between(startDate, endDate))
+                )
+                .orderBy(sSheet.eventTimestamp.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(searchMembershipEquals(membership,true,true).and(sSheet.status.eq(status))).fetchOne();
+			
+	        return new PageImpl<>(content, pageable, total);
+		}
 
 		@Override
 		public long countByMembership(SheetState status, Membership membership) {
@@ -100,6 +123,27 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
                 .where(
                 		sSheet.toolbox.eq(toolbox)
                 		.and(sSheet.status.eq(status))
+                )
+                .orderBy(sSheet.eventTimestamp.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+			long total = queryFactory.select(Wildcard.count).from(sSheet).where(sSheet.toolbox.eq(toolbox).and(sSheet.status.eq(status))).fetchOne();
+			
+	        return new PageImpl<>(content, pageable, total);
+		}
+		@Override
+		public Page<RentalRequestSheet> findByToolboxAndTimestamp(SheetState status, Toolbox toolbox, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+			QRentalRequestSheet sSheet = QRentalRequestSheet.rentalRequestSheet;
+			
+			List<RentalRequestSheet> content = queryFactory
+                .selectDistinct(sSheet)
+                .from(sSheet)
+                .where(
+                		sSheet.toolbox.eq(toolbox)
+                		.and(sSheet.status.eq(status))
+                		.and(sSheet.eventTimestamp.between(startDate, endDate))
                 )
                 .orderBy(sSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())

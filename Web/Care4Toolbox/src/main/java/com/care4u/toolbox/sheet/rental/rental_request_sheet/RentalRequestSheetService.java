@@ -133,18 +133,23 @@ public class RentalRequestSheetService {
 	}
 	@Transactional(readOnly=true)
 	public Page<RentalRequestSheetDto> getPage(SheetState status, long membershipId, Boolean isWorker, Boolean isLeader, long toolboxId, LocalDate startDate , LocalDate endDate, Pageable pageable) {
-		Optional<Membership> membership = membershipRepository.findById(membershipId);
-		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
-		if (membership.isEmpty()) {
-			logger.error("Invalid membership : " + membershipId);
-			return null;
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		Optional<Toolbox> toolboxOptional = toolboxRepository.findById(toolboxId);
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
+			logger.info("no membership : " + membershipId + " all membership selected.");
+			membership = null;
+		} else {
+			membership = membershipOptional.get();
 		}
-		if (toolbox.isEmpty()) {
-			logger.error("Invalid toolbox : " + toolboxId);
-			return null;
+		Toolbox toolbox;
+		if (toolboxOptional.isEmpty()) {
+			logger.info("no toolbox : " + membershipId + " all toolbox selected.");
+			toolbox = null;
+		} else {
+			toolbox = toolboxOptional.get();
 		}
-
-		Page<RentalRequestSheet> page= repository.findBySearchQuery(status, membership.get(), isWorker, isLeader, toolbox.get(),LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);	
+		Page<RentalRequestSheet> page= repository.findBySearchQuery(status, membership, isWorker, isLeader, toolbox,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);	
 		return page.map(e->convertToDto(e));
 	}
 	
