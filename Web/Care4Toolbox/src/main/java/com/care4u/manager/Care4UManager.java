@@ -676,6 +676,33 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
 			}
 			break;
+		case TAG_AND_TOOLBOX_TOOL_LABEL_FORM:
+	         if (!(paramJson.isEmpty() || paramJson==null)) {
+	            JSONObject jsonObj = new JSONObject(paramJson);
+	            long toolId = jsonObj.getLong("toolId");
+	            long toolboxId = jsonObj.getLong("toolboxId");
+	            String tagGroup = jsonObj.getString("tagGroup");
+	            JSONArray tagListArray = jsonObj.getJSONArray("tagList");
+	            String qrcode = jsonObj.getString("qrcode");
+	              List<String> tagList = new ArrayList<String>();
+	              for (int i = 0; i < tagListArray.length(); i++) {
+	                  tagList.add(tagListArray.getString(i));
+	              }
+	             try {
+	               tagService.register(toolId, toolboxId, tagList, tagGroup);
+	               logger.debug("good_tag");
+	               toolboxToolLabelService.register(toolId, toolboxId, qrcode);
+	               logger.debug("good_toolbox_tool_label");
+	                handler.sendData(keyword + "good");
+	             }catch(IllegalArgumentException e) {
+	                handler.sendData(keyword + e.getMessage());
+	                e.printStackTrace();
+	             }catch(Exception e) {
+	                handler.sendData(keyword + "bad");
+	                e.printStackTrace();
+	             }
+	         }
+	         break;
 		case TEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);

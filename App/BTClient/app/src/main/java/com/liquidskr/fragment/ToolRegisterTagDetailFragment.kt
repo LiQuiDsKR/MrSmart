@@ -57,42 +57,14 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
-    private var active = false
-    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
-        override fun onTextFinished() {
-            if (!active) {
-                return
-            }
-            val adapter = recyclerView.adapter as ToolRegisterTagDetailAdapter
-            val tag = sharedViewModel.qrScannerText
-            sharedViewModel.qrScannerText = ""
-            // 없으면 추가, 있으면 하이라이트
-            if (tag in adapter.qrcodes) {
-                adapter.qrCheck(qrcode)
-            } else {
-                var list = adapter.qrcodes.toMutableList()
-                list.add(tag)
-                adapter.updateList(list)
-            }
-
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_tag_detail, container, false)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         context = requireContext()
         val handler = Handler(Looper.getMainLooper())
 
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
-
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
-
-        qrCheckBtn = view.findViewById(R.id.qrCheckBtn)
-        qrAddBtn = view.findViewById(R.id.qrAddBtn)
         qrSearchText = view.findViewById(R.id.qr_search)
 
         toolName.text = tool.name
@@ -114,11 +86,14 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
         qrSearchText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 qrcode = fixCode(qrSearchText.text.toString().replace("\n", ""))
-
-                Log.d("tagDetail", qrcode)
-                adapter.qrCheck(qrcode)
-
+                var list = adapter.qrcodes.toMutableList()
+                if (!(qrcode in list)) {
+                    list.add(qrcode)
+                } else {
+                    adapter.qrCheck(qrcode)
+                }
                 qrSearchText.text.clear()
+                qrSearchText.requestFocus()
                 return@setOnEditorActionListener true
             }
 
@@ -160,18 +135,10 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
             requireActivity().supportFragmentManager.popBackStack()
         }
 
-        qrAddBtn.setOnClickListener {
-            var list = adapter.qrcodes.toMutableList()
-            list.add("")
-            adapter.updateList(list)
-        }
-
         recyclerView.adapter = adapter
+
+        qrSearchText.requestFocus()
         return view
-    }
-    override fun onDestroyView() {
-        active = false
-        super.onDestroyView()
     }
 
     private fun fixCode(input: String): String {

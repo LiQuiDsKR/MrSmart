@@ -42,30 +42,10 @@ class ToolRegisterFragment() : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
 
-    private var keyEventDispatcher: KeyEventDispatcher? = null
-
-
-
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
-    private var active = false
-    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
-        override fun onTextFinished() {
-            if (!active || (sharedViewModel.qrScannerText.length == 0)) {
-                return
-            }
 
-            val dbHelper = DatabaseHelper(requireContext())
-            val tool = dbHelper.getToolByTBT(sharedViewModel.qrScannerText)
-            val fragment = ToolRegisterDetailFragment(tool.toToolDto())
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
-                .addToBackStack(null)
-                .commit()
-            sharedViewModel.qrScannerText = ""
-        }
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -74,23 +54,10 @@ class ToolRegisterFragment() : Fragment() {
         val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
 
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
-        lobbyActivity.toolReturnFragment = this
-
-
         editTextName = view.findViewById(R.id.editTextName)
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        editTextName.setOnEditorActionListener { _, actionId, event ->
-            Log.d("Keycode", actionId.toString())
-            // 키 이벤트를 소비하고 처리하지 않음
-            requireActivity().dispatchKeyEvent(event)
-            false
-        }
 
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
@@ -107,15 +74,33 @@ class ToolRegisterFragment() : Fragment() {
 
         }
 
+        editTextName.setOnEditorActionListener { _, actionId, event ->
+            Log.d("tst","textEditted")
+            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                val label = editTextName.text.toString().replace("\n", "")
+                try {
+                    val dbHelper = DatabaseHelper(requireContext())
+                    val tool = dbHelper.getToolByTBT(label)
+                    val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                } catch(e:Exception) {
+                    Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
+                }
+                editTextName.text.clear()
+                editTextName.requestFocus()
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+
         recyclerView.adapter = adapter
 
         return view
     }
 
-    override fun onDestroyView() {
-        active = false
-        super.onDestroyView()
-    }
 
     fun filterByName(adapter: ToolRegisterAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
         val newList: MutableList<ToolDtoSQLite> = mutableListOf()

@@ -76,49 +76,6 @@ class LobbyActivity : AppCompatActivity() {
         fun onCancelButtonClicked()
     }
 
-    private var listener: MyScannerListener.Listener? = null
-
-    fun setListener(listener: MyScannerListener.Listener?) {
-        Log.d("setListener", listener.toString())
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(this, "${listener.toString()}",Toast.LENGTH_SHORT).show()
-        }
-        this.listener = listener
-    }
-
-    /*
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN) {
-            if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
-                Log.d("setListener", "onTextFinished")
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(this, "onTextFinished",Toast.LENGTH_SHORT).show()
-                }
-                listener?.onTextFinished()
-                return true
-            } else {
-                when (event.keyCode) {
-                    KEYCODE_0 -> sharedViewModel.qrScannerText += "0"
-                    KEYCODE_1 -> sharedViewModel.qrScannerText += "1"
-                    KEYCODE_2 -> sharedViewModel.qrScannerText += "2"
-                    KEYCODE_3 -> sharedViewModel.qrScannerText += "3"
-                    KEYCODE_4 -> sharedViewModel.qrScannerText += "4"
-                    KEYCODE_5 -> sharedViewModel.qrScannerText += "5"
-                    KEYCODE_6 -> sharedViewModel.qrScannerText += "6"
-                    KEYCODE_7 -> sharedViewModel.qrScannerText += "7"
-                    KEYCODE_8 -> sharedViewModel.qrScannerText += "8"
-                    KEYCODE_9 -> sharedViewModel.qrScannerText += "9"
-                }
-                Log.d("setListener", "${sharedViewModel.qrScannerText}")
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(this, "${sharedViewModel.qrScannerText}",Toast.LENGTH_SHORT).show()
-                }
-                return super.dispatchKeyEvent(event)
-            }
-        }
-        return super.dispatchKeyEvent(event)
-    }*/
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
@@ -162,6 +119,7 @@ class LobbyActivity : AppCompatActivity() {
             bluetoothManager.bluetoothOpen()
             bluetoothManager = getBluetoothManagerOnActivity()
         }
+
         settingBtn.setOnClickListener {
             val fragment = SettingsFragment(context)
             supportFragmentManager.beginTransaction()
@@ -212,6 +170,7 @@ class LobbyActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.show()
     }
+
     fun showBluetoothModal(title: String, content: String, listener: BluetoothModalListener) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
@@ -246,6 +205,7 @@ class LobbyActivity : AppCompatActivity() {
             }
         }
     }
+
     fun getBluetoothManagerOnActivity(): BluetoothManager {
         return bluetoothManager
     }
@@ -258,6 +218,5 @@ class LobbyActivity : AppCompatActivity() {
         isPopupVisible = false
         // Hide the popup layout
         popupLayout.visibility = View.GONE
-
     }
 }

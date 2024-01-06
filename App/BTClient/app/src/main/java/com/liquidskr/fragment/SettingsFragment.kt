@@ -44,10 +44,10 @@
         private lateinit var popupLayout: View
         private lateinit var progressBar: ProgressBar
         private lateinit var progressText: TextView
+        private var isPopupVisible = false
 
         private val handler = Handler(Looper.getMainLooper())
         private val gson = Gson()
-        private var isPopupVisible = false
 
         private lateinit var membershipRequest: MembershipRequest
         private lateinit var toolRequest: ToolRequest
@@ -403,7 +403,6 @@
             isPopupVisible = false
             // Hide the popup layout
             popupLayout.visibility = View.GONE
-
         }
         fun showTextDialog(context: Context, title: String, defaultText: String, callback: (String) -> Unit) {
             val editText = EditText(context)

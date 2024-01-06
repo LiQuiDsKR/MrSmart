@@ -59,97 +59,12 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var bluetoothManager: BluetoothManager
     private val handler = Handler(Looper.getMainLooper())
 
-    private var active = false
-    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
-        override fun onTextFinished() {
-            if (!active) {
-                return
-            }
-            val adapter = recyclerView.adapter as RentalRequestToolAdapter //
-            val tag = sharedViewModel.qrScannerText
-            sharedViewModel.qrScannerText = ""
-            try {
-                lateinit var taggedTool: ToolDto
-                bluetoothManager.requestData(RequestType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result != "null") {
-                            val tag: TagDto = gson.fromJson(result, type)
-                            taggedTool = tag.toolDto
-
-                            var toolDtoList = listOf<ToolDto>()
-                            for (rentalRequestTool:RentalRequestToolDto in rentalRequestSheet.toolList) {
-                                toolDtoList = toolDtoList.plus(rentalRequestTool.toolDto)
-                            }
-                            var toolIdList = listOf<Long>()
-                            for (tool in toolDtoList) {
-                                toolIdList = toolIdList.plus(tool.id)
-                            }
-                            if (taggedTool.id in toolIdList) {
-                                val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
-                                for (tool: RentalRequestToolDto in rentalRequestSheet.toolList) {
-                                    var modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, tool.Tags)
-                                    var modifiedTag = ""
-                                    try {
-                                        if (tool.toolDto.id == taggedTool.id) {
-                                            if (tool.Tags == null || tool.Tags == "") {
-                                                modifiedTag = tag.macaddress
-                                                handler.post {
-                                                    Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                    adapter.tagAdded(modifiedRentalRequestTool)
-                                                }
-                                            } else {
-                                                modifiedTag = tool.Tags
-                                                handler.post {
-                                                    Toast.makeText(activity, "기존 태그를 지우고, ${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }
-                                        } else {
-                                            if (tool.Tags == null) {
-                                                modifiedTag = ""
-                                            } else {
-                                                modifiedTag = tool.Tags
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-
-                                    modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, modifiedTag)
-                                    rentalRequestToolDtoList.add(modifiedRentalRequestTool)
-                                }
-                                val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
-                                rentalRequestSheet = modifiedRentalRequestSheet
-                            } else {
-                                handler.post {
-                                    Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            handler.post {
-                                Toast.makeText(activity, "서버에서 해당 태그를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                    override fun onError(e: Exception) {
-
-                    }
-                })
-            } catch (e: UninitializedPropertyAccessException) {
-                Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
-
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
 
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
@@ -249,11 +164,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
                 qrEditText.text.clear()
-
-                // Use a Handler to set focus after a delay
-                Handler().postDelayed({
-                    qrEditText.requestFocus()
-                }, 100) // You can adjust the delay as needed
+                qrEditText.requestFocus()
 
                 return@setOnEditorActionListener true
             }
@@ -285,7 +196,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                         }
                     }
                     val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
-                    // val rentalRequestSheetApprove = RentalRequestSheetApprove(modifiedRentalRequestSheet, sharedViewModel.loginManager.id)
+
                     val mod = modifiedRentalRequestSheet // shorten
                     var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
                     for (tool in mod.toolList) {
@@ -345,10 +256,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
 
         return view
     }
-    override fun onDestroyView() {
-        active = false
-        super.onDestroyView()
-    }
+
     fun sheetCancel() {
         try {
             bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:

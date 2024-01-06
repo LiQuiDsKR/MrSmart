@@ -107,10 +107,6 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         val view = inflater.inflate(R.layout.fragment_manager_self_rental, container, false)
         var dbHelper = DatabaseHelper(requireContext())
 
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
-
         workerSearchBtn = view.findViewById(R.id.BorrowerSearchBtn)
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
         addToolBtn = view.findViewById(R.id.AddToolBtn)
@@ -185,13 +181,9 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                         Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 qrEditText.text.clear()
-
-                // Use a Handler to set focus after a delay
-                Handler().postDelayed({
-                    qrEditText.requestFocus()
-                }, 100) // You can adjust the delay as needed
-
+                qrEditText.requestFocus()
                 return@setOnEditorActionListener true
             }
             false
@@ -290,6 +282,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         }
 
         recyclerView.adapter = adapter
+
+        qrEditText.requestFocus()
         return view
     }
 

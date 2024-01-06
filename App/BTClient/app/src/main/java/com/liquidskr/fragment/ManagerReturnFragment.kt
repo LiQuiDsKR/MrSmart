@@ -46,33 +46,6 @@ class ManagerReturnFragment() : Fragment() {
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
-
-    private var active = false
-    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
-        override fun onTextFinished() {
-            if (!active) {
-                return
-            }
-            val tag = sharedViewModel.qrScannerText
-            sharedViewModel.qrScannerText = ""
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{tag:\"${tag}\"}",object:BluetoothManager.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
-                    val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, fragment)
-                        .addToBackStack(null)
-                        .commit()
-                }
-
-                override fun onError(e: Exception) {
-                    e.printStackTrace()
-                }
-            })
-        }
-    }
-
     private lateinit var outstandingRentalSheetByMemberReq: OutstandingRentalSheetByMemberReq
     private val outstandingRentalSheetRequestListener = object: OutstandingRentalSheetByMemberReq.Listener {
         override fun onNextPage(pageNum: Int) {
@@ -98,10 +71,6 @@ class ManagerReturnFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
 
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
-
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
@@ -126,10 +95,6 @@ class ManagerReturnFragment() : Fragment() {
         return view
     }
 
-    override fun onDestroyView() {
-        active = false
-        super.onDestroyView()
-    }
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()
 

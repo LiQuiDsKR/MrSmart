@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,8 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
     private lateinit var context: Context
+
+    private lateinit var scannerReceiver: LinearLayout
 
     lateinit var scanBtn: LinearLayout
     lateinit var qrTextEdit: EditText
@@ -109,33 +112,12 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
             requireActivity().supportFragmentManager.popBackStack()
         }
     }
-
-    private var active = false
-    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
-        override fun onTextFinished() {
-            if (!active) {
-                return
-            }
-            Log.d("Register", sharedViewModel.qrScannerText)
-            val handler = Handler(Looper.getMainLooper())
-            val tag = sharedViewModel.qrScannerText
-            tbt_qrcode = tag
-            sharedViewModel.qrScannerText = ""
-            handler.post {
-                qrDisplay.text = tag
-            }
-        }
-    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_detail, container, false)
 
         val handler = Handler(Looper.getMainLooper())
         context = requireContext()
-
-        active = true
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(listener)
-
+        scannerReceiver = view.findViewById(R.id.scannerReceiver)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
@@ -229,7 +211,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
                 // qrcode가 이미 쓰인건지 체크
                 qrDisplay.text = "${tbt_qrcode}"
                 qrTextEdit.text.clear()
-                qrTextEdit.clearFocus()
+                qrTextEdit.requestFocus()
                 return@setOnEditorActionListener true
             }
 
@@ -239,12 +221,46 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         confirmBtn.setOnClickListener {
             showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
         }
-        return view
-    }
 
-    override fun onDestroyView() {
-        active = false
-        super.onDestroyView()
+        /*
+        var scannerInput = ""
+        var scannerResult = ""
+        scannerReceiver.setOnKeyListener { v, keyCode, event ->
+            when(keyCode) {
+                KEYCODE_0 -> scannerInput += "0"
+                KEYCODE_1 -> scannerInput += "1"
+                KEYCODE_2 -> scannerInput += "2"
+                KEYCODE_3 -> scannerInput += "3"
+                KEYCODE_4 -> scannerInput += "4"
+                KEYCODE_5 -> scannerInput += "5"
+                KEYCODE_6 -> scannerInput += "6"
+                KEYCODE_7 -> scannerInput += "7"
+                KEYCODE_8 -> scannerInput += "8"
+                KEYCODE_9 -> scannerInput += "9"
+                KEYCODE_ENTER -> {
+                    scannerResult = scannerInput
+                    scannerInput = ""
+                    tbt_qrcode = scannerResult
+                    handler.post {
+                        qrDisplay.text = tbt_qrcode
+
+                    }
+                }
+            }
+            qrTextEdit.requestFocus()
+            true
+        }
+        qrTextEdit.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                Log.d("scannerRec", "LostFocus")
+                handler.postDelayed({
+                    scannerReceiver.requestFocus()
+                }, 1000)
+            }
+        }*/
+
+        qrTextEdit.requestFocus()
+        return view
     }
 
     private fun fixCode(input: String): String {

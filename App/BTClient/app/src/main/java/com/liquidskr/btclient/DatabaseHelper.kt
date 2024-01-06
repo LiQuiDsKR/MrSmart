@@ -714,15 +714,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return tbt
     }
     @SuppressLint("Range")
-    fun updateQRCodeById(id: Long, newQRCode: String): Int {
+    fun updateQRCodeById(id: Long, newQRCode: String) {
         val values = ContentValues()
         values.put(COLUMN_TBT_QRCODE, newQRCode)
 
         val db = this.writableDatabase
-        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
+        db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_TOOL_ID = ?", arrayOf(id.toString()))
 
         db.close()
-        return rowsAffected
     }
     fun deleteTBTById(id: Long): Int {
         val db = this.writableDatabase
