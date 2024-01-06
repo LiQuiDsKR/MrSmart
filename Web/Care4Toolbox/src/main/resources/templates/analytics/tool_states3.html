@@ -173,22 +173,17 @@
 				<!-- Card -->
 				<div class="card mb-30 bg-white">
 					<div class="card-body">
-						<div class="d-flex ml-3">
-							<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3 mr-3">
-								<div class="">
-									<h3 class="mb-1">기간별 대여 현황</h3>
-								</div>
-							</div>
-							<div class="d-flex row align-items-center ml-auto">
-								<div class="col-4">
-									<div class="d-flex align-items-center flex-nowrap mr-4"
+							<div class="d-flex flex-md-row flex-column ml-auto">
+								<h3 class="mb-1">기간별 대여 현황</h3>
+								<div class="col-12 col-md-5">
+									<div class="d-flex align-items-center flex-nowrap m-4"
 										style="box-sizing: content-box;">
-										<div class="custom-select style--two mr-4" style="max-width:100px;">
+										<div class="custom-select style--two mr-4" style="max-width:200px;">
 											<select class=" theme-input-style" id="searchBySelect"
 												style="cursor: auto;">
 												<option value="part">부서</option>
-												<option value="worker" selected>작업자</option>
-												<option value="leader">리더</option>
+												<option value="membership" selected>작업자/리더</option>
+												<option value="leader" hidden>리더</option>
 												<option value="tool">공기구</option>
 											</select>
 										</div>
@@ -233,13 +228,13 @@
 
 								<!-- Search header -->
 								<div
-									class="d-flex col-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+									class="d-flex col-12 col-md-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
 									<!-- layer 1 -->
-									<div class="row flex-nowrap">
+									<div class="row flex-wrap">
 
 
 										<!-- Form Group -->
-										<div class="form-group mr-2">
+										<div class="form-group mr-2 col-12 col-md-5">
 											<label class="mb-2 font-14 bold">시작 날짜</label>
 
 											<!-- Date Picker -->
@@ -255,7 +250,7 @@
 										<!-- End Form Group -->
 
 										<!-- Form Group -->
-										<div class="form-group">
+										<div class="form-group col-12 col-md-5">
 											<label class="mb-2 font-14 bold">종료 날짜</label>
 
 											<!-- Date Picker -->
@@ -282,7 +277,6 @@
 								</div>
 								<!-- End Contact Header -->
 							</div>
-						</div>
 
 						<div id="sector1">
 
