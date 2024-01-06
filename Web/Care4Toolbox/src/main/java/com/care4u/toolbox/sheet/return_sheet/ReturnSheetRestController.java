@@ -72,7 +72,12 @@ public class ReturnSheetRestController {
 	
     @GetMapping(value="/return/sheet/getpage")
     public ResponseEntity<Page<ReturnSheetDto>> getReturnSheetPage(
-    		@RequestParam(name="membershipId") long membershipId,
+    		@RequestParam(name="partId") Long partId,
+    		@RequestParam(name="membershipId") Long membershipId,
+    		@RequestParam(name="toolId") Long toolId,
+    		@RequestParam(name="isWorker") Boolean isWorker,
+    		@RequestParam(name="isLeader") Boolean isLeader,
+    		@RequestParam(name="isApprover") Boolean isApprover,
     		@RequestParam(name="page") int page,
     		@RequestParam(name="size") int size,
     		@RequestParam(name="startDate") String startDate,
@@ -84,7 +89,7 @@ public class ReturnSheetRestController {
         LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     		
         Pageable pageable = PageRequest.of(page,size);
-        Page<ReturnSheetDto> returnSheetPage = returnSheetService.getPage(membershipId, startLocalDate, endLocalDate, pageable);
+        Page<ReturnSheetDto> returnSheetPage = returnSheetService.getPage(partId, membershipId, isWorker, isLeader, isApprover, toolId, startLocalDate, endLocalDate, pageable);
         
         for (ReturnSheetDto item : returnSheetPage.getContent()) {
         	logger.info(item.toString());

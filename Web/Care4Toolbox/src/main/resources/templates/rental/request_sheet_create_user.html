@@ -689,6 +689,7 @@
 						list[index].count++;
 						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
 						count.value = parseInt(count.value) + 1;
+						console.log(count.value);
 
 						stack.push({key: "i", param: index});
 					}

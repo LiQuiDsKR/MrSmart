@@ -110,7 +110,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
 	    
 	    
 		@Override
-		public Page<OutstandingRentalSheet> findBySearchQuery(OutstandingState status, Membership membership,
+		public Page<OutstandingRentalSheet> findBySearchQuery(Membership membership,
 				Boolean isWorker, Boolean isLeader, Toolbox toolbox, LocalDateTime startDate,
 				LocalDateTime endDate, Pageable pageable) {
 			QOutstandingRentalSheet sSheet = QOutstandingRentalSheet.outstandingRentalSheet;
@@ -121,7 +121,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
                 .where(
                 		searchMembershipEquals(membership,isWorker,isLeader)
                 		.or(sSheet.rentalSheet.toolbox.eq(toolbox))
-                		.and(sSheet.outstandingStatus.eq(status))
+                		//.and(sSheet.outstandingStatus.eq(status))
                 		.and(sSheet.rentalSheet.eventTimestamp.between(startDate, endDate))
                 )
                 .orderBy(sSheet.rentalSheet.eventTimestamp.desc())

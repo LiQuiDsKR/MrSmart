@@ -24,7 +24,7 @@
 			<div class="col-6">
 				<div class="card bg-transparent">
 					<!-- Contact Header -->
-					<div class=" d-flex flex-column bg-white mb-30">
+					<div class=" d-flex  flex-column bg-white mb-30">
 						<h4 class="font-30 m-3">공기구 매입 등록</h4>
 						<div class="table-responsive">
 							<!-- Invoice List Table -->
@@ -526,7 +526,7 @@
 			}
 			list[index].count++;
 			const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-			count.textContent = parseInt(count.textContent) + 1;
+			count.value=parseInt(count.value) + 1;
 
 			stack.push({key: "i", param: index});
 		}
@@ -541,7 +541,7 @@
 			} else {
 				list[index].count--;
 				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-				count.textContent = parseInt(count.textContent) - 1;
+				count.value=parseInt(count.value) - 1;
 
 				stack.push({key: "d", param: index});
 			}

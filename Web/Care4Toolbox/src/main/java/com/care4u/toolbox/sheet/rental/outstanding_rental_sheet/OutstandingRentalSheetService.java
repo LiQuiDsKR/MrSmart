@@ -225,7 +225,7 @@ public class OutstandingRentalSheetService {
 				+ sheet.getOutstandingStatus();
 	}
 
-	public Page<OutstandingRentalSheetDto> getPage(OutstandingState status, long membershipId, Boolean isWorker,
+	public Page<OutstandingRentalSheetDto> getPage(long membershipId, Boolean isWorker,
 			Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
@@ -237,7 +237,7 @@ public class OutstandingRentalSheetService {
 			logger.error("toolbox : " + toolbox);
 			return null;
 		}
-		Page<OutstandingRentalSheet> page = repository.findBySearchQuery(status, membership.get(), isWorker, isLeader,
+		Page<OutstandingRentalSheet> page = repository.findBySearchQuery(membership.get(), isWorker, isLeader,
 				toolbox.get(), LocalDateTime.of(startLocalDate, LocalTime.MIN),
 				LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
