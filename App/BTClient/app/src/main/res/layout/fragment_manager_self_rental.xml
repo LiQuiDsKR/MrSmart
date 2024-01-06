@@ -116,6 +116,7 @@
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
+                                android:clickable="false"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:background="@drawable/icon_fix_ic_top_search_copy" />
@@ -166,11 +167,12 @@
                                 android:text="홍길동" />
 
                             <TextView
-                                android:id="@+id/textView16"
+                                android:id="@+id/textView19"
                                 android:layout_width="20dp"
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
+                                android:clickable="false"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:background="@drawable/icon_fix_ic_top_search_copy" />
@@ -198,14 +200,14 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:id="@+id/imageView4"
+                            android:id="@+id/imageView9"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_margin="10dp"
                             app:srcCompat="@drawable/scan" />
 
                         <TextView
-                            android:id="@+id/textView5"
+                            android:id="@+id/textView8"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="5dp"

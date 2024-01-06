@@ -82,9 +82,23 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
         toolList.addAll(sharedViewModel.toolWithCountList)
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
-        for (id in sharedViewModel.rentalRequestToolIdList) { // 중복체크안되어잇음
-            val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
-            newToolList.add(toolWithCount)
+
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            var toolWithCountFound = false
+
+            for (toolWithCount in toolList) {
+                if (id == toolWithCount.tool.id) {
+                    // 이미 존재하는 경우
+                    toolWithCount.count += 1
+                    toolWithCountFound = true
+                    break
+                }
+            }
+            if (!toolWithCountFound) {
+                // 존재하지 않는 경우
+                val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
+                newToolList.add(toolWithCount)
+            }
         }
         
         val adapter = RentalToolAdapter(toolList, this)
@@ -146,15 +160,16 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                     Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
                 qrEditText.text.clear()
-
-                // Use a Handler to set focus after a delay
-                Handler().postDelayed({
-                    qrEditText.requestFocus()
-                }, 100) // You can adjust the delay as needed
+                qrEditText.requestFocus()
 
                 return@setOnEditorActionListener true
             }
             false
+        }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
         }
 
         addToolBtn.setOnClickListener {

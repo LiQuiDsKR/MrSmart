@@ -24,7 +24,6 @@ import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.CustomModal
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
@@ -220,7 +219,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                         rentalToolList.add(modifiedRentalTool)
                                     }
                                     val rentalSheet = RentalSheetDto(outstandingRentalSheet.rentalSheetDto.id, outstandingRentalSheet.rentalSheetDto.workerDto, outstandingRentalSheet.rentalSheetDto.leaderDto, outstandingRentalSheet.rentalSheetDto.approverDto, outstandingRentalSheet.rentalSheetDto.toolboxDto, outstandingRentalSheet.rentalSheetDto.eventTimestamp, rentalToolList)
-                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingRentalSheet.id, rentalSheet, outstandingRentalSheet.totalCount, outstandingRentalSheet.totalOutstandingCount,outstandingRentalSheet.outstandingState)
+                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingRentalSheet.id, rentalSheet, outstandingRentalSheet.totalCount, outstandingRentalSheet.totalOutstandingCount,outstandingRentalSheet.outstandingStatus)
                                     Log.d("newRentalSheet",outStandingRentalSheetDto.toString())
                                     outstandingRentalSheet = outStandingRentalSheetDto
                                 } else {
@@ -244,15 +243,16 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     }
                 }
                 qrEditText.text.clear()
-
-                // Use a Handler to set focus after a delay
-                Handler().postDelayed({
-                    qrEditText.requestFocus()
-                }, 100) // You can adjust the delay as needed
+                qrEditText.requestFocus()
 
                 return@setOnEditorActionListener true
             }
             false
+        }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
         }
 
         backButton.setOnClickListener {

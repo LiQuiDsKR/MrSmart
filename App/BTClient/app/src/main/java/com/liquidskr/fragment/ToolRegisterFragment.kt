@@ -78,8 +78,7 @@ class ToolRegisterFragment() : Fragment() {
         }
 
         searchBtn.setOnClickListener {
-            filterByName(adapter, tools, editTextName.text.toString())
-
+            filterByName(adapter, editTextName.text.toString())
         }
 
         editTextName.setOnEditorActionListener { _, actionId, event ->
@@ -104,20 +103,23 @@ class ToolRegisterFragment() : Fragment() {
             false
         }
 
+        editTextName.requestFocus()
         recyclerView.adapter = adapter
 
         return view
     }
 
 
-    fun filterByName(adapter: ToolRegisterAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
-        val newList: MutableList<ToolDtoSQLite> = mutableListOf()
-        for (tool in tools) {
-            if (keyword in tool.name) {
-                newList.add(tool)
+    fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
+        val dbHelper = DatabaseHelper(requireContext())
+        try {
+            val newList = dbHelper.getToolsByQuery(keyword)
+            adapter.updateList(newList)
+        } catch(e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "해당 검색어를 통해 공기구를 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-        adapter.updateList(newList)
     }
     fun handleKeyEvent(keyCode: Int) {
         if (sharedViewModel.qrScannerText == "") {
