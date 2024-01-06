@@ -11,12 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.care4u.entity.BaseEntity;
 import com.care4u.toolbox.Toolbox;
-import com.care4u.toolbox.sheet.return_tool.ReturnToolService;
 import com.care4u.toolbox.tool.Tool;
 
 import lombok.Builder;
@@ -31,8 +27,6 @@ import lombok.ToString;
 @Entity
 @Table(name="stock_status")
 public class StockStatus extends BaseEntity {
-	
-	private final Logger logger = LoggerFactory.getLogger(StockStatus.class);
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -85,14 +79,10 @@ public class StockStatus extends BaseEntity {
 		this.discardCount = discardCount;
 		this.supplyCount = supplyCount;
 		this.returnCount = returnCount;
-		logger.debug(getCreatedBy());
-		logger.debug("stock created : "+this.toString());
 	}
 	
 	public void update(Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
 			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, int supplyCount, int returnCount) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from : "+this.toString());
 		this.toolbox = toolbox;
 		this.tool = tool;
 		this.currentDay = currentDay;
@@ -106,31 +96,19 @@ public class StockStatus extends BaseEntity {
 		this.discardCount = discardCount;
 		this.supplyCount = supplyCount;
 		this.returnCount = returnCount;
-		logger.debug("stock updated to : "+this.toString());
 	}
 	
 	public void requestUpdate(int count) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from (request) : "+this.toString());
 		this.goodCount-=count;
-		logger.debug("stock updated to (request) : "+this.toString());
 	}
 	public void requestCancelUpdate(int count) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from (request Cancel) : "+this.toString());
 		this.goodCount+=count;
-		logger.debug("stock updated to (request Cancel) : "+this.toString());
 	}
 	public void rentUpdate(int count) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from (rent) : "+this.toString());
 		this.goodCount-=count;
 		this.rentalCount+=count;
-		logger.debug("stock updated to (rent) : "+this.toString());
 	}
 	public void returnUpdate(int goodCount, int faultCount, int damageCount, int discardCount, int lossCount) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from (return) : "+this.toString());
 		this.goodCount+=goodCount;
 		this.faultCount+=faultCount;
 		this.damageCount+=damageCount;
@@ -139,22 +117,15 @@ public class StockStatus extends BaseEntity {
 		this.rentalCount-=(goodCount+faultCount+damageCount+discardCount+lossCount);
 		this.returnCount+=(goodCount+faultCount+damageCount+discardCount+lossCount);
 		this.totalCount-=(discardCount+lossCount);
-		logger.debug("stock updated to (return) : "+this.toString());
 	}
 	public void buyUpdate(int count) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated from (buy) : "+this.toString());
 		this.buyCount+=count;
 		this.goodCount+=count;
 		this.totalCount+=count;
-		logger.debug("stock updated to (buy) : "+this.toString());
 	}
 	public void supplyUpdate(int count) {
-		logger.debug(getModifiedBy());
-		logger.debug("stock updated to (supply) : "+this.toString());
 		this.goodCount-=count;
 		this.supplyCount+=count;
 		this.totalCount-=count;
-		logger.debug("stock updated to (supply) : "+this.toString());
 	}
 }
