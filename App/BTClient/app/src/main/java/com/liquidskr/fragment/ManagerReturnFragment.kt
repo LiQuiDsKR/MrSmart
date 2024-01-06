@@ -39,8 +39,6 @@ class ManagerReturnFragment() : Fragment() {
     private lateinit var bluetoothManager: BluetoothManager
     lateinit var searchSheetEdit: EditText
     lateinit var sheetSearchBtn: ImageButton
-    lateinit var qrCodeBtn: LinearLayout
-    lateinit var qrEditText: EditText
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
 
@@ -49,8 +47,12 @@ class ManagerReturnFragment() : Fragment() {
     }
 
 
+    private var active = false
     val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
         override fun onTextFinished() {
+            if (!active) {
+                return
+            }
             val tag = sharedViewModel.qrScannerText
             sharedViewModel.qrScannerText = ""
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
@@ -96,13 +98,12 @@ class ManagerReturnFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
 
+        active = true
         val lobbyActivity = requireActivity() as LobbyActivity
         lobbyActivity.setListener(listener)
 
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
-        qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
-        qrEditText = view.findViewById(R.id.QREditText)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
@@ -120,44 +121,13 @@ class ManagerReturnFragment() : Fragment() {
             val id = dbHelper.getMembershipIdByName(name)
             getOutstandingRentalSheetListByMembership(id)
         }
-        qrCodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
-        }
-        qrEditText.setOnEditorActionListener { _, actionId, event ->
-            Log.d("tst","textEditted")
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val tag = qrEditText.text.toString().replace("\n", "")
-                bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{tag:\"${tag}\"}",object:BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
-                        val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                    }
-
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
-                    }
-                })
-
-                return@setOnEditorActionListener true
-            }
-            false
-        }
 
         getOutstandingRentalSheetList()
-        qrEditText.requestFocus()
         return view
     }
 
     override fun onDestroyView() {
-        val lobbyActivity = requireActivity() as LobbyActivity
-        lobbyActivity.setListener(null)
+        active = false
         super.onDestroyView()
     }
     fun getOutstandingRentalSheetListByMembership(id: Long) {

@@ -16,5 +16,4 @@ class SharedViewModel : ViewModel() {
     var toolWithCountList : MutableList<ToolWithCount> = mutableListOf()
 
     var qrScannerText: String = ""
-
 }

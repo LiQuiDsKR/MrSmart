@@ -25,12 +25,6 @@
                 android:orientation="horizontal"
                 android:padding="5dp">
 
-                <Button
-                    android:id="@+id/testBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Button" />
-
                 <ImageButton
                     android:id="@+id/bluetoothBtn"
                     android:layout_width="50dp"
@@ -50,15 +44,6 @@
                     android:scaleX="1.5"
                     android:scaleY="1.5"
                     app:srcCompat="@drawable/ic_set" />
-
-                <EditText
-                    android:id="@+id/testEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:text="Name" />
 
             </LinearLayout>
 

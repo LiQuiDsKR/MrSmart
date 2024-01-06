@@ -23,6 +23,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
@@ -55,11 +56,37 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+
+    private var active = false
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            if (!active) {
+                return
+            }
+            val adapter = recyclerView.adapter as ToolRegisterTagDetailAdapter
+            val tag = sharedViewModel.qrScannerText
+            sharedViewModel.qrScannerText = ""
+            // 없으면 추가, 있으면 하이라이트
+            if (tag in adapter.qrcodes) {
+                adapter.qrCheck(qrcode)
+            } else {
+                var list = adapter.qrcodes.toMutableList()
+                list.add(tag)
+                adapter.updateList(list)
+            }
+
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_tag_detail, container, false)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         context = requireContext()
         val handler = Handler(Looper.getMainLooper())
+
+        active = true
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
 
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
@@ -142,6 +169,11 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
         recyclerView.adapter = adapter
         return view
     }
+    override fun onDestroyView() {
+        active = false
+        super.onDestroyView()
+    }
+
     private fun fixCode(input: String): String {
         val typoMap = mapOf(
             'ㅁ' to 'A',

@@ -22,6 +22,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
@@ -58,6 +59,7 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
 
     private val lobbyActivity: LobbyActivity
         get() = requireActivity() as LobbyActivity
+
     private fun showBluetoothModal(title: String, content: String) {
         lobbyActivity.showBluetoothModal(title, content, bluetoothModalListener)
     }
@@ -108,11 +110,33 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
     }
 
+    private var active = false
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            if (!active) {
+                return
+            }
+            Log.d("Register", sharedViewModel.qrScannerText)
+            val handler = Handler(Looper.getMainLooper())
+            val tag = sharedViewModel.qrScannerText
+            tbt_qrcode = tag
+            sharedViewModel.qrScannerText = ""
+            handler.post {
+                qrDisplay.text = tag
+            }
+        }
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register_detail, container, false)
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+
         val handler = Handler(Looper.getMainLooper())
         context = requireContext()
+
+        active = true
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
+
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 
@@ -217,6 +241,12 @@ class ToolRegisterDetailFragment(tool: ToolDto) : Fragment() {
         }
         return view
     }
+
+    override fun onDestroyView() {
+        active = false
+        super.onDestroyView()
+    }
+
     private fun fixCode(input: String): String {
         val typoMap = mapOf(
             'ㅁ' to 'A',

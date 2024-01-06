@@ -24,6 +24,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
 import com.liquidskr.btclient.RequestType
@@ -54,6 +55,43 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
     var gson = Gson()
 
+    private var active = false
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            if (!active) {
+                return
+            }
+            val dbHelper = DatabaseHelper(requireContext())
+            val adapter = recyclerView.adapter as RentalToolAdapter //
+
+            val tbt = sharedViewModel.qrScannerText
+            sharedViewModel.qrScannerText = ""
+            try {
+                val taggedTool = dbHelper.getToolByTBT(tbt)
+                val taggedToolId = taggedTool.id
+                var toolIdList: MutableList<Long> = mutableListOf()
+                for (toolWithCnt in adapter.tools) {
+                    toolIdList.add(toolWithCnt.tool.id)
+                }
+                if (!(taggedToolId in toolIdList)) {
+                    adapter.tools.add(ToolWithCount(taggedTool,1))
+                } else {
+                    for (toolWithCnt in adapter.tools) {
+                        Log.d("wrf",toolWithCnt.tool.name)
+                        if (toolWithCnt.tool.id == taggedToolId) {
+                            toolWithCnt.count += 1
+                        }
+                    }
+                }
+                sharedViewModel.toolWithCountList = adapter.tools
+                recyclerView.adapter = adapter
+
+            } catch (e: UninitializedPropertyAccessException) {
+                Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -61,6 +99,10 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
         val dbHelper = DatabaseHelper(requireContext())
+
+        active = true
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
 
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 
@@ -213,6 +255,11 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
         recyclerView.adapter = adapter
         return view
+    }
+
+    override fun onDestroyView() {
+        active = false
+        super.onDestroyView()
     }
 
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {

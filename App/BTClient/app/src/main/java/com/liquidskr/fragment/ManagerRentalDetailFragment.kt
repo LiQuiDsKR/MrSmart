@@ -23,6 +23,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
@@ -40,11 +41,10 @@ import org.threeten.bp.format.DateTimeFormatter
 import java.io.IOException
 import java.lang.reflect.Type
 
-class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
+class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var toolList: List<RentalRequestToolDto> = rentalRequestSheet.toolList
 
-    var rentalRequestSheet: RentalRequestSheetDto = rentalRequestSheet
 
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -59,12 +59,98 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
     private lateinit var bluetoothManager: BluetoothManager
     private val handler = Handler(Looper.getMainLooper())
 
+    private var active = false
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            if (!active) {
+                return
+            }
+            val adapter = recyclerView.adapter as RentalRequestToolAdapter //
+            val tag = sharedViewModel.qrScannerText
+            sharedViewModel.qrScannerText = ""
+            try {
+                lateinit var taggedTool: ToolDto
+                bluetoothManager.requestData(RequestType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                    override fun onSuccess(result: String, type: Type) {
+                        if (result != "null") {
+                            val tag: TagDto = gson.fromJson(result, type)
+                            taggedTool = tag.toolDto
+
+                            var toolDtoList = listOf<ToolDto>()
+                            for (rentalRequestTool:RentalRequestToolDto in rentalRequestSheet.toolList) {
+                                toolDtoList = toolDtoList.plus(rentalRequestTool.toolDto)
+                            }
+                            var toolIdList = listOf<Long>()
+                            for (tool in toolDtoList) {
+                                toolIdList = toolIdList.plus(tool.id)
+                            }
+                            if (taggedTool.id in toolIdList) {
+                                val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
+                                for (tool: RentalRequestToolDto in rentalRequestSheet.toolList) {
+                                    var modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, tool.Tags)
+                                    var modifiedTag = ""
+                                    try {
+                                        if (tool.toolDto.id == taggedTool.id) {
+                                            if (tool.Tags == null || tool.Tags == "") {
+                                                modifiedTag = tag.macaddress
+                                                handler.post {
+                                                    Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                    adapter.tagAdded(modifiedRentalRequestTool)
+                                                }
+                                            } else {
+                                                modifiedTag = tool.Tags
+                                                handler.post {
+                                                    Toast.makeText(activity, "기존 태그를 지우고, ${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        } else {
+                                            if (tool.Tags == null) {
+                                                modifiedTag = ""
+                                            } else {
+                                                modifiedTag = tool.Tags
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+
+                                    modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, modifiedTag)
+                                    rentalRequestToolDtoList.add(modifiedRentalRequestTool)
+                                }
+                                val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
+                                rentalRequestSheet = modifiedRentalRequestSheet
+                            } else {
+                                handler.post {
+                                    Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } else {
+                            handler.post {
+                                Toast.makeText(activity, "서버에서 해당 태그를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    override fun onError(e: Exception) {
+
+                    }
+                })
+            } catch (e: UninitializedPropertyAccessException) {
+                Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
+
+        active = true
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
+
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -131,26 +217,6 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
                                                     handler.post {
                                                         Toast.makeText(activity, "기존 태그를 지우고, ${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
                                                     }
-
-                                                    /*
-                                                    if ("," in tool.Tags) { // 여러개 있다면 (여러개 있을수가 없음 (굳이 여러번 등록하지 않는 이상)
-                                                        val tags = tool.Tags.split(",")
-                                                        if (!(tag.macaddress in tags)) {
-                                                            modifiedTag = tool.Tags + "," + tag
-                                                            handler.post {
-                                                                Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                            }
-                                                        } else {
-                                                            modifiedTag = tag.macaddress
-                                                        }
-                                                    } else {
-                                                        if (!(tool.Tags == tag.macaddress)) {
-                                                            modifiedTag = tool.Tags + "," + tag
-                                                        } else {
-                                                            modifiedTag = tool.Tags
-                                                        }
-                                                    }
-                                                    */
                                                 }
                                             } else {
                                                 if (tool.Tags == null) {
@@ -278,6 +344,10 @@ class ManagerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : F
         }
 
         return view
+    }
+    override fun onDestroyView() {
+        active = false
+        super.onDestroyView()
     }
     fun sheetCancel() {
         try {

@@ -24,6 +24,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
 import com.liquidskr.btclient.RequestType
@@ -54,6 +55,45 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     private lateinit var bluetoothManager: BluetoothManager
     private val handler = Handler(Looper.getMainLooper())
 
+    private var active = false
+    val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
+        override fun onTextFinished() {
+            if (!active) {
+                return
+            }
+            val dbHelper = DatabaseHelper(requireContext())
+            val adapter = recyclerView.adapter as RentalToolAdapter //
+            val tbt = sharedViewModel.qrScannerText
+            sharedViewModel.qrScannerText = ""
+            Log.d("tst",tbt)
+            try {
+                val taggedTool = dbHelper.getToolByTBT(tbt)
+                val taggedToolId = taggedTool.id
+                var toolIdList: MutableList<Long> = mutableListOf()
+                for (toolWithCnt in adapter.tools) {
+                    toolIdList.add(toolWithCnt.tool.id)
+                }
+                if (!(taggedToolId in toolIdList)) {
+                    adapter.tools.add(ToolWithCount(taggedTool,1))
+                } else {
+                    for (toolWithCnt in adapter.tools) {
+                        Log.d("wrf",toolWithCnt.tool.name)
+                        if (toolWithCnt.tool.id == taggedToolId) {
+                            toolWithCnt.count += 1
+                        }
+                    }
+                }
+                sharedViewModel.toolWithCountList = adapter.tools
+                recyclerView.adapter = adapter
+
+            } catch (e: UninitializedPropertyAccessException) {
+                handler.post {
+                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
 
@@ -66,6 +106,10 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_self_rental, container, false)
         var dbHelper = DatabaseHelper(requireContext())
+
+        active = true
+        val lobbyActivity = requireActivity() as LobbyActivity
+        lobbyActivity.setListener(listener)
 
         workerSearchBtn = view.findViewById(R.id.BorrowerSearchBtn)
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
@@ -258,11 +302,10 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         adapter.updateList(toolList)
         recyclerView.adapter = adapter
     }
-
-
-
-
-
+    override fun onDestroyView() {
+        active = false
+        super.onDestroyView()
+    }
     private fun handleBluetoothError(sheet: RentalRequestSheetFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
 

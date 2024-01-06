@@ -38,9 +38,6 @@ class WorkerReturnListFragment() : Fragment() {
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
 
-    interface KeyListener {
-        fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean
-    }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -67,7 +64,7 @@ class WorkerReturnListFragment() : Fragment() {
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
+        val view = inflater.inflate(R.layout.fragment_worker_return_list, container, false)
 
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)

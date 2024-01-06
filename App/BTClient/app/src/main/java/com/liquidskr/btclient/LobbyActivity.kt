@@ -27,6 +27,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.KeyEventDispatcher
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
@@ -45,18 +46,18 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var managerBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
-    lateinit var testBtn: Button
-    lateinit var testEdit: EditText
     lateinit var bluetoothManager: BluetoothManager
     lateinit var managerRentalFragment: ManagerRentalFragment
     lateinit var managerReturnFragment: ManagerReturnFragment
     lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
+    lateinit var toolReturnFragment: ToolRegisterFragment
     private var workerFragment: WorkerFragment? = null
     private var isPopupVisible = false
 
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
+
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(this).get(SharedViewModel::class.java)
@@ -78,20 +79,23 @@ class LobbyActivity : AppCompatActivity() {
     private var listener: MyScannerListener.Listener? = null
 
     fun setListener(listener: MyScannerListener.Listener?) {
+        Log.d("setListener", listener.toString())
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(this, "${listener.toString()}",Toast.LENGTH_SHORT).show()
+        }
         this.listener = listener
     }
 
+    /*
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val handler = Handler(Looper.getMainLooper())
-        /*
-        handler.post {
-            Toast.makeText(this, event.keyCode, Toast.LENGTH_SHORT).show()
-        }*/
         if (event.action == KeyEvent.ACTION_DOWN) {
-            Log.d("SCANNER", "some key pressed, $event")
             if (event.keyCode == KeyEvent.KEYCODE_ENTER) {
-                // listener?.onTextFinished()
-                return super.dispatchKeyEvent(event)
+                Log.d("setListener", "onTextFinished")
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(this, "onTextFinished",Toast.LENGTH_SHORT).show()
+                }
+                listener?.onTextFinished()
+                return true
             } else {
                 when (event.keyCode) {
                     KEYCODE_0 -> sharedViewModel.qrScannerText += "0"
@@ -105,17 +109,15 @@ class LobbyActivity : AppCompatActivity() {
                     KEYCODE_8 -> sharedViewModel.qrScannerText += "8"
                     KEYCODE_9 -> sharedViewModel.qrScannerText += "9"
                 }
-                Log.d("SCANNER", "shared : ${sharedViewModel.qrScannerText}")
-
-                /*
-                handler.post {
-                    Toast.makeText(this, event.keyCode,Toast.LENGTH_SHORT).show()
-                }*/
+                Log.d("setListener", "${sharedViewModel.qrScannerText}")
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(this, "${sharedViewModel.qrScannerText}",Toast.LENGTH_SHORT).show()
+                }
                 return super.dispatchKeyEvent(event)
             }
         }
         return super.dispatchKeyEvent(event)
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,8 +136,6 @@ class LobbyActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.bluetoothProgressBar)
         progressText = findViewById(R.id.bluetoothProgressText)
 
-        testBtn = findViewById(R.id.testBtn)
-        testEdit = findViewById(R.id.testEdit)
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
@@ -168,28 +168,6 @@ class LobbyActivity : AppCompatActivity() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
-        }
-        testBtn.setOnClickListener {
-            bluetoothManager.requestData(RequestType.TEST, "{string:\"${testEdit.text}\"}", object:
-                BluetoothManager.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    if (result == "good") {
-                        handler.post{
-                            Toast.makeText(context, "rec : ${result}",Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        handler.post{
-                            Toast.makeText(context, "not good, rec : ${result}",Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-                override fun onError(e: Exception) {
-                    e.printStackTrace()
-                    handler.post{
-                        Toast.makeText(context, "ERROR",Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
         }
     }
 
