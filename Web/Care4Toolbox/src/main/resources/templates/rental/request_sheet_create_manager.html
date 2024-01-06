@@ -696,7 +696,7 @@
 						}
 						list[index].count++;
 						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-						count.textContent = parseInt(count.textContent) + 1;
+						count.value=parseInt(count.value) + 1;
 
 						stack.push({key: "i", param: index});
 					}
@@ -713,7 +713,7 @@
 			} else {
 				list[index].count--;
 				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-				count.textContent = parseInt(count.textContent) - 1;
+				count.value=parseInt(count.value) - 1;
 
 				stack.push({key: "d", param: index});
 			}
