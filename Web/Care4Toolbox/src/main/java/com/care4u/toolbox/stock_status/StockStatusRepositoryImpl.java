@@ -1,11 +1,16 @@
 package com.care4u.toolbox.stock_status;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import com.care4u.toolbox.group.main_group.QMainGroup;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
@@ -14,10 +19,12 @@ import com.care4u.toolbox.sheet.rental.rental_tool.QRentalTool;
 import com.care4u.toolbox.sheet.return_sheet.QReturnSheet;
 import com.care4u.toolbox.sheet.return_tool.QReturnTool;
 import com.care4u.toolbox.tool.QTool;
+import com.care4u.toolbox.tool.Tool;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -163,5 +170,36 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 				.collect(Collectors.toList());
 
 		return null;
+	}
+
+	@Override
+	public Page<StockStatus> findAllByToolboxIdAndCurrentDay(Long toolboxId, LocalDate date, String toolName,
+			List<Long> subGroupIds, Pageable pageable) {
+		QTool tool = QTool.tool;
+		QStockStatus stock = QStockStatus.stockStatus;
+		
+		String[] keywords = toolName.split(" "); // 검색어를 공백 기준으로 분리
+		List<BooleanExpression> conditions = new ArrayList<>();
+
+		for (String keyword : keywords) {
+			BooleanExpression condition = stock.tool.name.contains(keyword);
+			conditions.add(condition);
+		}
+
+		BooleanExpression finalCondition = Expressions.allOf(conditions.toArray(new BooleanExpression[0]));
+
+		List<StockStatus> content = queryFactory.selectFrom(stock)
+				.where(
+						finalCondition
+						.and(stock.toolbox.id.eq(toolboxId))
+						.and(stock.currentDay.eq(date))
+				)
+				.orderBy(QTool.tool.id.asc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
+				.fetch();
+		long total = queryFactory.select(Wildcard.count).from(stock)
+				.where(finalCondition
+				.and(stock.toolbox.id.eq(toolboxId))
+				.and(stock.currentDay.eq(date))).fetchOne();
+		return new PageImpl<>(content, pageable, total);
 	}
 }
