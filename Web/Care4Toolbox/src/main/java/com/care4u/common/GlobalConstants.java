@@ -38,7 +38,7 @@ public class GlobalConstants {
 		
 	public static final long DEVICE_ERROR_TIME_LIMIT = 30 * 60 * 1000;	//us
 	public static final long COMMUNICATION_TIME_LIMIT = 10 * 1000;	//us
-	public static final int COMMUNICATION_TIMEOUT = 3;	//seconds
+	public static final int COMMUNICATION_TIMEOUT = 10;	//seconds
 	
 	public static final int MAX_POOL_SIZE = 100;
 	public static final int SUB_CONTROLLER_COUNT = 3;
