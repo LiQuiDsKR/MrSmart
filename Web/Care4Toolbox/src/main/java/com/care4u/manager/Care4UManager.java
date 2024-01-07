@@ -406,7 +406,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	try {
 					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormDto.class);
 					
-		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(mainDto);
+		            RentalSheetDto result = rentalSheetService.create(mainDto);
 		            
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
