@@ -549,42 +549,29 @@
 //대여 신청 수량을 변경.
 		// : toolCount Input을 변경했을 때 실행.
 		function changeCount(index){
-			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
-				.then(stockData => {
-					if (stockData.goodCount < parseInt(this.value)) {
-						Swal.fire({
-							type: "info",
-							title: "재고 부족",
-							text: "이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
-						}).then(result=>{
-							this.value=stockData.goodCount;
-							list[index].count=this.value;
-						});
-						return;
-					} else if (index >= list.length) {
-						return "없다 그런거";
-					}
-					if (parseInt(this.value) < 1) {
-						Swal.fire({
-							type: 'question',
-							title: '입력 범위 밖',
-							html: '<p>0 이하의 값을 입력하셨습니다. 목록에서 현재 공기구를 제외하시겠습니까?</p>',
-							showCancelButton: true,
-							confirmButtonText: '예',
-							cancelButtonText: '아니오',
-							buttonStyling: false,
-						}).then(result => {
-							if (result.value == true) {
-								removeTool(list[index].id);
-							}else{
-								this.value=1;
-								list[index].count=this.value;
-							}
-						});
-					} else {
+			if (index >= list.length) {
+				return "없다 그런거";
+			}
+			if (parseInt(this.value) < 1) {
+				Swal.fire({
+					type: 'question',
+					title: '입력 범위 밖',
+					html: '<p>0 이하의 값을 입력하셨습니다. 목록에서 현재 공기구를 제외하시겠습니까?</p>',
+					showCancelButton: true,
+					confirmButtonText: '예',
+					cancelButtonText: '아니오',
+					buttonStyling: false,
+				}).then(result => {
+					if (result.value == true) {
+						removeTool(list[index].id);
+					}else{
+						this.value=1;
 						list[index].count=this.value;
 					}
-				})
+				});
+			} else {
+				list[index].count=this.value;
+			}
 		}
 		/*
 		//만약 list와 table element가 표시하는 정보가 일치하지 않을 때 

@@ -27,31 +27,42 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="70dp"
                     android:background="@drawable/tool_background"
-                    android:gravity="right|center_vertical"
-                    android:orientation="horizontal">
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingLeft="35dp"
+                    android:paddingTop="5dp"
+                    android:paddingRight="35dp"
+                    android:paddingBottom="5dp">
 
-                    <EditText
-                        android:id="@+id/searchSheetEdit"
-                        android:layout_width="330dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        android:background="@null"
-                        android:ems="10"
-                        android:inputType="text"
-                        android:singleLine="true"
-                        android:text="" />
+                        android:gravity="clip_horizontal|right"
+                        android:orientation="horizontal">
 
-                    <ImageButton
-                        android:id="@+id/sheetSearchBtn"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginRight="10dp"
-                        android:backgroundTint="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/icon_fix_ic_top_search_copy" />
+                        <EditText
+                            android:id="@+id/searchSheetEdit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:ems="10"
+                            android:inputType="text"
+                            android:singleLine="true"
+                            android:text="" />
+
+                        <ImageButton
+                            android:id="@+id/sheetSearchBtn"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_gravity="center_vertical"
+                            android:backgroundTint="#00FFFFFF"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/icon_fix_ic_top_search_copy" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -82,6 +93,149 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#fff4f4ff"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/ConnectBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="0"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    android:scaleX="2"
+                    android:scaleY="2"
+                    app:srcCompat="@drawable/manager_lobby_connectionbtn" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/RentalBtnField"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/RentalBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_on_01" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="대여"
+                        android:textColor="#32345E"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ReturnBtnField"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/ReturnBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_02" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="반납"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/StandbyBtnField"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/StandbyBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_03" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="보류"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/RegisterBtnField"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/RegisterBtn"
+                        android:layout_width="54dp"
+                        android:layout_height="51dp"
+                        android:layout_gravity="center"
+                        android:backgroundTint="#00FFFFFF"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_menu_off_04" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/noto_sans"
+                        android:gravity="center"
+                        android:text="등록"
+                        android:textColor="#BDBDBD"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
     </FrameLayout>
 
@@ -93,6 +247,12 @@
         android:visibility="gone">
 
         <!-- Progress Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:orientation="horizontal"></LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -114,12 +274,6 @@
                 android:progressTint="#FFFFFF" />
 
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80000000"
-            android:orientation="horizontal"></LinearLayout>
 
     </RelativeLayout>
 

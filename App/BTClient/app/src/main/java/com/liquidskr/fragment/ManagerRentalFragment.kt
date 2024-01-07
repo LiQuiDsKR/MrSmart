@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +41,7 @@ class ManagerRentalFragment() : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
+    private val REQUEST_PAGE_SIZE = 2
 
     private lateinit var bluetoothManager: BluetoothManager
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
@@ -63,7 +65,7 @@ class ManagerRentalFragment() : Fragment() {
         }
         override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
             rentalRequestSheetList.addAll(sheetList)
-            requireActivity().runOnUiThread {
+            handler.post {
                 (recyclerView.adapter as RentalRequestSheetAdapter).updateList(rentalRequestSheetList)
             }
         }
@@ -87,7 +89,7 @@ class ManagerRentalFragment() : Fragment() {
         val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
             val fragment = ManagerRentalDetailFragment(rentalRequestSheet)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -104,7 +106,7 @@ class ManagerRentalFragment() : Fragment() {
             sharedViewModel.rentalRequestToolIdList.clear()
             val fragment = ManagerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -124,9 +126,9 @@ class ManagerRentalFragment() : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                    val totalPage = Math.ceil(sheetCount/REQUEST_PAGE_SIZE.toDouble()).toInt()
                     rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
-                    if (sheetCount != 0) { // UI블로킹 start
+                    if (sheetCount > 0) { // UI블로킹 start
                         requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
                     } else {
                         hidePopup()
@@ -144,14 +146,14 @@ class ManagerRentalFragment() : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)
                 handler.post { // UI블로킹 start
                     progressBar.progress = page.pageable.page
-                    if (page.total != 0) {
-                        progressText.text = "대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
+                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
+                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
                     }
                 } // UI블로킹 end
             }
@@ -163,11 +165,24 @@ class ManagerRentalFragment() : Fragment() {
     // ## 여기서부터 블루투스 송수신 시 UI블로킹 start
     private fun showPopup() {
         isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
         popupLayout.visibility = View.VISIBLE
     }
     private fun hidePopup() {
-        isPopupVisible = false
-        popupLayout.visibility = View.GONE
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
     // UI블로킹 end
 }

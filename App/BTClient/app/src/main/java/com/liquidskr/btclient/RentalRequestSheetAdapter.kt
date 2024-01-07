@@ -31,9 +31,9 @@ class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequ
         val currentRentalRequestSheet = rentalRequestSheets[position]
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
-        holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp //LocalDateTime.parse(currentRentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        if (currentRentalRequestSheet.status == SheetState.READY) holder.sheetState.text = "신청 대기"
-        if (currentRentalRequestSheet.status == SheetState.REQUEST) holder.sheetState.text = "승인 대기"
+        holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp
+        if (currentRentalRequestSheet.status == SheetState.READY) holder.sheetState.text = "미신청 (신청 대기)"
+        if (currentRentalRequestSheet.status == SheetState.REQUEST) holder.sheetState.text = "신청 완료 (승인 대기)"
         var toolListString = ""
         for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
             val toolName: String = tool.toolDto.name

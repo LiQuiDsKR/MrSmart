@@ -93,9 +93,9 @@ public class StockStatusService {
 			logger.error("재고 없음" + stock.getGoodCount()+")");
 			return null;
 		}
-		logger.debug("stock updated from (request) : "+stock.toString());
+		logger.info("stock updated from (request) : "+stock.toString());
 		stock.requestUpdate(count);
-		logger.debug("stock updated to (request) : "+stock.toString());
+		logger.info("stock updated to (request) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
@@ -108,9 +108,9 @@ public class StockStatusService {
 		}
 		stock=stockOptional.get();
 
-		logger.debug("stock updated from (request cancel) : "+stock.toString());
+		logger.info("stock updated from (request cancel) : "+stock.toString());
 		stock.requestCancelUpdate(count);
-		logger.debug("stock updated to (request cancel) : "+stock.toString());
+		logger.info("stock updated to (request cancel) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
@@ -126,9 +126,9 @@ public class StockStatusService {
 			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
 			return null;
 		}
-		logger.debug("stock updated from (rent) : "+stock.toString());
+		logger.info("stock updated from (rent) : "+stock.toString());
 		stock.rentUpdate(count);
-		logger.debug("stock updated to (rent) : "+stock.toString());
+		logger.info("stock updated to (rent) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
@@ -140,9 +140,9 @@ public class StockStatusService {
 			return null;
 		}
 		stock=stockOptional.get();
-		logger.debug("stock updated from (return) : "+stock.toString());
+		logger.info("stock updated from (return) : "+stock.toString());
 		stock.returnUpdate(goodCount, faultCount, damageCount, discardCount, lossCount);
-		logger.debug("stock updated to (return) : "+stock.toString());
+		logger.info("stock updated to (return) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
@@ -151,9 +151,9 @@ public class StockStatusService {
 		if (stock==null) {
 			stock=addNew(toolId, toolboxId, 0);
 		}
-		logger.debug("stock updated from (buy) : "+stock.toString());
+		logger.info("stock updated from (buy) : "+stock.toString());
 		stock.buyUpdate(count);
-		logger.debug("stock updated to (buy) : "+stock.toString());
+		logger.info("stock updated to (buy) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	@Transactional
@@ -169,9 +169,9 @@ public class StockStatusService {
 			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
 			return null;
 		}
-		logger.debug("stock updated from (supply) : "+stock.toString());
+		logger.info("stock updated from (supply) : "+stock.toString());
 		stock.supplyUpdate(count);
-		logger.debug("stock updated to (supply) : "+stock.toString());
+		logger.info("stock updated to (supply) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
 	

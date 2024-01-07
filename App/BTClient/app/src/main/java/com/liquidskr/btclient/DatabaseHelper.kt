@@ -509,8 +509,43 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         cursor.close()
         db.close()
-
         return toolList
+    }
+
+    @SuppressLint("Range")
+    fun getToolsByQuery(searchQuery: String): List<ToolDtoSQLite> {
+        val toolList = mutableListOf<ToolDtoSQLite>()
+        val db = this.readableDatabase
+        val keywords = searchQuery.split(" ") // 검색어를 공백을 기준으로 분리
+
+        val sqlConditions = mutableListOf<String>()
+        for (keyword in keywords) {
+            sqlConditions.add("$COLUMN_TOOL_KRNAME LIKE '%$keyword%'")
+        }
+
+        val query = "SELECT * FROM $TABLE_TOOL_NAME WHERE ${sqlConditions.joinToString(" OR ")}"
+
+        val cursor = db.rawQuery(query, null)
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
+            val subGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SUBGROUP))
+            val mainGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_MAINGROUP))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_CODE))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_KRNAME))
+            val engName = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_ENGNAME))
+            val spec = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SPEC))
+            val unit = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_UNIT))
+            val price = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_PRICE))
+            val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
+            val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
+
+            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            toolList.add(tool)
+        }
+        cursor.close()
+        db.close()
+        return toolList
+
     }
 
     @SuppressLint("Range")
@@ -714,14 +749,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return tbt
     }
     @SuppressLint("Range")
-    fun updateQRCodeById(id: Long, newQRCode: String) {
+    fun updateQRCodeById(id: Long, newQRCode: String): Int {
         val values = ContentValues()
         values.put(COLUMN_TBT_QRCODE, newQRCode)
 
         val db = this.writableDatabase
-        db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_TOOL_ID = ?", arrayOf(id.toString()))
+        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
 
         db.close()
+        return rowsAffected
     }
     fun deleteTBTById(id: Long): Int {
         val db = this.writableDatabase

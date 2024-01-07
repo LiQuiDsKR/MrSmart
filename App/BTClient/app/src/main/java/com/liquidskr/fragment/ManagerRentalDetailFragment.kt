@@ -13,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -45,6 +46,10 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var recyclerView: RecyclerView
     private var toolList: List<RentalRequestToolDto> = rentalRequestSheet.toolList
 
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
 
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -57,7 +62,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
-    private val handler = Handler(Looper.getMainLooper())
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -83,6 +87,8 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         leaderName.text = rentalRequestSheet.leaderDto.name
         timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         var adapter = RentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
@@ -170,10 +176,16 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             }
             false
         }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
+        }
 
         confirmBtn.setOnClickListener {
             confirmBtn.isFocusable = false
             confirmBtn.isClickable = false
+            showPopup()
 
             var standbyAlreadySent = false
             recyclerView.adapter?.let { adapter ->
@@ -211,6 +223,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
+                                    hidePopup()
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
@@ -254,6 +267,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             sheetCancel()
         }
 
+        qrEditText.requestFocus()
         return view
     }
 
@@ -309,4 +323,26 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
         dbHelper.close()
     }
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    }
+
 }

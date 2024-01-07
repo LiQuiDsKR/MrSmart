@@ -12,8 +12,9 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.KeyEventDispatcher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,15 +22,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
-import java.lang.reflect.Type
-import java.security.Key
 
 
 class ToolRegisterFragment() : Fragment() {
@@ -39,8 +34,13 @@ class ToolRegisterFragment() : Fragment() {
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
-    private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // // UI블로킹 end
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -61,17 +61,17 @@ class ToolRegisterFragment() : Fragment() {
 
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
+
         val adapter = ToolRegisterAdapter(tools) { tool ->
-            val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+            val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
 
         searchBtn.setOnClickListener {
-            filterByName(adapter, tools, editTextName.text.toString())
-
+            filterByName(adapter, editTextName.text.toString())
         }
 
         editTextName.setOnEditorActionListener { _, actionId, event ->
@@ -81,9 +81,9 @@ class ToolRegisterFragment() : Fragment() {
                 try {
                     val dbHelper = DatabaseHelper(requireContext())
                     val tool = dbHelper.getToolByTBT(label)
-                    val fragment = ToolRegisterDetailFragment(tool.toToolDto())
+                    val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, fragment)
+                        .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack(null)
                         .commit()
                 } catch(e:Exception) {
@@ -96,29 +96,32 @@ class ToolRegisterFragment() : Fragment() {
             false
         }
 
+        editTextName.requestFocus()
         recyclerView.adapter = adapter
 
         return view
     }
 
 
-    fun filterByName(adapter: ToolRegisterAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
-        val newList: MutableList<ToolDtoSQLite> = mutableListOf()
-        for (tool in tools) {
-            if (keyword in tool.name) {
-                newList.add(tool)
+    fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
+        val dbHelper = DatabaseHelper(requireContext())
+        try {
+            val newList = dbHelper.getToolsByQuery(keyword)
+            adapter.updateList(newList)
+        } catch(e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "해당 검색어를 통해 공기구를 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-        adapter.updateList(newList)
     }
     fun handleKeyEvent(keyCode: Int) {
         if (sharedViewModel.qrScannerText == "") {
             scheduleTask(300) {
                 try {
                     val dbHelper = DatabaseHelper(requireContext())
-                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto())
+                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, fragment)
+                        .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack(null)
                         .commit()
                     sharedViewModel.qrScannerText = ""

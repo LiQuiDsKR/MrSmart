@@ -414,6 +414,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
+            RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
 
             // ###################
             RequestType.TEST.name -> {

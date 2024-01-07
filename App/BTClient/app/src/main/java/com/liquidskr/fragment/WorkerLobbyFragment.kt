@@ -12,18 +12,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import java.lang.reflect.Type
 
 class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
     private lateinit var connectBtn: ImageView
@@ -65,7 +59,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
             val fragment = WorkerRentalListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .commit()
         }
 
@@ -75,7 +69,7 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
 
             val fragment = WorkerReturnListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .commit()
         }
 

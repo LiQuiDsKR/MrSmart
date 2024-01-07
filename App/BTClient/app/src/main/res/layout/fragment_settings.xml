@@ -264,6 +264,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#80000000"
+            android:orientation="horizontal"></LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -283,12 +289,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80000000"
-            android:orientation="horizontal"></LinearLayout>
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -299,6 +299,12 @@
         android:visibility="gone">
 
         <!-- Progress Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:orientation="horizontal"></LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -320,12 +326,6 @@
                 android:progressTint="#FFFFFF" />
 
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80000000"
-            android:orientation="horizontal"></LinearLayout>
 
     </RelativeLayout>
 

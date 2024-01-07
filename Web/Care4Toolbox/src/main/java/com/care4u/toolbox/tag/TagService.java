@@ -263,5 +263,11 @@ public class TagService {
 	public long getCount(long toolboxId) {
 		return repository.countByToolboxId(toolboxId);
 	}
+
+	@Transactional(readOnly=true)
+	public List<TagDto> listByToolIdAndToolboxId(long toolId, long toolboxId) {
+		List<Tag> list = repository.findAllByToolIdAndToolboxId(toolId, toolboxId);
+		return list.stream().map(e->new TagDto(e)).toList();
+	}
 	
 }

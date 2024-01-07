@@ -36,6 +36,7 @@ import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.service.LogWriterService;
+import com.care4u.toolbox.tag.TagAndToolboxToolLabelDto;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.ToolboxService;
@@ -694,6 +695,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	               toolboxToolLabelService.register(toolId, toolboxId, qrcode);
 	               logger.debug("good_toolbox_tool_label");
 	                handler.sendData(keyword + "good");
+	             }catch(IllegalArgumentException e) {
+	                handler.sendData(keyword + e.getMessage());
+	                e.printStackTrace();
+	             }catch(Exception e) {
+	                handler.sendData(keyword + "bad");
+	                e.printStackTrace();
+	             }
+	         }
+	         break;
+		case TAG_AND_TOOLBOX_TOOL_LABEL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+	            JSONObject jsonObj = new JSONObject(paramJson);
+	            long toolId = jsonObj.getLong("toolId");
+	            long toolboxId = jsonObj.getLong("toolboxId");
+	            try {
+	            	TagAndToolboxToolLabelDto.builder()
+	            	.tagDtoList(tagService.listByToolIdAndToolboxId(toolId,toolboxId))
+	            	.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId))
+	            	.build();
 	             }catch(IllegalArgumentException e) {
 	                handler.sendData(keyword + e.getMessage());
 	                e.printStackTrace();

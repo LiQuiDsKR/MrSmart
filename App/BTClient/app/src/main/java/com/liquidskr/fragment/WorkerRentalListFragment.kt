@@ -73,7 +73,7 @@ class WorkerRentalListFragment() : Fragment() {
             if (rentalRequestSheet.status != SheetState.REQUEST) {
                 val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, fragment)
+                    .replace(R.id.fragmentContainer, fragment)
                     .addToBackStack(null)
                     .commit()
             }

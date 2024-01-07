@@ -73,10 +73,10 @@ class WorkerReturnListFragment() : Fragment() {
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
-            if (outstandingRentalSheet.outstandingState != OutstandingState.REQUEST) {
+            if (outstandingRentalSheet.outstandingStatus != OutstandingState.REQUEST) {
                 val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, fragment)
+                    .replace(R.id.fragmentContainer, fragment)
                     .addToBackStack(null)
                     .commit()
             }
@@ -101,7 +101,7 @@ class WorkerReturnListFragment() : Fragment() {
                         val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
                         val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
                         requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView, fragment)
+                            .replace(R.id.fragmentContainer, fragment)
                             .addToBackStack(null)
                             .commit()
                     }

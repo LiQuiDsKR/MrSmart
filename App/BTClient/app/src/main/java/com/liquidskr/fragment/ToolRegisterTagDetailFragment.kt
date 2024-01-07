@@ -96,7 +96,6 @@ class ToolRegisterTagDetailFragment(tool: ToolDto, tagList: List<String>, access
                 qrSearchText.requestFocus()
                 return@setOnEditorActionListener true
             }
-
             false
         }
 
