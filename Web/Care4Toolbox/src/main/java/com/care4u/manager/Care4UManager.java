@@ -710,10 +710,14 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	            long toolId = jsonObj.getLong("toolId");
 	            long toolboxId = jsonObj.getLong("toolboxId");
 	            try {
-	            	TagAndToolboxToolLabelDto.builder()
-	            	.tagDtoList(tagService.listByToolIdAndToolboxId(toolId,toolboxId))
-	            	.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId))
-	            	.build();
+	            	handler.sendData(
+	            			GsonUtils.toJson(
+	            					TagAndToolboxToolLabelDto.builder()
+					            	.tagDtoList(tagService.listByToolIdAndToolboxId(toolId,toolboxId))
+					            	.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId))
+					            	.build()
+					            	)
+	            			);
 	             }catch(IllegalArgumentException e) {
 	                handler.sendData(keyword + e.getMessage());
 	                e.printStackTrace();
