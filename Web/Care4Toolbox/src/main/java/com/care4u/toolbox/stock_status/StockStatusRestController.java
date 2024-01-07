@@ -77,8 +77,14 @@ public class StockStatusRestController {
     	return ResponseEntity.ok(summaryDto);
     }
     @GetMapping(value="/stock_status/get/analytics/list")
-    public ResponseEntity<List<StockStatusSummaryByToolStateDto>> getStockStatusSummaryList(
+    public ResponseEntity<List<StockStatusSummaryByToolStateDto>> getStockStatusSummaryList(    		
+    		@RequestParam(name="partId") Long partId,
+    		@RequestParam(name="membershipId") Long membershipId,
+    		@RequestParam(name="toolId") Long toolId,
     		@RequestParam(name="toolboxId") Long toolboxId,
+    		@RequestParam(name="isWorker") Boolean isWorker,
+    		@RequestParam(name="isLeader") Boolean isLeader,
+    		@RequestParam(name="isApprover") Boolean isApprover,
     		@RequestParam(name="startDate") String startDate,
     		@RequestParam(name="endDate") String endDate
     		){
@@ -86,7 +92,7 @@ public class StockStatusRestController {
     	LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
     	LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     	
-    	List<StockStatusSummaryByToolStateDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
+    	List<StockStatusSummaryByToolStateDto> summaryDto=stockStatusService.getSummary(partId, membershipId, toolId, toolboxId, isWorker, isLeader, isApprover, startLocalDate, endLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
     @GetMapping(value="/stock_status/get/analytics/by_main_group")

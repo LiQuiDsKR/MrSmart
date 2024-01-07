@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.group.main_group.QMainGroup;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
 import com.care4u.toolbox.sheet.rental.rental_sheet.QRentalSheet;
@@ -27,6 +28,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import groovyjarjarantlr4.v4.runtime.atn.SemanticContext.AND;
 
 public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
@@ -62,7 +65,8 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	}
 	
 	@Override
-	public List<StockStatusSummaryByToolStateDto> getStockStatusSummary(long toolboxId, LocalDate startDate,
+	public List<StockStatusSummaryByToolStateDto> getStockStatusSummary(Long partId, Membership membership, Tool tool,
+			Long toolboxId, Boolean isWorker, Boolean isLeader, Boolean isApprover, LocalDate startDate,
 			LocalDate endDate) {
 		QStockStatus stockStatus = QStockStatus.stockStatus;
 		QRentalSheet rentalSheet = QRentalSheet.rentalSheet;
@@ -70,24 +74,33 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		QReturnSheet returnSheet = QReturnSheet.returnSheet;
 		QReturnTool returnTool = QReturnTool.returnTool;
 		
-		long membershipId=0;
-		
-		Integer rentalCount = queryFactory
+		Integer rentalCount;
+		Integer returnCount;
+		try {
+		rentalCount = queryFactory
 			    .select(rentalTool.count.sum())
 			    .from(rentalSheet)
 			    .join(rentalTool).on(rentalSheet.id.eq(rentalTool.rentalSheet.id))
-			    .where(rentalSheet.worker.id.eq(membershipId))
+			    .where(rentalSheet.worker.eq(membership)
+			    	.and(rentalTool.tool.eq(tool))
+			    	.and(rentalSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
 
-		Integer returnCount = queryFactory
+		returnCount = queryFactory
 			    .select(returnTool.count.sum())
 			    .from(returnSheet)
 			    .join(returnTool).on(returnSheet.id.eq(returnTool.returnSheet.id))
-			    .where(returnSheet.worker.id.eq(membershipId))
+			    .where(returnSheet.worker.eq(membership)
+				    	.and(returnTool.rentalTool.tool.eq(tool))
+				    	.and(returnSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
+		} catch (Exception e){
+			rentalCount=0;
+			returnCount=0;
+		}
 
-
-		return queryFactory
+		
+		List<StockStatusSummaryByToolStateDto> tempList= queryFactory
 				.select(Projections.constructor(StockStatusSummaryByToolStateDto.class, stockStatus.toolbox.name,
 						stockStatus.currentDay, stockStatus.totalCount.sum(), stockStatus.rentalCount.sum(),
 						stockStatus.buyCount.sum(), stockStatus.goodCount.sum(), stockStatus.faultCount.sum(),
@@ -96,6 +109,23 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 				.from(stockStatus)
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.between(startDate, endDate)))
 				.groupBy(stockStatus.currentDay).fetch();
+		
+
+		List<StockStatusSummaryByToolStateDto> resultList;
+		if(tool!=null || membership!=null || partId!=0) {
+		resultList = new ArrayList<>();
+			for (StockStatusSummaryByToolStateDto item : tempList) {
+				StockStatusSummaryByToolStateDto newItem = new StockStatusSummaryByToolStateDto(item); // 복제 생성자를 통해 객체 복제
+			    newItem.setRentalCount(rentalCount);
+			    newItem.setReturnCount(returnCount);
+			    resultList.add(newItem); // 결과 리스트에 추가
+			}
+		}else {
+			resultList=tempList;
+		}
+		
+		
+		return resultList;
 	}
 
 	@Override

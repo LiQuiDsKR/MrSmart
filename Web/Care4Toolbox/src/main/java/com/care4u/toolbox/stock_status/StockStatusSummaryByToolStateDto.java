@@ -5,8 +5,9 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
 @AllArgsConstructor
 public class StockStatusSummaryByToolStateDto {
     private String toolboxName;
@@ -21,4 +22,26 @@ public class StockStatusSummaryByToolStateDto {
     private Integer discardCount;
     private Integer supplyCount;
     private Integer returnCount;
+    
+    public StockStatusSummaryByToolStateDto(StockStatusSummaryByToolStateDto source) {
+        this.toolboxName = source.toolboxName;
+        this.currentDay = source.currentDay;
+        this.totalCount = source.totalCount;
+        this.rentalCount = source.rentalCount;
+        this.buyCount = source.buyCount;
+        this.goodCount = source.goodCount;
+        this.faultCount = source.faultCount;
+        this.damageCount = source.damageCount;
+        this.lossCount = source.lossCount;
+        this.discardCount = source.discardCount;
+        this.supplyCount = source.supplyCount;
+        this.returnCount = source.returnCount;
+    }
+
+    
+    public StockStatusSummaryByToolStateDto update(Integer rentalCount, Integer returnCount) {
+    	this.rentalCount=rentalCount;
+    	this.returnCount=returnCount;
+    	return this;
+    }
 }
