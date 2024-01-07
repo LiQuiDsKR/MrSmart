@@ -1,7 +1,12 @@
 package com.care4u.controller;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.care4u.service.FileDownloadService;
 import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
@@ -28,6 +34,9 @@ public class MainController {
 	
 	@Autowired
 	private ToolboxService toolboxService;
+
+	@Autowired
+	private FileDownloadService fileDownloadService;
 	
 	@GetMapping(value = "")
     public String toolState(Model model){
@@ -62,6 +71,18 @@ public class MainController {
     public String initializeStock(Model model) {
     	model.addAttribute("toolboxList",toolboxService.list());
     	return "stock_initialize";
+    }
+    
+    @GetMapping("/download/manual")
+    public void downloadManual(HttpServletResponse response) {
+        try {
+            Resource resource = fileDownloadService.loadFileAsResource("user_manual.pdf");
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=" + resource.getFilename());
+            resource.getInputStream().transferTo(response.getOutputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     /*

@@ -173,8 +173,8 @@
 				<!-- Card -->
 				<div class="card mb-30 bg-white">
 					<div class="card-body">
-							<div class="d-flex flex-md-row flex-column ml-auto">
-								<h3 class="mb-1">기간별 대여 현황</h3>
+							<div class="d-flex flex-md-row flex-column align-items-center ml-auto">
+								<h3 class="m-3">기간별 대여 현황</h3>
 								<div class="col-12 col-md-5">
 									<div class="d-flex align-items-center flex-nowrap m-4"
 										style="box-sizing: content-box;">
@@ -430,8 +430,8 @@
 		)
 			.then(data => {
 				membershipId = data.id;
-				mainData.membership.id = data.id;
-				mainData.membership.name = data.name;
+				//mainData.membership.id = data.id;
+				//mainData.membership.name = data.name;
 				document.getElementById("membership").textContent = data.name;
 				return new Promise((resolved, rejected) => {
 					abcHttp.get(
@@ -550,6 +550,12 @@
 				'/stock_status/get/analytics/list',
 				{
 					toolboxId: toolboxId,
+					partId: $('#searchBySelect').val()==="part"?mainData.part.id:0,
+					membershipId:$('#searchBySelect').val()==="membership"?mainData.membership.id:0,
+					toolId: $('#searchBySelect').val()==="tool"?mainData.tool.id:0,
+					isWorker: $('#searchBySelect').val()==="membership",
+					isLeader: $('#searchBySelect').val()==="membership",
+					isApprover: $('#searchBySelect').val()==="membership",
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
@@ -966,7 +972,7 @@
 			mainData.membership.name = name;
 			document.getElementById("membership").textContent = mainData.membership.name;
 			$("#membershipEditModal").modal("hide");
-			load();
+			loadChart1.apply(chart1, [toolboxId]);
 		});
 
 		//fetch
@@ -1123,7 +1129,7 @@
 			mainData.part.name = name;
 			document.getElementById("part").textContent = mainData.part.name;
 			$("#partEditModal").modal("hide");
-			load();
+			loadChart1.apply(chart1, [toolboxId]);
 		});
 
 		//fetch
@@ -1269,7 +1275,7 @@
 			mainData.tool.name = name;
 			document.getElementById("tool").textContent = mainData.tool.name;
 			$("#toolEditModal").modal("hide");
-			load();
+			loadChart1.apply(chart1, [toolboxId]);
 		});
 
 		//fetch
