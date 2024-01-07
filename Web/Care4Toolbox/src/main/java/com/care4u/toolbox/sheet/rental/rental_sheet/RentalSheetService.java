@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
 import com.care4u.hr.main_part.MainPart;
 import com.care4u.hr.main_part.MainPartRepository;
@@ -26,6 +27,8 @@ import com.care4u.hr.sub_part.SubPart;
 import com.care4u.hr.sub_part.SubPartRepository;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheet;
+import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetRepository;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetApproveFormDto;
@@ -33,8 +36,10 @@ import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDt
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetService;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestTool;
+import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolApproveFormDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolFormDto;
+import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolRepository;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalTool;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolDto;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolRepository;
@@ -42,8 +47,16 @@ import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolService;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheet;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetDto;
 import com.care4u.toolbox.sheet.return_sheet.ReturnSheetFormDto;
+import com.care4u.toolbox.sheet.supply_sheet.SupplySheet;
+import com.care4u.toolbox.sheet.supply_sheet.SupplySheetDto;
+import com.care4u.toolbox.sheet.supply_sheet.SupplySheetRepository;
 import com.care4u.toolbox.sheet.supply_sheet.SupplySheetService;
 import com.care4u.toolbox.sheet.supply_tool.SupplyTool;
+import com.care4u.toolbox.sheet.supply_tool.SupplyToolRepository;
+import com.care4u.toolbox.stock_status.StockStatus;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusRepository;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
 import com.care4u.toolbox.tool.Tool;
@@ -68,11 +81,17 @@ public class RentalSheetService {
 	private final PartRepository partRepository;
 	private final SubPartRepository subPartRepository;
 	private final MainPartRepository mainPartRepository;
+	private final StockStatusRepository stockStatusRepository;
 	private final RentalRequestSheetRepository rentalRequestSheetRepository;
+	private final RentalRequestToolRepository rentalRequestToolRepository;
+	private final SupplySheetRepository supplySheetRepository;
+	private final SupplyToolRepository supplyToolRepository;
+	private final OutstandingRentalSheetRepository outstandingRentalSheetRepository;
 	private final RentalToolService rentalToolService;
 	private final OutstandingRentalSheetService outstandingRentalSheetService;
 	private final RentalRequestSheetService rentalRequestSheetService;
 	private final SupplySheetService supplySheetService;
+	private final StockStatusService stockStatusService;
 
 	@Transactional(readOnly = true)
 	public RentalSheetDto get(long id) {
@@ -277,5 +296,238 @@ public class RentalSheetService {
 		}else {
 			return updateAndAddNewInTransaction(formDto);
 		}
+	}
+	
+	@Transactional
+	public RentalSheetDto create(RentalRequestSheetApproveFormDto formDto) {
+		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerDtoId());
+		Optional<Membership> leader = membershipRepository.findById(formDto.getLeaderDtoId());
+		Optional<Membership> approver = membershipRepository.findById(formDto.getApproverDtoId());
+		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxDtoId());
+		if (worker.isEmpty()) {
+			logger.debug("Worker not found");
+			throw new IllegalArgumentException("Worker not found");
+		}
+		if (leader.isEmpty()) {
+			logger.debug("Leader not found");
+			throw new IllegalArgumentException("Leader not found");
+		}
+		if (approver.isEmpty()) {
+			logger.debug("Approver not found");
+			throw new IllegalArgumentException("Approver not found");
+		}
+		if (toolbox.isEmpty()) {
+			logger.debug("Toolbox not found");
+			throw new IllegalArgumentException("Toolbox not found");
+		}
+		RentalRequestSheetDto sheetDto = rentalRequestSheetUpdate(formDto,SheetState.APPROVE,worker.get(),leader.get(),toolbox.get());
+		return addNewPrivate(sheetDto,worker.get(),leader.get(),approver.get(),toolbox.get());
+	}
+	
+	private RentalRequestSheetDto rentalRequestSheetUpdate(RentalRequestSheetApproveFormDto formDto, SheetState status, Membership worker,Membership leader,Toolbox toolbox) {
+		logger.debug("RentalRequestSheet [Add] : start");
+		RentalRequestSheet rentalRequestSheet;
+		Optional<RentalRequestSheet> rentalRequestSheetOptional = rentalRequestSheetRepository.findById(formDto.getId());
+		if (rentalRequestSheetOptional.isEmpty()) {
+			logger.error("Sheet not found");
+			throw new IllegalArgumentException("Sheet not found");
+		}
+		if (rentalRequestSheetOptional.get().getStatus().equals(status)) {
+			logger.debug("Sheet is already " + status);
+			return null;
+		}
+
+		rentalRequestSheet = rentalRequestSheetOptional.get();
+
+		logger.debug("RentalRequestSheet [Add] : Param Null check completed");
+
+		rentalRequestSheet.update(worker, leader, toolbox, status,
+				rentalRequestSheet.getEventTimestamp());
+
+		List<RentalRequestToolDto> dtoList = new ArrayList<RentalRequestToolDto>();
+		logger.debug("RentalRequestSheet [Add] : toolList start");
+		for (RentalRequestToolApproveFormDto tool : formDto.getToolList()) {
+			logger.debug("RentalRequestSheet [Add] : tool finding");
+			Optional<RentalRequestTool> optionalRequestTool = rentalRequestToolRepository.findById(tool.getId());
+			Optional<Tool> optionalTool = toolRepository.findById(tool.getToolDtoId());
+			if (optionalRequestTool.isEmpty()) {
+				logger.error("rental request tool not found");
+				throw new IllegalArgumentException("rental request tool not found");
+			}
+			if (optionalTool.isEmpty()) {
+				logger.error("tool not found");
+				throw new IllegalArgumentException("tool not found");
+			}
+			logger.debug("RentalRequestSheet [Add] : tool found");
+			RentalRequestToolDto newDto = RentalRequestToolDto.builder().id(tool.getId()).count(tool.getCount())
+					.toolDto(new ToolDto(optionalTool.get())).Tags(tool.getTags()).build();
+
+			dtoList.add(newDto);
+			logger.debug("RentalRequestSheet [Add] : tool add");
+		}
+		logger.debug("RentalRequestSheet [Add] : complete");
+		return new RentalRequestSheetDto(rentalRequestSheetRepository.save(rentalRequestSheet), dtoList);
+	}
+	
+	private RentalSheetDto addNewPrivate(RentalRequestSheetDto requestSheetDto, Membership worker,Membership leader,Membership approver,Toolbox toolbox) {
+
+		logger.debug("RentalSheet [Add] : Start");
+		
+		// sheet create
+		RentalSheet rentalSheet = RentalSheet.builder().worker(worker).leader(leader)
+				.approver(approver).toolbox(toolbox).eventTimestamp(LocalDateTime.now()).build();
+		RentalSheet savedRentalSheet = repository.save(rentalSheet);
+		
+		logger.debug("RentalSheet [Add] : RentalSheet("+savedRentalSheet.getId()+") saved");
+
+		// tool create
+		List<RentalTool> toolList = new ArrayList<RentalTool>();
+		List<RentalRequestToolDto> supplyRequestToolList = new ArrayList<RentalRequestToolDto>();
+		
+		logger.debug("RentalSheet [Add] : RentalToolList Add Start");
+		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
+			// supplyTool
+			if (tool.getToolDto().getSubGroupDto().getMainGroupDto().getName().equals("소모자재")) {
+				supplyRequestToolList.add(tool);
+				logger.debug("RentalSheet [Add] : Supply Tool Skip");
+				continue;
+			}
+			// rentalTool
+			RentalTool newTool = addNewRentalTool(tool, savedRentalSheet, requestSheetDto);
+			toolList.add(newTool);
+			logger.info(newTool.getTool().getName() + " added to RentalSheet:" + savedRentalSheet.getId());
+		}
+		logger.debug("RentalSheet [Add] : RentalToolList Add Completed");
+
+		// supplySheet
+		if (supplyRequestToolList.size() > 0) {
+			addNewSupplySheet(requestSheetDto, supplyRequestToolList, worker, leader, approver, toolbox);
+		}
+
+		logger.debug("RentalSheet [Add] : Outstanding Add Start");
+		// outstandingSheet
+		if (toolList.isEmpty()) {
+			logger.debug("RentalSheet [Add] : toolList Empty -> rentalSheet add canceled");
+			repository.delete(savedRentalSheet);
+			return null;
+		} else {
+			logger.debug("RentalSheet [Add] : Dto converting start");
+			RentalSheetDto result = convertToDto(savedRentalSheet);
+			logger.debug("RentalSheet [Add] : Dto converting Completed");
+			
+			addNewOutstandingRentalSheet(savedRentalSheet, toolList);
+
+			return result;
+		}
+	}
+	private RentalTool addNewRentalTool(RentalRequestToolDto requestDto, RentalSheet sheet, RentalRequestSheetDto requestSheetDto) {
+		logger.debug("RentalTool [Add] : start");
+		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
+		if (tool.isEmpty()){
+			logger.error("tool not found");
+			return null;
+		}
+		Optional<RentalRequestSheet> requestSheet = rentalRequestSheetRepository.findById(requestSheetDto.getId());
+		if (requestSheet.isEmpty()){
+			logger.error("requestSheet not found");
+			return null;
+		}
+		logger.debug("RentalTool [Add] : tool & sheet Null check completed.");
+		
+		RentalTool rentalTool = RentalTool.builder()
+				.rentalSheet(sheet)
+				.tool(tool.get())
+				.count(requestDto.getCount())
+				.outstandingCount(requestDto.getCount())
+				//.rentalRequestSheet(requestSheet.get())
+				.build();
+		
+		RentalTool savedRentalTool=rentalToolRepository.save(rentalTool);
+		
+		logger.debug("RentalTool [Add] : RentalTool("+savedRentalTool.getId()+") saved");
+		
+		logger.debug("RentalTool [Add] : Tag info upload start");
+		if (requestDto.getTags() != null && requestDto.getTags().length() > 0) {
+			String[] tags = requestDto.getTags().split(",");
+			for (String tagString : tags) {
+				Tag tag = tagRepository.findByMacaddress(tagString);
+				if (tag==null) {
+					logger.error("Tag : "+tagString+" not found");
+					return null;
+				}
+					tag.updateRentalTool(savedRentalTool);
+					logger.info(tag.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
+			}
+		} else {
+			logger.debug("RentalTool [Add] : No tag info");
+		}
+		
+		//StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
+		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(savedRentalTool.getTool().getId(), sheet.getToolbox().getId(), LocalDate.now());
+		stockStatusService.rentItems(stock.getId(), savedRentalTool.getCount());
+		
+		logger.debug("RentalTool [Add] : Completed");
+		return savedRentalTool;
+	}
+	
+	private void addNewSupplySheet(RentalRequestSheetDto requestSheetDto,List<RentalRequestToolDto> supplyRequestToolList, Membership worker,Membership leader,Membership approver,Toolbox toolbox) {
+		logger.debug("SupplySheet [Add] : Start");
+		
+		SupplySheet supplySheet = SupplySheet.builder()
+				.worker(worker)
+				.leader(leader)
+				.approver(approver)
+				.toolbox(toolbox)
+				.eventTimestamp(LocalDateTime.now())
+				.build()
+				;
+		
+		SupplySheet savedSupplySheet = supplySheetRepository.save(supplySheet);
+		
+		logger.debug("SupplySheet [Add] : SupplySheet("+savedSupplySheet.getId()+") saved");
+		
+		logger.debug("SupplySheet [Add] : SupplyToolList Add Start");
+		for (RentalRequestToolDto tool : supplyRequestToolList) {
+			SupplyTool newTool = addNewSupplyTool(tool, savedSupplySheet);
+			logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
+		}
+		logger.debug("SupplySheet [Add] : SupplyToolList Add Completed");
+
+		logger.debug("SupplySheet [Add] : Completed");
+	}
+	
+	private SupplyTool addNewSupplyTool(RentalRequestToolDto requestDto, SupplySheet sheet) {
+		logger.debug("SupplyTool [Add] : Start");
+		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
+		if (tool.isEmpty()){
+			logger.error("tool not found");
+			return null;
+		}
+		logger.debug("SupplyTool [Add] : tool Null check completed");
+		SupplyTool supplyTool = SupplyTool.builder()
+				.supplySheet(sheet)
+				.tool(tool.get())
+				.count(requestDto.getCount())
+				.replacementDate(LocalDate.now().plusMonths(tool.get().getReplacementCycle()))
+				.build();
+		
+		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(requestDto.getToolDto().getId(), sheet.getToolbox().getId(), null);
+		stockStatusService.supplyItems(stock.getId(), supplyTool.getCount());
+		
+		logger.debug("SupplyTool [Add] : completed");
+		return supplyToolRepository.save(supplyTool);
+	}
+	
+	private OutstandingRentalSheet addNewOutstandingRentalSheet(RentalSheet sheet, List<RentalTool> toolList) {
+		logger.debug("OutstandingRentalSheet [Add] : start");
+		int totalCount = 0;
+		for (RentalTool tool : toolList) {
+			totalCount += tool.getCount();
+		}
+		OutstandingRentalSheet outstandingSheet = OutstandingRentalSheet.builder().rentalSheet(sheet)
+				.totalCount(totalCount).totalOutstandingCount(totalCount).outstandingStatus(OutstandingState.READY)
+				.build();
+		logger.debug("OutstandingRentalSheet [Add] : Completed");
+		return outstandingRentalSheetRepository.save(outstandingSheet);
 	}
 }
