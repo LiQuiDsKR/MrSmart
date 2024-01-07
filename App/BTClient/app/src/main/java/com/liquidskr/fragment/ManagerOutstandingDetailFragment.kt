@@ -26,6 +26,7 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
+import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalSheetDto
@@ -264,53 +265,69 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
             var standbyAlreadySent = false
             if (adapter is OutstandingDetailAdapter) {
-                val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
-                val rentalToolList: MutableList<RentalToolDto> = mutableListOf()
-                for (toolId in adapter.selectedToolsToReturn) {
-                    for (tool in newOutstandingRentalSheet.rentalSheetDto.toolList) {
-                        if (tool.id == toolId) {
-                            rentalToolList.add(tool)
-                        }
-                    }
-                }
-                for (rentalTool in rentalToolList) {
-                    for (finalToolState in finalToolStateList) {
-                        if (rentalTool.toolDto.id == finalToolState.first) {
-                            for (tool in finalToolState.second) {
-                                val tags = rentalTool.Tags ?: ""
-                                returnToolFormDtoList.add(ReturnToolFormDto(rentalTool.id, rentalTool.toolDto.id, tool.count, tool.state, tags))
-                            }
-                        }
-                    }
-                }
-                val returnSheetForm = ReturnSheetFormDto(newOutstandingRentalSheet.rentalSheetDto.id, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
-                bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
-                    BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        if (result == "good") {
-                            handler.post {
-                                Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
-                            }
-                            requireActivity().supportFragmentManager.popBackStack()
-                        } else {
-                            handler.post {
-                                Toast.makeText(activity, "반납 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
-                            }
-                            requireActivity().supportFragmentManager.popBackStack()
-                        }
-                    }
+                if (adapter.tools.isNotEmpty()) {
+                    val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
+                    val rentalToolList: MutableList<RentalToolDto> = mutableListOf()
+                    for (i in adapter.selectedToolsToReturn.indices) {
+                        for (tool in newOutstandingRentalSheet.rentalSheetDto.toolList) {
+                            if (tool.id == newOutstandingRentalSheet.rentalSheetDto.toolList[i].id) {
+                                rentalToolList.add(tool)
+                                finalToolStateList = finalToolStateList.filter { it.first != tool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
 
-                    override fun onError(e: Exception) {
-                        if (!standbyAlreadySent) {
-                            handler.post {
-                                Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                val holder = recyclerView.findViewHolderForAdapterPosition(i) as? OutstandingDetailAdapter.OutstandingRentalToolViewHolder
+                                val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
+
+                                var toolStateParamList: MutableList<ToolStateParam> = mutableListOf()
+                                if (toolCount > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.GOOD, toolCount))
+
+                                val pair = Pair(tool.toolDto.id, toolStateParamList)
+                                finalToolStateList.add(pair) //
                             }
-                            handleBluetoothError(returnSheetForm, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.leaderDto.id)
-                            e.printStackTrace()
-                            requireActivity().supportFragmentManager.popBackStack()
                         }
                     }
-                })
+                    for (rentalTool in rentalToolList) {
+                        for (finalToolState in finalToolStateList) {
+                            if (rentalTool.toolDto.id == finalToolState.first) {
+                                for (tool in finalToolState.second) {
+                                    val tags = rentalTool.Tags ?: ""
+                                    returnToolFormDtoList.add(ReturnToolFormDto(rentalTool.id, rentalTool.toolDto.id, tool.count, tool.state, tags))
+                                }
+                            }
+                        }
+                    }
+                    val returnSheetForm = ReturnSheetFormDto(newOutstandingRentalSheet.rentalSheetDto.id, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
+                    bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
+                        BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            if (result == "good") {
+                                handler.post {
+                                    Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
+                                }
+                                requireActivity().supportFragmentManager.popBackStack()
+                            } else {
+                                handler.post {
+                                    Toast.makeText(activity, "반납 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                                requireActivity().supportFragmentManager.popBackStack()
+                            }
+                        }
+
+                        override fun onError(e: Exception) {
+                            if (!standbyAlreadySent) {
+                                handler.post {
+                                    Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                                handleBluetoothError(returnSheetForm, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.leaderDto.id)
+                                e.printStackTrace()
+                                requireActivity().supportFragmentManager.popBackStack()
+                            }
+                        }
+                    })
+                } else {
+                    handler.post {
+                        Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
             standbyAlreadySent = true
         }

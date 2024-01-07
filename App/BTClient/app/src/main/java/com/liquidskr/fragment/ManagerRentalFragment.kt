@@ -12,9 +12,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,16 +29,23 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.liquidskr.btclient.RequestType
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
-class ManagerRentalFragment() : Fragment() {
+class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     lateinit var recyclerView: RecyclerView
     lateinit var selfRentalBtn: ImageButton
     lateinit var searchSheetEdit: EditText
     lateinit var sheetSearchBtn: ImageButton
+    private lateinit var connectBtn: ImageButton
+
+    lateinit var rentalBtnField: LinearLayout
+    lateinit var returnBtnField: LinearLayout
+    lateinit var standbyBtnField: LinearLayout
+    lateinit var registerBtnField: LinearLayout
 
     private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
     private lateinit var popupLayout: View
@@ -42,6 +53,8 @@ class ManagerRentalFragment() : Fragment() {
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
     private val REQUEST_PAGE_SIZE = 2
+
+    private lateinit var welcomeMessage: TextView
 
     private lateinit var bluetoothManager: BluetoothManager
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
@@ -79,6 +92,55 @@ class ManagerRentalFragment() : Fragment() {
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
+
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        registerBtnField = view.findViewById(R.id.RegisterBtnField)
+
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        welcomeMessage.text = manager.name + "님 환영합니다."
+
+        connectBtn = view.findViewById(R.id.ConnectBtn)
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
+        rentalBtnField.setOnClickListener {
+            val fragment = ManagerRentalFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerRentalFragment")
+                .commit()
+        }
+
+        returnBtnField.setOnClickListener {
+            val fragment = ManagerReturnFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerRentalFragment")
+                .commit()
+        }
+
+        standbyBtnField.setOnClickListener {
+            val fragment = ManagerStandByFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerRentalFragment")
+                .commit()
+        }
+
+        registerBtnField.setOnClickListener {
+            val fragment = ToolRegisterFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerRentalFragment")
+                .commit()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
 
         popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
         progressBar = view.findViewById(R.id.progressBar)
@@ -119,7 +181,6 @@ class ManagerRentalFragment() : Fragment() {
     fun getRentalRequestSheetList() {
         rentalRequestSheetList.clear()
 
-        showPopup() // UI블로킹
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
@@ -143,6 +204,7 @@ class ManagerRentalFragment() : Fragment() {
                 e.printStackTrace()
             }
         })
+        showPopup() // UI블로킹
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {

@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.io.ByteArrayOutputStream
@@ -66,6 +67,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     var gson = Gson()
     fun bluetoothOpen() {
         try {
+            try {
+                bluetoothClose()
+            } catch (e: Exception) {
+                // 연결이 있다면, 끊고 재연결하기
+            }
             val dbHelper = DatabaseHelper(context)
             pcName = dbHelper.getDeviceName()
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -77,25 +83,21 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 for (device in pairedDevices) {
                     if (device.name == pcName) {
                         bluetoothDevice = device
+                        val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
+                        bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
                         try {
-                            val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
-                            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
-                            if (!bluetoothSocket.isConnected) {
-                                bluetoothSocket.connect()
-                                Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "이미 연결되어 있습니다.", Toast.LENGTH_SHORT).show()
-                            }
+                            bluetoothSocket.connect()
+                            Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
                             flag = true
                         } catch (e: IOException) {
-                            e.printStackTrace()
-                            Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            Log.d("bluetooth", e.toString())
+                            // Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                         break
                     }
                 }
                 if (!flag) {
-                    Toast.makeText(context, "페어링된 기기 목록에서 [${pcName}]을 찾을 수 없습니다..", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "[${pcName}] 에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(context, "페어링된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
@@ -416,6 +418,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
             RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
+                val type: Type = object : TypeToken<TagAndToolboxToolLabelDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
 

@@ -61,7 +61,7 @@ class ManagerFragment : Fragment() {
                         val fragment = ManagerLobbyFragment(member.toMembership())
                         requireActivity().supportFragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainer, fragment)
-                            .addToBackStack(null)
+                            .addToBackStack("ManagerLogin")
                             .commit()
                     }
                 } else {

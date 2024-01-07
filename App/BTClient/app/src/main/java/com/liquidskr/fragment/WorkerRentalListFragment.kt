@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,20 +22,25 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.liquidskr.btclient.RequestType
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.SheetState
 import java.lang.reflect.Type
 
-class WorkerRentalListFragment() : Fragment() {
-    lateinit var recyclerView: RecyclerView
+class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var connectBtn: ImageButton
     private lateinit var selfRentalBtn: ImageButton
     private lateinit var searchSheetEdit: EditText
     private lateinit var sheetSearchBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var rentalBtnField: LinearLayout
+    private lateinit var returnBtnField: LinearLayout
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
 
+    lateinit var welcomeMessage: TextView
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -61,8 +68,20 @@ class WorkerRentalListFragment() : Fragment() {
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
         val view = inflater.inflate(R.layout.fragment_worker_rental_list, container, false)
+
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        welcomeMessage.text = worker.name + "님 환영합니다."
+
+        connectBtn = view.findViewById(R.id.connectBtn)
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
+
+        rentalBtnField  = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
@@ -79,6 +98,24 @@ class WorkerRentalListFragment() : Fragment() {
             }
 
         }
+
+        rentalBtnField.setOnClickListener {
+            val fragment = WorkerRentalListFragment(worker)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
+                .commit()
+        }
+
+        returnBtnField.setOnClickListener {
+
+            val fragment = WorkerReturnListFragment(worker)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
+                .commit()
+        }
+
         recyclerView.adapter = adapter
 
         sheetSearchBtn.setOnClickListener {

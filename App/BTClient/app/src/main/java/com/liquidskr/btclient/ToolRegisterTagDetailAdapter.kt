@@ -20,8 +20,6 @@ class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
     var checkingQR = "default"
 
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val scanBtn: LinearLayout = itemView.findViewById(R.id.qr_scanBtn)
-        val qrTextEdit: EditText = itemView.findViewById(R.id.qr_textEdit)
         val qrDisplay: TextView = itemView.findViewById(R.id.qr_display)
         val qrDelete: ImageButton = itemView.findViewById(R.id.qr_delete)
         var qrcode: String = ""
@@ -37,28 +35,12 @@ class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
         val currentQR = qrcodes[position]
         holder.qrcode = currentQR
         holder.qrDisplay.text = currentQR
-        holder.scanBtn.setOnClickListener{
-            holder.qrTextEdit.requestFocus()
-            holder.qrDisplay.text = "인식 중.."
-        }
-        holder.qrTextEdit.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                holder.qrcode = fixCode(holder.qrTextEdit.text.toString().replace("\n", ""))
-                holder.qrTextEdit.text.clear()
-                holder.qrDisplay.text = "${holder.qrcode}"
-                qrcodes = qrcodes.toMutableList().apply {set(position, holder.qrcode)}
-                notifyItemChanged(position)
-                return@setOnEditorActionListener true
-            }
-            false
-        }
         holder.qrDelete.setOnClickListener {
             Log.d("regiAdapter",qrcodes.toString())
             val updatedList = qrcodes.toMutableList()
             updatedList.removeAt(holder.adapterPosition)
             qrcodes = updatedList
             notifyDataSetChanged()
-            Log.d("regiAdapter",qrcodes.toString())
         }
         if (checkingQR == holder.qrcode) {
             // 현재 항목이 qrcode와 일치하면 배경색 변경
@@ -66,7 +48,7 @@ class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed({
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT)
-            }, 200) // 1000 밀리초 (1초) 후에 실행
+            }, 300)
         }
         checkingQR = "default"
     }

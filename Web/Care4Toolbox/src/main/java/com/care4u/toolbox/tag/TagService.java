@@ -224,6 +224,7 @@ public class TagService {
 		if (tagGroup.isEmpty()) {
 			if (tagList.size()<1) {
 				logger.error("처음 등록할 거면 리스트라도 좀 채워주세요");
+				return;
 			}
 			tagGroup=tagList.get(0);
 		}

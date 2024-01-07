@@ -296,6 +296,9 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             var toolList: MutableList<ToolWithCount> = mutableListOf()
             adapter.updateList(toolList)
         }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            qrEditText.requestFocus()
+        }
 
         recyclerView.adapter = adapter
 

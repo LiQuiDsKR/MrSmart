@@ -32,10 +32,7 @@ import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
 import java.lang.reflect.Type
 
-class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragment() {
-
-    val tool: ToolDto = tool
-    val tagList: List<String> = tagList
+class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) : Fragment() {
 
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
@@ -74,12 +71,16 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
             val handler = Handler(Looper.getMainLooper())
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             val tagGroup = if (tagList.size > 0) tagList[0] else ""
-            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagList}}",object:BluetoothManager.RequestCallback{
+            val tagLists: MutableList<String> = mutableListOf()
+            for (tag in tagList) {
+                tagLists.add("\"${tag}\"")
+            }
+            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         try {
                             val dbHelper = DatabaseHelper(context)
-                            dbHelper.updateQRCodeById(tool.id, tbt_qrcode) // << 왜안되는지
+                            dbHelper.updateOrAddTBT(tool.id, tbt_qrcode)
                             handler.post {
                                 Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
                             }
@@ -90,7 +91,7 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
                                 Log.d("TST", e.toString())
                             }
                         }
-                    } else if ("already exists!" in result) {
+                    } else if ("ERROR_ALREADY_EXIST" in result) {
                         handler.post {
                             Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
                         }
@@ -99,7 +100,7 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
                             Toast.makeText(context, "알 수 없는 오류 발생", Toast.LENGTH_SHORT).show()
                         }
                     }
-
+                    requireActivity().supportFragmentManager.popBackStack()
                 }
 
                 override fun onError(e: Exception) {
@@ -184,10 +185,12 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
                     // qrcode가 이미 쓰인건지 체크
                     qrDisplay.text = "${tbt_qrcode}"
                 } else { // Tag 모드
-                    qrSearchText.requestFocus()
+                    qrTextEdit.requestFocus()
                     var list = adapter.qrcodes.toMutableList()
                     if (!(qrcode in list)) {
                         list.add(qrcode)
+                        adapter.updateList(list)
+                        tagList = adapter.qrcodes
                     } else {
                         adapter.qrCheck(qrcode)
                     }
@@ -205,15 +208,15 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
                 qrTextEdit.requestFocus()
             }
         }
-
-
         confirmBtn.setOnClickListener {
             showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
         }
 
         recyclerView.adapter = adapter
-
         qrTextEdit.requestFocus()
+        handler.postDelayed ({
+            qrTextEdit.requestFocus()
+        },500)
         return view
     }
 

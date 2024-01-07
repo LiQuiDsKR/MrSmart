@@ -19,14 +19,12 @@ import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
-class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
+class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
     private lateinit var connectBtn: ImageView
     private lateinit var rentalBtn: ImageView
     private lateinit var returnBtn: ImageButton
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
-
-    val worker = worker
 
     lateinit var welcomeMessage: TextView
     val gson = Gson()
@@ -38,28 +36,23 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
 
-        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         connectBtn = view.findViewById(R.id.connectBtn)
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
         rentalBtnField  = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
 
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = worker.name + "님 환영합니다."
-        val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
-            val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
+
 
         rentalBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
             returnBtn.setImageResource(R.drawable.ic_menu_off_02)
-            val fragment = WorkerRentalListFragment()
+            val fragment = WorkerRentalListFragment(worker)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
                 .commit()
         }
 
@@ -67,9 +60,10 @@ class WorkerLobbyFragment(worker: MembershipDto) : Fragment(), BluetoothManager.
             rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
             returnBtn.setImageResource(R.drawable.ic_menu_on_02)
 
-            val fragment = WorkerReturnListFragment()
+            val fragment = WorkerReturnListFragment(worker)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
                 .commit()
         }
 
