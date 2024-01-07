@@ -8,10 +8,13 @@ import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestToolDto
+import com.mrsmart.standard.tool.RentalRequestToolWithCount
+import com.mrsmart.standard.tool.ToolWithCount
 
-class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto>) :
+class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<RentalRequestToolWithCount>) :
     RecyclerView.Adapter<RentalRequestToolAdapter.RentalRequestToolViewHolder>() {
     var selectedToolsToRental: MutableList<Long> = mutableListOf()
+
     class RentalRequestToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
         var toolSpec: TextView = itemView.findViewById(R.id.ToolSpec)
@@ -25,17 +28,17 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
     }
 
     override fun onBindViewHolder(holder: RentalRequestToolViewHolder, position: Int) {
-        val currentRentalRequestTool = rentalRequestTools[position]
-        holder.toolName.text = currentRentalRequestTool.toolDto.name
-        holder.toolSpec.text = currentRentalRequestTool.toolDto.spec
-        holder.toolCount.text = currentRentalRequestTool.count.toString()
+        val currentRentalRequestToolWithCount = rentalRequestToolWithCounts[position]
+        holder.toolName.text = currentRentalRequestToolWithCount.rentalRequestTool.toolDto.name
+        holder.toolSpec.text = currentRentalRequestToolWithCount.rentalRequestTool.toolDto.spec
+        holder.toolCount.text = currentRentalRequestToolWithCount.count.toString()
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
-            showNumberDialog(holder.toolCount, currentRentalRequestTool.count)
+            showNumberDialog(holder.toolCount, currentRentalRequestToolWithCount)
         }
         holder.itemView.setOnClickListener {
-            handleSelection(currentRentalRequestTool)
+            handleSelection(currentRentalRequestToolWithCount)
         }
-        if (isSelected(currentRentalRequestTool)) {
+        if (isSelected(currentRentalRequestToolWithCount)) {
             holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -43,14 +46,14 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
     }
 
     override fun getItemCount(): Int {
-        return rentalRequestTools.size
+        return rentalRequestToolWithCounts.size
     }
-    private fun showNumberDialog(textView: TextView, maxCount: Int) {
+    private fun showNumberDialog(textView: TextView, rentalRequestToolWithCount: RentalRequestToolWithCount) {
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
         input.minValue = 1
-        input.maxValue = maxCount // 최댓값은 공구수
+        input.maxValue = rentalRequestToolWithCount.rentalRequestTool.count
         input.wrapSelectorWheel = false
         input.value = textView.text.toString().toInt()
 
@@ -60,6 +63,11 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
             val newValue = input.value.toString()
             // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
             textView.text = newValue
+            for (rentalRequestTool in rentalRequestToolWithCounts) {
+                if (rentalRequestToolWithCount.rentalRequestTool.id == rentalRequestTool.rentalRequestTool.id) {
+                    rentalRequestTool.count = input.value
+                }
+            }
         }
 
         builder.setNegativeButton("취소") { dialog, _ ->
@@ -68,31 +76,41 @@ class RentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto
 
         builder.show()
     }
-    fun handleSelection(currentRentalRequestTool: RentalRequestToolDto) {
-        if (!isSelected(currentRentalRequestTool)) {
-            addToSelection(currentRentalRequestTool)
-
+    fun handleSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
+        if (!isSelected(currentRentalRequestToolWithCount)) {
+            addToSelection(currentRentalRequestToolWithCount)
         } else {
-            removeFromSelection(currentRentalRequestTool)
+            removeFromSelection(currentRentalRequestToolWithCount)
         }
         notifyDataSetChanged() // 변경된 데이터를 알림
     }
-    fun tagAdded(currentRentalRequestTool: RentalRequestToolDto) {
-        addToSelection(currentRentalRequestTool)
+    fun tagAdded(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
+        addToSelection(currentRentalRequestToolWithCount)
+        notifyDataSetChanged()
+    }
+    fun updateList(newList: MutableList<RentalRequestToolWithCount>) {
+        rentalRequestToolWithCounts = newList
         notifyDataSetChanged()
     }
 
-    private fun isSelected(currentRentalRequestTool: RentalRequestToolDto): Boolean {
-        return currentRentalRequestTool.id in selectedToolsToRental
+    private fun isSelected(currentRentalRequestToolWithCount: RentalRequestToolWithCount): Boolean {
+        return currentRentalRequestToolWithCount.rentalRequestTool.id in selectedToolsToRental
     }
 
-    private fun addToSelection(currentRentalRequestTool: RentalRequestToolDto) {
-        selectedToolsToRental.add(currentRentalRequestTool.id)
+    private fun addToSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
+        selectedToolsToRental.add(currentRentalRequestToolWithCount.rentalRequestTool.id)
 
+        rentalRequestToolWithCounts = rentalRequestToolWithCounts.map { rrtwc ->
+            if (rrtwc.rentalRequestTool.id == currentRentalRequestToolWithCount.rentalRequestTool.id) {
+                currentRentalRequestToolWithCount
+            } else {
+                rrtwc
+            }
+        }.toMutableList()
     }
 
-    private fun removeFromSelection(currentRentalRequestTool: RentalRequestToolDto) {
-        selectedToolsToRental.remove(currentRentalRequestTool.id)
+    private fun removeFromSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
+        selectedToolsToRental.remove(currentRentalRequestToolWithCount.rentalRequestTool.id)
     }
 
 }

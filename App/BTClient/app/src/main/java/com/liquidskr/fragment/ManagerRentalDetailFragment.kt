@@ -13,7 +13,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -24,17 +23,16 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
-import com.mrsmart.standard.rental.RentalRequestSheetApprove
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
+import com.mrsmart.standard.tool.RentalRequestToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import org.threeten.bp.LocalDateTime
@@ -44,7 +42,7 @@ import java.lang.reflect.Type
 
 class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private var toolList: List<RentalRequestToolDto> = rentalRequestSheet.toolList
+    private var toolList: MutableList<RentalRequestToolWithCount> = mutableListOf()
 
     private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
     private lateinit var popupLayout: View
@@ -90,6 +88,10 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
+        for (rentalRequestTool in rentalRequestSheet.toolList) {
+            toolList.add(RentalRequestToolWithCount(rentalRequestTool, rentalRequestTool.count))
+        }
+
         var adapter = RentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
 
@@ -111,53 +113,13 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                             if (result != null) {
                                 val tag: TagDto = gson.fromJson(result, type)
                                 taggedTool = tag.toolDto
-
-                                var toolDtoList = listOf<ToolDto>()
-                                for (rentalRequestTool:RentalRequestToolDto in rentalRequestSheet.toolList) {
-                                    toolDtoList = toolDtoList.plus(rentalRequestTool.toolDto)
-                                }
-                                var toolIdList = listOf<Long>()
-                                for (tool in toolDtoList) {
-                                    toolIdList = toolIdList.plus(tool.id)
-                                }
-                                if (taggedTool.id in toolIdList) {
-                                    val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
-                                    for (tool: RentalRequestToolDto in rentalRequestSheet.toolList) {
-                                        var modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, tool.Tags)
-                                        var modifiedTag = ""
-                                        try {
-                                            if (tool.toolDto.id == taggedTool.id) {
-                                                if (tool.Tags == null || tool.Tags == "") {
-                                                    modifiedTag = tag.macaddress
-                                                    handler.post {
-                                                        Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                        adapter.tagAdded(modifiedRentalRequestTool)
-                                                    }
-                                                } else {
-                                                    modifiedTag = tool.Tags
-                                                    handler.post {
-                                                        Toast.makeText(activity, "기존 태그를 지우고, ${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                    }
-                                                }
-                                            } else {
-                                                if (tool.Tags == null) {
-                                                    modifiedTag = ""
-                                                } else {
-                                                    modifiedTag = tool.Tags
-                                                }
-                                            }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
+                                for (rrtwc in adapter.rentalRequestToolWithCounts) { // rrtwc means, RentalRequestToolWithCount
+                                    if (rrtwc.rentalRequestTool.toolDto.id == taggedTool.id) {
+                                        rrtwc.rentalRequestTool.Tags = tag.macaddress
+                                        handler.post {
+                                            adapter.updateList(adapter.rentalRequestToolWithCounts)
+                                            Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
                                         }
-
-                                        modifiedRentalRequestTool = RentalRequestToolDto(tool.id, tool.toolDto, tool.count, modifiedTag)
-                                        rentalRequestToolDtoList.add(modifiedRentalRequestTool)
-                                    }
-                                    val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
-                                    rentalRequestSheet = modifiedRentalRequestSheet
-                                } else {
-                                    handler.post {
-                                        Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
@@ -189,46 +151,28 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             var standbyAlreadySent = false
             if (adapter is RentalRequestToolAdapter) {
                 if (adapter.selectedToolsToRental.isNotEmpty()) {
-                    showPopup()
-                    val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
-                    for (toolId in adapter.selectedToolsToRental) {
-                        for (tool in rentalRequestSheet.toolList) {
-                            if (tool.id == toolId) {
-                                for (i in adapter.selectedToolsToRental.indices) {
-                                    if (tool.id == adapter.selectedToolsToRental[i]) {
-                                        val holder = recyclerView.findViewHolderForAdapterPosition(i) as? RentalRequestToolAdapter.RentalRequestToolViewHolder
-                                        val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
-
-                                        Log.d("cnt",holder?.toolName.toString())
-                                        Log.d("cnt",toolCount.toString())
-                                        rentalRequestToolDtoList.add(RentalRequestToolDto(tool.id, tool.toolDto, toolCount, tool.Tags))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    val modifiedRentalRequestSheet = RentalRequestSheetDto(rentalRequestSheet.id, rentalRequestSheet.workerDto, rentalRequestSheet.leaderDto, rentalRequestSheet.toolboxDto,rentalRequestSheet.status,rentalRequestSheet.eventTimestamp, rentalRequestToolDtoList)
-
-                    val mod = modifiedRentalRequestSheet // shorten
+                    showPopup() // UI 블로킹
                     var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
-                    for (tool in mod.toolList) {
-                        val tags = tool.Tags ?: ""
-                        val toolForm = RentalRequestToolApproveFormDto(tool.id, tool.toolDto.id, tool.count, tags)
+                    for (rrtwc in adapter.rentalRequestToolWithCounts) { // rrtwc = rentalRequestToolWithCount
+                        val tags = rrtwc.rentalRequestTool.Tags ?: ""
+                        val toolForm = RentalRequestToolApproveFormDto(rrtwc.rentalRequestTool.id, rrtwc.rentalRequestTool.toolDto.id, rrtwc.count, tags)
                         toolFormList.add(toolForm)
                     }
-                    val rentalRequestSheetApprove = RentalRequestSheetApproveFormDto(mod.id, mod.workerDto.id, mod.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
+                    val sheet = rentalRequestSheet
+                    val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
 
                     try {
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApprove), object:
+                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
-                                    hidePopup()
+                                    hidePopup() // UI 블로킹
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
                                     }
                                     requireActivity().supportFragmentManager.popBackStack()
                                 } else {
+                                    hidePopup() // UI 블로킹
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                                     }
@@ -238,19 +182,12 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                             }
 
                             override fun onError(e: Exception) {
+                                hidePopup() // UI 블로킹
                                 if (!standbyAlreadySent) {
                                     handler.post {
                                         Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                     }
-                                    val mod = modifiedRentalRequestSheet // shorten
-                                    var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
-                                    for (tool in mod.toolList) {
-                                        val tags = tool.Tags ?: ""
-                                        val toolForm = RentalRequestToolApproveFormDto(tool.id, tool.toolDto.id, tool.count, tags)
-                                        toolFormList.add(toolForm)
-                                    }
-                                    val standbySheet = RentalRequestSheetApproveFormDto(mod.id, mod.workerDto.id, mod.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
-                                    handleBluetoothError(standbySheet)
+                                    handleBluetoothError(rentalRequestSheetApproveForm)
                                     e.printStackTrace()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
@@ -327,7 +264,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
         dbHelper.close()
     }
-    private fun showPopup() {
+    private fun showPopup() { // UI 블로킹 end
         isPopupVisible = true
         popupLayout.requestFocus()
         popupLayout.setOnClickListener {
@@ -347,6 +284,5 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             isPopupVisible = false
             popupLayout.visibility = View.GONE
         }
-    }
-
+    } // UI 블로킹 end
 }

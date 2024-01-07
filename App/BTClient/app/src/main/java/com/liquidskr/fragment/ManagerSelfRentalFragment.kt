@@ -49,11 +49,15 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     private lateinit var qrEditText: EditText
     private lateinit var backButton: ImageButton
 
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
+
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
-    private val handler = Handler(Looper.getMainLooper())
 
     private var active = false
     val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
@@ -119,6 +123,9 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI 블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI 블로킹 end
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -231,6 +238,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             var standbyAlreadySent = false
             if (adapter is RentalToolAdapter) {
                 if (!adapter.tools.isEmpty()) {
+                    showPopup() // UI 블로킹
                     val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
                     for (toolWithCount: ToolWithCount in adapter.tools) {
                         val toolCount = toolWithCount.count
@@ -243,6 +251,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     if  (result == "good") {
+                                        hidePopup() // UI 블로킹
                                         handler.post {
                                             Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                         }
@@ -252,6 +261,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                         toolList.clear()
                                         requireActivity().supportFragmentManager.popBackStack()
                                     } else {
+                                        hidePopup() // UI 블로킹
                                         handler.post {
                                             Toast.makeText(activity, "대여 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                                         }
@@ -260,6 +270,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
 
                                 }
                                 override fun onError(e: Exception) {
+                                    hidePopup() // UI 블로킹
                                     if (!standbyAlreadySent) {
                                         handler.post {
                                             Toast.makeText(activity, "대여 신청 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
@@ -343,4 +354,25 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
         sharedViewModel.toolWithCountList = list
     }
+    private fun showPopup() { // UI 블로킹 end
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    } // UI 블로킹 end
 }

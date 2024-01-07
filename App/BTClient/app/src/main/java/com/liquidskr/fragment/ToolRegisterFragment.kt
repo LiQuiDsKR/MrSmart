@@ -123,7 +123,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         rentalBtnField.setOnClickListener {
-            dontTouchUI()
+            disableAllClickableViews(view)
             val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -132,7 +132,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         returnBtnField.setOnClickListener {
-            dontTouchUI()
+            disableAllClickableViews(view)
             val fragment = ManagerReturnFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -141,7 +141,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         standbyBtnField.setOnClickListener {
-            dontTouchUI()
+            disableAllClickableViews(view)
             val fragment = ManagerStandByFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -150,7 +150,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         registerBtnField.setOnClickListener {
-            dontTouchUI()
+            disableAllClickableViews(view)
             val fragment = ToolRegisterFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -195,12 +195,15 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         return view
     }
-    fun dontTouchUI() {
-        rentalBtnField.isClickable = false
-        returnBtnField.isClickable = false
-        standbyBtnField.isClickable = false
-        registerBtnField.isClickable = false
-        connectBtn.isClickable = false
+    fun disableAllClickableViews(rootView: View) {
+        if (rootView is ViewGroup) {
+            for (i in 0 until rootView.childCount) {
+                val childView = rootView.getChildAt(i)
+                disableAllClickableViews(childView)
+            }
+        } else {
+            rootView.isClickable = false
+        }
     }
 
     fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
@@ -212,33 +215,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             handler.post {
                 Toast.makeText(activity, "해당 검색어를 통해 공기구를 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
-        }
-    }
-    fun handleKeyEvent(keyCode: Int) {
-        if (sharedViewModel.qrScannerText == "") {
-            scheduleTask(300) {
-                try {
-                    val dbHelper = DatabaseHelper(requireContext())
-                    val fragment = ToolRegisterDetailFragment(dbHelper.getToolByTBT(sharedViewModel.qrScannerText).toToolDto(), listOf())
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, fragment)
-                        .addToBackStack(null)
-                        .commit()
-                    sharedViewModel.qrScannerText = ""
-                } catch (e:Exception) {
-                    handler.post {
-                        Toast.makeText(requireContext(), "입력한 품목코드에 해당하는 공기구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                    sharedViewModel.qrScannerText = ""
-                }
-            }
-        }
-        val num: Int
-        if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-            num = keyCode - KeyEvent.KEYCODE_0
-            sharedViewModel.qrScannerText += num.toString()
-        } else {
-            cancelTimer()
         }
     }
     fun scheduleTask(delaySeconds: Long, task: () -> Unit) {

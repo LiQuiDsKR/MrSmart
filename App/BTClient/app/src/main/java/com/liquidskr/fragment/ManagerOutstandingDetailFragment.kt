@@ -26,15 +26,16 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
 import com.mrsmart.standard.rental.RentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
+import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolState
@@ -45,7 +46,12 @@ import java.lang.reflect.Type
 
 class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: OutstandingRentalSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private var toolList: List<RentalToolDto> = outstandingRentalSheet.rentalSheetDto.toolList
+    private var RentalToolWithCountList: MutableList<RentalToolWithCount> = mutableListOf()
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
 
     private lateinit var returnerName: TextView
     private lateinit var workerName: TextView
@@ -58,7 +64,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
-    private val handler = Handler(Looper.getMainLooper())
 
     val gson = Gson()
 
@@ -84,8 +89,16 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
         timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
 
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
+            RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
+        }
+        /*
         var newOutstandingRentalSheet = outstandingRentalSheet
 
         var existToolList: MutableList<RentalToolDto> = mutableListOf() // 0인 항목 미표시
@@ -93,57 +106,41 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             if (rentalTool.outstandingCount > 0) {
                 existToolList.add(rentalTool)
             }
-        }
-        var existToolCountList: MutableList<Pair<Long, Int>> = mutableListOf()
-        for (existTool in existToolList) {
-            existToolCountList.add(Pair(existTool.toolDto.id, existTool.outstandingCount))
-        }
-        newOutstandingRentalSheet.rentalSheetDto.toolList = existToolList
+        }*/
 
-
-        var toolList = newOutstandingRentalSheet.rentalSheetDto.toolList
         var finalToolStateList: MutableList<Pair<Long,MutableList<ToolStateParam>>> = mutableListOf()
-        for (tool in toolList) {
-            finalToolStateList.add(Pair(tool.toolDto.id, mutableListOf(ToolStateParam(tool.id, ToolState.GOOD, tool.outstandingCount))))
+        for (rtwc in RentalToolWithCountList) { // rtwc means RentalToolWithCount
+            finalToolStateList.add(Pair(rtwc.rentalTool.toolDto.id, mutableListOf(ToolStateParam(rtwc.rentalTool.id, ToolState.GOOD, rtwc.rentalTool.outstandingCount))))
         }
 
-        val adapter = OutstandingDetailAdapter(recyclerView, toolList, onSetToolStateClick = { rentalTool ->
+        val adapter = OutstandingDetailAdapter(recyclerView, RentalToolWithCountList, onSetToolStateClick = { rentalToolWithCount ->
             var cnt = 0
-            for (existToolCount in existToolCountList) {
-                if (existToolCount.first == rentalTool.toolDto.id) {
-                    cnt = existToolCount.second
+            for (rtwc in RentalToolWithCountList) {
+                if (rtwc.rentalTool.toolDto.id == rentalToolWithCount.rentalTool.toolDto.id) {
+                    cnt = rtwc.count
                 }
             }
             val customModal = CustomModal(requireContext(), cnt)
             customModal.setOnCountsConfirmedListener(object : CustomModal.OnCountsConfirmedListener {
                 override fun onCountsConfirmed(counts: IntArray) {
-                    for (tool in toolList) {
-                        if (tool.id == rentalTool.id) {
-                            finalToolStateList = finalToolStateList.filter { it.first != tool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
+                    for (rtwc in RentalToolWithCountList) {
+                        if (rtwc.rentalTool.id == rentalToolWithCount.rentalTool.id) {
+                            finalToolStateList = finalToolStateList.filter { it.first != rtwc.rentalTool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
 
                             var toolStateParamList: MutableList<ToolStateParam> = mutableListOf()
-                            if (counts[0] > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.GOOD, counts[0]))
-                            if (counts[1] > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.FAULT, counts[1]))
-                            if (counts[2] > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.DAMAGE, counts[2]))
-                            if (counts[3] > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.LOSS, counts[3]))
-                            if (counts[4] > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.DISCARD, counts[4]))
+                            if (counts[0] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.GOOD, counts[0]))
+                            if (counts[1] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.FAULT, counts[1]))
+                            if (counts[2] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DAMAGE, counts[2]))
+                            if (counts[3] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.LOSS, counts[3]))
+                            if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
 
-                            val pair = Pair(tool.toolDto.id, toolStateParamList)
+                            val pair = Pair(rtwc.rentalTool.toolDto.id, toolStateParamList)
                             finalToolStateList.add(pair)
                         }
                     }
                 }
             })
             customModal.show()
-        }, onToolCountClick = { newToolWithCount ->
-            for (index in existToolCountList.indices) {
-                val pair = existToolCountList[index]
-                if (pair.first == newToolWithCount.tool.id) {
-                    existToolCountList[index] = Pair(pair.first, newToolWithCount.count)
-                    break  // 수정이 완료되었으므로 반복 종료
-                }
-            }
-            newOutstandingRentalSheet.rentalSheetDto.toolList = existToolList
         })
 
         recyclerView.adapter = adapter
@@ -164,73 +161,18 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                             if (result != "null") {
                                 val tag: TagDto = gson.fromJson(result, type)
                                 taggedTool = tag.toolDto
-
-                                var toolDtoList = listOf<ToolDto>()
-                                for (rentalToolDto: RentalToolDto in newOutstandingRentalSheet.rentalSheetDto.toolList) {
-                                    toolDtoList = toolDtoList.plus(rentalToolDto.toolDto)
-                                }
-                                var toolIdList = listOf<Long>()
-                                for (tool in toolDtoList) {
-                                    toolIdList = toolIdList.plus(tool.id)
-                                }
-                                if (taggedTool.id in toolIdList) {
-                                    val rentalToolList: MutableList<RentalToolDto> = mutableListOf()
-                                    for (tool: RentalToolDto in newOutstandingRentalSheet.rentalSheetDto.toolList) {
-                                        var modifiedRentalTool = RentalToolDto(tool.id, tool.toolDto, tool.count, tool.outstandingCount, tool.Tags?:"null")
-                                        var modifiedTag = ""
-                                        if (tool.toolDto.id == taggedTool.id) {
-                                            if (tool.Tags == null || tool.Tags == "") {
-                                                modifiedTag = tag.macaddress
-                                                handler.post {
-                                                    Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                    adapter.tagAdded(modifiedRentalTool)
-                                                }
-
-                                            } else {
-                                                if ("," in tool.Tags) { // 여러개 있다면
-                                                    val tags = tool.Tags.split(",")
-                                                    if (!(tag.macaddress in tags)) {
-                                                        modifiedTag = tool.Tags + "," + tag
-                                                        handler.post {
-                                                            Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                        }
-                                                    } else {
-                                                        modifiedTag = tag.macaddress
-                                                    }
-                                                } else { // 한개 있다면
-
-                                                    if (!(tool.Tags == tag.tagGroup)) {
-                                                        modifiedTag = tool.Tags + "," + tag
-                                                        handler.post {
-                                                            Toast.makeText(activity, "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                                        }
-                                                    } else {
-                                                        modifiedTag = tool.Tags
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            if (tool.Tags == null) {
-                                                modifiedTag = ""
-                                            } else {
-                                                modifiedTag = tool.Tags
-                                            }
+                                for (rtwc in adapter.outstandingRentalToolWithCounts) {
+                                    if (rtwc.rentalTool.toolDto.id == taggedTool.id) {
+                                        rtwc.rentalTool.Tags = tag.macaddress
+                                        handler.post {
+                                            adapter.updateList(adapter.outstandingRentalToolWithCounts)
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
-                                        modifiedRentalTool = RentalToolDto(tool.id, tool.toolDto, tool.count, tool.outstandingCount, modifiedTag)
-                                        rentalToolList.add(modifiedRentalTool)
                                     }
-                                    val rentalSheet = RentalSheetDto(outstandingRentalSheet.rentalSheetDto.id, outstandingRentalSheet.rentalSheetDto.workerDto, outstandingRentalSheet.rentalSheetDto.leaderDto, outstandingRentalSheet.rentalSheetDto.approverDto, outstandingRentalSheet.rentalSheetDto.toolboxDto, outstandingRentalSheet.rentalSheetDto.eventTimestamp, rentalToolList)
-                                    val outStandingRentalSheetDto = OutstandingRentalSheetDto(outstandingRentalSheet.id, rentalSheet, outstandingRentalSheet.totalCount, outstandingRentalSheet.totalOutstandingCount,outstandingRentalSheet.outstandingStatus)
-                                    Log.d("newRentalSheet",outStandingRentalSheetDto.toString())
-                                    outstandingRentalSheet = outStandingRentalSheetDto
-                                } else {
-                                    handler.post {
-                                        Toast.makeText(activity, "해당 QR은 대여 신청 목록에 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            } else {
-                                handler.post {
-                                    Toast.makeText(activity, "서버에서 해당 태그를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -266,58 +208,45 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             var standbyAlreadySent = false
             if (adapter is OutstandingDetailAdapter) {
                 if (adapter.tools.isNotEmpty()) {
+                    showPopup()
                     val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
-                    val rentalToolList: MutableList<RentalToolDto> = mutableListOf()
-                    for (i in adapter.selectedToolsToReturn.indices) {
-                        for (tool in newOutstandingRentalSheet.rentalSheetDto.toolList) {
-                            if (tool.id == newOutstandingRentalSheet.rentalSheetDto.toolList[i].id) {
-                                rentalToolList.add(tool)
-                                finalToolStateList = finalToolStateList.filter { it.first != tool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
-
-                                val holder = recyclerView.findViewHolderForAdapterPosition(i) as? OutstandingDetailAdapter.OutstandingRentalToolViewHolder
-                                val toolCount = holder?.toolCount?.text?.toString()?.toIntOrNull() ?: 0
-
-                                var toolStateParamList: MutableList<ToolStateParam> = mutableListOf()
-                                if (toolCount > 0) toolStateParamList.add(ToolStateParam(tool.toolDto.id, ToolState.GOOD, toolCount))
-
-                                val pair = Pair(tool.toolDto.id, toolStateParamList)
-                                finalToolStateList.add(pair) //
-                            }
-                        }
-                    }
-                    for (rentalTool in rentalToolList) {
+                    for (rtwc in adapter.outstandingRentalToolWithCounts) {
                         for (finalToolState in finalToolStateList) {
-                            if (rentalTool.toolDto.id == finalToolState.first) {
+                            if (rtwc.rentalTool.toolDto.id == finalToolState.first) {
                                 for (tool in finalToolState.second) {
-                                    val tags = rentalTool.Tags ?: ""
-                                    returnToolFormDtoList.add(ReturnToolFormDto(rentalTool.id, rentalTool.toolDto.id, tool.count, tool.state, tags))
+                                    val tags = rtwc.rentalTool.Tags ?: ""
+                                    returnToolFormDtoList.add(ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool .toolDto.id, tool.count, tool.state, tags))
                                 }
                             }
                         }
                     }
-                    val returnSheetForm = ReturnSheetFormDto(newOutstandingRentalSheet.rentalSheetDto.id, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.approverDto.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
+                    val sheet = outstandingRentalSheet
+                    val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
+
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             if (result == "good") {
+                                hidePopup() // UI 블로킹
                                 handler.post {
                                     Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
                                 }
                                 requireActivity().supportFragmentManager.popBackStack()
                             } else {
+                                hidePopup() // UI 블로킹
                                 handler.post {
                                     Toast.makeText(activity, "반납 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                                 }
                                 requireActivity().supportFragmentManager.popBackStack()
                             }
                         }
-
                         override fun onError(e: Exception) {
                             if (!standbyAlreadySent) {
+                                hidePopup() // UI 블로킹
                                 handler.post {
                                     Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                 }
-                                handleBluetoothError(returnSheetForm, newOutstandingRentalSheet.rentalSheetDto.workerDto.id, newOutstandingRentalSheet.rentalSheetDto.leaderDto.id)
+                                handleBluetoothError(returnSheetForm, outstandingRentalSheet.rentalSheetDto.workerDto.id, outstandingRentalSheet.rentalSheetDto.leaderDto.id)
                                 e.printStackTrace()
                                 requireActivity().supportFragmentManager.popBackStack()
                             }
@@ -331,6 +260,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             }
             standbyAlreadySent = true
         }
+        qrEditText.requestFocus()
 
         return view
     }
@@ -373,4 +303,25 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         dbHelper.insertStandbyData(gson.toJson(standbySheet), "RETURN","STANDBY", detail)
         dbHelper.close()
     }
+    private fun showPopup() { // UI 블로킹 end
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    } // UI 블로킹 end
 }

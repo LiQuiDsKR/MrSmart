@@ -10,7 +10,7 @@ import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.SheetState
 
 
-class RentalRequestSheetAdapter(private var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
+class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
 
     class RentalRequestSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

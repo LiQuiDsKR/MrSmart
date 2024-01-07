@@ -511,7 +511,7 @@ public class RentalSheetService {
 				.replacementDate(LocalDate.now().plusMonths(tool.get().getReplacementCycle()))
 				.build();
 		
-		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(requestDto.getToolDto().getId(), sheet.getToolbox().getId(), null);
+		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(requestDto.getToolDto().getId(), sheet.getToolbox().getId(), LocalDate.now());
 		stockStatusService.supplyItems(stock.getId(), supplyTool.getCount());
 		
 		logger.debug("SupplyTool [Add] : completed");

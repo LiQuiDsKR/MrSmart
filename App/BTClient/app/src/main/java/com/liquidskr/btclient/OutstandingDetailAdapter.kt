@@ -8,17 +8,17 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.tool.RentalRequestToolWithCount
+import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.ToolWithCount
 
-class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outstandingRentalTools: List<RentalToolDto>,
-                               private val onSetToolStateClick: (RentalToolDto) -> Unit, private val onToolCountClick: (ToolWithCount) -> Unit) :
+class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outstandingRentalToolWithCounts: MutableList<RentalToolWithCount>,
+                               private val onSetToolStateClick: (RentalToolWithCount) -> Unit) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
-    val tools: List<RentalToolDto> = outstandingRentalTools
+    val tools: List<RentalToolWithCount> = outstandingRentalToolWithCounts
 
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val setToolState: LinearLayout = itemView.findViewById(R.id.toolStateSet)
@@ -37,20 +37,20 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
     }
 
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
-        val currentOutstandingRentalTool = outstandingRentalTools[position]
-        holder.toolName.text = currentOutstandingRentalTool.toolDto.name
-        holder.toolCount.text = currentOutstandingRentalTool.outstandingCount.toString()
+        val currentOutstandingRentalToolWithCount = outstandingRentalToolWithCounts[position]
+        holder.toolName.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.name
+        holder.toolCount.text = currentOutstandingRentalToolWithCount.count.toString() // 바꾸
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
-            showNumberDialog(holder.toolCount, currentOutstandingRentalTool.outstandingCount, currentOutstandingRentalTool)
+            showNumberDialog(holder.toolCount, currentOutstandingRentalToolWithCount.rentalTool.outstandingCount, currentOutstandingRentalToolWithCount)
         }
-        holder.toolSpec.text = currentOutstandingRentalTool.toolDto.spec
+        holder.toolSpec.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.spec
         holder.setToolState.setOnClickListener{
-            onSetToolStateClick(currentOutstandingRentalTool)
+            onSetToolStateClick(currentOutstandingRentalToolWithCount)
         }
         holder.selectSpace.setOnClickListener {
-            handleSelection(currentOutstandingRentalTool)
+            handleSelection(currentOutstandingRentalToolWithCount)
         }
-        if (isSelected(currentOutstandingRentalTool)) {
+        if (isSelected(currentOutstandingRentalToolWithCount)) {
             holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -58,10 +58,10 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
     }
 
     override fun getItemCount(): Int {
-        return outstandingRentalTools.size
+        return outstandingRentalToolWithCounts.size
     }
 
-    private fun showNumberDialog(textView: TextView, maxCount: Int, rentalTool: RentalToolDto) {
+    private fun showNumberDialog(textView: TextView, maxCount: Int, rentalToolWithCount: RentalToolWithCount) {
         val builder = AlertDialog.Builder(textView.context)
         builder.setTitle("공구 개수 변경")
         val input = NumberPicker(textView.context)
@@ -76,10 +76,9 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
             val newValue = input.value.toString()
             // 여기서 숫자 값을 처리하거나 다른 작업을 수행합니다.
             textView.text = newValue
-            for (currentRentalTool in tools) {
-                if (currentRentalTool.id == rentalTool.id) {
-                    val tags = rentalTool.Tags ?: ""
-                    onToolCountClick(ToolWithCount(currentRentalTool.toolDto.toToolDtoSQLite(), input.value))
+            for (ortwc in outstandingRentalToolWithCounts) {
+                if (ortwc.rentalTool.id == rentalToolWithCount.rentalTool.id) {
+                    ortwc.count = input.value
                 }
             }
         }
@@ -90,7 +89,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
 
         builder.show()
     }
-    fun handleSelection(currentRentalTool: RentalToolDto) {
+    fun handleSelection(currentRentalTool: RentalToolWithCount) {
         if (!isSelected(currentRentalTool)) {
             addToSelection(currentRentalTool)
         } else {
@@ -98,7 +97,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
         }
         notifyDataSetChanged() // 변경된 데이터를 알림
     }
-    fun tagAdded(currentRentalTool: RentalToolDto) {
+    fun tagAdded(currentRentalTool: RentalToolWithCount) {
         Log.d("Tst", "imhere")
         addToSelection(currentRentalTool)
         Log.d("Tst", "imhere2")
@@ -107,17 +106,21 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
         }
         Log.d("Tst", "imhere3")
     }
-
-    private fun isSelected(currentRentalTool: RentalToolDto): Boolean {
-        return currentRentalTool.id in selectedToolsToReturn
+    fun updateList(newList: MutableList<RentalToolWithCount>) {
+        outstandingRentalToolWithCounts = newList
+        notifyDataSetChanged()
     }
 
-    private fun addToSelection(currentRentalTool: RentalToolDto) {
-        selectedToolsToReturn.add(currentRentalTool.id)
+    private fun isSelected(currentRentalTool: RentalToolWithCount): Boolean {
+        return currentRentalTool.rentalTool.id in selectedToolsToReturn
+    }
+
+    private fun addToSelection(currentRentalTool: RentalToolWithCount) {
+        selectedToolsToReturn.add(currentRentalTool.rentalTool.id)
 
     }
 
-    private fun removeFromSelection(currentRentalTool: RentalToolDto) {
-        selectedToolsToReturn.remove(currentRentalTool.id)
+    private fun removeFromSelection(currentRentalTool: RentalToolWithCount) {
+        selectedToolsToReturn.remove(currentRentalTool.rentalTool.id)
     }
 }
