@@ -13,10 +13,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,16 +31,23 @@ import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
-class ManagerReturnFragment() : Fragment() {
+class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManager: BluetoothManager
     private lateinit var searchSheetEdit: EditText
     private lateinit var sheetSearchBtn: ImageButton
     private lateinit var qrEditText: EditText
+    private lateinit var connectBtn: ImageButton
+
+    lateinit var rentalBtnField: LinearLayout
+    lateinit var returnBtnField: LinearLayout
+    lateinit var standbyBtnField: LinearLayout
+    lateinit var registerBtnField: LinearLayout
 
     private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
     private lateinit var popupLayout: View
@@ -45,6 +55,8 @@ class ManagerReturnFragment() : Fragment() {
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
     private val REQUEST_PAGE_SIZE = 2
+
+    private lateinit var welcomeMessage: TextView
 
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     val gson = Gson()
@@ -78,6 +90,20 @@ class ManagerReturnFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
 
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        welcomeMessage.text = manager.name + "님 환영합니다."
+
+        connectBtn = view.findViewById(R.id.ConnectBtn)
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
+
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        registerBtnField = view.findViewById(R.id.RegisterBtnField)
+
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
@@ -95,6 +121,43 @@ class ManagerReturnFragment() : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
+
+        rentalBtnField.setOnClickListener {
+            val fragment = ManagerRentalFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerReturnFragment")
+                .commit()
+        }
+
+        returnBtnField.setOnClickListener {
+            val fragment = ManagerReturnFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerReturnFragment")
+                .commit()
+        }
+
+        standbyBtnField.setOnClickListener {
+            val fragment = ManagerStandByFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerReturnFragment")
+                .commit()
+        }
+
+        registerBtnField.setOnClickListener {
+            val fragment = ToolRegisterFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerReturnFragment")
+                .commit()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+
         recyclerView.adapter = adapter
 
         qrEditText.setOnEditorActionListener { _, actionId, event ->
@@ -147,33 +210,39 @@ class ManagerReturnFragment() : Fragment() {
         return view
     }
 
+
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()
-
-        showPopup()
         var sheetCount = 0
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                try {
-                    sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount/REQUEST_PAGE_SIZE.toDouble()).toInt()
-                    outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                    if (sheetCount>0){
-                        requestOutstandingRentalSheetByMembership(0, id)
-                    } else{
-                        hidePopup()
+        try {
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    try {
+                        sheetCount = result.toInt()
+                        val totalPage = Math.ceil(sheetCount/REQUEST_PAGE_SIZE.toDouble()).toInt()
+                        outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
+                        if (sheetCount>0){
+                            requestOutstandingRentalSheetByMembership(0, id)
+                        } else{
+                            hidePopup()
+                        }
+                        progressBar.max=totalPage
+                    } catch (e: Exception) {
+                        Log.d("RentalRequestSheetReady", e.toString())
                     }
-                    progressBar.max=totalPage
-                } catch (e: Exception) {
-                    Log.d("RentalRequestSheetReady", e.toString())
                 }
-            }
 
-            override fun onError(e: Exception) {
-                e.printStackTrace()
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+            showPopup()
+        } catch (e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
     }
     fun requestOutstandingRentalSheetByMembership(pageNum: Int, id: Long) {
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
@@ -194,25 +263,32 @@ class ManagerReturnFragment() : Fragment() {
     }
     fun getOutstandingRentalSheetList() {
         outStandingRentalSheetList.clear()
-
         var sheetCount = 0
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                try {
-                    sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
-                    outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                    requestOutstandingRentalSheet(0)
-                } catch (e: Exception) {
-                    Log.d("RentalRequestSheetReady", e.toString())
+        try {
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    try {
+                        sheetCount = result.toInt()
+                        val totalPage = Math.ceil(sheetCount / 10.0).toInt()
+                        outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
+                        requestOutstandingRentalSheet(0)
+                    } catch (e: Exception) {
+                        Log.d("RentalRequestSheetReady", e.toString())
+                    }
                 }
-            }
 
-            override fun onError(e: Exception) {
-                e.printStackTrace()
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+            showPopup()
+        } catch (e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{

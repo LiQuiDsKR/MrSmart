@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -22,17 +23,17 @@ class CustomModal(private val context: Context, private val count: Int) {
     lateinit var lossCount: TextView
     lateinit var discardCount: TextView
 
-    lateinit var incrementGood: FrameLayout
-    lateinit var incrementFault: FrameLayout
-    lateinit var incrementDamage: FrameLayout
-    lateinit var incrementLoss: FrameLayout
-    lateinit var incrementDiscard: FrameLayout
+    lateinit var incrementGood: ImageView
+    lateinit var incrementFault: ImageView
+    lateinit var incrementDamage: ImageView
+    lateinit var incrementLoss: ImageView
+    lateinit var incrementDiscard: ImageView
 
-    lateinit var decrementGood: FrameLayout
-    lateinit var decrementFault: FrameLayout
-    lateinit var decrementDamage: FrameLayout
-    lateinit var decrementLoss: FrameLayout
-    lateinit var decrementDiscard: FrameLayout
+    lateinit var decrementGood: ImageView
+    lateinit var decrementFault: ImageView
+    lateinit var decrementDamage: ImageView
+    lateinit var decrementLoss: ImageView
+    lateinit var decrementDiscard: ImageView
 
     // 현재 각 상태의 수량을 저장하는 변수들
     private var goodCountVal = count

@@ -185,11 +185,11 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         confirmBtn.setOnClickListener {
             confirmBtn.isFocusable = false
             confirmBtn.isClickable = false
-            showPopup()
 
             var standbyAlreadySent = false
-            recyclerView.adapter?.let { adapter ->
-                if (adapter is RentalRequestToolAdapter) {
+            if (adapter is RentalRequestToolAdapter) {
+                if (adapter.selectedToolsToRental.isNotEmpty()) {
+                    showPopup()
                     val rentalRequestToolDtoList: MutableList<RentalRequestToolDto> = mutableListOf()
                     for (toolId in adapter.selectedToolsToRental) {
                         for (tool in rentalRequestSheet.toolList) {
@@ -258,6 +258,10 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                         })
                     } catch (e: IOException) {
 
+                    }
+                } else {
+                    handler.post {
+                        Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
                     }
                 }
             }

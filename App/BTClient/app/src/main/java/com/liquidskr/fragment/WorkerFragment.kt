@@ -49,7 +49,7 @@ class WorkerFragment : Fragment() {
                     sharedViewModel.loginWorker = member
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
-                        .addToBackStack(null)
+                        .addToBackStack("WorkerLogin")
                         .commit()
                 } else {
                     Toast.makeText(requireContext(), "해당 직원은 작업자가 아닙니다.", Toast.LENGTH_SHORT).show()

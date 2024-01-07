@@ -759,6 +759,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return rowsAffected
     }
+    fun updateOrAddTBT(id: Long, newQRCode: String): Long {
+        val existingQRCode = getTBTByToolId(id)
+
+        return if (existingQRCode != null) {
+            // 이미 해당 id에 대한 QR 코드가 존재하면 업데이트
+            updateQRCodeById(id, newQRCode)
+            id
+        } else {
+            // 해당 id에 대한 QR 코드가 없으면 추가
+            addTBT(newQRCode)
+        }
+    }
     fun deleteTBTById(id: Long): Int {
         val db = this.writableDatabase
         val rowsAffected = db.delete(TABLE_TBT_NAME, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))

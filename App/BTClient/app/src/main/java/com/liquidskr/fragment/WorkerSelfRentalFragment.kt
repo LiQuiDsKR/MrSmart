@@ -226,7 +226,13 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
             var toolList: MutableList<ToolWithCount> = mutableListOf()
             adapter.updateList(toolList)
         }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
+        }
 
+        qrEditText.requestFocus()
         recyclerView.adapter = adapter
         return view
     }

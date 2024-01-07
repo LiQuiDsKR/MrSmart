@@ -20,7 +20,7 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
-class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
+class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
     lateinit var connectBtn: ImageButton
     lateinit var rentalBtn: ImageButton
     lateinit var returnBtn: ImageButton
@@ -31,11 +31,10 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
     lateinit var returnBtnField: LinearLayout
     lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
-    val manager = manager
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 
-    lateinit var welcomeMessage: TextView
+    private lateinit var welcomeMessage: TextView
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -44,7 +43,6 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_lobby, container, false)
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
-        connectBtn = view.findViewById(R.id.ConnectBtn)
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
         standbyBtn = view.findViewById(R.id.StandbyBtn)
@@ -58,35 +56,40 @@ class ManagerLobbyFragment(manager: MembershipDto) : Fragment(), BluetoothManage
 
         welcomeMessage.text = manager.name + "님 환영합니다."
 
+        connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
         rentalBtnField.setOnClickListener {
-            val fragment = ManagerRentalFragment()
+            val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerLobbyFragment")
                 .commit()
         }
 
         returnBtnField.setOnClickListener {
-            val fragment = ManagerReturnFragment()
+            val fragment = ManagerReturnFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerLobbyFragment")
                 .commit()
         }
 
         standbyBtnField.setOnClickListener {
-            val fragment = ManagerStandByFragment()
+            val fragment = ManagerStandByFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerLobbyFragment")
                 .commit()
         }
 
         registerBtnField.setOnClickListener {
-            val fragment = ToolRegisterFragment()
+            val fragment = ToolRegisterFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment, "ToolRegisterFragment")
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerLobbyFragment")
                 .commit()
         }
 

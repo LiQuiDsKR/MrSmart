@@ -85,9 +85,6 @@ class LobbyActivity : AppCompatActivity() {
         val handler = Handler(Looper.getMainLooper())
 
         bluetoothManager = BluetoothManager(this, this)
-        managerRentalFragment = ManagerRentalFragment()
-        // managerReturnFragment = ManagerReturnFragment()
-        workerSelfRentalFragment = WorkerSelfRentalFragment()
 
         popupLayout = findViewById(R.id.bluetoothPopupLayout)
         progressBar = findViewById(R.id.bluetoothProgressBar)

@@ -12,25 +12,39 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
+import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
+import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
+import java.lang.reflect.Type
 
 
-class ToolRegisterFragment() : Fragment() {
+class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var confirmBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var connectBtn: ImageButton
+
+    lateinit var rentalBtnField: LinearLayout
+    lateinit var returnBtnField: LinearLayout
+    lateinit var standbyBtnField: LinearLayout
+    lateinit var registerBtnField: LinearLayout
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
@@ -41,6 +55,7 @@ class ToolRegisterFragment() : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
     private var isPopupVisible = false // // UI블로킹 end
+    private lateinit var welcomeMessage: TextView
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -54,24 +69,103 @@ class ToolRegisterFragment() : Fragment() {
         val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
 
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        welcomeMessage.text = manager.name + "님 환영합니다."
+
+        connectBtn = view.findViewById(R.id.ConnectBtn)
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
+
         editTextName = view.findViewById(R.id.editTextName)
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        registerBtnField = view.findViewById(R.id.RegisterBtnField)
+
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
 
         val adapter = ToolRegisterAdapter(tools) { tool ->
-            val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
+
+            editTextName.clearFocus()
+            editTextName.isClickable = false
+            editTextName.isFocusable = false
+            recyclerView.requestFocus()
+
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
+
+                    val tagQRList: MutableList<String> = mutableListOf()
+                    for (tagDto in tagAndTBT.tagDtoList) {
+                        if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
+                    }
+
+                    val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
+                override fun onError(e: Exception) {
+                    handler.post{
+                        Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+        }
+
+        rentalBtnField.setOnClickListener {
+            dontTouchUI()
+            val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
+                .addToBackStack("ToolRegisterFragment")
                 .commit()
         }
 
+        returnBtnField.setOnClickListener {
+            dontTouchUI()
+            val fragment = ManagerReturnFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
+        }
+
+        standbyBtnField.setOnClickListener {
+            dontTouchUI()
+            val fragment = ManagerStandByFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
+        }
+
+        registerBtnField.setOnClickListener {
+            dontTouchUI()
+            val fragment = ToolRegisterFragment(manager)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+
+
         searchBtn.setOnClickListener {
             filterByName(adapter, editTextName.text.toString())
+            editTextName.clearFocus()
         }
 
         editTextName.setOnEditorActionListener { _, actionId, event ->
@@ -101,7 +195,13 @@ class ToolRegisterFragment() : Fragment() {
 
         return view
     }
-
+    fun dontTouchUI() {
+        rentalBtnField.isClickable = false
+        returnBtnField.isClickable = false
+        standbyBtnField.isClickable = false
+        registerBtnField.isClickable = false
+        connectBtn.isClickable = false
+    }
 
     fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
         val dbHelper = DatabaseHelper(requireContext())

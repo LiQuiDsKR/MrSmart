@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,19 +24,24 @@ import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.OutstandingState
 import java.lang.reflect.Type
 
-class WorkerReturnListFragment() : Fragment() {
+class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
+    private lateinit var connectBtn: ImageButton
     private lateinit var bluetoothManager: BluetoothManager
-    lateinit var searchSheetEdit: EditText
-    lateinit var sheetSearchBtn: ImageButton
-    lateinit var qrCodeBtn: LinearLayout
-    lateinit var qrEditText: EditText
+    private lateinit var searchSheetEdit: EditText
+    private lateinit var sheetSearchBtn: ImageButton
+    private lateinit var qrCodeBtn: LinearLayout
+    private lateinit var qrEditText: EditText
+    private lateinit var rentalBtnField: LinearLayout
+    private lateinit var returnBtnField: LinearLayout
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
+    lateinit var welcomeMessage: TextView
     val gson = Gson()
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -66,6 +72,18 @@ class WorkerReturnListFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_return_list, container, false)
 
+        welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        welcomeMessage.text = worker.name + "님 환영합니다."
+
+        connectBtn = view.findViewById(R.id.connectBtn)
+        connectBtn.setOnClickListener{
+            bluetoothManager.bluetoothOpen()
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        }
+
+        rentalBtnField  = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
@@ -81,43 +99,27 @@ class WorkerReturnListFragment() : Fragment() {
                     .commit()
             }
         }
+
+        rentalBtnField.setOnClickListener {
+            val fragment = WorkerRentalListFragment(worker)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
+                .commit()
+        }
+
+        returnBtnField.setOnClickListener {
+
+            val fragment = WorkerReturnListFragment(worker)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
+                .commit()
+        }
+
         recyclerView.adapter = adapter
 
-        sheetSearchBtn.setOnClickListener {
-
-        }
-        qrCodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
-        }
-        qrEditText.setOnEditorActionListener { _, actionId, event ->
-            Log.d("tst","textEditted")
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val tag = qrEditText.text.toString().replace("\n", "")
-                bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG,"{tag:\"${tag}\"}",object:BluetoothManager.RequestCallback{
-                    override fun onSuccess(result: String, type: Type) {
-                        val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
-                        val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                    }
-
-                    override fun onError(e: Exception) {
-                        e.printStackTrace()
-                    }
-                })
-
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-
         getOutstandingRentalSheetList()
-        qrEditText.requestFocus()
         return view
     }
 

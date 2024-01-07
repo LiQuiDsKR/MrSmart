@@ -189,7 +189,7 @@ public class StockStatusService {
 		return new StockStatusDto(repository.save(stock));
 	}
 	
-@Scheduled(cron = "00 44 07 * * ?") // 매일 자정에 실행
+@Scheduled(cron = "00 00 00 * * ?") // 매일 자정에 실행
 
     public void copyEntities() {
 		
