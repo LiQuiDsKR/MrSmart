@@ -1,5 +1,6 @@
 package com.care4u.toolbox.sheet.rental.rental_tool;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetRepository;
 import com.care4u.toolbox.stock_status.StockStatus;
 import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusRepository;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
@@ -40,6 +42,7 @@ public class RentalToolService {
 	private final ToolRepository toolRepository;
 	private final RentalRequestSheetRepository rentalRequestSheetRepository;
 	private final TagRepository tagRepository;
+	private final StockStatusRepository stockStatusRepository;
 	
 	private final TagService tagService;
 	private final StockStatusService stockStatusService;
@@ -125,8 +128,9 @@ public class RentalToolService {
 			logger.debug("RentalTool [Add] : No tag info");
 		}
 		
-		StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
-		stockStatusService.rentItems(stockDto.getId(), savedRentalTool.getCount());
+		//StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
+		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(savedRentalTool.getTool().getId(), sheet.getToolbox().getId(), LocalDate.now());
+		stockStatusService.rentItems(stock.getId(), savedRentalTool.getCount());
 		
 		logger.debug("RentalTool [Add] : Completed");
 		return savedRentalTool;
