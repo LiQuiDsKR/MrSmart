@@ -36,6 +36,7 @@ import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartService;
 import com.care4u.service.LogWriterService;
+import com.care4u.toolbox.tag.TagAndToolboxToolLabelDto;
 import com.care4u.toolbox.tag.TagDto;
 import com.care4u.toolbox.tag.TagService;
 import com.care4u.toolbox.ToolboxService;
@@ -709,7 +710,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	            long toolId = jsonObj.getLong("toolId");
 	            long toolboxId = jsonObj.getLong("toolboxId");
 	            try {
-	            	tagService.listByToolIdAndToolboxId(toolId,toolboxId);
+	            	TagAndToolboxToolLabelDto.builder()
+	            	.tagDtoList(tagService.listByToolIdAndToolboxId(toolId,toolboxId))
+	            	.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId))
+	            	.build();
 	             }catch(IllegalArgumentException e) {
 	                handler.sendData(keyword + e.getMessage());
 	                e.printStackTrace();
