@@ -1,5 +1,7 @@
 package com.care4u.toolbox.stock_status;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,6 +22,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Cell;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
@@ -32,6 +40,7 @@ import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
 import com.care4u.toolbox.tool.ToolService;
 import com.google.gson.Gson;
+
 
 @RestController
 public class StockStatusRestController {
@@ -111,5 +120,47 @@ public class StockStatusRestController {
         	logger.info(item.toString());
         }
         return ResponseEntity.ok(stockPage);
+    }
+    
+    @PostMapping("/stock_status/initialize")
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    	try (
+    			InputStream inputStream = file.getInputStream();
+    		     Workbook workbook = new XSSFWorkbook(inputStream)
+    		){
+    		
+    		Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트
+	    	for (Row row : sheet) {
+	    	    for (Cell cell : row) {
+	    	    	switch(cell.getCellType()) {
+	    	    	case STRING:
+	                    logger.debug(cell.getAddress()+": String value: " + cell.getStringCellValue());
+	                    break;
+	                case NUMERIC:
+	                	logger.debug(cell.getAddress()+": Numeric value: " + cell.getNumericCellValue());
+	                    break;
+	                case BOOLEAN:
+	                    logger.debug(cell.getAddress()+": Boolean value: " + cell.getBooleanCellValue());
+	                    break;
+	                case FORMULA:
+	                    logger.debug(cell.getAddress()+": Formula: " + cell.getCellFormula());
+	                    break;
+	                case BLANK:
+	                    logger.debug(cell.getAddress()+": Blank cell");
+	                    break;
+	                case ERROR:
+	                    logger.debug(cell.getAddress()+": Error in cell");
+	                    break;
+	                default:
+	                    logger.debug(cell.getAddress()+": Unknown cell type");
+	                    break;
+	    	    	}
+	    	    }
+	    	}
+	    	
+		} catch (Exception e) {
+		    // 예외 처리 로직
+		}
+        return ResponseEntity.ok().body("{\"message\":\"["+file.getOriginalFilename()+"] upload complete\"}");
     }
 }
