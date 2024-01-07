@@ -151,6 +151,7 @@
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
+                                android:clickable="false"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:background="@drawable/icon_fix_ic_top_search_copy" />

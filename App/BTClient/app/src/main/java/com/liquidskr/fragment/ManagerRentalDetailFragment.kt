@@ -176,6 +176,11 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             }
             false
         }
+        qrEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrEditText.requestFocus()
+            }
+        }
 
         confirmBtn.setOnClickListener {
             confirmBtn.isFocusable = false
@@ -262,6 +267,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             sheetCancel()
         }
 
+        qrEditText.requestFocus()
         return view
     }
 

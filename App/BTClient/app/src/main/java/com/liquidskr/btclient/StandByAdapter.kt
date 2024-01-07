@@ -103,6 +103,7 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
         var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
+        var sheetState: TextView = itemView.findViewById(R.id.RentalRequestSheet_sheetState)
 
         fun bind(item: RentalRequestSheetApproveFormDto, detail: String) {
             val currentRentalRequestSheetApprove = item
@@ -110,7 +111,8 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
 
             workerName.text = dbData.workerName
             leaderName.text = dbData.leaderName
-            timeStamp.text = dbData.timestamp
+            timeStamp.text = dbData.timestamp.substring(0, 19).replace("T"," ")
+            sheetState.text = "신청 완료 (승인 대기)"
 
             var toolListString = ""
             for (pair in dbData.toolList) {
@@ -123,17 +125,19 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
     }
 
     inner class Type2ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var workerName: TextView = itemView.findViewById(R.id.RentalRequestSheet_WorkerName)
-        var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
-        var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
+        var workerName: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_WorkerName)
+        var leaderName: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_LeaderName)
+        var timeStamp: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_TimeStamp)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
+        var sheetState: TextView = itemView.findViewById(R.id.OutstandingRentalSheet_sheetState)
         fun bind(item: ReturnSheetFormDto, detail: String) {
             val currentReturnSheetFormDto = item
             val dbData = gson.fromJson(detail, StandbyParam::class.java)
 
             workerName.text = dbData.workerName
             leaderName.text = dbData.leaderName
-            timeStamp.text = dbData.timestamp
+            timeStamp.text = dbData.timestamp.substring(0, 19).replace("T"," ")
+            sheetState.text = "신청 완료 (승인 대기)"
             var toolListString = ""
             for (pair in dbData.toolList) {
                 val toolName: String = pair.first
@@ -149,12 +153,14 @@ class StandByAdapter(private var sheets: List<StandbyDto>) :
         var leaderName: TextView = itemView.findViewById(R.id.RentalRequestSheet_LeaderName)
         var timeStamp: TextView = itemView.findViewById(R.id.RentalRequestSheet_TimeStamp)
         var toolListTextView: TextView = itemView.findViewById(R.id.ToolListTextView)
+        var sheetState: TextView = itemView.findViewById(R.id.RentalRequestSheet_sheetState)
 
         fun bind(item: RentalRequestSheetFormDto, detail: String) {
             val dbData = gson.fromJson(detail, StandbyParam::class.java)
             workerName.text = dbData.workerName
             leaderName.text = dbData.leaderName
-            timeStamp.text = dbData.timestamp
+            timeStamp.text = dbData.timestamp.substring(0, 19).replace("T"," ")
+            sheetState.text = "미신청 (신청 대기)"
             var toolListString = ""
             for (pair in dbData.toolList) {
                 val toolName: String = pair.first

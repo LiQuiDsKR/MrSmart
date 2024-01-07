@@ -62,7 +62,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                 return
             }
             val dbHelper = DatabaseHelper(requireContext())
-            val adapter = recyclerView.adapter as RentalToolAdapter //
+            val adapter = recyclerView.adapter as RentalToolAdapter
             val tbt = sharedViewModel.qrScannerText
             sharedViewModel.qrScannerText = ""
             Log.d("tst",tbt)
@@ -123,13 +123,28 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
+        var toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
         toolList.addAll(sharedViewModel.toolWithCountList)
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
-        for (id in sharedViewModel.rentalRequestToolIdList) { // 중복체크안되어잇음
-            val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
-            newToolList.add(toolWithCount)
+
+        for (id in sharedViewModel.rentalRequestToolIdList) {
+            var toolWithCountFound = false
+
+            for (toolWithCount in toolList) {
+                if (id == toolWithCount.tool.id) {
+                    // 이미 존재하는 경우
+                    toolWithCount.count += 1
+                    toolWithCountFound = true
+                    break
+                }
+            }
+            if (!toolWithCountFound) {
+                // 존재하지 않는 경우
+                val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
+                newToolList.add(toolWithCount)
+            }
         }
+
         var finalToolList: MutableList<ToolWithCount> = toolList
         finalToolList.addAll(newToolList)
 
@@ -191,7 +206,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         workerSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(1) // type = 1
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -199,7 +214,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         leaderSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(2) // type = 2
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -208,7 +223,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
 
             val fragment = ToolFindFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, fragment)
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -229,15 +244,16 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                 override fun onSuccess(result: String, type: Type) {
                                     if  (result == "good") {
                                         handler.post {
-                                            Toast.makeText(requireActivity(), "대여 승인 완료", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                         }
                                         sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
                                         sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
                                         sharedViewModel.rentalRequestToolIdList.clear()
+                                        toolList.clear()
                                         requireActivity().supportFragmentManager.popBackStack()
                                     } else {
                                         handler.post {
-                                            Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(activity, "대여 신청 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
                                         }
                                         requireActivity().supportFragmentManager.popBackStack()
                                     }
@@ -246,7 +262,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                                 override fun onError(e: Exception) {
                                     if (!standbyAlreadySent) {
                                         handler.post {
-                                            Toast.makeText(activity, "반납 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(activity, "대여 신청 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
                                         }
 
                                         handleBluetoothError(rentalRequestSheetForm)

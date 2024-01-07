@@ -41,12 +41,11 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
     private lateinit var toolSpec: TextView
     private lateinit var context: Context
 
-    private lateinit var switch_tag: Switch
-    private lateinit var switch_label: Switch
+    private lateinit var check_tag: ImageButton
+    private lateinit var check_label: ImageButton
 
     private lateinit var scannerReceiver: LinearLayout
 
-    lateinit var scanBtn: LinearLayout
     lateinit var qrTextEdit: EditText
     lateinit var qrDisplay: TextView
     var tbt_qrcode: String = ""
@@ -127,12 +126,11 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 
-        switch_tag = view.findViewById(R.id.switch_tag)
-        switch_label = view.findViewById(R.id.switch_label)
+        check_label = view.findViewById(R.id.check_label)
+        check_tag = view.findViewById(R.id.check_tag)
 
         toolName.text = tool.name
         toolSpec.text = tool.spec
-        scanBtn = view.findViewById(R.id.qr_scanBtn)
         qrTextEdit = view.findViewById(R.id.qr_textEdit)
         qrDisplay = view.findViewById(R.id.qr_display)
 
@@ -162,31 +160,29 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
             requireActivity().supportFragmentManager.popBackStack()
         }
 
-        scanBtn.setOnClickListener {// 삭제 예정
-            qrTextEdit.text.clear()
-            qrTextEdit.requestFocus()
-            qrDisplay.text = "인식 중.."
+        var isLabelMode = true
+        check_label.setOnClickListener {
+            isLabelMode = !isLabelMode
+            if (isLabelMode) {
+                check_label.setImageResource(R.drawable.icon_choice_ic_choice_round_on)
+                check_tag.setImageResource(R.drawable.icon_choice_ic_choice_round_off)
+            }
         }
-        switch_tag.setOnClickListener {
-            switch_label.isChecked = switch_tag.isChecked
-            switch_tag.isChecked = !switch_tag.isChecked
-        }
-        switch_label.setOnClickListener {
-            switch_tag.isChecked = switch_label.isChecked
-            switch_label.isChecked = !switch_label.isChecked
+        check_tag.setOnClickListener {
+            isLabelMode = !isLabelMode
+            check_label.setImageResource(R.drawable.icon_choice_ic_choice_round_off)
+            check_tag.setImageResource(R.drawable.icon_choice_ic_choice_round_on)
+
         }
 
         qrTextEdit.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val qrcode = qrTextEdit.text.toString().replace("\n", "")
-                if (switch_label.isChecked) { // Label 모드
+                if (isLabelMode) { // Label 모드
                     qrTextEdit.requestFocus()
                     tbt_qrcode = qrcode
                     // qrcode가 이미 쓰인건지 체크
                     qrDisplay.text = "${tbt_qrcode}"
-                    qrTextEdit.text.clear()
-                    qrTextEdit.requestFocus()
-                    return@setOnEditorActionListener true
                 } else { // Tag 모드
                     qrSearchText.requestFocus()
                     var list = adapter.qrcodes.toMutableList()
@@ -195,14 +191,19 @@ class ToolRegisterDetailFragment(tool: ToolDto, tagList: List<String>) : Fragmen
                     } else {
                         adapter.qrCheck(qrcode)
                     }
-                    qrSearchText.text.clear()
-                    qrSearchText.requestFocus()
                 }
+                qrTextEdit.text.clear()
+                qrTextEdit.requestFocus()
+
+                return@setOnEditorActionListener true
             }
-
-
-
             false
+        }
+
+        qrTextEdit.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                qrTextEdit.requestFocus()
+            }
         }
 
 

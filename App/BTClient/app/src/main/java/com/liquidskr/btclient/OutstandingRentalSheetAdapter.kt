@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.OutstandingState
 import com.mrsmart.standard.rental.RentalToolDto
-import com.mrsmart.standard.rental.SheetState
 
 
 class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
@@ -33,8 +32,8 @@ class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<Ou
         holder.workerName.text = currentOutstandingRentalSheet.rentalSheetDto.workerDto.name
         holder.leaderName.text = currentOutstandingRentalSheet.rentalSheetDto.leaderDto.name
         holder.timeStamp.text = currentOutstandingRentalSheet.rentalSheetDto.eventTimestamp
-        if (currentOutstandingRentalSheet.outstandingState == OutstandingState.READY) holder.sheetState.text = "신청 대기"
-        if (currentOutstandingRentalSheet.outstandingState == OutstandingState.REQUEST) holder.sheetState.text = "승인 대기"
+        if (currentOutstandingRentalSheet.outstandingStatus == OutstandingState.READY) holder.sheetState.text = "미신청 (신청 대기)"
+        if (currentOutstandingRentalSheet.outstandingStatus == OutstandingState.REQUEST) holder.sheetState.text = "신청 완료 (승인 대기)"
         var toolListString = ""
         for (tool: RentalToolDto in currentOutstandingRentalSheet.rentalSheetDto.toolList) {
             val toolName: String = tool.toolDto.name
