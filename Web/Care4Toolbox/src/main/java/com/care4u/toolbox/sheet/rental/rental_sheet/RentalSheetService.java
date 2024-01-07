@@ -154,6 +154,8 @@ public class RentalSheetService {
 	@Transactional
 	public RentalSheetDto addNew(RentalRequestSheetDto requestSheetDto, long approverId) {
 
+		logger.debug("RentalSheet [Add] : Start");
+		
 		// parameter null check
 		Optional<Membership> worker = membershipRepository.findById(requestSheetDto.getWorkerDto().getId());
 		Optional<Membership> leader = membershipRepository.findById(requestSheetDto.getLeaderDto().getId());
@@ -176,18 +178,25 @@ public class RentalSheetService {
 			throw new IllegalArgumentException("Toolbox not found");
 		}
 
+		logger.debug("RentalSheet [Add] : membership & toolbox Null check completed.");
+		
 		// sheet create
 		RentalSheet rentalSheet = RentalSheet.builder().worker(worker.get()).leader(leader.get())
 				.approver(approver.get()).toolbox(toolbox.get()).eventTimestamp(LocalDateTime.now()).build();
 		RentalSheet savedRentalSheet = repository.save(rentalSheet);
+		
+		logger.debug("RentalSheet [Add] : RentalSheet("+savedRentalSheet.getId()+") saved");
 
 		// tool create
 		List<RentalTool> toolList = new ArrayList<RentalTool>();
 		List<RentalRequestToolDto> supplyRequestToolList = new ArrayList<RentalRequestToolDto>();
+		
+		logger.debug("RentalSheet [Add] : RentalToolList Add Start");
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
 			// supplyTool
 			if (tool.getToolDto().getSubGroupDto().getMainGroupDto().getName().equals("소모자재")) {
 				supplyRequestToolList.add(tool);
+				logger.debug("RentalSheet [Add] : Supply Tool Skip");
 				continue;
 			}
 			// rentalTool
@@ -195,19 +204,24 @@ public class RentalSheetService {
 			toolList.add(newTool);
 			logger.info(newTool.getTool().getName() + " added to RentalSheet:" + savedRentalSheet.getId());
 		}
+		logger.debug("RentalSheet [Add] : RentalToolList Add Completed");
 
 		// supplySheet
 		if (supplyRequestToolList.size() > 0) {
 			supplySheetService.addNew(requestSheetDto, supplyRequestToolList, approverId);
 		}
 
+		logger.debug("RentalSheet [Add] : Outstanding Add Start");
 		// outstandingSheet
 		if (toolList.isEmpty()) {
+			logger.debug("RentalSheet [Add] : toolList Empty -> rentalSheet add canceled");
 			repository.delete(savedRentalSheet);
 			return null;
 		} else {
+			logger.debug("RentalSheet [Add] : Dto converting start");
 			RentalSheetDto result = convertToDto(savedRentalSheet);
-
+			logger.debug("RentalSheet [Add] : Dto converting Completed");
+			
 			outstandingRentalSheetService.addNew(savedRentalSheet, toolList);
 
 			return result;
@@ -237,6 +251,9 @@ public class RentalSheetService {
 	}
 	@Transactional
 	public RentalSheetDto updateAndAddNewInTransaction(RentalRequestSheetApproveFormDto formDto) {
+		
+		logger.debug("Request start");
+		
 		RentalRequestSheetDto sheetDto=rentalRequestSheetService.update(formDto, SheetState.APPROVE);
 		return addNew(sheetDto, formDto.getApproverDtoId());
 	}

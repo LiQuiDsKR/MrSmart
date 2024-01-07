@@ -83,6 +83,7 @@ public class RentalToolService {
 	 */
 	@Transactional
 	public RentalTool addNew(RentalRequestToolDto requestDto, RentalSheet sheet, RentalRequestSheetDto requestSheetDto) {
+		logger.debug("RentalTool [Add] : start");
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
@@ -93,18 +94,22 @@ public class RentalToolService {
 			logger.error("requestSheet not found");
 			return null;
 		}
-		
+		logger.debug("RentalTool [Add] : tool & sheet Null check completed.");
 		
 		RentalTool rentalTool = RentalTool.builder()
 				.rentalSheet(sheet)
 				.tool(tool.get())
 				.count(requestDto.getCount())
 				.outstandingCount(requestDto.getCount())
-				.rentalRequestSheet(requestSheet.get())
+				//.rentalRequestSheet(requestSheet.get())
 				.build();
 		
 		RentalTool savedRentalTool=repository.save(rentalTool);
 		
+		logger.debug("RentalTool [Add] : RentalTool("+savedRentalTool.getId()+") saved");
+		
+		
+		logger.debug("RentalTool [Add] : Tag info upload start");
 		if (requestDto.getTags() != null && requestDto.getTags().length() > 0) {
 			String[] tags = requestDto.getTags().split(",");
 			for (String tagString : tags) {
@@ -116,11 +121,14 @@ public class RentalToolService {
 					tag.updateRentalTool(savedRentalTool);
 					logger.info(tag.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
 			}
+		} else {
+			logger.debug("RentalTool [Add] : No tag info");
 		}
 		
 		StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
 		stockStatusService.rentItems(stockDto.getId(), savedRentalTool.getCount());
 		
+		logger.debug("RentalTool [Add] : Completed");
 		return savedRentalTool;
 	}
 

@@ -172,6 +172,7 @@ public class OutstandingRentalSheetService {
 
 	@Transactional
 	public OutstandingRentalSheet addNew(RentalSheet sheet, List<RentalTool> toolList) {
+		logger.debug("OutstandingRentalSheet [Add] : start");
 		int totalCount = 0;
 		for (RentalTool tool : toolList) {
 			totalCount += tool.getCount();
@@ -179,7 +180,7 @@ public class OutstandingRentalSheetService {
 		OutstandingRentalSheet outstandingSheet = OutstandingRentalSheet.builder().rentalSheet(sheet)
 				.totalCount(totalCount).totalOutstandingCount(totalCount).outstandingStatus(OutstandingState.READY)
 				.build();
-
+		logger.debug("OutstandingRentalSheet [Add] : Completed");
 		return repository.save(outstandingSheet);
 	}
 

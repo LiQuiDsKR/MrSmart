@@ -65,12 +65,13 @@ public class SupplyToolService {
 
 	@Transactional
 	public SupplyTool addNew(RentalRequestToolDto requestDto, SupplySheet sheet) {
+		logger.debug("SupplyTool [Add] : Start");
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
 			return null;
 		}
-		
+		logger.debug("SupplyTool [Add] : tool Null check completed");
 		SupplyTool supplyTool = SupplyTool.builder()
 				.supplySheet(sheet)
 				.tool(tool.get())
@@ -81,6 +82,7 @@ public class SupplyToolService {
 		StockStatusDto stockDto = stockStatusService.get(supplyTool.getTool().getId(),sheet.getToolbox().getId());
 		stockStatusService.supplyItems(stockDto.getId(), supplyTool.getCount());
 		
+		logger.debug("SupplyTool [Add] : completed");
 		return repository.save(supplyTool);
 	}
 

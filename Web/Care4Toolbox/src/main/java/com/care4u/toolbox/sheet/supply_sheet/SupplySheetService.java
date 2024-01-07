@@ -124,6 +124,8 @@ public class SupplySheetService {
 	
 	@Transactional
 	public SupplySheetDto addNew(RentalRequestSheetDto requestSheetDto,List<RentalRequestToolDto> supplyRequestToolList, long approverId) {
+		logger.debug("SupplySheet [Add] : Start");
+		
 		Optional<Membership> worker = membershipRepository.findById(requestSheetDto.getWorkerDto().getId());
 		Optional<Membership> leader = membershipRepository.findById(requestSheetDto.getLeaderDto().getId());
 		Optional<Membership> approver = membershipRepository.findById(approverId);
@@ -146,6 +148,8 @@ public class SupplySheetService {
 			return null;
 		}
 		
+		logger.debug("SupplySheet [Add] : membership & toolbox Null check completed");
+		
 		SupplySheet supplySheet = SupplySheet.builder()
 				.worker(worker.get())
 				.leader(leader.get())
@@ -157,13 +161,20 @@ public class SupplySheetService {
 		
 		SupplySheet savedSupplySheet = repository.save(supplySheet);
 		
+		logger.debug("SupplySheet [Add] : SupplySheet("+savedSupplySheet.getId()+") saved");
+		
+		
+		logger.debug("SupplySheet [Add] : SupplyToolList Add Start");
 		List<SupplyTool> toolList = new ArrayList<SupplyTool>();
 		for (RentalRequestToolDto tool : supplyRequestToolList) {
 			SupplyTool newTool = supplyToolService.addNew(tool, savedSupplySheet);
 			toolList.add(newTool);
 			logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
 		}
-		
+		logger.debug("SupplySheet [Add] : SupplyToolList Add Completed");
+
+		logger.debug("SupplySheet [Add] : Completed");
+
 		return convertToDto(savedSupplySheet);
 	}
 

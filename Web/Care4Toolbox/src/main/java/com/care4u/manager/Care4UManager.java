@@ -245,9 +245,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		}
 		String keyword = type.name() + ",";
 		switch(type) {
+		//앱 최초 화면 인원 기준정보 다운로드 전 항목 총 개수
 		case MEMBERSHIP_ALL_COUNT:
 			handler.sendData(keyword+GsonUtils.toJson(membershipService.getMembershipCount()));
 			break;
+		//앱 최초 화면 인원 기준정보 다운로드
 		case MEMBERSHIP_ALL:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -258,9 +260,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipPage(pageable)));
 			}
 			break;
+		//앱 최초 화면 공기구 기준정보 다운로드 전 항목 총 개수
 		case TOOL_ALL_COUNT:
 			handler.sendData(keyword+GsonUtils.toJson(toolService.getToolCount()));
 			break;
+		//앱 최초 화면 공기구 기준정보 다운로드 
 		case TOOL_ALL:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -271,6 +275,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
 			}
 			break;
+		//MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리
+		//작업자 - 대여 페이지에서 보여주는 항목
 		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -283,6 +289,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
+		//MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
+		//작업자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -291,6 +299,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
 			break;
+		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리
+		//관리자 - 대여 페이지에서 보여주는 항목
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -303,6 +313,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
+		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
+		//관리자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -311,6 +323,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
 			break;
+//		//ToolboxId로 status가 Request인 RentalRequestSheet 리스트 쿼리
+//		//관리자 - 대여 페이지에서 보여주는 항목
+//		//deprecated : 리스트로 통신 시 타임아웃이 발생할 수 있기에 페이지로 분할해서 통신하는 방향으로 변경.
 //		case RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX:
 //			if (!(paramJson.isEmpty() || paramJson==null)) {
 //				JSONObject jsonObj = new JSONObject(paramJson);
@@ -320,6 +335,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 //				handler.sendData(keyword + GsonUtils.toJson(sheetList));
 //			}
 //			break;
+		//RentalRequestSheetFormDto를 통해 RentalRequestSheet(status : REQUEST)를 생성
+		//관리자 - 대여 신청 페이지 - 확인 버튼 터치시 신청됨.
 		case RENTAL_REQUEST_SHEET_FORM:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetFormDto formDto;
@@ -333,6 +350,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}	
 			break;
+		//RentalRequestSheetFormWithTimestampDto를 통해 RentalRequestSheet(status : REQUEST)를 생성.
+		//관리자 - 보류 페이지 - 동기화 시 신청됨.
+		//eventTimestamp를 통해 중복 신청 여부를 확인함.
 		case RENTAL_REQUEST_SHEET_FORM_STANDBY:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetFormWithTimestampDto mainDto;
@@ -352,6 +372,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		//RentalRequestSheetApproveFormAndTimestampDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경, RentalSheet를 생성.
+		//관리자 - 보류 페이지 - 동기화 시 신청됨.
+		//eventTimestamp를 통해 중복 신청 여부를 확인함.
 		case RENTAL_REQUEST_SHEET_APPROVE_STANDBY:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetApproveFormAndTimestampDto mainDto;
@@ -375,6 +398,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		//RentalRequestSheetApproveFormDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경, RentalSheet를 생성.
+		//관리자 - 대여 승인 페이지 - 확인 버튼 터치 시 신청.
 		case RENTAL_REQUEST_SHEET_APPROVE:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				RentalRequestSheetApproveFormDto mainDto;
@@ -393,6 +418,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		//RentalRequestSheet의 Id를 통해 해당 시트의 status를 CANCEL로 변경.
+		//관리자 - 대여 승인 - 취소 버튼 OR 
+		//작업자 - 대여 신청 - 취소 버튼으로 신청.
 		case RENTAL_REQUEST_SHEET_CANCEL:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -409,6 +437,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		//RentalRequestSheet의 Id를 통해 해당 시트의 status를 REQUEST로 변경.
+		//작업자 - 대여 신청 - 확인 버튼으로 신청.
+		//status:READY인 RentalRequestSheet에 대해서 필요한 로직임.
 		case RENTAL_REQUEST_SHEET_APPLY:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -425,6 +456,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		//MembershipId로 status와 관계없이 OutstandingRentalSheet 페이지 쿼리
+		//관리자 - 반납 페이지에서 검색 시 보여주는 항목
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
