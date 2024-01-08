@@ -139,11 +139,11 @@ public class StockStatusRestController {
     		List<Integer> columnIndices = new ArrayList();
 	    	for (Row row : sheet) {
 	    	    for (Cell cell : row) {
-	    	    	if (row.getRowNum()==0) {
-	    	    		switch(cell.getStringCellValue()) {
-	    	    		case 
-	    	    		}
-	    	    	}
+//	    	    	if (row.getRowNum()==0) {
+//	    	    		switch(cell.getStringCellValue()) {
+//	    	    		case 
+//	    	    		}
+//	    	    	}
 	    	    	switch(cell.getCellType()) {
 	    	    	case STRING:
 	                    logger.debug(cell.getAddress()+": String value: " + cell.getStringCellValue());
