@@ -98,15 +98,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
             RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
         }
-        /*
-        var newOutstandingRentalSheet = outstandingRentalSheet
-
-        var existToolList: MutableList<RentalToolDto> = mutableListOf() // 0인 항목 미표시
-        for (rentalTool in toolList) {
-            if (rentalTool.outstandingCount > 0) {
-                existToolList.add(rentalTool)
-            }
-        }*/
 
         var finalToolStateList: MutableList<Pair<Long,MutableList<ToolStateParam>>> = mutableListOf()
         for (rtwc in RentalToolWithCountList) { // rtwc means RentalToolWithCount
@@ -120,7 +111,11 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     cnt = rtwc.count
                 }
             }
-            val customModal = CustomModal(requireContext(), cnt)
+            val customModal = CustomModal(requireContext(), cnt, onValidCount = {
+                handler.post {
+                    Toast.makeText(activity, "총 수량이 맞지 않아 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
             customModal.setOnCountsConfirmedListener(object : CustomModal.OnCountsConfirmedListener {
                 override fun onCountsConfirmed(counts: IntArray) {
                     for (rtwc in RentalToolWithCountList) {
@@ -132,12 +127,16 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                             if (counts[1] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.FAULT, counts[1]))
                             if (counts[2] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DAMAGE, counts[2]))
                             if (counts[3] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.LOSS, counts[3]))
-                            if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
+                            // if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
 
                             val pair = Pair(rtwc.rentalTool.toolDto.id, toolStateParamList)
                             finalToolStateList.add(pair)
+
+                            updateToolState(rtwc.rentalTool.toolDto.id, counts)
                         }
                     }
+
+                    // adapter 전달, counts
                 }
             })
             customModal.show()
@@ -263,6 +262,11 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         qrEditText.requestFocus()
 
         return view
+    }
+
+    fun updateToolState(toolId: Long, counts: IntArray) {
+        val myAdapter = recyclerView.adapter
+        if (myAdapter is OutstandingDetailAdapter) myAdapter.updateToolState(toolId, counts)
     }
 
     fun fixCode(input: String): String {

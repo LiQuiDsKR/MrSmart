@@ -13,7 +13,7 @@
 
         <LinearLayout
             android:layout_width="300dp"
-            android:layout_height="220dp"
+            android:layout_height="300dp"
             android:background="#00E3CBCB"
             android:orientation="vertical">
 
@@ -21,9 +21,9 @@
                 android:id="@+id/textView13"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
+                android:padding="10dp"
                 android:text="공기구 상태 설정"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -203,49 +203,21 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editTextText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView19"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="폐기"
-                        android:textSize="20sp" />
-
-                    <ImageView
-                        android:id="@+id/incrementDiscard"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:layout_marginTop="8dp"
-                        android:rotation="-90"
-                        app:srcCompat="@drawable/arrow_right" />
-
-                    <TextView
-                        android:id="@+id/discardCount"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textSize="34sp" />
-
-                    <ImageView
-                        android:id="@+id/decrementDiscard"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:layout_marginTop="12dp"
-                        android:rotation="90"
-                        app:srcCompat="@drawable/arrow_right" />
-
-                </LinearLayout>
-
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="메모"
+                    android:inputType="text"
+                    android:maxLength="50" />
             </LinearLayout>
 
         </LinearLayout>

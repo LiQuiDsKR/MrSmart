@@ -10,8 +10,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import com.mrsmart.standard.tool.RentalToolWithCount
 
-class CustomModal(private val context: Context, private val count: Int) {
+class CustomModal(private val context: Context, private val count: Int, private val onValidCount:() -> Unit) {
     interface OnCountsConfirmedListener {
         fun onCountsConfirmed(counts: IntArray)
     }
@@ -40,11 +41,12 @@ class CustomModal(private val context: Context, private val count: Int) {
     private var faultCountVal = 0
     private var damageCountVal = 0
     private var lossCountVal = 0
-    private var discardCountVal = 0
+    //private var discardCountVal = 0
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private var counts = intArrayOf(goodCountVal, faultCountVal, damageCountVal, lossCountVal, discardCountVal)
+    //private var counts = intArrayOf(goodCountVal, faultCountVal, damageCountVal, lossCountVal, discardCountVal)
+    private var counts = intArrayOf(goodCountVal, faultCountVal, damageCountVal, lossCountVal)
     // 다이얼로그를 생성하고 보여주는 함수
     fun show() {
         val dialogBuilder = AlertDialog.Builder(context)
@@ -55,26 +57,26 @@ class CustomModal(private val context: Context, private val count: Int) {
         faultCount = view.findViewById(R.id.faultCount)
         damageCount = view.findViewById(R.id.damageCount)
         lossCount = view.findViewById(R.id.lossCount)
-        discardCount = view.findViewById(R.id.discardCount)
+        //discardCount = view.findViewById(R.id.discardCount)
 
         incrementGood = view.findViewById(R.id.incrementGood)
         incrementFault = view.findViewById(R.id.incrementFault)
         incrementDamage = view.findViewById(R.id.incrementDamage)
         incrementLoss = view.findViewById(R.id.incrementLoss)
-        incrementDiscard = view.findViewById(R.id.incrementDiscard)
+        //incrementDiscard = view.findViewById(R.id.incrementDiscard)
 
         decrementGood = view.findViewById(R.id.decrementGood)
         decrementFault = view.findViewById(R.id.decrementFault)
         decrementDamage = view.findViewById(R.id.decrementDamage)
         decrementLoss = view.findViewById(R.id.decrementLoss)
-        decrementDiscard = view.findViewById(R.id.decrementDiscard)
+        //decrementDiscard = view.findViewById(R.id.decrementDiscard)
 
         // 초기값 설정
         goodCount.text = goodCountVal.toString()
         faultCount.text = faultCountVal.toString()
         damageCount.text = damageCountVal.toString()
         lossCount.text = lossCountVal.toString()
-        discardCount.text = discardCountVal.toString()
+        // discardCount.text = discardCountVal.toString()
 
         // 증가 및 감소 버튼에 대한 리스너 설정
         incrementGood.setOnClickListener { incrementCount(goodCount,0) }
@@ -85,8 +87,8 @@ class CustomModal(private val context: Context, private val count: Int) {
         decrementDamage.setOnClickListener { decrementCount(damageCount,2) }
         incrementLoss.setOnClickListener { incrementCount(lossCount,3) }
         decrementLoss.setOnClickListener { decrementCount(lossCount,3) }
-        incrementDiscard.setOnClickListener { incrementCount(discardCount,4) }
-        decrementDiscard.setOnClickListener { decrementCount(discardCount,4) }
+        //incrementDiscard.setOnClickListener { incrementCount(discardCount,4) }
+        //decrementDiscard.setOnClickListener { decrementCount(discardCount,4) }
 
         dialogBuilder.setView(view)
         dialogBuilder.setPositiveButton("확인") { _, _ ->
@@ -94,9 +96,7 @@ class CustomModal(private val context: Context, private val count: Int) {
             val totalSum = counts.sum()
             if (totalSum != count) {
                 // 예외처리
-                handler.post {
-                    // Toast.makeText(activity, "수량이 맞지 않아 실패", Toast.LENGTH_SHORT).show()
-                }
+                onValidCount()
             } else {
                 notifyCountsConfirmed()
             }

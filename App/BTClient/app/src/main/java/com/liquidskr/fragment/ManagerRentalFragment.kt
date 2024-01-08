@@ -151,7 +151,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
             sharedViewModel.rentalRequestToolIdList.clear()
             fragmentTransform(ManagerSelfRentalFragment(), null)
         }
-
         getRentalRequestSheetList()
 
         return view
