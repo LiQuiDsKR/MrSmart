@@ -9,12 +9,15 @@ import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.tool.RentalRequestToolWithCount
 import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.ToolWithCount
 
-class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outstandingRentalToolWithCounts: MutableList<RentalToolWithCount>,
+class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
+                               var outstandingRentalToolWithCounts: MutableList<RentalToolWithCount>,
+
                                private val onSetToolStateClick: (RentalToolWithCount) -> Unit) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
@@ -39,7 +42,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
         val currentOutstandingRentalToolWithCount = outstandingRentalToolWithCounts[position]
         holder.toolName.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.name
-        holder.toolCount.text = currentOutstandingRentalToolWithCount.count.toString() // 바꾸
+        holder.toolCount.text = currentOutstandingRentalToolWithCount.count.toString()
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
             showNumberDialog(holder.toolCount, currentOutstandingRentalToolWithCount.rentalTool.outstandingCount, currentOutstandingRentalToolWithCount)
         }
@@ -55,10 +58,30 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView, var outst
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
         }
+        holder.toolState.text = "양호 : ${currentOutstandingRentalToolWithCount.count}"
     }
 
     override fun getItemCount(): Int {
         return outstandingRentalToolWithCounts.size
+    }
+
+    fun updateToolState (toolId: Long, toolStates: IntArray) {
+        var stateString = ""
+        if (toolStates[0] > 0) stateString += " 양호:${toolStates[0]}"
+        if (toolStates[1] > 0) stateString += " 고장:${toolStates[1]}"
+        if (toolStates[2] > 0) stateString += " 파손:${toolStates[2]}"
+        if (toolStates[3] > 0) stateString += " 망실:${toolStates[3]}"
+        for (ortwc in outstandingRentalToolWithCounts) {
+            if (toolId == ortwc.rentalTool.toolDto.id) {
+                // 해당 툴 아이디를 가진 항목을 찾았을 때
+                val position = outstandingRentalToolWithCounts.indexOf(ortwc)
+                val viewHolder = recyclerView.findViewHolderForAdapterPosition(position)
+                if (viewHolder is OutstandingRentalToolViewHolder) {
+                    viewHolder.toolState.text = stateString
+                }
+                break
+            }
+        }
     }
 
     private fun showNumberDialog(textView: TextView, maxCount: Int, rentalToolWithCount: RentalToolWithCount) {

@@ -80,7 +80,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                     if (result == "good") {
                         try {
                             val dbHelper = DatabaseHelper(context)
-                            dbHelper.updateOrAddTBT(tool.id, tbt_qrcode)
+                            dbHelper.updateQRCodeById(tool.id, tbt_qrcode, sharedViewModel.toolBoxId)
                             handler.post {
                                 Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
                             }
@@ -100,7 +100,6 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                             Toast.makeText(context, "알 수 없는 오류 발생", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    requireActivity().supportFragmentManager.popBackStack()
                 }
 
                 override fun onError(e: Exception) {

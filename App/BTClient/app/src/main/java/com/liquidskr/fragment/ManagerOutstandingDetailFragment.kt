@@ -28,9 +28,6 @@ import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
-import com.mrsmart.standard.rental.RentalSheetDto
-import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
@@ -38,8 +35,6 @@ import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
 import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
-import com.mrsmart.standard.tool.ToolState
-import com.mrsmart.standard.tool.ToolStateParam
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.lang.reflect.Type
@@ -95,22 +90,15 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        var returnToolFormList: MutableList<ReturnToolFormDto> = mutableListOf()
+
         for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
             RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
         }
-        /*
-        var newOutstandingRentalSheet = outstandingRentalSheet
 
-        var existToolList: MutableList<RentalToolDto> = mutableListOf() // 0인 항목 미표시
-        for (rentalTool in toolList) {
-            if (rentalTool.outstandingCount > 0) {
-                existToolList.add(rentalTool)
-            }
-        }*/
-
-        var finalToolStateList: MutableList<Pair<Long,MutableList<ToolStateParam>>> = mutableListOf()
+        var finalToolStateList: MutableList<Pair<Long,ReturnToolFormDto>> = mutableListOf()
         for (rtwc in RentalToolWithCountList) { // rtwc means RentalToolWithCount
-            finalToolStateList.add(Pair(rtwc.rentalTool.toolDto.id, mutableListOf(ToolStateParam(rtwc.rentalTool.id, ToolState.GOOD, rtwc.rentalTool.outstandingCount))))
+            finalToolStateList.add(Pair(rtwc.rentalTool.toolDto.id, ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, rtwc.rentalTool.Tags, rtwc.rentalTool.outstandingCount,0,0,0, "")))
         }
 
         val adapter = OutstandingDetailAdapter(recyclerView, RentalToolWithCountList, onSetToolStateClick = { rentalToolWithCount ->
@@ -120,22 +108,34 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     cnt = rtwc.count
                 }
             }
-            val customModal = CustomModal(requireContext(), cnt)
+            val customModal = CustomModal(requireContext(), cnt, onValidCount = {
+                handler.post {
+                    Toast.makeText(activity, "총 수량이 맞지 않아 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
             customModal.setOnCountsConfirmedListener(object : CustomModal.OnCountsConfirmedListener {
-                override fun onCountsConfirmed(counts: IntArray) {
+                override fun onCountsConfirmed(counts: IntArray, comment: String) {
                     for (rtwc in RentalToolWithCountList) {
                         if (rtwc.rentalTool.id == rentalToolWithCount.rentalTool.id) {
-                            finalToolStateList = finalToolStateList.filter { it.first != rtwc.rentalTool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
-
-                            var toolStateParamList: MutableList<ToolStateParam> = mutableListOf()
+                            // finalToolStateList = finalToolStateList.filter { it.first != rtwc.rentalTool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
+                            returnToolFormList.filter{ it.toolDtoId != rtwc.rentalTool.toolDto.id }.toMutableList()
+                            val goodCnt = counts[0]
+                            val faultCnt = counts[1]
+                            val damageCnt = counts[2]
+                            val lossCnt = counts[3]
+                            // val discardCnt = counts[4]
+                            var returnToolForm = ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, rtwc.rentalTool.Tags, goodCnt, faultCnt, damageCnt, lossCnt, comment)
+                            /*
                             if (counts[0] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.GOOD, counts[0]))
                             if (counts[1] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.FAULT, counts[1]))
                             if (counts[2] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DAMAGE, counts[2]))
                             if (counts[3] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.LOSS, counts[3]))
-                            if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
+                            */
+                            // if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
 
-                            val pair = Pair(rtwc.rentalTool.toolDto.id, toolStateParamList)
-                            finalToolStateList.add(pair)
+                            returnToolFormList.add(returnToolForm)
+
+                            updateToolState(rtwc.rentalTool.toolDto.id, counts)
                         }
                     }
                 }
@@ -209,6 +209,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             if (adapter is OutstandingDetailAdapter) {
                 if (adapter.tools.isNotEmpty()) {
                     showPopup()
+                    /*
                     val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
                     for (rtwc in adapter.outstandingRentalToolWithCounts) {
                         for (finalToolState in finalToolStateList) {
@@ -219,9 +220,9 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                 }
                             }
                         }
-                    }
+                    }*/
                     val sheet = outstandingRentalSheet
-                    val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormDtoList)
+                    val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
 
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
@@ -265,6 +266,11 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         return view
     }
 
+    fun updateToolState(toolId: Long, counts: IntArray) {
+        val myAdapter = recyclerView.adapter
+        if (myAdapter is OutstandingDetailAdapter) myAdapter.updateToolState(toolId, counts)
+    }
+
     fun fixCode(input: String): String {
         val typoMap = mapOf(
             'ㅁ' to 'A',
@@ -294,7 +300,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         var pairToolList = listOf<Pair<String,Int>>()
         for (tool in toolList) {
             val name = dbHelper.getToolById(tool.toolDtoId).name
-            val count = tool.count
+            val count = tool.goodCount + tool.faultCount + tool.damageCount + tool.lossCount
             val pair = Pair(name, count)
             pairToolList = pairToolList.plus(pair)
         }

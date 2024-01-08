@@ -25,6 +25,7 @@
     import com.liquidskr.listener.MembershipRequest
     import com.liquidskr.btclient.R
     import com.liquidskr.btclient.RequestType
+    import com.liquidskr.listener.OutstandingRequest
     import com.liquidskr.listener.TagRequest
     import com.liquidskr.listener.ToolBoxToolLabelRequest
     import com.liquidskr.listener.ToolRequest
@@ -34,6 +35,7 @@
     class SettingsFragment(context: Context) : Fragment() {
         lateinit var importStandard: LinearLayout
         lateinit var importQRData: LinearLayout
+        lateinit var importOutstanding: LinearLayout
         lateinit var setServerPCName: LinearLayout
         lateinit var setToolBox: LinearLayout
         lateinit var closeBtn: LinearLayout
@@ -48,13 +50,13 @@
 
         private val handler = Handler(Looper.getMainLooper())
         private val gson = Gson()
+        private val dbHelper = DatabaseHelper(context)
 
         private lateinit var membershipRequest: MembershipRequest
         private lateinit var toolRequest: ToolRequest
         private lateinit var toolBoxToolLabelRequest: ToolBoxToolLabelRequest
         private lateinit var tagRequest: TagRequest
-
-        private val dbHelper = DatabaseHelper(context)
+        private lateinit var outstandingRequest: OutstandingRequest
 
         private val membershipRequestListener = object: MembershipRequest.Listener {
             override fun onNextPage(pageNum: Int) {
@@ -86,7 +88,6 @@
             }
 
         }
-
         private val toolBoxToolLabelRequestListener = object: ToolBoxToolLabelRequest.Listener {
             override fun onNextPage(pageNum: Int) {
                 requestToolboxToolLabel(pageNum)
@@ -95,8 +96,8 @@
             override fun onLastPageArrived() {
                 handler.post {
                     hidePopup()
-                    Toast.makeText(requireActivity(), "기준 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
-                    showAlertModal("기준정보 수신 완료","기준 정보를 정상적으로 불러왔습니다.")
+                    Toast.makeText(requireActivity(), "선반 QR코드 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                    showAlertModal("선반 QR코드 정보 수신 완료","선반 QR코드 정보를 정상적으로 불러왔습니다.")
                 }
             }
 
@@ -111,6 +112,23 @@
 
             override fun onLastPageArrived() {
 
+            }
+
+            override fun onError(e: Exception) {
+            }
+
+        }
+        private val outstandingRequestListener = object: OutstandingRequest.Listener {
+            override fun onNextPage(pageNum: Int) {
+                requestTag(pageNum)
+            }
+
+            override fun onLastPageArrived() {
+                handler.post {
+                    hidePopup()
+                    Toast.makeText(requireActivity(), "반납전표 정보를 정상적으로 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                    showAlertModal("반납전표 정보 수신 완료","반납전표 정보를 정상적으로 불러왔습니다.")
+                }
             }
 
             override fun onError(e: Exception) {
@@ -153,6 +171,7 @@
             progressText = view.findViewById(R.id.progressText)
             importStandard = view.findViewById(R.id.importStandard)
             importQRData = view.findViewById(R.id.importQRData)
+            importOutstanding = view.findViewById(R.id.importOutstanding)
             setServerPCName = view.findViewById(R.id.setServerPCName)
             setToolBox = view.findViewById(R.id.setToolBox)
             closeBtn = view.findViewById(R.id.closeBtn)
@@ -174,6 +193,7 @@
 
             setToolBox.setOnClickListener {
                 var selectedToolbox = "선강정비1실"
+                sharedViewModel.toolBoxId = dbHelper.getToolboxName()
                 if (sharedViewModel.toolBoxId.toInt() == 5222) {
                     selectedToolbox = "선강정비1실"
                 } else if (sharedViewModel.toolBoxId.toInt() == 5223) {
@@ -209,6 +229,10 @@
             importQRData.setOnClickListener{
                 showPopup() // progressBar appear
                 importTBT(dbHelper)
+            }
+            importOutstanding.setOnClickListener{
+                showPopup() // progressBar appear
+                importOutstanding(dbHelper)
             }
 
             return view
@@ -310,6 +334,30 @@
                 }
             })
         }
+        private fun importOutstanding(dbHelper: DatabaseHelper) {
+            var outstandingCnt = 0
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT,"{}",object: BluetoothManager.RequestCallback {
+                override fun onSuccess(result: String, type: Type) {
+                    try {
+                        outstandingCnt = result.toInt()
+                        val totalPage = Math.ceil(outstandingCnt / 10.0).toInt()
+                        progressBar.max = totalPage
+                        dbHelper.clearTBTTable()
+                        outstandingRequest = OutstandingRequest(totalPage, outstandingCnt, dbHelper, outstandingRequestListener)
+
+                        requestOutstanding(0)
+                    } catch (e: Exception) {
+                        Log.d("importOutstanding", e.toString())
+                    }
+                }
+                override fun onError(e: Exception) {
+                    hidePopup() // progressBar hide
+                    handler.post {
+                        Toast.makeText(requireActivity(), "반납전표 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+        }
         fun requestMembership(pageNum: Int) {
             bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
@@ -393,6 +441,27 @@
                 }
             })
         }
+        fun requestOutstanding(pageNum: Int) {
+            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
+                override fun onSuccess(result: String, type: Type) {
+                    var page: Page = gson.fromJson(result, type)
+                    tagRequest.process(page)
+                    requireActivity().runOnUiThread {
+                        progressBar.progress = page.pageable.page
+                        if (page.total != 0) {
+                            progressText.text = "반납전표 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
+                        }
+                    }
+
+                }
+                override fun onError(e: Exception) {
+                    hidePopup() // progressBar hide
+                    handler.post {
+                        Toast.makeText(requireActivity(), "반납전표 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
+        }
 
         private fun showPopup() {
             isPopupVisible = true
@@ -420,7 +489,6 @@
 
             dialog.show()
         }
-
         fun showSelectionDialog(context: Context, title: String, items: Array<String>, defaultSelectedItem: String?, callback: (String) -> Unit) {
             val selectedIndex = items.indexOf(defaultSelectedItem)
 
@@ -446,6 +514,5 @@
 
         override fun onDestroyView() {
             super.onDestroyView()
-            // 프래그먼트가 종료될 때 핸들러의 작업 중지
         }
     }

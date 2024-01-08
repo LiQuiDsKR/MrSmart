@@ -80,7 +80,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         private const val TABLE_TOOLBOX_NAME = "Toolbox"
         private const val COLUMN_TOOLBOX_ID = "toolbox_id"
+        private const val COLUMN_TOOLBOX_TOOLBOX_ID = "toolbox_toolbox_id"
         private const val COLUMN_TOOLBOX_NAME = "toolbox_name"
+
+
+        private const val TABLE_OUTSTANDING_NAME = "OutstandingRentalSheet"
+        private const val COLUMN_OUTSTANDING_ID = "outstanding_id"
+        private const val COLUMN_OUTSTANDING_RENTALSHEET = "outstanding_rentalSheet"
+        private const val COLUMN_OUTSTANDING_TOTALCOUNT = "outstanding_count"
+        private const val COLUMN_OUTSTANDING_OUTSTANDINGCOUNT = "outstanding_outstandingCount"
+        private const val COLUMN_OUTSTANDING_STATUS = "outstanding_status"
+        private const val COLUMN_OUTSTANDING_JSON = "outstanding_json"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -116,7 +126,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_STANDBY_DETAIL TEXT)"
 
         val createTBTTableQuery = "CREATE TABLE $TABLE_TBT_NAME " +
-                "($COLUMN_TBT_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "($COLUMN_TBT_ID INTEGER, " +
                 "$COLUMN_TBT_TOOLBOX_ID INTEGER, " +
                 "$COLUMN_TBT_LOCATION TEXT, " +
                 "$COLUMN_TBT_TOOL_ID INTEGER, " +
@@ -140,9 +150,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 "$COLUMN_DEVICE_NAME TEXT)"
 
         val createToolboxTableQuery = "CREATE TABLE $TABLE_TOOLBOX_NAME " +
-                "($COLUMN_TOOLBOX_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "($COLUMN_TOOLBOX_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "$COLUMN_TOOLBOX_TOOLBOX_ID TEXT, " +
                 "$COLUMN_TOOLBOX_NAME TEXT)"
 
+        val createOutstandingTableQuery = "CREATE TABLE $TABLE_OUTSTANDING_NAME " +
+                "($COLUMN_OUTSTANDING_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_OUTSTANDING_RENTALSHEET TEXT, " +
+                "$COLUMN_OUTSTANDING_TOTALCOUNT INTEGER, " +
+                "$COLUMN_OUTSTANDING_OUTSTANDINGCOUNT INTEGER, " +
+                "$COLUMN_OUTSTANDING_STATUS TEXT, " +
+                "$COLUMN_OUTSTANDING_JSON TEXT)"
 
         db.execSQL(createMembershipTableQuery)
         db.execSQL(createToolTableQuery)
@@ -152,6 +170,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(createRSTableQuery)
         db.execSQL(createDeviceTableQuery)
         db.execSQL(createToolboxTableQuery)
+        db.execSQL(createOutstandingTableQuery)
     }
 
     // 데이터베이스 도우미 클래스의 onUpgrade 메서드 내에서 호출
@@ -164,6 +183,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_RENTALSHEET_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_DEVICE_NAME")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TOOLBOX_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_OUTSTANDING_NAME")
 
         onCreate(db)
     }
@@ -193,7 +213,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     ): Long {
 
         val values = ContentValues()
-        values.put(COLUMN_TOOLBOX_ID, toolboxId)
+        values.put(COLUMN_TOOLBOX_ID, 1)
+        values.put(COLUMN_TOOLBOX_TOOLBOX_ID, toolboxId)
         values.put(COLUMN_TOOLBOX_NAME, "선강정비${toolboxId - 5221}실")
 
         val db = this.writableDatabase
@@ -206,6 +227,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         db.close()
         return id
+    }
+    @SuppressLint("Range")
+    fun getToolboxName(): Long {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TOOLBOX_TOOLBOX_ID FROM $TABLE_TOOLBOX_NAME WHERE $COLUMN_TOOLBOX_ID = ?"
+        var toolboxId: Long = 0
+        val selectionArgs = arrayOf("1")
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            toolboxId = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOLBOX_TOOLBOX_ID))
+        }
+        cursor.close()
+        db.close()
+        return toolboxId
     }
 
     fun insertMembershipData(
@@ -338,6 +373,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         val db = this.writableDatabase
         val id = db.insert(TABLE_RENTALSHEET_NAME, null, values)
+        db.close()
+        return id
+    }
+
+    fun insertOutstandingData(
+        orsId: Long,
+        orsRentalSheet: String,
+        orsTotalCount: Int,
+        orsTotalOutstandingCount: Int,
+        orsOutstandingStatus: String,
+        orsJson: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_OUTSTANDING_ID, orsId)
+        values.put(COLUMN_OUTSTANDING_RENTALSHEET, orsRentalSheet)
+        values.put(COLUMN_OUTSTANDING_TOTALCOUNT, orsTotalCount)
+        values.put(COLUMN_OUTSTANDING_OUTSTANDINGCOUNT, orsTotalOutstandingCount)
+        values.put(COLUMN_OUTSTANDING_STATUS, orsOutstandingStatus)
+        values.put(COLUMN_OUTSTANDING_JSON, orsJson)
+
+        val db = this.writableDatabase
+        val id = db.insert(TABLE_OUTSTANDING_NAME, null, values)
         db.close()
         return id
     }
@@ -749,32 +806,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return tbt
     }
     @SuppressLint("Range")
-    fun updateQRCodeById(id: Long, newQRCode: String): Int {
+    fun updateQRCodeById(toolid: Long, newQRCode: String, toolboxId: Long): Int {
         val values = ContentValues()
         values.put(COLUMN_TBT_QRCODE, newQRCode)
 
         val db = this.writableDatabase
-        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
 
-        db.close()
-        return rowsAffected
-    }
-    fun updateOrAddTBT(id: Long, newQRCode: String): Long {
-        val existingQRCode = getTBTByToolId(id)
-
-        return if (existingQRCode != null) {
-            // 이미 해당 id에 대한 QR 코드가 존재하면 업데이트
-            updateQRCodeById(id, newQRCode)
-            id
-        } else {
-            // 해당 id에 대한 QR 코드가 없으면 추가
-            addTBT(newQRCode)
+        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_TOOL_ID = ?", arrayOf(toolid.toString()))
+        if (rowsAffected == 0) {
+            insertTBTData(0, toolboxId, "",toolid, newQRCode)
         }
-    }
-    fun deleteTBTById(id: Long): Int {
-        val db = this.writableDatabase
-        val rowsAffected = db.delete(TABLE_TBT_NAME, "$COLUMN_TBT_ID=?", arrayOf(id.toString()))
-
         db.close()
         return rowsAffected
     }
