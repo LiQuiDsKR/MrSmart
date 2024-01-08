@@ -456,6 +456,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    	}
 			}
 			break;
+		case OUTSTANDING_RENTAL_SHEET_PAGE_ALL:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				int page = jsonObj.getInt("page");
+				int pageSize = jsonObj.getInt("size");
+		        Pageable pageable = PageRequest.of(page,pageSize);
+		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(pageable);
+		        
+				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			}
+			break;
+		case OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT:
+			if (!(paramJson.isEmpty() || paramJson==null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+		       	Long count = outstandingRentalSheetService.getCount();
+		        
+				handler.sendData(keyword + GsonUtils.toJson(count));
+			}
+			break;
 		//MembershipId로 status와 관계없이 OutstandingRentalSheet 페이지 쿼리
 		//관리자 - 반납 페이지에서 검색 시 보여주는 항목
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:

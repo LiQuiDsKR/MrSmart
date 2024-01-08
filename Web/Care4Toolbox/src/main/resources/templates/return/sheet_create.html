@@ -342,7 +342,7 @@
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="goodCount" style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount goodCount" data-name="goodCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount goodCount" data-name="goodCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="goodCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
@@ -353,7 +353,7 @@
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="faultCount"  style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount faultCount" data-name="faultCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount faultCount" data-name="faultCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="faultCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
@@ -364,7 +364,7 @@
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="damageCount"  style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount damageCount" data-name="damageCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount damageCount" data-name="damageCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="damageCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
@@ -375,7 +375,7 @@
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button"  data-name="lossCount" style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount lossCount" data-name="lossCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount lossCount" data-name="lossCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
 														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" data-name="lossCount"  style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
@@ -427,14 +427,15 @@
 							return {
 								rentalToolDtoId: e.id,
 								toolId: e.toolDto.id,
-								count: 0,
-								//goodCount:0,
-								//faultCount:0,
-								//damageCount:0,
-								//lossCount:0,
+								//count: 0,
+								goodCount:0,
+								faultCount:0,
+								damageCount:0,
+								lossCount:0,
 								//discardCount:0,
-								status: "GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
+								//status: "GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
 								tags: "",
+								comment: "",
 							}
 						}),
 					}
@@ -456,9 +457,10 @@
 						});
 						element.classList.add("listener-added");
 					});
-					document.querySelectorAll(".toolCount select:not(.listener-added)").forEach(element => {
+					document.querySelectorAll(".toolCount:not(.listener-added)").forEach(element => {
 						element.addEventListener("change", function () {
-							countChange.call(this, dataObj, name);
+							const name = this.dataset.name;
+							changeCount.call(this, dataObj, name);
 						});
 						element.classList.add("listener-added");
 					});
@@ -468,7 +470,27 @@
 						});
 						element.classList.add("listener-added");
 					});
-
+					document.querySelectorAll(".comment textarea:not(.listener-added)").forEach(element => {
+		                element.addEventListener("input", function() {
+							const row = this.closest("tr");
+							const index = Array.from(row.parentNode.children).indexOf(row);
+			
+			                var maxBytes = 150; // 바이트 제한 설정
+			                let text = this.value;
+				            let currentBytes = new TextEncoder().encode(text).length;
+				
+				            while (currentBytes > maxBytes) {
+				                // 텍스트를 한 글자씩 줄입니다.
+				                text = text.substring(0, text.length - 1);
+				                currentBytes = new TextEncoder().encode(text).length;
+				            }
+				
+				            // 최종 텍스트를 설정합니다.
+				            this.value = text;
+							dataObj.toolList[index].comment=text;
+		                });
+		                element.classList.add("listener-added");
+		            });
 					document.querySelectorAll(".approveBtn:not(.listener-added)").forEach(element => {
 						element.addEventListener("click", function () {
 							approveBtnClickHandler.call(this, dataObj);
@@ -568,9 +590,16 @@
 		function increaseCount(dataObj, name) {
 			const row = this.closest("tr");
 			const count = row.querySelector("."+name);
+			const countList = row.querySelectorAll(".toolCount");
 			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
 			const index = Array.from(row.parentNode.children).indexOf(row);
-			if (outstandingCount <= dataObj.toolList[index].count) {
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (outstandingCount <= sum()) {
 				/*
 				Swal.fire({
 					type: "warning",
@@ -580,19 +609,27 @@
 				*/
 				return;
 			} else {
-				dataObj.toolList[index].count++;
-				count.value = dataObj.toolList[index].count;
+				dataObj.toolList[index][name]++;
+				count.value = dataObj.toolList[index][name];
+				console.log(dataObj.toolList[index][name])
 			}
-			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			row.classList.toggle('selected', sum() > 0);
 			activateApproveBtn(this);
 		}
 		//반납 수량을 -1.
 		function decreaseCount(dataObj, name) {
 			const row = this.closest("tr");
-			const count = row.querySelector(".toolCount");
+			const count = row.querySelector("."+name);
+			const countList = row.querySelectorAll(".toolCount");
 			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
 			const index = Array.from(row.parentNode.children).indexOf(row);
-			if (0 >= dataObj.toolList[index].count) {
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (0 >= dataObj.toolList[index][name]) {
 				/*
 				Swal.fire({
 					type: "warning",
@@ -602,34 +639,46 @@
 				*/
 				return;
 			} else {
-				dataObj.toolList[index].count--;
-				count.value = dataObj.toolList[index].count;
+				dataObj.toolList[index][name]--;
+				count.value = dataObj.toolList[index][name];
+				console.log(dataObj.toolList[index][name])
 			}
-			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			row.classList.toggle('selected', sum() > 0);
 			activateApproveBtn(this);
 		}
 		//반납 수량을 변경 (<input>)
 		function changeCount(dataObj, name) {
 			const row = this.closest("tr");
-			const outstandingCount = parseInt(row.querySelector(".outstandingcount").textContent);
+			const countList = row.querySelectorAll(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
 			const index = Array.from(row.parentNode.children).indexOf(row);
-			if (outstandingCount < this.value) {
+			
+			dataObj.toolList[index][name] = this.value;
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (outstandingCount < sum()) {
 				Swal.fire({
 					type: "warning",
 					title: "반납 수량 경고",
 					text: "반납 수량이 대여 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
 				}).then(result=>{
-					this.value = outstandingCount;
-					dataObj.toolList[index].count = outstandingCount;
-				})
-				return;
-			} else if (this.value<1){
 					this.value = 0;
-					dataObj.toolList[index].count = 0;
+					dataObj.toolList[index][name] = 0;
+					
+			row.classList.toggle('selected', sum() > 0);
+			activateApproveBtn(this);
+				});
+			} else if (this.value<0){
+					this.value = 0;
+					dataObj.toolList[index][name] = 0;
 			}else{
-				dataObj.toolList[index].count = this.value;
+				dataObj.toolList[index][name] = this.value;
 			}
-			row.classList.toggle('selected', dataObj.toolList[index].count > 0);
+			row.classList.toggle('selected', sum() > 0);
 			activateApproveBtn(this);
 		}
 		

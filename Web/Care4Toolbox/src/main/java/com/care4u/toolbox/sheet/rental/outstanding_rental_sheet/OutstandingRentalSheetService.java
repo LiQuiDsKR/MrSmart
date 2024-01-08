@@ -117,7 +117,7 @@ public class OutstandingRentalSheetService {
 		Page<OutstandingRentalSheet> page = repository.findByMembership(membership.get(), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
-
+	@Transactional(readOnly = true)
 	public Long getCountByMembershipId(long membershipId) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		if (membership.isEmpty()) {
@@ -225,7 +225,7 @@ public class OutstandingRentalSheetService {
 		return "outstandingRentalSheet Id : " + sheet.getId() + " OutstandingStatus changed to"
 				+ sheet.getOutstandingStatus();
 	}
-
+	@Transactional(readOnly = true)
 	public Page<OutstandingRentalSheetDto> getPage(long membershipId, Boolean isWorker,
 			Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
 		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
@@ -249,5 +249,13 @@ public class OutstandingRentalSheetService {
 				LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
-
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPage(Pageable pageable){
+		Page<OutstandingRentalSheet> page = repository.findAll(pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+	@Transactional(readOnly = true)
+	public Long getCount() {
+		return repository.count();
+	}
 }
