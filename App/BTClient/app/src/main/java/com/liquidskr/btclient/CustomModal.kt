@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.mrsmart.standard.tool.RentalToolWithCount
 
-class CustomModal(private val context: Context, private val count: Int, private val onValidCount:() -> Unit) {
+class CustomModal(private val context: Context, private val count: Int) {
     interface OnCountsConfirmedListener {
         fun onCountsConfirmed(counts: IntArray, comment: String)
     }
@@ -74,6 +74,7 @@ class CustomModal(private val context: Context, private val count: Int, private 
         decrementDamage = view.findViewById(R.id.decrementDamage)
         decrementLoss = view.findViewById(R.id.decrementLoss)
         //decrementDiscard = view.findViewById(R.id.decrementDiscard)
+        commentEdit = view.findViewById(R.id.commentEdit)
 
         // 초기값 설정
         goodCount.text = goodCountVal.toString()
@@ -98,12 +99,15 @@ class CustomModal(private val context: Context, private val count: Int, private 
         dialogBuilder.setPositiveButton("확인") { _, _ ->
             // 확인 버튼을 눌렀을 때 수량과 각 상태의 합이 일치하는지 확인
             val totalSum = counts.sum()
+            comment = commentEdit.text.toString()
+            notifyCountsConfirmed()
+            /*
             if (totalSum != count) {
                 onValidCount()
             } else {
                 comment = commentEdit.text.toString()
                 notifyCountsConfirmed()
-            }
+            }*/
         }
         dialogBuilder.setNegativeButton("취소") { dialog, _ ->
             dialog.dismiss()
