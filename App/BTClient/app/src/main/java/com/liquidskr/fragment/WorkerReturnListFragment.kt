@@ -3,6 +3,8 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -12,6 +14,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -40,6 +43,14 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
     private lateinit var qrEditText: EditText
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // // UI블로킹 end
+    private val REQUEST_PAGE_SIZE = 2
+
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
     lateinit var welcomeMessage: TextView
     val gson = Gson()
@@ -54,7 +65,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         }
 
         override fun onLastPageArrived() {
-
+            hidePopup() // UI블로킹
         }
 
         override fun onError(e: Exception) {
@@ -76,9 +87,14 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         welcomeMessage.text = worker.name + "님 환영합니다."
 
         connectBtn = view.findViewById(R.id.connectBtn)
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressBar = view.findViewById(R.id.progressBar)
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.bluetoothOpen()
         }
 
         rentalBtnField  = view.findViewById(R.id.RentalBtnField)
@@ -118,14 +134,13 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         }
 
         recyclerView.adapter = adapter
-
         getOutstandingRentalSheetList()
         return view
     }
 
     fun getOutstandingRentalSheetList() {
         outStandingRentalSheetList.clear()
-
+        showPopup() // UI블로킹
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
@@ -134,6 +149,14 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
                     sheetCount = result.toInt()
                     val totalPage = Math.ceil(sheetCount / 10.0).toInt()
                     outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
+                    handler.post {
+                        if (sheetCount > 0) { // UI블로킹 start
+                            requestOutstandingRentalSheet(0) // 알잘딱 넣으세요
+                        } else {
+                            hidePopup()
+                        }
+                    }
+                    progressBar.max = totalPage // UI블로킹 end
                     requestOutstandingRentalSheet(0)
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
@@ -150,6 +173,12 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)
+                handler.post { // UI블로킹 start
+                    progressBar.progress = page.pageable.page
+                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
+                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
+                    }
+                } // UI블로킹 end
             }
             override fun onError(e: Exception) {
                 e.printStackTrace()
@@ -165,4 +194,28 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         }
         adapter.updateList(newList)
     }
+    // ## 여기서부터 블루투스 송수신 시 UI블로킹 start
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    }
+    // UI블로킹 end
 }

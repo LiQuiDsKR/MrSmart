@@ -53,8 +53,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
-    private var isPopupVisible = false // // UI블로킹 end
-    private val REQUEST_PAGE_SIZE = 2
+    private var isPopupVisible = false
+    private val REQUEST_PAGE_SIZE = 2 // UI블로킹 end
 
     private lateinit var welcomeMessage: TextView
 
@@ -167,12 +167,16 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun whenDisconnected () {
-        Log.d("bluetooth_","Disconnected3")
-        connectBtn.setImageResource(R.drawable.group_11_copy)
-        hidePopup()
-        handler.post {
-            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+        try {
+            handler.post {
+                hidePopup()
+                connectBtn.setImageResource(R.drawable.group_11_copy)
+                Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+
         }
+
     }
 
     private fun fragmentTransform(frag: Fragment, backStackTag: String?) {

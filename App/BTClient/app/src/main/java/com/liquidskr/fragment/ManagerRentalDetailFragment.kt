@@ -158,6 +158,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                         val toolForm = RentalRequestToolApproveFormDto(rrtwc.rentalRequestTool.id, rrtwc.rentalRequestTool.toolDto.id, rrtwc.count, tags)
                         toolFormList.add(toolForm)
                     }
+                    toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.id) }.toMutableList()
                     val sheet = rentalRequestSheet
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
 

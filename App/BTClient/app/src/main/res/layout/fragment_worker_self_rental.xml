@@ -151,10 +151,10 @@
                                 android:layout_height="wrap_content" />
 
                             <ImageButton
-                                android:clickable="false"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
-                                android:background="@drawable/icon_fix_ic_top_search_copy" />
+                                android:background="@drawable/icon_fix_ic_top_search_copy"
+                                android:clickable="false" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -251,11 +251,11 @@
                         android:orientation="horizontal">
 
                         <ImageButton
-                            android:focusable="false"
-                            android:clickable="false"
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:background="#00FFFFFF"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:scaleType="fitCenter"
                             android:src="@drawable/recycle" />
 
@@ -308,4 +308,37 @@
         </LinearLayout>
 
     </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/popupLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <!-- Progress Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#B3000000"
+            android:orientation="horizontal"></LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/progressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="처리중... 잠시만 기다려주세요"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

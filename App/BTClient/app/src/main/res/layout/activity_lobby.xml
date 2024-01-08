@@ -25,6 +25,13 @@
                 android:orientation="horizontal"
                 android:padding="5dp">
 
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:background="#00FFFFFF"
+                    android:text="Button" />
+
                 <ImageButton
                     android:id="@+id/bluetoothBtn"
                     android:layout_width="50dp"

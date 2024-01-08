@@ -4,6 +4,7 @@ import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,12 +39,16 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
 
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
+
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
     private lateinit var bluetoothManager: BluetoothManager
-    private val handler = Handler(Looper.getMainLooper())
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -62,11 +67,13 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
         backButton = view.findViewById(R.id.backButton)
 
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         workerName.text = rentalRequestSheet.workerDto.name
         leaderName.text = rentalRequestSheet.leaderDto.name
         timeStamp.text = rentalRequestSheet.eventTimestamp
         //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
 
         var adapter = WorkerRentalRequestToolAdapter(toolList)
         recyclerView.adapter = adapter
@@ -85,6 +92,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
             recyclerView.adapter?.let { adapter ->
                 if (adapter is WorkerRentalRequestToolAdapter) {
+                    showPopup() // UI 블로킹
                     var rentalRequestToolFormList: MutableList<RentalRequestToolFormDto> = mutableListOf()
                     for (rentalRequestTool in rentalRequestSheet.toolList) {
                         rentalRequestToolFormList.add(RentalRequestToolFormDto(rentalRequestTool.toolDto.id, rentalRequestTool.count))
@@ -184,4 +192,25 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
             e.printStackTrace()
         }
     }
+    private fun showPopup() { // UI 블로킹 end
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    } // UI 블로킹 end
 }

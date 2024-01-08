@@ -118,13 +118,22 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = StandByAdapter(dbHelper.getAllStandby())
         recyclerView.adapter = adapter
-
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         standbySyncBtn = view.findViewById(R.id.standby_SyncBtn)
 
         standbySyncBtn.setOnClickListener {
-            bluetoothManager.standbyProcess()
-            adapter.updateList(dbHelper.getAllStandby())
+            try { // 블루투스가 연결되어있을때만 해야함
+                showPopup()
+                bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+                bluetoothManager.standbyProcess()
+                handler.postDelayed({
+                    adapter.updateList(dbHelper.getAllStandby())
+                    hidePopup()
+                }, 500)
+            } catch (e: Exception) {
+                handler.post {
+                    Toast.makeText(context ,"보류 항목을 전송하려면 블루투스 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
         return view
     }
@@ -132,7 +141,6 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
     fun whenDisconnected () {
         Log.d("bluetooth_","Disconnected3")
         connectBtn.setImageResource(R.drawable.group_11_copy)
-        hidePopup()
         handler.post {
             Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
         }

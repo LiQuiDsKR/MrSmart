@@ -117,12 +117,19 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
-                whenDisconnected()
-                val dbHelper = DatabaseHelper(requireContext())
-                handler.post {
-                    (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
+                try {
+                    whenDisconnected()
+                    val dbHelper = DatabaseHelper(requireContext())
+                    handler.post {
+                        (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
+                    }
+                    Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+                } catch (e: Exception) {
+                    handler.post {
+                        Toast.makeText(activity, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
+                    }
                 }
-                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+
             }
         })
 
@@ -275,7 +282,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                 handler.post { // UI블로킹 start
                     progressBar.progress = page.pageable.page
                     if ((page.total/REQUEST_PAGE_SIZE) > 0) {
-                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
+                        progressText.setText("반납 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
                     }
                 } // UI블로킹 end
             }
@@ -295,7 +302,6 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                         sheetCount = result.toInt()
                         val totalPage = Math.ceil(sheetCount / 10.0).toInt()
                         outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                        requestOutstandingRentalSheet(0)
                         if (sheetCount > 0){
                             requestOutstandingRentalSheet(0)
                         } else{
@@ -324,6 +330,12 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)
+                handler.post { // UI블로킹 start
+                    progressBar.progress = page.pageable.page
+                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
+                        progressText.setText("반납 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
+                    }
+                } // UI블로킹 end
             }
             override fun onError(e: Exception) {
                 e.printStackTrace()

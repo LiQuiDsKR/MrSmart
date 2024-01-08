@@ -43,6 +43,11 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     lateinit var clearBtn: LinearLayout
     lateinit var backButton: ImageButton
 
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
+
 
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
@@ -51,7 +56,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
-    private val handler = Handler(Looper.getMainLooper())
 
     var gson = Gson()
 
@@ -75,6 +79,8 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -183,7 +189,8 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         }
         confirmBtn.setOnClickListener {
             if (adapter is RentalToolAdapter) {
-                if (!adapter.tools.isEmpty()) {
+                if (adapter.tools.isNotEmpty()) {
+                    showPopup() // UI 블로킹
                     val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
                     for (toolwithCnt in adapter.tools) {
                         rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolwithCnt.tool.id, toolwithCnt.count))
@@ -240,4 +247,25 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
         sharedViewModel.toolWithCountList = list
     }
+    private fun showPopup() { // UI 블로킹 end
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    } // UI 블로킹 end
 }

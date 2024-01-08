@@ -127,7 +127,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                             for (count in counts) {
                                 sum += count
                             }
-                            returnToolFormList = returnToolFormList.filter{ rentalToolWithCount.rentalTool.toolDto.id != rtwc.rentalTool.toolDto.id }.toMutableList()
+                            returnToolFormList = returnToolFormList.filter{ it.toolDtoId != rtwc.rentalTool.toolDto.id }.toMutableList()
                             if (sum != 0) {
                                 val goodCnt = counts[0]
                                 val faultCnt = counts[1]
@@ -139,6 +139,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                 var returnToolForm = ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, tags, goodCnt, faultCnt, damageCnt, lossCnt, comment)
                                 returnToolFormList.add(returnToolForm)
                             }
+                            updateToolState(rtwc.rentalTool.toolDto.id, counts)
                             /*
                             if (counts[0] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.GOOD, counts[0]))
                             if (counts[1] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.FAULT, counts[1]))
@@ -147,14 +148,12 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                             if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
                             */
 
-                            updateToolState(rtwc.rentalTool.toolDto.id, counts)
                         }
                     }
                 }
             })
             customModal.show()
         })
-
         recyclerView.adapter = adapter
 
         qrcodeBtn.setOnClickListener {
@@ -220,10 +219,10 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             var standbyAlreadySent = false
             if (adapter is OutstandingDetailAdapter) {
                 if (adapter.selectedToolsToReturn.isNotEmpty()) {
-                    showPopup()
+                    showPopup() // UI 블로킹
                     val sheet = outstandingRentalSheet
+                    returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.rentalToolDtoId) }.toMutableList()
                     val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
-
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
@@ -259,10 +258,10 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     }
                 }
             }
+
             standbyAlreadySent = true
         }
         qrEditText.requestFocus()
-
         return view
     }
 
@@ -271,7 +270,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         if (myAdapter is OutstandingDetailAdapter) myAdapter.updateToolState(toolId, counts)
     }
 
-    fun fixCode(input: String): String {
+    private fun fixCode(input: String): String {
         val typoMap = mapOf(
             'ㅁ' to 'A',
             'ㅠ' to 'B',

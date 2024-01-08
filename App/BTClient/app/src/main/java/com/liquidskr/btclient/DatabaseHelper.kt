@@ -773,7 +773,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     @SuppressLint("Range")
     fun getToolByTBT(tbt: String): ToolDtoSQLite {
         var toolId: Long = 0
-        lateinit var toolDtoSQLite: ToolDtoSQLite
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TBT_TOOL_ID FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_QRCODE = ?"
         val selectionArgs = arrayOf(tbt)
@@ -782,7 +781,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         while (cursor.moveToNext()) {
             toolId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOL_ID))
         }
-        toolDtoSQLite = getToolById(toolId)
+        var toolDtoSQLite: ToolDtoSQLite = getToolById(toolId)
 
         cursor.close()
         db.close()

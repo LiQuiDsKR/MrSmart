@@ -17,7 +17,6 @@ import com.mrsmart.standard.tool.ToolWithCount
 
 class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
                                var outstandingRentalToolWithCounts: MutableList<RentalToolWithCount>,
-
                                private val onSetToolStateClick: (RentalToolWithCount) -> Unit) :
     RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
     val selectedToolsToReturn: MutableList<Long> = mutableListOf()
@@ -41,11 +40,10 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
 
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
         val currentOutstandingRentalToolWithCount = outstandingRentalToolWithCounts[position]
+        var counts = intArrayOf(0,0,0,0)
+
         holder.toolName.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.name
         holder.toolCount.text = currentOutstandingRentalToolWithCount.count.toString()
-        holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
-            showNumberDialog(holder.toolCount, currentOutstandingRentalToolWithCount.rentalTool.outstandingCount, currentOutstandingRentalToolWithCount)
-        }
         holder.toolSpec.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.spec
         holder.setToolState.setOnClickListener{
             onSetToolStateClick(currentOutstandingRentalToolWithCount)
@@ -58,15 +56,14 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
         }
-
-        holder.toolState.text = "양호 : ${currentOutstandingRentalToolWithCount.rentalTool.outstandingCount}"
+        // holder.toolState.text = "양호 : ${currentOutstandingRentalToolWithCount.rentalTool.outstandingCount}"
     }
 
     override fun getItemCount(): Int {
         return outstandingRentalToolWithCounts.size
     }
 
-    fun updateToolState (toolId: Long, toolStates: IntArray) {
+    fun updateToolState(toolId: Long, toolStates: IntArray) {
         var stateString = ""
         if (toolStates[0] > 0) stateString += " 양호:${toolStates[0]}"
         if (toolStates[1] > 0) stateString += " 고장:${toolStates[1]}"
@@ -80,6 +77,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
                 if (viewHolder is OutstandingRentalToolViewHolder) {
                     viewHolder.toolState.text = stateString
                 }
+                notifyDataSetChanged()
                 break
             }
         }

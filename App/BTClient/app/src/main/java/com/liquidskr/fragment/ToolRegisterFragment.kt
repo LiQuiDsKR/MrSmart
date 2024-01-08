@@ -46,6 +46,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
     lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
 
+    private lateinit var QREditText: EditText
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
     private var runnable: Runnable? = null
@@ -81,6 +82,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         }
 
+        QREditText = view.findViewById(R.id.QR_EditText)
         editTextName = view.findViewById(R.id.editTextName)
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
@@ -167,23 +169,13 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 .commit()
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        }
-
-
-        searchBtn.setOnClickListener {
-            filterByName(adapter, editTextName.text.toString())
-            editTextName.clearFocus()
-        }
-
-        editTextName.setOnEditorActionListener { _, actionId, event ->
-            Log.d("tst","textEditted")
+        QREditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val label = editTextName.text.toString().replace("\n", "")
+                val label = QREditText.text.toString().replace("\n", "")
                 try {
                     val dbHelper = DatabaseHelper(requireContext())
                     val tool = dbHelper.getToolByTBT(label)
+                    QREditText.clearFocus()
                     val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
@@ -193,13 +185,24 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                     Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
                 }
                 editTextName.text.clear()
-                editTextName.requestFocus()
                 return@setOnEditorActionListener true
             }
             false
         }
 
-        editTextName.requestFocus()
+        editTextName.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                QREditText.requestFocus()
+            }
+        }
+
+        searchBtn.setOnClickListener {
+            filterByName(adapter, editTextName.text.toString())
+            editTextName.clearFocus()
+            QREditText.requestFocus()
+        }
+
+        QREditText.requestFocus()
         recyclerView.adapter = adapter
 
         return view

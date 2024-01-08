@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +34,11 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
     val outstandingRentalSheet: OutstandingRentalSheetDto = outstandingRentalSheet
     private lateinit var bluetoothManager: BluetoothManager
 
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI블로킹 end
+
     private lateinit var returnerName: TextView
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -40,7 +46,6 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var backButton: ImageButton
-    private val handler = Handler(Looper.getMainLooper())
 
 
     val gson = Gson()
@@ -72,12 +77,16 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
         timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
 
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         val adapter = WorkerOutstandingDetailAdapter(existToolList)
         recyclerView.adapter = adapter
 
         confirmBtn.setOnClickListener {
             confirmBtn.isFocusable = false
             confirmBtn.isClickable = false
+            showPopup() // UI 블로킹
 
             bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                 BluetoothManager.RequestCallback{
@@ -109,4 +118,25 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
 
         return view
     }
+    private fun showPopup() { // UI 블로킹 end
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    } // UI 블로킹 end
 }

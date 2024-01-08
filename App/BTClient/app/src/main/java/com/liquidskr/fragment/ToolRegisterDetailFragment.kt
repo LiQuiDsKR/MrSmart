@@ -91,13 +91,9 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                                 Log.d("TST", e.toString())
                             }
                         }
-                    } else if ("ERROR_ALREADY_EXIST" in result) {
-                        handler.post {
-                            Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
-                        }
                     } else {
                         handler.post {
-                            Toast.makeText(context, "알 수 없는 오류 발생", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }

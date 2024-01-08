@@ -41,6 +41,15 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1">
 
+                    <EditText
+                        android:id="@+id/QR_EditText"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:background="#00FFFFFF"
+                        android:ems="10"
+                        android:inputType="textMultiLine"
+                        android:textColor="#A14343"
+                        android:textSize="8sp" />
                 </FrameLayout>
 
                 <TextView

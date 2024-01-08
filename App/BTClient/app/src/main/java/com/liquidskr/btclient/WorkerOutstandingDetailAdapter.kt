@@ -18,7 +18,7 @@ class WorkerOutstandingDetailAdapter(val outstandingRentalTools: List<RentalTool
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OutstandingRentalToolViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_returntool, parent, false)
+            .inflate(R.layout.fragment_returntool_worker, parent, false)
         return OutstandingRentalToolViewHolder(itemView)
     }
 
