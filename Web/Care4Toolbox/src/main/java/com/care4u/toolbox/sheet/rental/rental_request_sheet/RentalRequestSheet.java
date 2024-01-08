@@ -73,5 +73,9 @@ public class RentalRequestSheet extends BaseEntity {
 	public void updateState(SheetState status) {
 		this.status = status;		
 	}
+
+	public void updateEventTimestamp(LocalDateTime eventTimestamp) {
+		this.eventTimestamp=eventTimestamp;
+	}
 	
 }
