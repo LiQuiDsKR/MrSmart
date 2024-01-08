@@ -88,8 +88,9 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-
         val view = inflater.inflate(R.layout.fragment_manager_rental, container, false)
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
@@ -107,6 +108,13 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                whenDisconnected()
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+        })
+
         val layoutManager = LinearLayoutManager(requireContext())
         val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
             fragmentTransform(ManagerRentalDetailFragment(rentalRequestSheet), null)
@@ -117,6 +125,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
         }
         rentalBtnField.setOnClickListener {
             fragmentTransform(ManagerRentalFragment(manager), "ManagerRentalFragment")
@@ -156,6 +165,12 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         return view
     }
 
+    fun whenDisconnected () {
+        Log.d("bluetooth_","Disconnected3")
+        connectBtn.setImageResource(R.drawable.group_11_copy)
+        Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+    }
+
     private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, frag)
@@ -184,7 +199,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         rentalRequestSheetList.clear()
 
         var sheetCount = 0
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {

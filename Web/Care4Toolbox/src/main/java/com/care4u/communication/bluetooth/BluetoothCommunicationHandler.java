@@ -3,6 +3,7 @@ package com.care4u.communication.bluetooth;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 
 import javax.microedition.io.StreamConnection;

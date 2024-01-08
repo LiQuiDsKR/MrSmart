@@ -63,6 +63,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         fun onBluetoothDisconnected()
     }
 
+    fun setBluetoothConnectionListener (listener: BluetoothConnectionListener) {
+        this.bluetoothConnectionListener = listener
+        Log.d("bluetooth_","Disconnected2")
+    }
+
 
     var gson = Gson()
     fun bluetoothOpen() {
@@ -145,10 +150,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                                 dataSize = -1
                             }
                         } else if (size == 0) {
-                            continue
-                        } else { // 작동하지 않음
-                            bluetoothConnectionListener?.onBluetoothDisconnected()
-                            Log.d("bluetoothDisconnected", "블루투스 연결 끊김")
+                            if (bluetoothSocket.isConnected) {
+                                continue
+                            } else {
+                                handler.post {
+                                    Log.d("bluetooth_","Disconnected1")
+                                    bluetoothConnectionListener?.onBluetoothDisconnected()
+                                }
+                            }
                         }
                     }
                 } catch (e: Exception) {

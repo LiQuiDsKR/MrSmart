@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -14,7 +15,7 @@ import com.mrsmart.standard.tool.RentalToolWithCount
 
 class CustomModal(private val context: Context, private val count: Int, private val onValidCount:() -> Unit) {
     interface OnCountsConfirmedListener {
-        fun onCountsConfirmed(counts: IntArray)
+        fun onCountsConfirmed(counts: IntArray, comment: String)
     }
     private var countsConfirmedListener: OnCountsConfirmedListener? = null
 
@@ -36,6 +37,8 @@ class CustomModal(private val context: Context, private val count: Int, private 
     lateinit var decrementLoss: ImageView
     lateinit var decrementDiscard: ImageView
 
+    lateinit var commentEdit: EditText
+
     // 현재 각 상태의 수량을 저장하는 변수들
     private var goodCountVal = count
     private var faultCountVal = 0
@@ -47,6 +50,7 @@ class CustomModal(private val context: Context, private val count: Int, private 
 
     //private var counts = intArrayOf(goodCountVal, faultCountVal, damageCountVal, lossCountVal, discardCountVal)
     private var counts = intArrayOf(goodCountVal, faultCountVal, damageCountVal, lossCountVal)
+    private var comment = ""
     // 다이얼로그를 생성하고 보여주는 함수
     fun show() {
         val dialogBuilder = AlertDialog.Builder(context)
@@ -95,9 +99,9 @@ class CustomModal(private val context: Context, private val count: Int, private 
             // 확인 버튼을 눌렀을 때 수량과 각 상태의 합이 일치하는지 확인
             val totalSum = counts.sum()
             if (totalSum != count) {
-                // 예외처리
                 onValidCount()
             } else {
+                comment = commentEdit.text.toString()
                 notifyCountsConfirmed()
             }
         }
@@ -114,7 +118,7 @@ class CustomModal(private val context: Context, private val count: Int, private 
     }
 
     private fun notifyCountsConfirmed() {
-        countsConfirmedListener?.onCountsConfirmed(counts)
+        countsConfirmedListener?.onCountsConfirmed(counts, comment)
     }
 
     // 상태 증가 함수
