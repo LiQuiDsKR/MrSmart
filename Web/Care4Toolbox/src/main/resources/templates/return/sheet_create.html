@@ -315,9 +315,13 @@
 											<th>규격</th>
 											<th>신청수량</th>
 											<th>미반납수량</th>
-											<th>반납수량</th>
 											<th>QR코드</th>
-											<th>공기구상태</th>
+											<th>양호수량</th>
+											<th>고장수량</th>
+											<th>파손수량</th>
+											<th>망실수량</th>
+											<th hidden>공기구상태</th>
+											<th>비고<th>
 										</tr>
 									</thead>
 									<tbody>
@@ -332,28 +336,64 @@
 											<td class="spec">${tool.toolDto.spec}</td>
 											<td class="retnalcount">${tool.count}</td>
 											<td class="outstandingcount">${tool.outstandingCount}</td>
-											<td class="returncount">
-												<div class="input-group large col-8 bootstrap-touchspin p-1" style="min-width:200px;">
-													<span class="input-group-btn input-group-prepend bootstrap-touchspin-injected">
-													<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button">+</button>
+											<td class="qrcode">${tool.tags}</td>
+											<td class="goodcount" style="width:80px;">
+												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-													<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount" style="text-align:center;">
-													<span class="input-group-btn input-group-append bootstrap-touchspin-injected">
-														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button">-</button>
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
 												</div>
 											</td>
-											<td class="qrcode">${tool.tags}</td>
-											<td class="toolstate">
+											<td class="faultcount" style="width:80px;">
+												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="damagecount" style="width:80px;">
+												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="losscount" style="width:80px;">
+												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="toolstate" hidden>
 												<div class="custom-select style--two" style="max-width:none">
 													<select class="theme-input-style">
 														<option value="GOOD">양호</option>									
 														<option value="FAULT">고장</option>
 														<option value="DAMAGE">파손</option>
 														<option value="LOSS">망실</option>
-														<option value="DISCARD">폐기</option>
+														<option value="DISCARD" hidden>폐기</option>
 													</select>
 												</div>
+											</td>
+											<td class="comment">
+												<textarea id="exampleTextarea1" class="theme-input-style" placeholder="50자 내로 입력해주세요." style="height:120px; min-width:150px;"></textarea>
 											</td>
 										</tr>
 						`;
@@ -482,6 +522,21 @@
 			});
 		}
 
+		//비고 바이트 제한.
+        document.querySelectorAll("comment").forEach(e=>{
+			e.addEventListener("input",function(){
+				console.log(this);
+				var byteLimit = 100; // 여기서 바이트 제한을 설정합니다.
+
+	            var currentBytes = new TextEncoder().encode(this.value).length;
+	
+	            if (currentBytes > byteLimit) {
+	                alert("입력 바이트 수가 제한을 초과했습니다.");
+	                textArea.value = textArea.value.substring(0, this.value.length - 1);
+	            }
+			})
+		})
+           
 
 		function activateApproveBtn(tableElement) {
 			const sheet = tableElement.closest("div.sheet");
