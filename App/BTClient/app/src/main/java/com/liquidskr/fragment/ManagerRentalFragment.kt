@@ -123,8 +123,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         connectBtn = view.findViewById(R.id.ConnectBtn)
 
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManager.bluetoothOpen()
             connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
         }
         rentalBtnField.setOnClickListener {
@@ -154,6 +154,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         recyclerView.adapter = adapter
 
         recyclerView.layoutManager = layoutManager
+
         selfRentalBtn.setOnClickListener {
             sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" ) // 개선 요망
             sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" ) // 개선 요망
@@ -168,7 +169,10 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     fun whenDisconnected () {
         Log.d("bluetooth_","Disconnected3")
         connectBtn.setImageResource(R.drawable.group_11_copy)
-        Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+        hidePopup()
+        handler.post {
+            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
@@ -196,9 +200,11 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     }
 
     private fun getRentalRequestSheetList() {
+        showPopup() // UI블로킹
         rentalRequestSheetList.clear()
 
         var sheetCount = 0
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
@@ -220,10 +226,10 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
                 e.printStackTrace()
             }
         })
-        showPopup() // UI블로킹
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)

@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.membership.MembershipSQLite
+import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.standby.StandbyDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
@@ -935,6 +936,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return toolList
     }
 
+    @SuppressLint("Range")
+    fun getAllOutstanding():List<OutstandingRentalSheetDto> {
+        var outstandingList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_OUTSTANDING_JSON FROM $TABLE_OUTSTANDING_NAME"
+
+        val cursor = db.rawQuery(query, null)
+        while (cursor.moveToNext()) {
+            val json = cursor.getString(cursor.getColumnIndex(COLUMN_OUTSTANDING_JSON))
+            val gson = Gson()
+            val type: Type = object : TypeToken<OutstandingRentalSheetDto>() {}.type
+            outstandingList.add(gson.fromJson(json, type))
+        }
+
+        cursor.close()
+        db.close()
+        return outstandingList
+    }
+
     fun removeFirstAndLastQuotes(input: String): String {
         return if (input.length >= 2 && input.first() == '"' && input.last() == '"') {
             input.substring(1, input.length - 1)
@@ -974,6 +994,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun clearStandbyTable() {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_STANDBY_NAME")
+        db.close()
+    }
+
+    fun clearOutstandingTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_OUTSTANDING_NAME")
         db.close()
     }
 }

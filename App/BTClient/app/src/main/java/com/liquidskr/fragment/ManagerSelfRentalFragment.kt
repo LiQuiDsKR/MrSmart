@@ -130,6 +130,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+
         var toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
         toolList.addAll(sharedViewModel.toolWithCountList)
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가

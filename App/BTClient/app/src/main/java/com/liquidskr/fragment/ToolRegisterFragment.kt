@@ -72,6 +72,9 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
 
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
             bluetoothManager.bluetoothOpen()
@@ -88,6 +91,12 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
 
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                whenDisconnected()
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+        })
         val databaseHelper = DatabaseHelper(requireContext())
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
 
@@ -195,6 +204,16 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         return view
     }
+
+    fun whenDisconnected () {
+        Log.d("bluetooth_","Disconnected3")
+        connectBtn.setImageResource(R.drawable.group_11_copy)
+        hidePopup()
+        handler.post {
+            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun disableAllClickableViews(rootView: View) {
         if (rootView is ViewGroup) {
             for (i in 0 until rootView.childCount) {
@@ -229,5 +248,26 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             runnable = null
         }
         sharedViewModel.qrScannerText = ""
+    }
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
 }

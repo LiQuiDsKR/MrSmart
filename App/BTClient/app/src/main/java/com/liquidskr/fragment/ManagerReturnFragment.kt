@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -113,6 +114,18 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                whenDisconnected()
+                val dbHelper = DatabaseHelper(requireContext())
+                handler.post {
+                    (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+        })
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
@@ -206,10 +219,19 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         }
 
         getOutstandingRentalSheetList()
+
         qrEditText.requestFocus()
         return view
     }
 
+    fun whenDisconnected () {
+        Log.d("bluetooth_","Disconnected3")
+        connectBtn.setImageResource(R.drawable.group_11_copy)
+        hidePopup()
+        handler.post {
+            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+        }
+    }
 
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()
@@ -245,6 +267,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         }
     }
     fun requestOutstandingRentalSheetByMembership(pageNum: Int, id: Long) {
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
@@ -273,6 +296,11 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                         val totalPage = Math.ceil(sheetCount / 10.0).toInt()
                         outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
                         requestOutstandingRentalSheet(0)
+                        if (sheetCount > 0){
+                            requestOutstandingRentalSheet(0)
+                        } else{
+                            hidePopup()
+                        }
                     } catch (e: Exception) {
                         Log.d("RentalRequestSheetReady", e.toString())
                     }
@@ -288,9 +316,10 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                 Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-
+        showPopup()
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)

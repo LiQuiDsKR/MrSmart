@@ -65,7 +65,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
     fun setBluetoothConnectionListener (listener: BluetoothConnectionListener) {
         this.bluetoothConnectionListener = listener
-        Log.d("bluetooth_","Disconnected2")
     }
 
 
@@ -242,6 +241,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             })
         } catch (e: Exception) {
             // 전송 중 에러
+            handler.post {
+                Log.d("bluetooth_","Disconnected1")
+                bluetoothConnectionListener?.onBluetoothDisconnected()
+            }
             callback.onError(e)
         }
     }
@@ -256,10 +259,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     }
 
     private fun processData(data: ByteArray) {
-
         val receivedString = String(data, Charsets.UTF_8)
         val (type, jsonString) = parseInputString(receivedString)
-
 
         Log.d("bluetooth", type)
         Log.d("bluetooth", jsonString)
@@ -431,6 +432,14 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             }
             RequestType.TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
                 val type: Type = object : TypeToken<TagAndToolboxToolLabelDto>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                bluetoothDataListener?.onSuccess(jsonString, type)
+            }
+            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
 

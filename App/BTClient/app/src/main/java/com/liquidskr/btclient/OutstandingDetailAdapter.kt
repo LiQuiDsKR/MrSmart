@@ -42,7 +42,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
     override fun onBindViewHolder(holder: OutstandingRentalToolViewHolder, position: Int) {
         val currentOutstandingRentalToolWithCount = outstandingRentalToolWithCounts[position]
         holder.toolName.text = currentOutstandingRentalToolWithCount.rentalTool.toolDto.name
-        holder.toolCount.text = currentOutstandingRentalToolWithCount.rentalTool.outstandingCount.toString()
+        holder.toolCount.text = currentOutstandingRentalToolWithCount.count.toString()
         holder.toolCount.setOnClickListener { // count 부분을 눌렀을 떄
             showNumberDialog(holder.toolCount, currentOutstandingRentalToolWithCount.rentalTool.outstandingCount, currentOutstandingRentalToolWithCount)
         }
@@ -58,6 +58,7 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
         }
+
         holder.toolState.text = "양호 : ${currentOutstandingRentalToolWithCount.rentalTool.outstandingCount}"
     }
 

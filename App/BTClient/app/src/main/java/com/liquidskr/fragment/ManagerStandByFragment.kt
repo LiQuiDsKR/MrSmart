@@ -2,12 +2,18 @@ package com.liquidskr.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -27,6 +33,12 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
     private lateinit var connectBtn: ImageButton
+
+    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressBar: ProgressBar
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // // UI블로킹 end
 
     lateinit var rentalBtnField: LinearLayout
     lateinit var returnBtnField: LinearLayout
@@ -52,6 +64,18 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressBar = view.findViewById(R.id.progressBar)
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                whenDisconnected()
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+        })
 
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment(manager)
@@ -102,10 +126,36 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
             bluetoothManager.standbyProcess()
             adapter.updateList(dbHelper.getAllStandby())
         }
-
-
-
         return view
     }
 
+    fun whenDisconnected () {
+        Log.d("bluetooth_","Disconnected3")
+        connectBtn.setImageResource(R.drawable.group_11_copy)
+        hidePopup()
+        handler.post {
+            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
+    }
 }

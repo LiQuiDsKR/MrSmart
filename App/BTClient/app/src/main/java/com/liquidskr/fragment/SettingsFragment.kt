@@ -120,7 +120,7 @@
         }
         private val outstandingRequestListener = object: OutstandingRequest.Listener {
             override fun onNextPage(pageNum: Int) {
-                requestTag(pageNum)
+                requestOutstanding(pageNum)
             }
 
             override fun onLastPageArrived() {
@@ -318,7 +318,7 @@
                         tagCnt = result.toInt()
                         val totalPage = Math.ceil(tagCnt / 10.0).toInt()
                         progressBar.max = totalPage
-                        dbHelper.clearTBTTable()
+                        dbHelper.clearTagTable()
                         tagRequest = TagRequest(totalPage, tagCnt, dbHelper, tagRequestListener)
 
                         requestTag(0)
@@ -342,7 +342,7 @@
                         outstandingCnt = result.toInt()
                         val totalPage = Math.ceil(outstandingCnt / 10.0).toInt()
                         progressBar.max = totalPage
-                        dbHelper.clearTBTTable()
+                        dbHelper.clearOutstandingTable()
                         outstandingRequest = OutstandingRequest(totalPage, outstandingCnt, dbHelper, outstandingRequestListener)
 
                         requestOutstanding(0)
@@ -365,7 +365,7 @@
                     membershipRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0 && page.total >= 10) {
+                        if (page.total / 10 > 0) {
                             progressText.text = "사원 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -385,7 +385,7 @@
                     toolRequest.process(page) //
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0 && page.total >= 10) {
+                        if (page.total / 10 > 0) {
                             progressText.text = "공기구 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -406,7 +406,7 @@
                     toolBoxToolLabelRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0 && page.total >= 10) {
+                        if (page.total / 10 > 0) {
                             progressText.text = "선반 코드 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -427,7 +427,7 @@
                     tagRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0) {
+                        if (page.total / 10 > 0) {
                             progressText.text = "태그 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }
@@ -445,10 +445,10 @@
             bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
-                    tagRequest.process(page)
+                    outstandingRequest.process(page)
                     requireActivity().runOnUiThread {
                         progressBar.progress = page.pageable.page
-                        if (page.total != 0) {
+                        if (page.total / 10 > 0) {
                             progressText.text = "반납전표 정보 다운로드 중, ${page.pageable.page}/${page.total / 10}, ${page.pageable.page * 100 / (page.total / 10)}%"
                         }
                     }

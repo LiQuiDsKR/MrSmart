@@ -94,8 +94,13 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
         for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
             if (rentalTool.outstandingCount > 0) {
-                RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
+                RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.outstandingCount))
             }
+        }
+
+        for (rtwc in RentalToolWithCountList) {
+            val tags = rtwc.rentalTool.Tags ?: ""
+            returnToolFormList.add(ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, tags, rtwc.count,0,0,0,""))
         }
 
 
@@ -216,18 +221,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
             if (adapter is OutstandingDetailAdapter) {
                 if (adapter.selectedToolsToReturn.isNotEmpty()) {
                     showPopup()
-                    /*
-                    val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
-                    for (rtwc in adapter.outstandingRentalToolWithCounts) {
-                        for (finalToolState in finalToolStateList) {
-                            if (rtwc.rentalTool.toolDto.id == finalToolState.first) {
-                                for (tool in finalToolState.second) {
-                                    val tags = rtwc.rentalTool.Tags ?: ""
-                                    returnToolFormDtoList.add(ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool .toolDto.id, tool.count, tool.state, tags))
-                                }
-                            }
-                        }
-                    }*/
                     val sheet = outstandingRentalSheet
                     val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
 
