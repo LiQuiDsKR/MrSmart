@@ -93,47 +93,54 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         var returnToolFormList: MutableList<ReturnToolFormDto> = mutableListOf()
 
         for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
-            RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
+            if (rentalTool.outstandingCount > 0) {
+                RentalToolWithCountList.add(RentalToolWithCount(rentalTool, rentalTool.count))
+            }
         }
+
 
         var finalToolStateList: MutableList<Pair<Long,ReturnToolFormDto>> = mutableListOf()
         for (rtwc in RentalToolWithCountList) { // rtwc means RentalToolWithCount
-            finalToolStateList.add(Pair(rtwc.rentalTool.toolDto.id, ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, rtwc.rentalTool.Tags, rtwc.rentalTool.outstandingCount,0,0,0, "")))
+            val tags = rtwc.rentalTool.Tags ?: ""
+            finalToolStateList.add(Pair(rtwc.rentalTool.toolDto.id, ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, tags, rtwc.rentalTool.outstandingCount,0,0,0, "")))
         }
 
         val adapter = OutstandingDetailAdapter(recyclerView, RentalToolWithCountList, onSetToolStateClick = { rentalToolWithCount ->
             var cnt = 0
             for (rtwc in RentalToolWithCountList) {
                 if (rtwc.rentalTool.toolDto.id == rentalToolWithCount.rentalTool.toolDto.id) {
-                    cnt = rtwc.count
+                    cnt = rtwc.rentalTool.outstandingCount
                 }
             }
-            val customModal = CustomModal(requireContext(), cnt, onValidCount = {
-                handler.post {
-                    Toast.makeText(activity, "총 수량이 맞지 않아 실패했습니다.", Toast.LENGTH_SHORT).show()
-                }
-            })
+            val customModal = CustomModal(requireContext(), cnt)
             customModal.setOnCountsConfirmedListener(object : CustomModal.OnCountsConfirmedListener {
                 override fun onCountsConfirmed(counts: IntArray, comment: String) {
                     for (rtwc in RentalToolWithCountList) {
                         if (rtwc.rentalTool.id == rentalToolWithCount.rentalTool.id) {
                             // finalToolStateList = finalToolStateList.filter { it.first != rtwc.rentalTool.toolDto.id }.toMutableList() // 이미 toolState를 등록한 ToolId라면 해당 항목 제거
-                            returnToolFormList.filter{ it.toolDtoId != rtwc.rentalTool.toolDto.id }.toMutableList()
-                            val goodCnt = counts[0]
-                            val faultCnt = counts[1]
-                            val damageCnt = counts[2]
-                            val lossCnt = counts[3]
-                            // val discardCnt = counts[4]
-                            var returnToolForm = ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, rtwc.rentalTool.Tags, goodCnt, faultCnt, damageCnt, lossCnt, comment)
+                            var sum = 0
+                            for (count in counts) {
+                                sum += count
+                            }
+                            returnToolFormList = returnToolFormList.filter{ rentalToolWithCount.rentalTool.toolDto.id != rtwc.rentalTool.toolDto.id }.toMutableList()
+                            if (sum != 0) {
+                                val goodCnt = counts[0]
+                                val faultCnt = counts[1]
+                                val damageCnt = counts[2]
+                                val lossCnt = counts[3]
+                                // val discardCnt = counts[4]
+
+                                val tags = rtwc.rentalTool.Tags ?: ""
+                                var returnToolForm = ReturnToolFormDto(rtwc.rentalTool.id, rtwc.rentalTool.toolDto.id, tags, goodCnt, faultCnt, damageCnt, lossCnt, comment)
+                                returnToolFormList.add(returnToolForm)
+                            }
                             /*
                             if (counts[0] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.GOOD, counts[0]))
                             if (counts[1] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.FAULT, counts[1]))
                             if (counts[2] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DAMAGE, counts[2]))
                             if (counts[3] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.LOSS, counts[3]))
+                            if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
                             */
-                            // if (counts[4] > 0) toolStateParamList.add(ToolStateParam(rtwc.rentalTool.toolDto.id, ToolState.DISCARD, counts[4]))
-
-                            returnToolFormList.add(returnToolForm)
 
                             updateToolState(rtwc.rentalTool.toolDto.id, counts)
                         }
@@ -207,7 +214,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
             var standbyAlreadySent = false
             if (adapter is OutstandingDetailAdapter) {
-                if (adapter.tools.isNotEmpty()) {
+                if (adapter.selectedToolsToReturn.isNotEmpty()) {
                     showPopup()
                     /*
                     val returnToolFormDtoList: MutableList<ReturnToolFormDto> = mutableListOf()
