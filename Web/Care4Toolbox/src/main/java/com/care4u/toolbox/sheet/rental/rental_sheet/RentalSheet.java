@@ -60,7 +60,7 @@ public class RentalSheet extends BaseEntity {
 		this.eventTimestamp = eventTimestamp;
 	}
 
-	public void updateEventTimestamp(LocalDateTime eventTimestamp2) {
+	public void updateEventTimestamp(LocalDateTime eventTimestamp) {
 		this.eventTimestamp = eventTimestamp;
 	}
 }

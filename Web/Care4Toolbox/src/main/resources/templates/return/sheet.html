@@ -355,7 +355,8 @@
 										<th>고장수량</th>
 										<th>파손수량</th>
 										<th>망실수량</th>
-										<th>폐기수량</th>
+										<th hidden>폐기수량</th>
+										<th>비고</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -368,14 +369,15 @@
 										<td class="toolbox">${element.toolboxDto.name}</td>
 										<td class="name">${tool.rentalToolDto.toolDto.name}</td>
 										<td class="spec">${tool.rentalToolDto.toolDto.spec}</td>
-										<td class="rentalcount">${tool.rentalToolDto.count < 1 ? '' : tool.rentalToolDto.count}</td>
-										<td class="outstandingcount" hidden>${tool.rentalToolDto.outstandingCount < 1 ? '' : tool.rentalToolDto.outstandingCount}</td>
-										<td class="count">${tool.count < 1 ? '' : tool.count}</td>
-										<td class="goodcount">${tool.goodCount < 1 ? '' : tool.goodCount}</td>
-										<td class="faultcount">${tool.faultCount < 1 ? '' : tool.faultCount}</td>
-										<td class="damagecount">${tool.damageCount < 1 ? '' : tool.damageCount}</td>
-										<td class="losscount">${tool.lossCount < 1 ? '' : tool.lossCount}</td>
-										<td class="discardcount">${tool.discardCount < 1 ? '' : tool.discardCount}</td>
+										<td class="rentalcount"style="width:100px;">${tool.rentalToolDto.count < 1 ? '' : tool.rentalToolDto.count}</td>
+										<td class="outstandingcount"style="width:100px;" hidden>${tool.rentalToolDto.outstandingCount < 1 ? '' : tool.rentalToolDto.outstandingCount}</td>
+										<td class="count" style="width:100px;">${tool.count < 1 ? '' : tool.count}</td>
+										<td class="goodcount"style="width:100px;">${tool.goodCount < 1 ? '' : tool.goodCount}</td>
+										<td class="faultcount"style="width:100px;">${tool.faultCount < 1 ? '' : tool.faultCount}</td>
+										<td class="damagecount"style="width:100px;">${tool.damageCount < 1 ? '' : tool.damageCount}</td>
+										<td class="losscount"style="width:100px;">${tool.lossCount < 1 ? '' : tool.lossCount}</td>
+										<td class="discardcount"style="width:100px;" hidden>${tool.discardCount < 1 ? '' : tool.discardCount}</td>
+										<td class="comment"style="width:100px;text-wrap:wrap;">${tool.comment}</td>
 									</tr>
 					`;
 					}
