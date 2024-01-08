@@ -19,6 +19,17 @@
 	</div>
 	<div class="contentdiv">
 		
+		
+		<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+			</span>
+				<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+			</span>
+		</div>
+		
 	</div>
 </div>
 <!-- End Main Content -->
@@ -86,6 +97,8 @@ document.getElementById("btn").addEventListener("click",function(){
 				}
 			});
 });
+
+/*
 abcHttp.get(
 	`/outstanding_rental_sheet/getpage`,
 	{
@@ -98,8 +111,7 @@ abcHttp.get(
 ).then(data => {
 	document.querySelector(".contentdiv").innerHTML=JSON.stringify(data);
 });
-
-
+*/
 
 
 var socket = new SockJS('/care4u_websocket');
