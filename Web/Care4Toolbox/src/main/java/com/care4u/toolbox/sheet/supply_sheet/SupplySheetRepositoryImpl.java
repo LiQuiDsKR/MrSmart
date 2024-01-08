@@ -117,7 +117,7 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
                 		.and(searchSubGroupEquals(subGroup))
                 		.and(searchToolEquals(tool))
                 )
-                .orderBy(sTool.replacementDate.asc(),sSheet.eventTimestamp.desc())
+                .orderBy(sSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

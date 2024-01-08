@@ -54,7 +54,7 @@ public class RentalRequestSheetRepositoryImpl implements RentalRequestSheetRepos
                 		.and(sSheet.status.eq(status))
                 		.and(sSheet.eventTimestamp.between(startDate, endDate))
                 )
-                .orderBy(sSheet.eventTimestamp.desc())
+                .orderBy(sSheet.eventTimestamp.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

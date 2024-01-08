@@ -101,7 +101,7 @@ public class SupplyToolRepositoryImpl implements SupplyToolRepositoryCustom {
                 		.and(searchPartEquals(partId))
                 		.and(searchToolEquals(tool))
                 )
-                .orderBy(sTool.replacementDate.asc(),sSheet.eventTimestamp.desc())
+                .orderBy(sTool.replacementDate.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

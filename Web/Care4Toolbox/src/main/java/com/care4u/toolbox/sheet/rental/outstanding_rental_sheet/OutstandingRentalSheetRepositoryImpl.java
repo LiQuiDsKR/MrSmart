@@ -124,7 +124,7 @@ public class OutstandingRentalSheetRepositoryImpl implements OutstandingRentalSh
                 		//.and(sSheet.outstandingStatus.eq(status))
                 		.and(sSheet.rentalSheet.eventTimestamp.between(startDate, endDate))
                 )
-                .orderBy(sSheet.rentalSheet.eventTimestamp.desc())
+                .orderBy(sSheet.rentalSheet.eventTimestamp.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
