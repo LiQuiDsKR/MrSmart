@@ -571,6 +571,7 @@
 		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
 		//sheet단위 카드의 "반납 승인" 버튼 클릭 이벤트리스너 설정
 		function approveBtnClickHandler(dataObj) {
+			dataObj.toolList=dataObj.toolList.filter(e=>(e.goodCount+e.faultCount+e.damageCount+e.lossCount>0))
 			abcHttp.post(
 				`/return/sheet/approve`,
 				dataObj,

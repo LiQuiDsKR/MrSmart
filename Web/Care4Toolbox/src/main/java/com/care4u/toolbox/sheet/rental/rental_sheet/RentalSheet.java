@@ -59,4 +59,8 @@ public class RentalSheet extends BaseEntity {
 		this.toolbox = toolbox;
 		this.eventTimestamp = eventTimestamp;
 	}
+
+	public void updateEventTimestamp(LocalDateTime eventTimestamp2) {
+		this.eventTimestamp = eventTimestamp;
+	}
 }

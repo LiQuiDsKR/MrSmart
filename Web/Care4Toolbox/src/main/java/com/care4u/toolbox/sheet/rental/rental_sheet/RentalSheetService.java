@@ -294,7 +294,11 @@ public class RentalSheetService {
 			logger.error("RentalSheet already exists! : " + eventTimestamp);
 			return null;
 		}else {
-			return updateAndAddNewInTransaction(formDto);
+			Optional<RentalSheet> sheetOptional = repository.findById(updateAndAddNewInTransaction(formDto).getId());
+			RentalSheet sheet = sheetOptional.get();
+			sheet.updateEventTimestamp(eventTimestamp);
+			repository.save(sheet);
+			return null;
 		}
 	}
 	

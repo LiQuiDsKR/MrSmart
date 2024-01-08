@@ -101,6 +101,7 @@ public class ReturnSheetRepositoryImpl implements ReturnSheetRepositoryCustom {
                 		.and(searchPartEquals(partId))
                 		.and(searchToolEquals(tool))
                 )
+                .orderBy(rSheet.eventTimestamp.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

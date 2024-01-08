@@ -216,7 +216,11 @@ public class ReturnSheetService {
 			logger.error("returnSheet already exists! : " + eventTimestamp);
 			return null;
 		}else {
-			return addNew(formDto);
+			Optional<ReturnSheet> sheetOptional = repository.findById(addNew(formDto).getId());
+			ReturnSheet sheet = sheetOptional.get();
+			sheet.updateEventTimestamp(eventTimestamp);
+			repository.save(sheet);
+			return null;
 		}
 	}
 }
