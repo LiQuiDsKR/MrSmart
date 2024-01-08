@@ -293,6 +293,9 @@
 			}).then(() => {
 				load();
 			});
+			
+			var newOption = $('<option>', { value: '0', text: '전체' });
+    		$('#subGroupSelect').prepend(newOption).val('0');
 		});
 
 		//fetch
