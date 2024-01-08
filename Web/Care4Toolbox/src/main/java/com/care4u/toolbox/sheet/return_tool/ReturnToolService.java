@@ -65,38 +65,36 @@ public class ReturnToolService {
 			return null;
 		}
 		
-		ToolState status = toolDto.getStatus();
-		int count = toolDto.getCount();
+//		ToolState status = toolDto.getStatus();
+//		int count = toolDto.getCount();
+//
+//		ReturnTool formerReturnTool = repository.findByReturnSheetIdAndRentalToolId(savedReturnSheet.getId(),toolDto.getRentalToolDtoId());
+//		int goodCount=status.equals(ToolState.GOOD)?count:0;
+//		int faultCount=status.equals(ToolState.FAULT)?count:0;
+//		int damageCount=status.equals(ToolState.DAMAGE)?count:0;
+//		int lossCount=status.equals(ToolState.LOSS)?count:0;
+//		int discardCount=status.equals(ToolState.DISCARD)?count:0;
 		
 		ReturnTool returnTool;
-		
-		ReturnTool formerReturnTool = repository.findByReturnSheetIdAndRentalToolId(savedReturnSheet.getId(),toolDto.getRentalToolDtoId());
-		int goodCount=status.equals(ToolState.GOOD)?count:0;
-		int faultCount=status.equals(ToolState.FAULT)?count:0;
-		int damageCount=status.equals(ToolState.DAMAGE)?count:0;
-		int lossCount=status.equals(ToolState.LOSS)?count:0;
-		int discardCount=status.equals(ToolState.DISCARD)?count:0;
-		
-		if (formerReturnTool ==null) {
+		int goodCount=toolDto.getGoodCount();
+		int faultCount=toolDto.getFaultCount();
+		int damageCount=toolDto.getDamageCount();
+		int lossCount=toolDto.getLossCount();
+		int discardCount=0;
+		int count =goodCount+faultCount+damageCount+lossCount+discardCount;
 			
-			returnTool = ReturnTool.builder()
-					.returnSheet(savedReturnSheet)
-					.rentalTool(rentalTool.get())
-					.goodCount(goodCount)
-					.faultCount(faultCount)
-					.damageCount(damageCount)
-					.lossCount(lossCount)
-					.discardCount(discardCount)
-					.count(count)
-					.Tags(toolDto.getTags())
-					.build();
-			
-		} else {
-			
-			returnTool = formerReturnTool;
-			returnTool.updateCount(goodCount, faultCount, damageCount, lossCount, discardCount, toolDto.getTags());
-			
-		}
+		returnTool = ReturnTool.builder()
+				.returnSheet(savedReturnSheet)
+				.rentalTool(rentalTool.get())
+				.goodCount(goodCount)
+				.faultCount(faultCount)
+				.damageCount(damageCount)
+				.lossCount(lossCount)
+				.discardCount(0)
+				.count(count)
+				.Tags(toolDto.getTags())
+				.comment(toolDto.getComment())
+				.build();
 		
 		ReturnTool savedReturnTool=repository.save(returnTool);
 		

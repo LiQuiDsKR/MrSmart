@@ -337,47 +337,47 @@
 											<td class="retnalcount">${tool.count}</td>
 											<td class="outstandingcount">${tool.outstandingCount}</td>
 											<td class="qrcode">${tool.tags}</td>
-											<td class="goodcount" style="width:80px;">
+											<td class="" style="width:80px;">
 												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="goodCount" style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount goodCount" data-name="goodCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="goodCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
 												</div>
 											</td>
-											<td class="faultcount" style="width:80px;">
+											<td class="" style="width:80px;">
 												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="faultCount"  style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount faultCount" data-name="faultCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="faultCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
 												</div>
 											</td>
-											<td class="damagecount" style="width:80px;">
+											<td class="" style="width:80px;">
 												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="damageCount"  style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount damageCount" data-name="damageCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="damageCount" style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
 												</div>
 											</td>
-											<td class="losscount" style="width:80px;">
+											<td class="" style="width:80px;">
 												<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button"  data-name="lossCount" style="border-radius:5px 5px 0px 0px;">+</button>
 													</span>
-														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+														<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount lossCount" data-name="lossCount" style="text-align:center; padding:0px;">
 													<span class="input-group-btn bootstrap-touchspin-injected">
-														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" data-name="lossCount"  style="border-radius:0px 0px 5px 5px;">-</button>
 													</span>
 												</div>
 											</td>
@@ -444,19 +444,21 @@
 					//addListenerDeleteBtn(dataObj);
 					document.querySelectorAll(".increaseBtn:not(.listener-added)").forEach(element => {
 						element.addEventListener("click", function () {
-							increaseCount.call(this, dataObj);
+							const name = this.dataset.name;
+							increaseCount.call(this, dataObj, name);
 						});
 						element.classList.add("listener-added");
 					});
 					document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
 						element.addEventListener("click", function () {
-							decreaseCount.call(this, dataObj);
+							const name = this.dataset.name;
+							decreaseCount.call(this, dataObj, name);
 						});
 						element.classList.add("listener-added");
 					});
 					document.querySelectorAll(".toolCount select:not(.listener-added)").forEach(element => {
 						element.addEventListener("change", function () {
-							countChange.call(this, dataObj);
+							countChange.call(this, dataObj, name);
 						});
 						element.classList.add("listener-added");
 					});
@@ -563,9 +565,9 @@
 		}
 
 		//반납 수량을 +1
-		function increaseCount(dataObj) {
+		function increaseCount(dataObj, name) {
 			const row = this.closest("tr");
-			const count = row.querySelector(".toolCount");
+			const count = row.querySelector("."+name);
 			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
 			const index = Array.from(row.parentNode.children).indexOf(row);
 			if (outstandingCount <= dataObj.toolList[index].count) {
@@ -585,7 +587,7 @@
 			activateApproveBtn(this);
 		}
 		//반납 수량을 -1.
-		function decreaseCount(dataObj) {
+		function decreaseCount(dataObj, name) {
 			const row = this.closest("tr");
 			const count = row.querySelector(".toolCount");
 			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
@@ -607,7 +609,7 @@
 			activateApproveBtn(this);
 		}
 		//반납 수량을 변경 (<input>)
-		function changeCount(dataObj) {
+		function changeCount(dataObj, name) {
 			const row = this.closest("tr");
 			const outstandingCount = parseInt(row.querySelector(".outstandingcount").textContent);
 			const index = Array.from(row.parentNode.children).indexOf(row);

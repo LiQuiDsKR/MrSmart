@@ -52,9 +52,11 @@ public class ReturnTool extends BaseEntity {
 	
 	private String Tags;
 	
+	private String comment;
+	
 	@Builder
 	public ReturnTool(ReturnSheet returnSheet, RentalTool rentalTool, int count, String Tags,
-			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String comment) {
 		this.returnSheet = returnSheet;
 		this.rentalTool = rentalTool;
 		this.count = count;
@@ -64,6 +66,7 @@ public class ReturnTool extends BaseEntity {
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
 		this.Tags = Tags;
+		this.comment = comment;
 	}
 	public void updateCount(int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String Tags) {
 		this.count += goodCount+faultCount+damageCount+lossCount+discardCount;
