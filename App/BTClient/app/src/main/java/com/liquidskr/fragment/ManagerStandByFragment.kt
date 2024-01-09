@@ -133,10 +133,6 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
                         handler.post {
                             Toast.makeText(context ,"모든 보류 항목을 처리했습니다.", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        handler.post {
-                            Toast.makeText(context ,"보류 항목을 전송하지 못했습니다.", Toast.LENGTH_SHORT).show()
-                        }
                     }
                     hidePopup()
                 } else {
