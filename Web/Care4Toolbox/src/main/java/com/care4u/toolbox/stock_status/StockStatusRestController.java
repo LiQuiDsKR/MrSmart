@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -36,8 +38,13 @@ import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.care4u.toolbox.ToolboxDto;
+import com.care4u.toolbox.ToolboxService;
+import com.care4u.toolbox.group.main_group.MainGroupDto;
+import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
 import com.google.gson.Gson;
 
@@ -55,6 +62,13 @@ public class StockStatusRestController {
 	
 	@Autowired
 	private SubGroupService subGroupService;
+	
+	@Autowired
+	private MainGroupService mainGroupService;
+	
+	@Autowired
+	private ToolboxService toolboxService;
+	
 	
     @GetMapping(value="/stock_status/get")
     public ResponseEntity<StockStatusDto> getStockStatus(
@@ -135,15 +149,87 @@ public class StockStatusRestController {
     		     Workbook workbook = new XSSFWorkbook(inputStream)
     		){
     		
+    		int logCount = 1;
+    		List<String> results = new ArrayList<String> ();
+			Map<String, Integer> resultMap = new HashMap<>();
     		Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트
-    		List<Integer> columnIndices = new ArrayList();
+    		List<Integer> columnIndices = new ArrayList<Integer>(10);
 	    	for (Row row : sheet) {
+	    		String mainGroup = null;
+	    		String subGroup = null;
+	    		String name = null;
+	    		String engName=null;
+	    		String code = null;
+	    		String spec = null;
+	    		String unit = null;
+	    		String toolbox = null;
+	    		Integer count = null;
 	    	    for (Cell cell : row) {
-//	    	    	if (row.getRowNum()==0) {
-//	    	    		switch(cell.getStringCellValue()) {
-//	    	    		case 
-//	    	    		}
-//	    	    	}
+	    	    	if (row.getRowNum()==0) {
+	    	    		switch(cell.getStringCellValue()) {
+	    	    		case "대분류" :
+	    	    			columnIndices.set(0, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "중분류" :
+	    	    			columnIndices.set(1, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "한글명" :
+	    	    			columnIndices.set(2, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "영문명" :
+	    	    			columnIndices.set(3, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "품목코드" :
+	    	    		case "코드":
+	    	    			columnIndices.set(4, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "규격" :
+	    	    			columnIndices.set(5, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "단위" :
+	    	    			columnIndices.set(6, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "정비실" :
+	    	    		case "부서명" :
+	    	    			columnIndices.set(7, cell.getColumnIndex());
+	    	    			break;
+	    	    		case "수량" :
+	    	    			columnIndices.set(8, cell.getColumnIndex());
+	    	    			break;	    	    			
+	    	    		}
+	    	    	} else {
+	    	    		switch (columnIndices.get(cell.getColumnIndex())) {
+	    	    		case 0:
+	    	    			mainGroup = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 1:
+	    	    			subGroup = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 2:
+	    	    			name = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 3:
+	    	    			engName = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 4:
+	    	    			code = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 5:
+	    	    			spec = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 6:
+	    	    			unit = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 7:
+	    	    			toolbox = cell.getStringCellValue();
+	    	    			break;
+	    	    		case 8:
+	    	    			count = (int) cell.getNumericCellValue();
+	    	    			break;
+	    	    		default:
+	    	    			continue;
+	    	    		}
+	    	    	}
 	    	    	switch(cell.getCellType()) {
 	    	    	case STRING:
 	                    logger.debug(cell.getAddress()+": String value: " + cell.getStringCellValue());
@@ -168,11 +254,98 @@ public class StockStatusRestController {
 	                    break;
 	    	    	}
 	    	    }
+	    	    if (row.getRowNum()!=0) {
+	    	    	
+						SubGroupDto subGroupDto = parseGroup(mainGroup,subGroup);
+						
+						if (subGroupDto == null) {
+							logger.error("subGroupDto is NULL");
+							return null;
+						}
+						
+						ToolDto tool = ToolDto.builder()
+										.code(code)
+										.name(name)
+										.engName(engName)
+										.spec(spec)
+										.unit(unit)
+										//.price(datas[8].trim().isEmpty()?0:Integer.parseInt(datas[8].trim()))
+										.subGroupDto(subGroupDto)									
+										.build();
+						ToolDto resultTool = toolService.update(subGroupDto.getId(), tool);
+						logger.info(logCount + " : " + tool.toString());
+
+						if (count!=null) {
+							StockStatusDto stockDto = parseStock(resultTool.getId(),toolbox);
+							stockStatusService.buyItems(stockDto.getToolDto().getId(),stockDto.getToolboxDto().getId(), count);
+						}
+						
+						logCount++;
+	    	    	
+	    	    	
+//					ToolDto toolDto = toolService.getByCode(code);
+//					if (toolDto==null) {
+//						logger.info(logCount + " : NULL");
+//						results.add(logCount + " : NULL");
+//					}else {
+//						logger.info(logCount + " : " + toolDto.getCode()+" , "+toolDto.getName()+" , "+toolDto.getSpec());
+//						String key = toolDto.getCode();
+//						if (resultMap.containsKey(key)) {
+//				            // 현재 value에 1 추가
+//				            int currentValue = resultMap.get(key);
+//				            resultMap.put(key, currentValue + 1);
+//				            results.add(logCount + " : "+resultMap.get(key));
+//				        } else {
+//				            // key가 존재하지 않으면 1로 초기화
+//				            resultMap.put(key, 1);
+//				        }
+//					}
+//					logCount++;
+	    	    }
 	    	}
 	    	
 		} catch (Exception e) {
-		    // 예외 처리 로직
+		    logger.error(e.getStackTrace());
 		}
         return ResponseEntity.ok().body("{\"message\":\"["+file.getOriginalFilename()+"] upload complete\"}");
     }
+    
+    private SubGroupDto parseGroup(String mainGroupName, String subGroupName) {				
+		MainGroupDto mainGroupDto = mainGroupService.get(mainGroupName);
+		if (mainGroupDto == null) {
+			mainGroupDto = MainGroupDto.builder()
+					.name(mainGroupName)
+					.build();
+			mainGroupDto = mainGroupService.update(mainGroupDto);
+		}
+		
+		SubGroupDto subGroupDto = subGroupService.get(mainGroupDto.getId(), subGroupName);
+		if (subGroupDto == null) {
+			subGroupDto = SubGroupDto.builder()
+					.name(subGroupName)
+					.mainGroupDto(mainGroupDto)
+					.build();
+			subGroupDto = subGroupService.update(mainGroupDto.getId(), subGroupDto);
+		}
+		
+		return subGroupDto;
+	}
+	
+	private StockStatusDto parseStock(long toolId, String toolboxName) {
+		ToolboxDto toolboxDto = toolboxService.get(toolboxName);
+		if (toolboxDto == null) {
+			logger.debug(toolboxName + " toolbox is NULL");
+			toolboxDto = ToolboxDto.builder()
+					.name(toolboxName)
+					.build();
+			toolboxDto = toolboxService.update(toolboxDto);
+		}
+
+		StockStatusDto stock= stockStatusService.get(toolId, toolboxDto.getId());
+		if (stock == null) {
+			return new StockStatusDto(stockStatusService.addNew(toolId, toolboxDto.getId(), 0));
+		}else {
+			return stock;
+		}
+	}
 }
