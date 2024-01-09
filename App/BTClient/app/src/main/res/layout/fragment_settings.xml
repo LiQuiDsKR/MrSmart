@@ -22,13 +22,13 @@
                 android:id="@+id/settingBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#FFFFFF"
+                android:background="#999999"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
                     android:padding="10dp">
@@ -49,10 +49,11 @@
                     android:id="@+id/setServerPCName"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:padding="15dp"
+                    android:stateListAnimator="@animator/background_state_list_animator">
 
                     <ImageView
                         android:id="@+id/imageView12"
@@ -92,10 +93,11 @@
                     android:id="@+id/setToolBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:padding="15dp"
+                    android:stateListAnimator="@animator/background_state_list_animator">
 
                     <ImageView
                         android:id="@+id/imageView12"
@@ -135,10 +137,11 @@
                     android:id="@+id/importStandard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:padding="15dp"
+                    android:stateListAnimator="@animator/background_state_list_animator">
 
                     <ImageView
                         android:id="@+id/imageView12"
@@ -178,10 +181,11 @@
                     android:id="@+id/importQRData"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:padding="15dp"
+                    android:stateListAnimator="@animator/background_state_list_animator">
 
                     <ImageView
                         android:id="@+id/imageView12"
@@ -221,10 +225,11 @@
                     android:id="@+id/importOutstanding"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#00FFFFFF"
+                    android:background="#FFFFFFFF"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:padding="15dp"
+                    android:stateListAnimator="@animator/background_state_list_animator">
 
                     <ImageView
                         android:id="@+id/imageView12"

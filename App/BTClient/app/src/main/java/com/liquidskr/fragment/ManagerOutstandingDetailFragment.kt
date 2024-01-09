@@ -54,7 +54,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
     private lateinit var timeStamp: TextView
 
     lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: LinearLayout
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
@@ -76,7 +75,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
         qrEditText = view.findViewById((R.id.QR_EditText))
-        qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
         returnerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
@@ -156,12 +154,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         })
         recyclerView.adapter = adapter
 
-        qrcodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
-        }
-
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = fixCode(qrEditText.text.toString().replace("\n", ""))
@@ -177,11 +169,8 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                         rtwc.rentalTool.Tags = tag.macaddress
                                         handler.post {
                                             adapter.updateList(adapter.outstandingRentalToolWithCounts)
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            adapter.tagAdded(taggedTool.id)
+                                            Toast.makeText(requireContext(),"${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }

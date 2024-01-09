@@ -189,35 +189,6 @@
                     android:orientation="horizontal"
                     android:padding="15dp">
 
-                    <LinearLayout
-                        android:id="@+id/QRcodeBtn"
-                        android:layout_width="150dp"
-                        android:layout_height="48dp"
-                        android:layout_marginLeft="10dp"
-                        android:background="@drawable/edittext_rounded_bg"
-                        android:backgroundTint="#FEA039"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/imageView9"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_margin="10dp"
-                            app:srcCompat="@drawable/scan" />
-
-                        <TextView
-                            android:id="@+id/textView8"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:text="QR 코드"
-                            android:textColor="#FFFFFF" />
-
-
-                    </LinearLayout>
-
                     <EditText
                         android:id="@+id/QREditText"
                         android:layout_width="1dp"

@@ -3,6 +3,8 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +27,8 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothMana
     private lateinit var returnBtn: ImageButton
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
+
+    private val handler = Handler(Looper.getMainLooper()) { true }
 
     lateinit var welcomeMessage: TextView
     val gson = Gson()
@@ -91,10 +95,12 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothMana
             }
         })
     }*/
-
-    override fun onBluetoothDisconnected() {
-        activity?.runOnUiThread {
+    fun whenDisconnected () {
+        handler.post {
             connectBtn.setImageResource(R.drawable.group_11_copy)
         }
+    }
+    override fun onBluetoothDisconnected() {
+        whenDisconnected()
     }
 }

@@ -49,9 +49,9 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
             onSetToolStateClick(currentOutstandingRentalToolWithCount)
         }
         holder.selectSpace.setOnClickListener {
-            handleSelection(currentOutstandingRentalToolWithCount)
+            handleSelection(currentOutstandingRentalToolWithCount.rentalTool.toolDto.id)
         }
-        if (isSelected(currentOutstandingRentalToolWithCount)) {
+        if (isSelected(currentOutstandingRentalToolWithCount.rentalTool.toolDto.id)) {
             holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -111,38 +111,32 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
 
         builder.show()
     }
-    fun handleSelection(currentRentalTool: RentalToolWithCount) {
-        if (!isSelected(currentRentalTool)) {
-            addToSelection(currentRentalTool)
+    fun handleSelection(toolId: Long) {
+        if (!isSelected(toolId)) {
+            addToSelection(toolId)
         } else {
-            removeFromSelection(currentRentalTool)
+            removeFromSelection(toolId)
         }
         notifyDataSetChanged() // 변경된 데이터를 알림
     }
-    fun tagAdded(currentRentalTool: RentalToolWithCount) {
-        Log.d("Tst", "imhere")
-        addToSelection(currentRentalTool)
-        Log.d("Tst", "imhere2")
-        recyclerView.post {
-            notifyDataSetChanged()
-        }
-        Log.d("Tst", "imhere3")
+    fun tagAdded(toolId: Long) {
+        addToSelection(toolId)
+        notifyDataSetChanged()
     }
     fun updateList(newList: MutableList<RentalToolWithCount>) {
         outstandingRentalToolWithCounts = newList
         notifyDataSetChanged()
     }
 
-    private fun isSelected(currentRentalTool: RentalToolWithCount): Boolean {
-        return currentRentalTool.rentalTool.id in selectedToolsToReturn
+    private fun isSelected(toolId: Long): Boolean {
+        return toolId in selectedToolsToReturn
     }
 
-    private fun addToSelection(currentRentalTool: RentalToolWithCount) {
-        selectedToolsToReturn.add(currentRentalTool.rentalTool.id)
-
+    private fun addToSelection(toolId: Long) {
+        selectedToolsToReturn.add(toolId)
     }
 
-    private fun removeFromSelection(currentRentalTool: RentalToolWithCount) {
-        selectedToolsToReturn.remove(currentRentalTool.rentalTool.id)
+    private fun removeFromSelection(toolId: Long) {
+        selectedToolsToReturn.remove(toolId)
     }
 }

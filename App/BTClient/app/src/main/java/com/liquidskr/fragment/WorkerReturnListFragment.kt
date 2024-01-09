@@ -16,7 +16,10 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,11 +29,13 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.liquidskr.btclient.R
+import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.OutstandingState
+import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
@@ -102,7 +107,6 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
 
         searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
-        qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
         qrEditText = view.findViewById(R.id.QREditText)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -114,6 +118,9 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
                     .addToBackStack(null)
                     .commit()
             }
+        }
+        sheetSearchBtn.setOnClickListener {
+            filterByName(adapter, outStandingRentalSheetList, searchSheetEdit.text.toString())
         }
 
         rentalBtnField.setOnClickListener {
@@ -131,6 +138,10 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
                 .commit()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("WorkerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         recyclerView.adapter = adapter
@@ -157,7 +168,6 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
                         }
                     }
                     progressBar.max = totalPage // UI블로킹 end
-                    requestOutstandingRentalSheet(0)
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
                 }
@@ -193,6 +203,22 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
             }
         }
         adapter.updateList(newList)
+    }
+    private fun filterByName(adapter: OutstandingRentalSheetAdapter, originSheetList: MutableList<OutstandingRentalSheetDto>, keyword: String) {
+        val sheetList = originSheetList
+        var newSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
+        for (sheet in sheetList) {
+            if ((keyword in sheet.rentalSheetDto.workerDto.name) or (keyword in sheet.rentalSheetDto.leaderDto.name)) {
+                newSheetList.add(sheet)
+            }
+        }
+        try {
+            adapter.updateList(newSheetList)
+        } catch(e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     // ## 여기서부터 블루투스 송수신 시 UI블로킹 start
     private fun showPopup() {

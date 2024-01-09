@@ -54,7 +54,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var timeStamp: TextView
 
     private lateinit var qrEditText: EditText
-    private lateinit var qrcodeBtn: LinearLayout
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
@@ -78,7 +77,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         qrEditText = view.findViewById((R.id.QR_EditText))
-        qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
         workerName.text = rentalRequestSheet.workerDto.name
@@ -98,11 +96,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        qrcodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
-        }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = qrEditText.text.toString().replace("\n", "")
@@ -118,6 +111,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                                         rrtwc.rentalRequestTool.Tags = tag.macaddress
                                         handler.post {
                                             adapter.updateList(adapter.rentalRequestToolWithCounts)
+                                            adapter.tagAdded(taggedTool.id)
                                             Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
                                         }
                                     }
@@ -158,7 +152,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                         val toolForm = RentalRequestToolApproveFormDto(rrtwc.rentalRequestTool.id, rrtwc.rentalRequestTool.toolDto.id, rrtwc.count, tags)
                         toolFormList.add(toolForm)
                     }
-                    toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.id) }.toMutableList()
+                    toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.toolDtoId) }.toMutableList()
                     val sheet = rentalRequestSheet
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
 

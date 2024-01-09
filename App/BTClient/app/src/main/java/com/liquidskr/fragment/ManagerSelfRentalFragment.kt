@@ -45,7 +45,6 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     private lateinit var addToolBtn: LinearLayout
     private lateinit var confirmBtn: LinearLayout
     private lateinit var clearBtn: LinearLayout
-    private lateinit var qrCodeBtn: LinearLayout
     private lateinit var qrEditText: EditText
     private lateinit var backButton: ImageButton
 
@@ -116,7 +115,6 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
-        qrCodeBtn = view.findViewById(R.id.QRcodeBtn)
         qrEditText = view.findViewById(R.id.QREditText)
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         backButton = view.findViewById(R.id.backButton)
@@ -167,11 +165,6 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
-        }
-        qrCodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             Log.d("tst","textEditted")

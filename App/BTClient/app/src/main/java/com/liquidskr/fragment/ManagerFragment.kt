@@ -63,11 +63,12 @@ class ManagerFragment : Fragment() {
                             .replace(R.id.fragmentContainer, fragment)
                             .addToBackStack("ManagerLogin")
                             .commit()
+                    } else {
+                        Toast.makeText(requireContext(), "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(requireContext(), "해당 직원은 관리자가 아닙니다.", Toast.LENGTH_SHORT).show()
                 }
-
             } catch (e: UninitializedPropertyAccessException) {
                 Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }

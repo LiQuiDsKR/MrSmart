@@ -17,7 +17,7 @@ import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
 import com.mrsmart.standard.tool.ToolDtoSQLite
 
 
-class StandByAdapter(private var sheets: List<StandbyDto>) :
+class StandByAdapter(var sheets: List<StandbyDto>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val Rental = 1

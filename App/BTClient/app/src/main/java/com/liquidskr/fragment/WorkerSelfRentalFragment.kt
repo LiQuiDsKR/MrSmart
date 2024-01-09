@@ -37,7 +37,6 @@ import java.lang.reflect.Type
 class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     lateinit var leaderSearchBtn: LinearLayout
     lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: LinearLayout
     lateinit var addToolBtn: LinearLayout
     lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: LinearLayout
@@ -71,7 +70,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
         qrEditText = view.findViewById((R.id.QR_EditText))
-        qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         confirmBtn = view.findViewById(R.id.confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
@@ -130,11 +128,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
-        }
-        qrcodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             Log.d("tst","textEditted")
