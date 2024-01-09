@@ -16,7 +16,8 @@ public class StockStatusSummaryByMainGroupDto {
     private LocalDate currentDay;
     private String mainGroupName;
     private Integer totalCount;
+    private Integer goodCount;
     private Integer rentalCount;
-    private Integer returnCount;
     private Integer storedCount;
+    private Integer returnCount;
 }

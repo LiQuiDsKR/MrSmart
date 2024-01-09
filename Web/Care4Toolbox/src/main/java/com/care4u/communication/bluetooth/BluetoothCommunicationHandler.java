@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 import javax.microedition.io.StreamConnection;
@@ -35,7 +36,7 @@ public class BluetoothCommunicationHandler {
 		@Override
 		public void onDataArrived(byte[] datas) {
 			// TODO Auto-generated method stub
-			if (listener != null) listener.onDataArrived(BluetoothCommunicationHandler.this, new String(datas));
+			if (listener != null) listener.onDataArrived(BluetoothCommunicationHandler.this, new String(datas,StandardCharsets.UTF_8));
 			commTimeInMillis = 0;
 		}
 	};
@@ -103,7 +104,7 @@ public class BluetoothCommunicationHandler {
 	
 	public void sendData(String message){
 		logger.info("send message : " + message);
-	    byte[] data = message.getBytes();
+	    byte[] data = message.getBytes(StandardCharsets.UTF_8);
 	    ByteBuffer buffer = ByteBuffer.allocate(4); // int는 4바이트
 	    buffer.putInt(data.length);
 	    byte[] sizeByte = buffer.array();

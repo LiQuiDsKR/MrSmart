@@ -152,8 +152,8 @@
 				</div>
 				<!-- End Card -->
 			</div>
-			
-			<div class="col-md-4 col-12" hidden >
+
+			<div class="col-md-4 col-12" hidden>
 				<!-- Card -->
 				<div class="card mb-30 bg-white">
 					<div class="card-body">
@@ -220,36 +220,33 @@
 		)
 			.then(data => {
 				return new Promise((resolved, rejected) => {
-				abcHttp.get(
-					'/toolbox/getbymanagerid',
-					{
-						managerId: data.id
-					}
-				)
-					.then(toolboxData => {
-						if (toolboxData == null || toolboxData?.id==null) {
-							throw error("no toolbox");
-						} else {
-							document.getElementById("toolboxSelect").value=toolboxData.id;
-							resolved(toolboxData.id);
+					abcHttp.get(
+						'/toolbox/getbymanagerid',
+						{
+							managerId: data.id
 						}
-					})
-					.catch(error => {
-						console.log('no toolbox for manager');
-						Swal.fire({
-							type: 'error',
-							title: '정비실 없음',
-							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
-						}).then(() => {rejected();});
-					});
+					)
+						.then(toolboxData => {
+							if (toolboxData == null || toolboxData?.id == null) {
+								throw error("no toolbox");
+							} else {
+								document.getElementById("toolboxSelect").value = toolboxData.id;
+								resolved(toolboxData.id);
+							}
+						})
+						.catch(error => {
+							console.log('no toolbox for manager');
+							Swal.fire({
+								type: 'error',
+								title: '정비실 없음',
+								text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+							}).then(() => {rejected();});
+						});
 				});
 			})
 			.then(toolboxId => {
 				document.getElementById("toolboxSelect").value = toolboxId;
-				loadChart1.apply(chart1, [toolboxId]);
-				loadChart2.apply(chart2, [toolboxId]);
-				loadChart3.apply(chart3, [toolboxId]);
-				loadChart4.apply(chart4, [toolboxId]);
+				loadAll(toolboxId);
 			});
 
 		const toolboxSelect = document.getElementById("toolboxSelect");
@@ -259,11 +256,23 @@
 		//정비실 선택 드롭다운 change시 이벤트핸들러
 		function toolboxChangeEventHandler() {
 			toolboxId = this.value;
-			loadChart1.apply(chart1, [toolboxId]);
-			loadChart2.apply(chart2, [toolboxId]);
-			loadChart3.apply(chart3, [toolboxId]);
-			loadChart4.apply(chart4, [toolboxId]);
-	}
+			loadAll(toolboxId);
+		}
+
+		function loadAll(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics/by_main_group',
+				{
+					toolboxId: toolboxId,
+					currentDate: $('#end-date').val()
+				}
+			).then(data => {
+				loadChart1.apply(chart1, [data]);
+				loadChart2.apply(chart2, [data]);
+				loadChart3.apply(chart3, [data]);
+				loadChart4.apply(chart4, [data]);
+			});
+		}
 
 
 		function initializeChart1() {
@@ -387,25 +396,17 @@
 
 			return columnChart;
 		}
-		function loadChart1(toolboxId) {
-			abcHttp.get(
-				'/stock_status/get/analytics/by_main_group',
-				{
-					toolboxId: toolboxId,
-					currentDate: $('#end-date').val()
-				}
-			).then(data => {
-				console.log(data);
-				series = [];
-				for (item of data) {
-					series.push({
-						name: item.mainGroupName,
-						data: [item.rentalCount]
-					});
-				}
-				this.updateOptions({
-					series: series
+		function loadChart1(data) {
+			console.log(data);
+			series = [];
+			for (item of data) {
+				series.push({
+					name: item.mainGroupName,
+					data: [item.rentalCount]
 				});
+			}
+			this.updateOptions({
+				series: series
 			});
 		}
 		function initializeChart2() {
@@ -529,25 +530,18 @@
 
 			return columnChart;
 		}
-		function loadChart2(toolboxId) {
-			abcHttp.get(
-				'/stock_status/get/analytics/by_main_group',
-				{
-					toolboxId: toolboxId,
-					currentDate: $('#end-date').val()
-				}
-			).then(data => {
-				console.log(data);
-				series = [];
-				for (item of data) {
-					series.push({
-						name: item.mainGroupName,
-						data: [item.returnCount]
-					});
-				}
-				this.updateOptions({
-					series: series
+
+		function loadChart2(data) {
+			console.log(data);
+			series = [];
+			for (item of data) {
+				series.push({
+					name: item.mainGroupName,
+					data: [item.goodCount]
 				});
+			}
+			this.updateOptions({
+				series: series
 			});
 		}
 		function initializeChart3() {
@@ -671,26 +665,18 @@
 
 			return columnChart;
 		}
-		function loadChart3(toolboxId) {
-			abcHttp.get(
-				'/stock_status/get/analytics/by_main_group',
-				{
-					toolboxId: toolboxId,
-					currentDate: $('#end-date').val()
-				}
-			).then(data => {
-				console.log(data);
-				series = [];
-				for (item of data) {
-					series.push({
-						name: item.mainGroupName,
-						data: [item.storedCount]
-					});
-				}
-				console.log(series)
-				this.updateOptions({
-					series: series
+		function loadChart3(data) {
+			console.log(data);
+			series = [];
+			for (item of data) {
+				series.push({
+					name: item.mainGroupName,
+					data: [item.storedCount]
 				});
+			}
+			console.log(series)
+			this.updateOptions({
+				series: series
 			});
 		}
 
@@ -757,7 +743,7 @@
 				},
 				xaxis: {
 					categories: [
-						'입고 현황'
+						'반납 현황'
 					],
 				},
 				yaxis: {
@@ -815,26 +801,18 @@
 
 			return columnChart;
 		}
-		function loadChart4(toolboxId) {
-			abcHttp.get(
-				'/stock_status/get/analytics/by_main_group',
-				{
-					toolboxId: toolboxId,
-					currentDate: $('#end-date').val()
-				}
-			).then(data => {
-				console.log(data);
-				series = [];
-				for (item of data) {
-					series.push({
-						name: item.mainGroupName,
-						data: [item.returnCount]
-					});
-				}
-				console.log(series)
-				this.updateOptions({
-					series: series
+		function loadChart4(data) {
+			console.log(data);
+			series = [];
+			for (item of data) {
+				series.push({
+					name: item.mainGroupName,
+					data: [item.returnCount]
 				});
+			}
+			console.log(series)
+			this.updateOptions({
+				series: series
 			});
 		}
 
@@ -847,7 +825,7 @@
 			const month = today.getMonth() + 1;
 			const day = today.getDate();
 			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
-			const lastMonthDate = new Date();lastMonthDate.setDate(today.getDate()-30);const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 30); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
 			$('#start-date').val(formattedLastMonthDate);
 			$('#end-date').val(formattedTodayDate);
 
@@ -855,9 +833,7 @@
 				console.log('start changed');
 			});
 			$('#end-date').on('change', function () {
-				loadChart1.apply(chart1, [toolboxId]);
-				loadChart2.apply(chart2, [toolboxId]);
-				loadChart3.apply(chart3, [toolboxId]);
+				loadAll(toolboxId);
 				console.log('end changed');
 			})
 
@@ -878,10 +854,7 @@
 					document.querySelectorAll(".date-today").forEach(e => {
 						e.textContent = formatDate(new Date($('#end-date').val()));
 					});
-					
-					loadChart1.apply(chart1, [toolboxId]);
-					loadChart2.apply(chart2, [toolboxId]);
-					loadChart3.apply(chart3, [toolboxId]);
+					loadAll(toolboxId);
 					console.log('end changed');
 				}
 			});

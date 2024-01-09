@@ -102,7 +102,7 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		
 		List<StockStatusSummaryByToolStateDto> tempList= queryFactory
 				.select(Projections.constructor(StockStatusSummaryByToolStateDto.class, stockStatus.toolbox.name,
-						stockStatus.currentDay, stockStatus.totalCount.sum(), stockStatus.rentalCount.sum(),
+						stockStatus.currentDay, stockStatus.totalCount.sum(), stockStatus.rentalCount.sum().add(stockStatus.supplyCount.sum()),
 						stockStatus.buyCount.sum(), stockStatus.goodCount.sum(), stockStatus.faultCount.sum(),
 						stockStatus.damageCount.sum(), stockStatus.lossCount.sum(), stockStatus.discardCount.sum(),
 						stockStatus.supplyCount.sum(), stockStatus.returnCount.sum()))
@@ -142,6 +142,8 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.eq(currentDate))).fetchOne();
 	}
 
+	
+	//대분류별 일간 통계. -> 금일 현황 페이지를 담당.
 	@Override
 	public List<StockStatusSummaryByMainGroupDto> getStockStatusSummaryByMainGroupDto(long toolboxId,
 			LocalDate currentDate) {
@@ -151,25 +153,37 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		QMainGroup mainGroup = QMainGroup.mainGroup;
 
 		List<Tuple> results = queryFactory
-				.select(stockStatus.toolbox.name, stockStatus.currentDay, mainGroup.name, stockStatus.totalCount.sum(),
-						stockStatus.rentalCount.sum(), stockStatus.goodCount.sum(),
-						stockStatus.damageCount.sum().add(stockStatus.faultCount.sum()))
+				.select(stockStatus.toolbox.name,
+						stockStatus.currentDay,
+						mainGroup.name,
+						stockStatus.totalCount.sum(),
+						stockStatus.goodCount.sum(),
+						stockStatus.rentalCount.sum(),
+						stockStatus.damageCount.sum().add(stockStatus.faultCount.sum()),
+						stockStatus.returnCount.sum()
+						)
 				.from(stockStatus).leftJoin(stockStatus.tool, tool).leftJoin(tool.subGroup, subGroup)
 				.leftJoin(subGroup.mainGroup, mainGroup)
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.eq(currentDate)))
 				.groupBy(mainGroup.id, mainGroup.name).fetch();
 
 		List<StockStatusSummaryByMainGroupDto> dtoList = results.stream()
-				.map(tuple -> new StockStatusSummaryByMainGroupDto(tuple.get(stockStatus.toolbox.name),
-						tuple.get(stockStatus.currentDay), tuple.get(mainGroup.name),
-						tuple.get(stockStatus.totalCount.sum()), tuple.get(stockStatus.rentalCount.sum()),
+				.map(tuple -> new StockStatusSummaryByMainGroupDto(
+						tuple.get(stockStatus.toolbox.name),
+						tuple.get(stockStatus.currentDay),
+						tuple.get(mainGroup.name),
+						tuple.get(stockStatus.totalCount.sum()),
 						tuple.get(stockStatus.goodCount.sum()),
-						tuple.get(stockStatus.damageCount.sum().add(stockStatus.faultCount.sum()))))
+						tuple.get(stockStatus.rentalCount.sum()),
+						tuple.get(stockStatus.damageCount.sum().add(stockStatus.faultCount.sum())),
+						tuple.get(stockStatus.returnCount.sum())
+						))
 				.collect(Collectors.toList());
 
 		return dtoList;
 	}
 
+	//대분류별 & 월별 통계 (미사용)
 	@Override
 	public List<StockStatusSummaryByMainGroupDto> getStockStatusSummaryByMainGroupDtoWithMonth(long toolboxId,
 			LocalDate currentDate) {
@@ -194,14 +208,16 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		List<StockStatusSummaryByMainGroupDto> dtoList = results.stream()
 				.map(tuple -> new StockStatusSummaryByMainGroupDto(tuple.get(stockStatus.toolbox.name),
 						tuple.get(stockStatus.currentDay), tuple.get(mainGroup.name),
-						tuple.get(stockStatus.totalCount.sum()), tuple.get(stockStatus.rentalCount.sum()),
-						tuple.get(stockStatus.goodCount.sum()),
-						tuple.get(stockStatus.damageCount.sum().add(stockStatus.faultCount.sum()))))
+						tuple.get(stockStatus.totalCount.sum()), 
+						tuple.get(stockStatus.goodCount.sum()),tuple.get(stockStatus.rentalCount.sum()),
+						tuple.get(stockStatus.damageCount.sum().add(stockStatus.faultCount.sum())), 
+						tuple.get(stockStatus.returnCount.sum())))
 				.collect(Collectors.toList());
 
 		return null;
 	}
 
+	//이름으로 검색 쿼리. -> 타 공구실 재고 조회 페이지.
 	@Override
 	public Page<StockStatus> findAllByToolboxIdAndCurrentDay(Long toolboxId, LocalDate date, String toolName,
 			List<Long> subGroupIds, Pageable pageable) {
