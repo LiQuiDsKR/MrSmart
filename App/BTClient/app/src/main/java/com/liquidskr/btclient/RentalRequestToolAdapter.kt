@@ -36,9 +36,9 @@ class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<Rent
             showNumberDialog(holder.toolCount, currentRentalRequestToolWithCount)
         }
         holder.itemView.setOnClickListener {
-            handleSelection(currentRentalRequestToolWithCount)
+            handleSelection(currentRentalRequestToolWithCount.rentalRequestTool.toolDto.id)
         }
-        if (isSelected(currentRentalRequestToolWithCount)) {
+        if (isSelected(currentRentalRequestToolWithCount.rentalRequestTool.toolDto.id)) {
             holder.itemView.setBackgroundColor(0xFFAACCEE.toInt())
         } else {
             holder.itemView.setBackgroundColor(0xFFFFFFFF.toInt())
@@ -76,16 +76,16 @@ class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<Rent
 
         builder.show()
     }
-    fun handleSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
-        if (!isSelected(currentRentalRequestToolWithCount)) {
-            addToSelection(currentRentalRequestToolWithCount)
+    fun handleSelection(toolId: Long) {
+        if (!isSelected(toolId)) {
+            addToSelection(toolId)
         } else {
-            removeFromSelection(currentRentalRequestToolWithCount)
+            removeFromSelection(toolId)
         }
         notifyDataSetChanged() // 변경된 데이터를 알림
     }
-    fun tagAdded(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
-        addToSelection(currentRentalRequestToolWithCount)
+    fun tagAdded(toolId: Long) {
+        addToSelection(toolId)
         notifyDataSetChanged()
     }
     fun updateList(newList: MutableList<RentalRequestToolWithCount>) {
@@ -93,24 +93,16 @@ class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<Rent
         notifyDataSetChanged()
     }
 
-    private fun isSelected(currentRentalRequestToolWithCount: RentalRequestToolWithCount): Boolean {
-        return currentRentalRequestToolWithCount.rentalRequestTool.id in selectedToolsToRental
+    private fun isSelected(toolId: Long): Boolean {
+        return toolId in selectedToolsToRental
     }
 
-    private fun addToSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
-        selectedToolsToRental.add(currentRentalRequestToolWithCount.rentalRequestTool.id)
-
-        rentalRequestToolWithCounts = rentalRequestToolWithCounts.map { rrtwc ->
-            if (rrtwc.rentalRequestTool.id == currentRentalRequestToolWithCount.rentalRequestTool.id) {
-                currentRentalRequestToolWithCount
-            } else {
-                rrtwc
-            }
-        }.toMutableList()
+    private fun addToSelection(toolId: Long) {
+        selectedToolsToRental.add(toolId)
     }
 
-    private fun removeFromSelection(currentRentalRequestToolWithCount: RentalRequestToolWithCount) {
-        selectedToolsToRental.remove(currentRentalRequestToolWithCount.rentalRequestTool.id)
+    private fun removeFromSelection(toolId: Long) {
+        selectedToolsToRental.remove(toolId)
     }
 
 }

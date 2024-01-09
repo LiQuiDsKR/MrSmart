@@ -819,6 +819,19 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return rowsAffected
     }
+
+    fun updateOutstandingStatusBySheetId(sheetId: Long): Int {
+        val values = ContentValues()
+        values.put(COLUMN_OUTSTANDING_STATUS, "APPROVED")
+
+        val db = this.writableDatabase
+
+        val rowsAffected = db.update(TABLE_OUTSTANDING_NAME, values, "$COLUMN_OUTSTANDING_ID = ?", arrayOf(sheetId.toString()))
+
+        db.close()
+        return rowsAffected
+    }
+
     fun addTBT(newQRCode: String): Long {
         val values = ContentValues()
         values.put(COLUMN_TBT_QRCODE, newQRCode)
@@ -939,9 +952,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getAllOutstanding():List<OutstandingRentalSheetDto> {
         var outstandingList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_OUTSTANDING_JSON FROM $TABLE_OUTSTANDING_NAME"
+        val query = "SELECT $COLUMN_OUTSTANDING_JSON FROM $TABLE_OUTSTANDING_NAME WHERE $COLUMN_OUTSTANDING_STATUS = ?"
 
-        val cursor = db.rawQuery(query, null)
+        val cursor = db.rawQuery(query, arrayOf("READY"))
         while (cursor.moveToNext()) {
             val json = cursor.getString(cursor.getColumnIndex(COLUMN_OUTSTANDING_JSON))
             val gson = Gson()

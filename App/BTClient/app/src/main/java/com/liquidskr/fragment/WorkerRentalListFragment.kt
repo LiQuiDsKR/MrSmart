@@ -15,7 +15,10 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -135,7 +138,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         recyclerView.adapter = adapter
 
         sheetSearchBtn.setOnClickListener {
-
+            filterByName(adapter, rentalRequestSheetList, searchSheetEdit.text.toString())
         }
 
         recyclerView.layoutManager = layoutManager
@@ -152,6 +155,10 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("WorkerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         getRentalRequestSheetList()
@@ -176,7 +183,6 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
                             hidePopup()
                         }
                     }
-                    requestRentalRequestSheetReady(0)
                 } catch (e: Exception) {
                     Log.d("RentalRequestSheetReady", e.toString())
                 }
@@ -189,7 +195,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)
@@ -205,14 +211,21 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
             }
         })
     }
-    fun filterByLeader(adapter: RentalRequestSheetAdapter, sheets: List<RentalRequestSheetDto>, keyword: String) {
-        val newList: MutableList<RentalRequestSheetDto> = mutableListOf()
-        for (sheet in sheets) {
-            if (keyword in sheet.leaderDto.name) {
-                newList.add(sheet)
+    private fun filterByName(adapter: RentalRequestSheetAdapter, originSheetList: MutableList<RentalRequestSheetDto>, keyword: String) {
+        val sheetList = originSheetList
+        var newSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
+        for (sheet in sheetList) {
+            if ((keyword in sheet.workerDto.name) or (keyword in sheet.leaderDto.name)) {
+                newSheetList.add(sheet)
             }
         }
-        adapter.updateList(newList)
+        try {
+            adapter.updateList(newSheetList)
+        } catch(e: Exception) {
+            handler.post {
+                Toast.makeText(activity, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     // ## 여기서부터 블루투스 송수신 시 UI블로킹 start
     private fun showPopup() {

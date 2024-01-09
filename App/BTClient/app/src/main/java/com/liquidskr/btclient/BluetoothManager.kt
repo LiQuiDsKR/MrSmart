@@ -29,13 +29,15 @@ import java.util.UUID
 
 class BluetoothManager (private val context: Context, private val activity: Activity) {
     private lateinit var bluetoothDevice: BluetoothDevice
-    private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothSocket: BluetoothSocket
 
     private lateinit var receiveThread: Thread
     private val handler = Handler(Looper.getMainLooper())
+
+    var isConnected = false
 
     //var isSending: Boolean = false
     //private val messageQueue: Queue<BluetoothMessage> = LinkedList()
@@ -74,7 +76,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             try {
                 bluetoothClose()
             } catch (e: Exception) {
-                // 연결이 있다면, 끊고 재연결하기
+                Log.d("bluetoothError", e.toString())
             }
             val dbHelper = DatabaseHelper(context)
             pcName = dbHelper.getDeviceName()
@@ -92,8 +94,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         try {
                             bluetoothSocket.connect()
                             Toast.makeText(context, "연결에 성공했습니다.", Toast.LENGTH_SHORT).show()
+                            isConnected = true
                             flag = true
                         } catch (e: IOException) {
+                            isConnected = false
                             Log.d("bluetooth", e.toString())
                             // Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
@@ -101,9 +105,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     }
                 }
                 if (!flag) {
+                    isConnected = false
                     Toast.makeText(context, "[${pcName}] 에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             } else {
+                isConnected = false
                 Toast.makeText(context, "페어링된 기기가 없습니다.", Toast.LENGTH_SHORT).show()
             }
             receiveThread = Thread {
@@ -116,7 +122,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         if (size > 0) {
                             val readDatas = ByteArray(size)
                             inputStream.read(readDatas, 0, size)
-                            Log.d("readData(HEX)",byteArrayToHex(readDatas))
                             outputStream.write(readDatas)
                             if (dataSize == -1 && outputStream.size() > 4) {
                                 try {
@@ -127,7 +132,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                                 // dataSize = ByteBuffer.wrap(outputStream.toByteArray(), 0, 4).int
                                 val remainingBytes = outputStream.toByteArray().drop(4).toByteArray()
                                 if (remainingBytes.isNotEmpty()) {
-                                    Log.d("datas",byteArrayToHex(remainingBytes))
+                                    Log.d("readData(HEX)",byteArrayToHex(remainingBytes))
+                                    Log.d("readData(STR)", String(remainingBytes, Charsets.UTF_8))
                                     outputStream.reset()
                                     if (remainingBytes.isNotEmpty()) {
                                         outputStream.write(remainingBytes)
@@ -137,7 +143,8 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             }
                             if (dataSize > -1 && outputStream.size() >= (dataSize)) {
                                 var datas = ByteBuffer.wrap(outputStream.toByteArray(), 0, dataSize)
-                                Log.d("datas",byteArrayToHex(datas.array()))
+                                Log.d("writeData(HEX)",byteArrayToHex(datas.array()))
+                                Log.d("writeData(STR)", String(datas.array(), Charsets.UTF_8))
                                 val remainingBytes = outputStream.toByteArray().drop(dataSize).toByteArray()
                                 outputStream.reset()
                                 if (remainingBytes.isNotEmpty()) {
@@ -152,9 +159,11 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                             if (bluetoothSocket.isConnected) {
                                 continue
                             } else {
+                                isConnected = false
                                 handler.post {
                                     Log.d("bluetooth_","Disconnected1")
                                     bluetoothConnectionListener?.onBluetoothDisconnected()
+                                    Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -167,11 +176,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         } catch (e:Exception) {
             Toast.makeText(activity, "블루투스 연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
-
     }
 
     fun bluetoothClose() {
-        bluetoothSocket.close()
+        if (bluetoothSocket != null) bluetoothSocket.close()
     }
 
     fun requestData(type:RequestType, params:String, callback:RequestCallback) {
@@ -215,7 +223,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     val byteArray = ByteArray(buffer.remaining())
                     buffer.get(byteArray)
                     outputStream.write(byteArray)
-
                     outputStream.flush()
                     Log.d("bluetooth_SendData", byteArrayToHex(buffer.array()))
                     buffer.clear()
@@ -261,9 +268,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
     private fun processData(data: ByteArray) {
         val receivedString = String(data, Charsets.UTF_8)
         val (type, jsonString) = parseInputString(receivedString)
-
-        Log.d("bluetooth", type)
-        Log.d("bluetooth", jsonString)
 
         when (type) {
             RequestType.MEMBERSHIP_ALL.name -> {
@@ -458,6 +462,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             performSend(nextMessage.type, nextMessage.params, nextMessage.callback)
         }
     }*/
+
     private fun parseInputString(input: String): Pair<String, String> {
         val index = input.indexOf(',')
         if (index != -1) {
@@ -556,8 +561,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                     }
                 }
             }
+            var delaySecond = 5
             while (!isReady) {
-
+                if (delaySecond == 0) {
+                    break
+                }
+                delaySecond--
+                Thread.sleep(1000)
             }
         }
         dbHelper.close()

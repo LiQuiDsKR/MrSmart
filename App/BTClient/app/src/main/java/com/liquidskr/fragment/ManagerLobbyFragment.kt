@@ -21,16 +21,16 @@ import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
 class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
-    lateinit var connectBtn: ImageButton
-    lateinit var rentalBtn: ImageButton
-    lateinit var returnBtn: ImageButton
-    lateinit var standbyBtn: ImageButton
-    lateinit var registerBtn: ImageButton
+    private lateinit var connectBtn: ImageButton
+    private lateinit var rentalBtn: ImageButton
+    private lateinit var returnBtn: ImageButton
+    private lateinit var standbyBtn: ImageButton
+    private lateinit var registerBtn: ImageButton
 
-    lateinit var rentalBtnField: LinearLayout
-    lateinit var returnBtnField: LinearLayout
-    lateinit var standbyBtnField: LinearLayout
-    lateinit var registerBtnField: LinearLayout
+    private lateinit var rentalBtnField: LinearLayout
+    private lateinit var returnBtnField: LinearLayout
+    private lateinit var standbyBtnField: LinearLayout
+    private lateinit var registerBtnField: LinearLayout
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 

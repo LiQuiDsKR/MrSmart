@@ -28,6 +28,9 @@ import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.rental.OutstandingState
+import com.mrsmart.standard.rental.RentalSheetDto
+import com.mrsmart.standard.rental.RentalToolDto
 import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
@@ -35,6 +38,7 @@ import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
 import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
+import com.mrsmart.standard.tool.ToolWithCount
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.lang.reflect.Type
@@ -54,7 +58,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
     private lateinit var timeStamp: TextView
 
     lateinit var qrEditText: EditText
-    lateinit var qrcodeBtn: LinearLayout
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
@@ -76,7 +79,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
         qrEditText = view.findViewById((R.id.QR_EditText))
-        qrcodeBtn = view.findViewById(R.id.QRcodeBtn)
         backButton = view.findViewById(R.id.backButton)
 
         returnerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
@@ -156,12 +158,6 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         })
         recyclerView.adapter = adapter
 
-        qrcodeBtn.setOnClickListener {
-            if (!qrEditText.isFocused) {
-                qrEditText.requestFocus()
-            }
-        }
-
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = fixCode(qrEditText.text.toString().replace("\n", ""))
@@ -177,11 +173,8 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                         rtwc.rentalTool.Tags = tag.macaddress
                                         handler.post {
                                             adapter.updateList(adapter.outstandingRentalToolWithCounts)
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            adapter.tagAdded(taggedTool.id)
+                                            Toast.makeText(requireContext(),"${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }
@@ -221,13 +214,19 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                 if (adapter.selectedToolsToReturn.isNotEmpty()) {
                     showPopup() // UI 블로킹
                     val sheet = outstandingRentalSheet
-                    returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.rentalToolDtoId) }.toMutableList()
+                    returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.toolDtoId) }.toMutableList()
                     val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
                     bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             if (result == "good") {
                                 hidePopup() // UI 블로킹
+                                try {
+                                    val dbHelper = DatabaseHelper(requireContext())
+                                    dbHelper.updateOutstandingStatusBySheetId(outstandingRentalSheet.id)
+                                } catch (e: Exception) {
+                                    Log.d("outstaning", "승인한 반납 시트는 보류 목록에 없습니다.")
+                                }
                                 handler.post {
                                     Toast.makeText(activity, "반납 승인 완료", Toast.LENGTH_SHORT).show()
                                 }
@@ -306,6 +305,39 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         val detail = gson.toJson(StandbyParam(returnSheetForm.rentalSheetDtoId, names.first, names.second, timestamp, pairToolList))
         val standbySheet = ReturnSheetFormStandbySheet(sheet, timestamp)
         dbHelper.insertStandbyData(gson.toJson(standbySheet), "RETURN","STANDBY", detail)
+
+
+        var processedToolList: MutableList<Pair<Long, Int>> = mutableListOf()
+        for (returnToolForm in sheet.toolList) {
+            val returnToolCnt = returnToolForm.goodCount + returnToolForm.faultCount + returnToolForm.damageCount + returnToolForm.lossCount
+            processedToolList.add(Pair(returnToolForm.toolDtoId, returnToolCnt))
+        }
+
+        var leftToolList: MutableList<RentalToolDto> = mutableListOf()
+        var outstandingCount = 0
+        for (rentalTool in outstandingRentalSheet.rentalSheetDto.toolList) {
+            for (processedTool in processedToolList) {
+                if (processedTool.first == rentalTool.toolDto.id) {
+                    val tags = rentalTool.Tags ?: ""
+                    val leftRentalTool = RentalToolDto(rentalTool.id, rentalTool.toolDto, rentalTool.count, (rentalTool.outstandingCount - processedTool.second), tags)
+                    if (leftRentalTool.outstandingCount > 0) {
+                        leftToolList.add(leftRentalTool)
+                        outstandingCount += leftRentalTool.outstandingCount
+                    }
+                }
+            }
+        }
+        val os = outstandingRentalSheet
+        val rs = os.rentalSheetDto // shorten
+        val rentalSheet = RentalSheetDto(rs.id, rs.workerDto, rs.leaderDto, rs.approverDto, rs.toolboxDto, rs.eventTimestamp, leftToolList)
+        val newOutstandingRentalSheet = OutstandingRentalSheetDto(os.id, rentalSheet, os.totalCount, outstandingCount,OutstandingState.READY)
+        try {
+            dbHelper.insertOutstandingData(os.id, gson.toJson(rentalSheet), os.totalCount, outstandingCount, OutstandingState.READY.name, gson.toJson(newOutstandingRentalSheet))
+        } catch (e: Exception) {
+            handler.post {
+                Toast.makeText(requireContext(), "승인하지 않은 공기구를 DB에 다시 저장하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+            }
+        }
         dbHelper.close()
     }
     private fun showPopup() { // UI 블로킹 end

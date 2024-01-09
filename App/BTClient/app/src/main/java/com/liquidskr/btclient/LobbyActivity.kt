@@ -1,6 +1,7 @@
 package com.liquidskr.btclient
 
 import SharedViewModel
+import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -47,10 +48,7 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
     lateinit var bluetoothManager: BluetoothManager
-    lateinit var managerRentalFragment: ManagerRentalFragment
-    lateinit var managerReturnFragment: ManagerReturnFragment
-    lateinit var workerSelfRentalFragment: WorkerSelfRentalFragment
-    lateinit var toolReturnFragment: ToolRegisterFragment
+    lateinit var bluetoothSocket: BluetoothSocket
     private var workerFragment: WorkerFragment? = null
     private var isPopupVisible = false
 
@@ -82,10 +80,13 @@ class LobbyActivity : AppCompatActivity() {
         val gson = Gson()
         val context = this
 
+        val dbHelper = DatabaseHelper(this)
+
+        sharedViewModel.toolBoxId = dbHelper.getToolboxName()
+
         val handler = Handler(Looper.getMainLooper())
 
         bluetoothManager = BluetoothManager(this, this)
-
         popupLayout = findViewById(R.id.bluetoothPopupLayout)
         progressBar = findViewById(R.id.bluetoothProgressBar)
         progressText = findViewById(R.id.bluetoothProgressText)

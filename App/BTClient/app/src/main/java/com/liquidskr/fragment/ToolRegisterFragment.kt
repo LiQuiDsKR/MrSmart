@@ -103,6 +103,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
 
         val adapter = ToolRegisterAdapter(tools) { tool ->
+            showPopup()
 
             editTextName.clearFocus()
             editTextName.isClickable = false
@@ -168,23 +169,50 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 .addToBackStack("ToolRegisterFragment")
                 .commit()
         }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
 
         QREditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val label = QREditText.text.toString().replace("\n", "")
                 try {
+                    showPopup()
+                    editTextName.clearFocus()
+                    editTextName.isClickable = false
+                    editTextName.isFocusable = false
+                    recyclerView.requestFocus()
+
                     val dbHelper = DatabaseHelper(requireContext())
                     val tool = dbHelper.getToolByTBT(label)
-                    QREditText.clearFocus()
-                    val fragment = ToolRegisterDetailFragment(tool.toToolDto(), listOf())
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, fragment)
-                        .addToBackStack(null)
-                        .commit()
+                    bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+                    bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                        override fun onSuccess(result: String, type: Type) {
+                            val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
+
+                            val tagQRList: MutableList<String> = mutableListOf()
+                            for (tagDto in tagAndTBT.tagDtoList) {
+                                if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
+                            }
+                            hidePopup()
+                            val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.fragmentContainer, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                        override fun onError(e: Exception) {
+                            handler.post{
+                                Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
+                            }
+                            hidePopup()
+                        }
+                    })
                 } catch(e:Exception) {
                     Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
+                    hidePopup()
                 }
-                editTextName.text.clear()
+                QREditText.text.clear()
                 return@setOnEditorActionListener true
             }
             false
@@ -209,11 +237,9 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun whenDisconnected () {
-        Log.d("bluetooth_","Disconnected3")
-        connectBtn.setImageResource(R.drawable.group_11_copy)
-        hidePopup()
         handler.post {
-            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+            hidePopup()
+            connectBtn.setImageResource(R.drawable.group_11_copy)
         }
     }
 
@@ -238,19 +264,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 Toast.makeText(activity, "해당 검색어를 통해 공기구를 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-    fun scheduleTask(delaySeconds: Long, task: () -> Unit) {
-        runnable = Runnable {
-            task.invoke()
-        }
-        handler.postDelayed(runnable!!, delaySeconds)
-    }
-    fun cancelTimer() {
-        runnable?.let {
-            handler.removeCallbacks(it)
-            runnable = null
-        }
-        sharedViewModel.qrScannerText = ""
     }
     private fun showPopup() {
         isPopupVisible = true

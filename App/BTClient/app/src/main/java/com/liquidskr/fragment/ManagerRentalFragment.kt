@@ -2,9 +2,11 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -49,12 +51,15 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var standbyBtnField: LinearLayout
     private lateinit var registerBtnField: LinearLayout
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var mContext: Context
+
+    private val handler = Handler(Looper.getMainLooper()) { true }
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
     private var isPopupVisible = false
-    private val REQUEST_PAGE_SIZE = 2 // UI블로킹 end
+
+    private val REQUEST_PAGE_SIZE = 2
 
     private lateinit var welcomeMessage: TextView
 
@@ -124,8 +129,12 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn.setOnClickListener{
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.bluetoothOpen()
-            connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
         rentalBtnField.setOnClickListener {
             fragmentTransform(ManagerRentalFragment(manager), "ManagerRentalFragment")
@@ -144,7 +153,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         sheetSearchBtn.setOnClickListener {
@@ -167,16 +176,10 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun whenDisconnected () {
-        try {
-            handler.post {
-                hidePopup()
-                connectBtn.setImageResource(R.drawable.group_11_copy)
-                Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-
+        handler.post {
+            hidePopup()
+            connectBtn.setImageResource(R.drawable.group_11_copy)
         }
-
     }
 
     private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
@@ -274,4 +277,12 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
     }
     // UI블로킹 end
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is LobbyActivity) {
+            mContext = context
+        }
+    }
+
 }

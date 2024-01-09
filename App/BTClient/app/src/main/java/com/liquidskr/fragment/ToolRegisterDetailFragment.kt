@@ -7,7 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.view.KeyEvent.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.Switch
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -34,6 +33,7 @@ import java.lang.reflect.Type
 
 class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) : Fragment() {
 
+
     private lateinit var toolName: TextView
     private lateinit var toolSpec: TextView
     private lateinit var context: Context
@@ -43,9 +43,14 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
 
     private lateinit var scannerReceiver: LinearLayout
 
-    lateinit var qrTextEdit: EditText
-    lateinit var qrDisplay: TextView
-    var tbt_qrcode: String = ""
+    private val handler = Handler(Looper.getMainLooper()) { true } // UI 블로킹 start
+    private lateinit var popupLayout: View
+    private lateinit var progressText: TextView
+    private var isPopupVisible = false // UI 블로킹 end
+
+    private lateinit var qrTextEdit: EditText
+    private lateinit var qrDisplay: TextView
+    var tbtQrcode: String = ""
 
     lateinit var recyclerView: RecyclerView
     lateinit var qrSearchText: EditText
@@ -68,6 +73,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
     }
     private val bluetoothModalListener = object : LobbyActivity.BluetoothModalListener {
         override fun onConfirmButtonClicked() {
+            showPopup()
             val handler = Handler(Looper.getMainLooper())
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             val tagGroup = if (tagList.size > 0) tagList[0] else ""
@@ -75,15 +81,17 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             for (tag in tagList) {
                 tagLists.add("\"${tag}\"")
             }
-            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbt_qrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbtQrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         try {
                             val dbHelper = DatabaseHelper(context)
-                            dbHelper.updateQRCodeById(tool.id, tbt_qrcode, sharedViewModel.toolBoxId)
+                            dbHelper.updateQRCodeById(tool.id, tbtQrcode, sharedViewModel.toolBoxId)
                             handler.post {
                                 Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
                             }
+                            requireActivity().supportFragmentManager.popBackStack()
+
                         } catch (e:Exception) {
                             handler.post {
                                 Toast.makeText(context, "라벨 정보가 DB에 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
@@ -96,20 +104,21 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                             Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
+                    hidePopup()
                 }
 
                 override fun onError(e: Exception) {
                     handler.post {
                         Toast.makeText(context, "공기구 등록 실패", Toast.LENGTH_SHORT).show()
                     }
+                    requireActivity().supportFragmentManager.popBackStack()
                     e.printStackTrace()
                 }
             })
-            requireActivity().supportFragmentManager.popBackStack()
         }
 
         override fun onCancelButtonClicked() {
-            requireActivity().supportFragmentManager.popBackStack()
+
         }
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -124,6 +133,9 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
 
         check_label = view.findViewById(R.id.check_label)
         check_tag = view.findViewById(R.id.check_tag)
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         toolName.text = tool.name
         toolSpec.text = tool.spec
@@ -144,7 +156,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             val dbHepler = DatabaseHelper(requireContext())
             val label = dbHepler.getTBTByToolId(tool.id)
             qrDisplay.text = label
-            tbt_qrcode = label
+            tbtQrcode = label
         } catch(e: Exception) {
             e.printStackTrace()
             handler.post {
@@ -176,9 +188,9 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                 val qrcode = qrTextEdit.text.toString().replace("\n", "")
                 if (isLabelMode) { // Label 모드
                     qrTextEdit.requestFocus()
-                    tbt_qrcode = qrcode
+                    tbtQrcode = qrcode
                     // qrcode가 이미 쓰인건지 체크
-                    qrDisplay.text = "${tbt_qrcode}"
+                    qrDisplay.text = "${tbtQrcode}"
                 } else { // Tag 모드
                     qrTextEdit.requestFocus()
                     var list = adapter.qrcodes.toMutableList()
@@ -236,5 +248,26 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             correctedText.append(correctedChar)
         }
         return correctedText.toString()
+    }
+    private fun showPopup() {
+        isPopupVisible = true
+        popupLayout.requestFocus()
+        popupLayout.setOnClickListener {
+
+        }
+        popupLayout.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+                return@setOnKeyListener true
+            }
+            false
+        }
+        popupLayout.visibility = View.VISIBLE
+    }
+    private fun hidePopup() {
+        handler.post {
+            isPopupVisible = false
+            popupLayout.visibility = View.GONE
+        }
     }
 }

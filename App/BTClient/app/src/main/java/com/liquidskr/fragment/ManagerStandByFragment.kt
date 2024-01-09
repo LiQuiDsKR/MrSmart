@@ -34,7 +34,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
     lateinit var bluetoothManager: BluetoothManager
     private lateinit var connectBtn: ImageButton
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private val handler = Handler(Looper.getMainLooper()) { true } // UI블로킹 start
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
@@ -110,7 +110,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         var dbHelper = DatabaseHelper(requireContext())
@@ -121,28 +121,40 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         standbySyncBtn = view.findViewById(R.id.standby_SyncBtn)
 
         standbySyncBtn.setOnClickListener {
-            try { // 블루투스가 연결되어있을때만 해야함
-                showPopup()
+            showPopup()
+            try {
                 bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                bluetoothManager.standbyProcess()
-                handler.postDelayed({
-                    adapter.updateList(dbHelper.getAllStandby())
+                if (bluetoothManager.isConnected) {
+                    bluetoothManager.standbyProcess()
+                    handler.postDelayed({
+                        adapter.updateList(dbHelper.getAllStandby())
+                    }, 500)
+                    if (adapter.sheets.isEmpty()) {
+                        handler.post {
+                            Toast.makeText(context ,"모든 보류 항목을 처리했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                     hidePopup()
-                }, 500)
+                } else {
+                    handler.post {
+                        Toast.makeText(context ,"보류 항목을 전송하려면 블루투스 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } catch (e: Exception) {
                 handler.post {
-                    Toast.makeText(context ,"보류 항목을 전송하려면 블루투스 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context ,"보류 항목을 전송하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    hidePopup()
                 }
             }
+
         }
         return view
     }
 
     fun whenDisconnected () {
-        Log.d("bluetooth_","Disconnected3")
-        connectBtn.setImageResource(R.drawable.group_11_copy)
         handler.post {
-            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
+            hidePopup()
+            connectBtn.setImageResource(R.drawable.group_11_copy)
         }
     }
     private fun showPopup() {

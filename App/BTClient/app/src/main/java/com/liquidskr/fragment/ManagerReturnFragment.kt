@@ -2,6 +2,7 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -50,7 +51,10 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
     lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
+    private lateinit var mContext: Context
+
+
+    private val handler = Handler(Looper.getMainLooper()) { true } // UI블로킹 start
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
@@ -119,21 +123,21 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             override fun onBluetoothDisconnected() {
                 try {
                     whenDisconnected()
-                    val dbHelper = DatabaseHelper(requireContext())
+                    val dbHelper = DatabaseHelper(mContext)
                     handler.post {
                         (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
                     }
                     Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
                 } catch (e: Exception) {
                     handler.post {
-                        Toast.makeText(activity, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
                     }
                 }
 
             }
         })
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = LinearLayoutManager(mContext)
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -175,7 +179,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            requireActivity().supportFragmentManager.popBackStack("ManagerLogin", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         recyclerView.adapter = adapter
@@ -212,10 +216,11 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             false
         }
         sheetSearchBtn.setOnClickListener {
-            val dbHelper = DatabaseHelper(requireContext())
+            val dbHelper = DatabaseHelper(mContext)
             val name = searchSheetEdit.text.toString()
             val id = dbHelper.getMembershipIdByName(name)
             getOutstandingRentalSheetListByMembership(id)
+            searchSheetEdit.clearFocus()
             qrEditText.requestFocus()
         }
 
@@ -232,11 +237,9 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun whenDisconnected () {
-        Log.d("bluetooth_","Disconnected3")
-        connectBtn.setImageResource(R.drawable.group_11_copy)
-        hidePopup()
         handler.post {
-            Toast.makeText(activity, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+            hidePopup()
+            connectBtn.setImageResource(R.drawable.group_11_copy)
         }
     }
 
@@ -316,7 +319,6 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                     e.printStackTrace()
                 }
             })
-            showPopup()
         } catch (e: Exception) {
             handler.post {
                 Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
@@ -362,6 +364,12 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         handler.post {
             isPopupVisible = false
             popupLayout.visibility = View.GONE
+        }
+    }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is LobbyActivity) {
+            mContext = context
         }
     }
 }
