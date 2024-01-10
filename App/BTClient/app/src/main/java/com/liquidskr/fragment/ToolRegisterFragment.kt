@@ -29,6 +29,7 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
+import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
@@ -86,6 +87,25 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
+            }
+        })
 
         QREditText = view.findViewById(R.id.QR_EditText)
         editTextName = view.findViewById(R.id.editTextName)
@@ -256,17 +276,21 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         editTextName.isClickable = true
         editTextName.isFocusable = true
 
+        bluetoothManager
+        bluetoothManager.requestData(RequestType.TEST,"{string:\"check\"}",object:BluetoothManager.RequestCallback{
+            override fun onSuccess(result: String, type: Type) {
+
+            }
+
+            override fun onError(e: Exception) {
+
+            }
+        })
+
         QREditText.requestFocus()
         recyclerView.adapter = adapter
 
         return view
-    }
-
-    fun whenDisconnected () {
-        handler.post {
-            hidePopup()
-            connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
     }
 
     fun disableAllClickableViews(rootView: View) {

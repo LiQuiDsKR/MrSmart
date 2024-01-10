@@ -185,7 +185,21 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         return view
     }
 
-    private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
+    override fun onResume() {
+        super.onResume()
+        connectBtn.setOnClickListener(null)
+        connectBtn.setOnClickListener{
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+        private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, frag)
             .addToBackStack(backStackTag)

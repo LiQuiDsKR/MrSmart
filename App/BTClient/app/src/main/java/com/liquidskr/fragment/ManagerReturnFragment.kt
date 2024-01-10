@@ -108,21 +108,6 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
-
-        rentalBtnField = view.findViewById(R.id.RentalBtnField)
-        returnBtnField = view.findViewById(R.id.ReturnBtnField)
-        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
-        registerBtnField = view.findViewById(R.id.RegisterBtnField)
-
-        searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
-        sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
-        recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
-        qrEditText = view.findViewById(R.id.QREditText)
-
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressBar = view.findViewById(R.id.progressBar)
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
-
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
@@ -141,6 +126,21 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                 Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
             }
         })
+
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        registerBtnField = view.findViewById(R.id.RegisterBtnField)
+
+        searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
+        sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
+        recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
+        qrEditText = view.findViewById(R.id.QREditText)
+
+        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
+        progressBar = view.findViewById(R.id.progressBar)
+        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+
 
         recyclerView.layoutManager = LinearLayoutManager(mContext)
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->

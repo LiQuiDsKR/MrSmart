@@ -193,6 +193,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             messageQueue.offer(BluetoothMessage(type, params, callback))
         }*/
     }
+
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
         try {
             outputStream = bluetoothSocket.outputStream

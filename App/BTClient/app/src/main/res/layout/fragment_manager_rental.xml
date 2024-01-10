@@ -117,38 +117,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="#F4F4FF"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
                 android:background="#fff4f4ff"
                 android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/ConnectBtn"
                     android:layout_width="100dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
+                    android:background="#00FFFFFF"
                     android:scaleType="fitCenter"
-                    android:scaleX="2"
-                    android:scaleY="2"
                     app:srcCompat="@drawable/manager_lobby_connectionbtn" />
 
                 <ImageButton
                     android:id="@+id/Manager_SelfRentalBtn"
                     android:layout_width="100dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0"
-                    android:backgroundTint="#00FFFFFF"
+                    android:background="#00FFFFFF"
                     android:scaleType="fitCenter"
-                    android:scaleX="2"
-                    android:scaleY="2"
                     app:srcCompat="@drawable/group_8" />
             </LinearLayout>
 
