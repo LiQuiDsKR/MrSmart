@@ -187,13 +187,27 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
         }
 
         qrTextEdit.setOnEditorActionListener { _, actionId, event ->
+            Log.d("qr", "#1")
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                Log.d("qr", "#2")
                 val qrcode = qrTextEdit.text.toString().replace("\n", "")
+                Log.d("qr", "#3")
                 if (isLabelMode) { // Label 모드
+                    Log.d("qr", "#4")
                     qrTextEdit.requestFocus()
+                    Log.d("qr", "#5")
                     tbtQrcode = qrcode
+                    Log.d("qr", "#6")
+                    handler.post{
+                        Log.d("qr", "#7")
+                        Toast.makeText(requireContext(), "TBT_QRCODE : ${tbtQrcode}",Toast.LENGTH_SHORT).show()
+
+                        Log.d("qr", "#8")
+                        qrDisplay.text = "${tbtQrcode}"
+
+                        Log.d("qr", "#9")
+                    }
                     // qrcode가 이미 쓰인건지 체크
-                    qrDisplay.text = "${tbtQrcode}"
                 } else { // Tag 모드
                     qrTextEdit.requestFocus()
                     var list = adapter.qrcodes.toMutableList()
@@ -228,6 +242,15 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
 
         recyclerView.adapter = adapter
         qrTextEdit.requestFocus()
+
+        handler.post {
+            val currentFocus: View? = requireActivity().currentFocus
+
+            if (currentFocus != null) {
+                Toast.makeText(requireContext(), "${currentFocus.id}",Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "det : ${qrTextEdit.id}",Toast.LENGTH_SHORT).show()
+            }
+        }
 
         return view
     }

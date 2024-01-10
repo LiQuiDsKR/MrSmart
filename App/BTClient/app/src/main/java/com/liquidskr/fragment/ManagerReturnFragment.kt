@@ -315,10 +315,20 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
 
                 override fun onError(e: Exception) {
                     e.printStackTrace()
+                    try {
+                        val dbHelper = DatabaseHelper(requireContext())
+                        (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
+                        Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+                    } catch (e: Exception) {
+                        handler.post {
+                            Toast.makeText(activity, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             })
             showPopup()
         } catch (e: Exception) {
+            Log.d("a","a")
             handler.post {
                 Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }

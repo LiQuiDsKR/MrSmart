@@ -250,9 +250,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             })
         } catch (e: Exception) {
             // 전송 중 에러
+            bluetoothConnectionListener?.onBluetoothDisconnected()
             handler.post {
                 Log.d("bluetooth_","Disconnected1")
-                bluetoothConnectionListener?.onBluetoothDisconnected()
             }
             callback.onError(e)
         }

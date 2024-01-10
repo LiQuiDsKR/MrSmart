@@ -140,11 +140,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         val adapter = ToolRegisterAdapter(tools) { tool ->
             showPopup()
-
-            editTextName.clearFocus()
-            editTextName.clearFocus()
-            editTextName.isClickable = false
-            editTextName.isFocusable = false
             recyclerView.requestFocus()
 
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
@@ -171,7 +166,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         rentalBtnField.setOnClickListener {
-            disableAllClickableViews(view)
             val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -180,7 +174,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         returnBtnField.setOnClickListener {
-            disableAllClickableViews(view)
             val fragment = ManagerReturnFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -189,7 +182,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         standbyBtnField.setOnClickListener {
-            disableAllClickableViews(view)
             val fragment = ManagerStandByFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -198,7 +190,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         registerBtnField.setOnClickListener {
-            disableAllClickableViews(view)
             val fragment = ToolRegisterFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -271,11 +262,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             QREditText.requestFocus()
         }
 
-        QREditText.isClickable = true
-        QREditText.isFocusable = true
-        editTextName.isClickable = true
-        editTextName.isFocusable = true
-
         bluetoothManager
         bluetoothManager.requestData(RequestType.TEST,"{string:\"check\"}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
@@ -291,17 +277,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         recyclerView.adapter = adapter
 
         return view
-    }
-
-    fun disableAllClickableViews(rootView: View) {
-        if (rootView is ViewGroup) {
-            for (i in 0 until rootView.childCount) {
-                val childView = rootView.getChildAt(i)
-                disableAllClickableViews(childView)
-            }
-        } else {
-            rootView.isClickable = false
-        }
     }
 
     fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {

@@ -188,7 +188,6 @@
                         android:layout_width="1dp"
                         android:layout_height="1dp"
                         android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
                         android:inputType="textMultiLine"
                         android:textColor="#00FFFFFF"
                         android:textSize="0sp" />
