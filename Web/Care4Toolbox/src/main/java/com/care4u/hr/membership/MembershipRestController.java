@@ -94,7 +94,7 @@ public class MembershipRestController {
     				.code(memberFormDto.getCode())
     				.password(memberFormDto.getPassword())
     				.partDto(partDto)
-    				.role(Role.USER)
+    				.role(memberFormDto.getRole())
     				.employmentStatus(memberFormDto.getEmploymentStatus())
     				.build()
     				);

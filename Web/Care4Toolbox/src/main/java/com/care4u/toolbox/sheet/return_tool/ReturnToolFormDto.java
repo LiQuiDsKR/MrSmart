@@ -22,8 +22,13 @@ public class ReturnToolFormDto {
 	@NotNull
 	private Long toolDtoId;
 	@Min(value=1, message="수량은 1 이상이어야 합니다")
-	private int count;
-    @NotNull(message = "재직 상태는 필수 입력 값입니다.")
-    private ToolState status;
-	private String Tags;
+	private int goodCount;
+	@Min(value=1, message="수량은 1 이상이어야 합니다")
+	private int faultCount;
+	@Min(value=1, message="수량은 1 이상이어야 합니다")
+	private int damageCount;
+	@Min(value=1, message="수량은 1 이상이어야 합니다")
+	private int lossCount;
+	private String tags;
+	private String comment;
 }

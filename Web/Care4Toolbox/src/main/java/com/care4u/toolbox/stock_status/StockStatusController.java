@@ -38,10 +38,30 @@ public class StockStatusController {
 	@Autowired
 	private ToolboxService toolboxService;
 	
-    @GetMapping(value = "tool_states")
-    public String toolState(Model model){
-    	model.addAttribute("toolboxList",toolboxService.list());
-        return "analytics/tool_states";
-    }
+//    @GetMapping(value = "tool_states")
+//    public String toolState(Model model){
+//    	model.addAttribute("toolboxList",toolboxService.list());
+//        return "analytics/tool_states";
+//    }
     
+    @GetMapping(value = "tool_states/rental_return/old")
+    public String rentalReturnStateOld(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+    	return "analytics/tool_states";
+    } 
+    @GetMapping(value = "tool_states/rental_return")
+    public String rentalReturnState(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+    	return "analytics/tool_states2";
+    }
+    @GetMapping(value = "tool_states/main_group")
+    public String mainGroupState(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+    	return "analytics/tool_states3";
+    }
+    @GetMapping(value = "other_stock")
+    public String otherToolboxStock(Model model){
+    	model.addAttribute("toolboxList",toolboxService.list());
+    	return "analytics/other_stock";
+    }
 }

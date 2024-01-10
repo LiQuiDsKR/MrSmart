@@ -39,12 +39,16 @@
 	<link type="text/css" th:href="@{/plugins/datatables/datatables.min.css}" rel="stylesheet"/>
 	<link type="text/css" th:href="@{/plugins/sweetalert2/sweetalert2.min.css}" rel="stylesheet"/>
 	<link type="text/css" th:href="@{/plugins/datepicker/datepicker.min.css}" rel="stylesheet"/>
+	<link type="text/css" th:href="@{/plugins/dropzone/dropzone.min.css}" rel="stylesheet"/>
 	<!-- ======= END BEGIN PAGE LEVEL PLUGINS STYLES ======= -->
 	
 	<!-- ======= MAIN STYLES ======= -->
 	<link type="text/css" th:href="@{/css/style.css}" rel="stylesheet"/>
 	<link type="text/css" th:href="@{/css/custom.css}" rel="stylesheet"/>
 	<!-- ======= END MAIN STYLES ======= -->
+	
+	
+	<script th:src="@{/js/jquery.min.js}"></script>
 	
 	<th:block layout:fragment="css"></th:block>
 	
@@ -90,7 +94,6 @@
 	
 	<!-- JS, Popper.js, and jQuery -->
 	<!-- ======= BEGIN GLOBAL MANDATORY SCRIPTS ======= -->
-	<script th:src="@{/js/jquery.min.js}"></script>
 	<script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/plugins/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
 	<script th:src="@{/js/script.js}"></script>
@@ -106,6 +109,7 @@
 	<script th:src="@{/plugins/datepicker/i18n/datepicker-kr.js}"></script>
 	<script th:src="@{/plugins/sockjs-client/sockjs.min.js}"></script>
 	<script th:src="@{/plugins/stompjs/stomp.min.js}"></script>
+	<script th:src="@{/plugins/dropzone/dropzone.min.js}"></script>
 	<script th:src="@{/js/abcHttp.js}"></script>
 	<!-- ======= End BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS ======= -->
 	
@@ -118,7 +122,7 @@
 		abcHttp.get(
 			'/membership/getbycode',
 			{
-				code:parseInt( document.getElementById("user-code").textContent)
+				code: document.getElementById("user-code").textContent
 			}
 		)
 		.then(data=>{

@@ -25,7 +25,7 @@
 					<span class="link-title">조직 정보</span>
 				</a>
 			</li>
-			<li class="" >
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" >
 				<a th:href="@{/membership}">
 					<i class="icofont-ui-user"></i>
 					<span class="link-title">인원 정보</span>
@@ -50,10 +50,16 @@
 				</a>
 			</li>
 			<li class="nav-category">공기구 대여</li>
-			<li class="">
-				<a th:href="@{/rental/request_sheet/create}">
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/rental/request_sheet/manager/create}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">리스트 생성</span>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('USER')">
+				<a th:href="@{/rental/request_sheet/user/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
 				</a>
 			</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
@@ -69,6 +75,12 @@
 				</a>
 			</li>
 			<li class="nav-category">공기구 반납</li>
+			<li class="">
+				<a th:href="@{/return/outstanding_rental_sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/return/sheet/create}">
 					<i class="icofont-navigation-menu"></i>
@@ -81,11 +93,61 @@
 					<span class="link-title">기록 조회</span>
 				</a>
 			</li>
-			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">분석 현황</li>
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">소모자재</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
-				<a th:href="@{/analytics/tool_states}">
+				<a th:href="@{/supply/sheet}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">대여 / 반납 현황</span>
+					<span class="link-title">지급 기록 조회</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/supply/sheet/tool}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">재지급기간 조회</span>
+				</a>
+			</li>
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">공기구 매입</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/buy/sheet/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">매입 등록</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/buy/sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">기록 조회</span>
+				</a>
+			</li>
+			<li class="nav-category">분석</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" hidden>
+				<a th:href="@{/analytics/tool_states/rental_return/old}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">(구)분석 현황</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/analytics/tool_states/rental_return}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">금일 현황</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/analytics/tool_states/main_group}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">대여/반납 현황</span>
+				</a>
+			</li>
+			<li class="" >
+				<a th:href="@{/analytics/other_stock}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">타 공구실 재고 조회</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasRole('ADMIN')" >
+				<a th:href="@{/initialize/stock_status}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">재고 초기 설정</span>
 				</a>
 			</li>
 			<!-- 원본 -->

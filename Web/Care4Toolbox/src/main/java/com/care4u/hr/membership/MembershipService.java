@@ -64,11 +64,13 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		}
 		membership.update(part.get(), membershipDto);
 		
+		/*
 		// Hash the plain password using BCrypt
 		String plainPassword = membership.getPassword();
         String hashedPassword = passwordEncoder.encode(plainPassword);
         membership.updatePassword(hashedPassword);
         logger.info(membership.getCode()+","+membership.getName()+" 회원의 비밀번호가 ["+hashedPassword+"]로 정상 변경되었습니다.");
+		*/
 
 		return new MembershipDto(repository.save(membership));
 	}
@@ -88,7 +90,7 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
      */
     @Transactional(readOnly = true)
 	public List<MembershipDto> list(){
-		List<Membership> list = repository.findAllByRoleOrderByNameAsc(Role.USER);
+		List<Membership> list = repository.findAll();
 		return getDtoList(list);
 	}
 	
@@ -112,11 +114,22 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
 		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
 		return membershipPage.map(MembershipDto::new);
     }
+	@Transactional(readOnly = true)
+    public Page<MembershipDto> getMembershipPage(Pageable pageable){
+		Page<Membership> membershipPage = repository.findAll(pageable);
+		logger.info("membership total page : " + membershipPage.getTotalPages() + ", current page : " + membershipPage.getNumber());
+		return membershipPage.map(MembershipDto::new);
+    }
 	
 	@Transactional(readOnly = true)
 	public Page<MembershipDto> getMembershipPageByName(Pageable pageable, String name){
 		Page<Membership> membershipPage = repository.findByNameContaining(pageable, name);
 		return membershipPage.map(MembershipDto::new);
+	}
+	
+	@Transactional(readOnly = true)
+	public long getMembershipCount() {
+		return repository.count();
 	}
 	
 	@Transactional(readOnly=true)
@@ -162,6 +175,18 @@ private final Logger logger = LoggerFactory.getLogger(MembershipService.class);
             // Update the user's password in the database
             
             logger.info(member.getCode()+","+member.getName()+" 회원의 비밀번호가 ["+hashedPassword+"]로 정상 변경되었습니다.");
+            repository.save(member);
+        }
+    }
+    @Transactional
+    public void downdatePasswords() {
+    	List<Membership> memberships = repository.findAll();
+
+        for (Membership member : memberships) {            
+            member.updatePassword("123");
+            // Update the user's password in the database
+            
+            logger.info(member.getCode()+","+member.getName()+" 회원의 비밀번호가 ["+member.getPassword()+"]로 정상 변경되었습니다.");
             repository.save(member);
         }
     }

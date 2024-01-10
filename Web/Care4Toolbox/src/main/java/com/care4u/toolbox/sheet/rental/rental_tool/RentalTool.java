@@ -35,9 +35,6 @@ public class RentalTool extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private RentalSheet rentalSheet;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	private RentalRequestSheet rentalRequestSheet;
-	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Tool tool;
@@ -47,12 +44,12 @@ public class RentalTool extends BaseEntity {
 	private int outstandingCount;
 	
 	@Builder
-	public RentalTool(RentalSheet rentalSheet, Tool tool, int count, int outstandingCount, String Tags, RentalRequestSheet rentalRequestSheet) {
+	public RentalTool(RentalSheet rentalSheet, Tool tool, int count, int outstandingCount, String Tags/*, RentalRequestSheet rentalRequestSheet*/) {
 		this.rentalSheet = rentalSheet;
 		this.tool = tool;
 		this.count = count;
 		this.outstandingCount = outstandingCount;
-		this.rentalRequestSheet = rentalRequestSheet;
+		//this.rentalRequestSheet = rentalRequestSheet;
 	}
 	
 	public void returnUpdate(int returnedCount) {

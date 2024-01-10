@@ -10,11 +10,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.care4u.constant.OutstandingState;
 import com.care4u.hr.membership.Membership;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 
-public interface OutstandingRentalSheetRepository extends JpaRepository<OutstandingRentalSheet, Long> {
+public interface OutstandingRentalSheetRepository extends JpaRepository<OutstandingRentalSheet, Long>, OutstandingRentalSheetRepositoryCustom{
 	
 	List<OutstandingRentalSheet> findByRentalSheetLeaderId(long leaderId);
 	
@@ -22,5 +23,5 @@ public interface OutstandingRentalSheetRepository extends JpaRepository<Outstand
 	
 	OutstandingRentalSheet findByRentalSheetId(long RentalSheetId);
 	
-	Page<OutstandingRentalSheet> findByRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(long toolboxId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	List<OutstandingRentalSheet> findByOutstandingStatusAndRentalSheetToolboxId(OutstandingState status, long toolboxId);	
 }

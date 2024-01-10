@@ -1,0 +1,14 @@
+package com.mrsmart.standard.rental
+
+import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.tool.ToolboxDto
+
+data class RentalSheetDto(
+    var id: Long,
+    var workerDto: MembershipDto,
+    var leaderDto: MembershipDto,
+    var approverDto: MembershipDto,
+    var toolboxDto: ToolboxDto,
+    var eventTimestamp: String,
+    var toolList: List<RentalToolDto>
+)

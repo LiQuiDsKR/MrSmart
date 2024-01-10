@@ -9,5 +9,7 @@ public interface ToolboxRepository extends JpaRepository<Toolbox, Long> {
 	List<Toolbox> findAllByOrderByNameAsc();
 	
 	Toolbox findByName(String name);
+
+	Toolbox findByManagerId(Long managerId);
 	
 }

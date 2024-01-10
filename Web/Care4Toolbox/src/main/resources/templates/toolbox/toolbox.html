@@ -245,9 +245,9 @@
 	}
 	document.querySelectorAll("table .contact-edit").forEach(element=>{
 		element.addEventListener("click",e=>{
-			const parentTable=element.closest("table");
-			document.getElementById("editFormId").value = parseInt(parentTable.querySelector('td:nth-child(1)').textContent.trim());
-			document.getElementById("editFormName").value=parentTable.querySelector('td:nth-child(2)').textContent.trim();
+			const row=element.closest("tr");
+			document.getElementById("editFormId").value = parseInt(row.querySelector('td:nth-child(1)').textContent.trim());
+			document.getElementById("editFormName").value=row.querySelector('td:nth-child(2)').textContent.trim();
 		});
 	});
 

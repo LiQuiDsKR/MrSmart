@@ -46,6 +46,17 @@ public class ToolboxService {
 		return new ToolboxDto(item);
 	}
 	
+	@Transactional(readOnly=true)
+	public ToolboxDto getByManagerId(Long managerId) {
+		Toolbox item = repository.findByManagerId(managerId);
+		if (item == null) {
+			logger.error("Invalid managerId : " + managerId);
+			return null;
+		}
+		return new ToolboxDto(item);
+
+	}
+	
 	@Transactional(readOnly = true)
 	public List<ToolboxDto> list(){
 		List<Toolbox> list = repository.findAllByOrderByNameAsc();
@@ -92,4 +103,5 @@ public class ToolboxService {
 		
 		return new ToolboxDto(repository.save(toolbox));
 	}
+
 }

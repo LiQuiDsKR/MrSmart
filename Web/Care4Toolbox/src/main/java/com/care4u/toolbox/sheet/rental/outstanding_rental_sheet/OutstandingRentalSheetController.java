@@ -49,4 +49,9 @@ public class OutstandingRentalSheetController {
         return "return/sheet_create";
     }
     
+    @GetMapping(value = "outstanding_rental_sheet")
+    public String outstandingRentalSheet(Model model) {
+    	return "return/outstanding_rental_sheet";
+    }
+    
 }

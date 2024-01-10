@@ -31,9 +31,11 @@ public class ReturnToolDto {
 	
 	private int discardCount;
 	
+	private String comment;
+	
 	@Builder
 	public ReturnToolDto(long id, RentalTool rentalTool, String Tags,
-			int count, int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String rentalTags) {
+			int count, int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, String rentalTags, String comment) {
 		this.id = id;
 		this.rentalToolDto = new RentalToolDto(rentalTool,rentalTags);
 		this.Tags = Tags;
@@ -43,6 +45,7 @@ public class ReturnToolDto {
 		this.damageCount = damageCount;
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
+		this.comment=comment;
 	}
 	
 	public ReturnToolDto(ReturnTool returnTool, String rentalTags) {
@@ -55,6 +58,7 @@ public class ReturnToolDto {
 		this.damageCount = returnTool.getDamageCount();
 		this.lossCount = returnTool.getLossCount();
 		this.discardCount = returnTool.getDiscardCount();
+		this.comment=returnTool.getComment();
 	}
 	
 }

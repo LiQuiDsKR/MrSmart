@@ -15,8 +15,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.hr.main_part.MainPart;
+import com.care4u.hr.main_part.MainPartRepository;
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipRepository;
+import com.care4u.hr.part.Part;
+import com.care4u.hr.part.PartRepository;
+import com.care4u.hr.sub_part.SubPart;
+import com.care4u.hr.sub_part.SubPartRepository;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.outstanding_rental_sheet.OutstandingRentalSheetService;
@@ -37,6 +43,8 @@ import com.care4u.toolbox.sheet.return_tool.ReturnToolRepository;
 import com.care4u.toolbox.sheet.return_tool.ReturnToolService;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
+import com.care4u.toolbox.tool.Tool;
+import com.care4u.toolbox.tool.ToolRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,6 +62,10 @@ public class ReturnSheetService {
 	private final TagRepository tagRepository;
 	private final RentalSheetRepository rentalSheetRepository;
 	private final ReturnToolRepository returnToolRepository;
+	private final PartRepository partRepository;
+	private final SubPartRepository subPartRepository;
+	private final MainPartRepository mainPartRepository;
+	private final ToolRepository toolRepository;
 	private final ReturnToolService returnToolService;
 	private final OutstandingRentalSheetService outstandingRentalSheetService;
 	private final RentalRequestSheetService rentalRequestSheetService;
@@ -84,6 +96,54 @@ public class ReturnSheetService {
 		}
 		
 		return new ReturnSheetDto(returnSheet,rentalSheetDto.getToolList(),dtoList);
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ReturnSheetDto> getPage(Long partId, long membershipId, Boolean isWorker, Boolean isLeader,
+			Boolean isApprover, long toolId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
+		Optional<Part> part = partRepository.findById(partId);
+		if (part.isEmpty()) {
+			Optional<SubPart> subPart = subPartRepository.findById(partId);
+			if (subPart.isEmpty()) {
+				Optional<MainPart> mainPart = mainPartRepository.findById(partId);
+				if (mainPart.isEmpty()) {
+					logger.info("no part : " + partId + " all part selected.");
+				}
+			}
+		}
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
+			logger.info("no membership : " + membershipId + " all membership selected.");
+			membership = null;
+		} else {
+			membership = membershipOptional.get();
+		}
+
+		Optional<Tool> toolOptional = toolRepository.findById(toolId);
+		Tool tool;
+		if (toolOptional.isEmpty()) {
+			logger.info("no tool : " + toolId + " all tool selected.");
+			tool = null;
+		} else {
+			tool = toolOptional.get();
+		}
+
+		Page<ReturnSheet> page = repository.findBySearchQuery(partId, membership, isWorker, isLeader, isApprover, tool,
+				LocalDateTime.of(startLocalDate, LocalTime.MIN), LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);
+
+		return page.map(e->convertToDto(e));
+	}
+	@Transactional(readOnly=true)
+	public Page<ReturnSheetDto> getPage(long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		if(membershipOptional.isEmpty()) {
+			logger.error("invalid membership id : "+membershipId);
+			return null;
+		}
+		Membership member = membershipOptional.get();
+		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		return page.map(e->convertToDto(e));
 	}
 	
 	/**
@@ -148,15 +208,19 @@ public class ReturnSheetService {
 		
 		return resultDto;
 	}
-
-	public Page<ReturnSheetDto> getPage(long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
-		if(membershipOptional.isEmpty()) {
-			logger.error("invalid membership id : "+membershipId);
+	
+	@Transactional
+	public ReturnSheetDto addNew(ReturnSheetFormDto formDto,LocalDateTime eventTimestamp) {
+		ReturnSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
+		if (findSheet != null) {
+			logger.error("returnSheet already exists! : " + eventTimestamp);
+			return null;
+		}else {
+			Optional<ReturnSheet> sheetOptional = repository.findById(addNew(formDto).getId());
+			ReturnSheet sheet = sheetOptional.get();
+			sheet.updateEventTimestamp(eventTimestamp);
+			repository.save(sheet);
 			return null;
 		}
-		Membership member = membershipOptional.get();
-		Page<ReturnSheet> page = repository.findByMemberAndEventTimestampBetween(member,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
-		return page.map(e->convertToDto(e));
 	}
 }

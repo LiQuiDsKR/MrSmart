@@ -4,6 +4,7 @@ import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
 import com.care4u.entity.BaseEntity;
 import com.care4u.hr.part.Part;
+import com.querydsl.core.annotations.QueryInit;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +38,7 @@ public class Membership extends BaseEntity {
 
     @NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
+    @QueryInit("subPart.mainPart")
     private Part part;
 
     @Enumerated(EnumType.STRING)

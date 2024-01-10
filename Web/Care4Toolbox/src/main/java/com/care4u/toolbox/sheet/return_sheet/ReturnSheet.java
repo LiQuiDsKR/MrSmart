@@ -65,4 +65,8 @@ public class ReturnSheet extends BaseEntity {
 		this.toolbox = toolbox;
 		this.eventTimestamp = eventTimestamp;
 	}
+
+	public void updateEventTimestamp(LocalDateTime eventTimestamp) {
+		this.eventTimestamp = eventTimestamp;		
+	}
 }

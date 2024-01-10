@@ -14,7 +14,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
+import com.care4u.hr.membership.Membership;
+import com.care4u.hr.membership.MembershipRepository;
+import com.care4u.toolbox.Toolbox;
+import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_request_tool.RentalRequestToolDto;
@@ -39,6 +44,8 @@ public class OutstandingRentalSheetService {
 
 	private final OutstandingRentalSheetRepository repository;
 	private final TagRepository tagRepository;
+	private final MembershipRepository membershipRepository;
+	private final ToolboxRepository toolboxRepository;
 	private final RentalToolService rentalToolService;
 
 	@Transactional(readOnly = true)
@@ -57,13 +64,13 @@ public class OutstandingRentalSheetService {
 		if (tag == null) {
 			logger.error("Invalid Tag : " + macAddress);
 			return null;
-		} 
+		}
 		if (tag.getRentalTool() == null) {
 			logger.error("Tag already returned");
 			return null;
 		}
 		long rentalSheetId = tag.getRentalTool().getRentalSheet().getId();
-		
+
 		OutstandingRentalSheet sheet = repository.findByRentalSheetId(rentalSheetId);
 		if (sheet == null) {
 			logger.error("Invalid Tag : " + macAddress);
@@ -73,23 +80,111 @@ public class OutstandingRentalSheetService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OutstandingRentalSheetDto> getPage(Long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-		Page<OutstandingRentalSheet> page = repository
-				.findByRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+	public Page<OutstandingRentalSheetDto> getPageByToolboxId(OutstandingState status, Long toolboxId, Pageable pageable) {
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolbox : " + toolboxId);
+			return null;
+		}
+		Page<OutstandingRentalSheet> page = repository.findByToolbox(status, toolbox.get(),pageable);
 		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
 	}
+	public Long getCountByToolboxId(OutstandingState status, long toolboxId) {
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolbox : " + toolboxId);
+			return null;
+		}
+		Long count = repository.countByToolbox(status, toolbox.get());
+		return count;
+	}
+
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPageByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+		Page<OutstandingRentalSheet> page = repository.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(
+				membershipId, LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX),
+				pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPageByMembershipId(Long membershipId, Pageable pageable) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("Invalid membership : " + membershipId);
+			return null;
+		}
+		Page<OutstandingRentalSheet> page = repository.findByMembership(membership.get(), pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+	@Transactional(readOnly = true)
+	public Long getCountByMembershipId(long membershipId) {
+		Optional<Membership> membership = membershipRepository.findById(membershipId);
+		if (membership.isEmpty()) {
+			logger.error("Invalid membership : " + membershipId);
+			return null;
+		}
+		Long count = repository.countByMembership(membership.get());
+		return count;
+	}
+
+//  앱에서도 page로만 받게 되어서 list는 주석처리했습니다.
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId, LocalDate startDate, LocalDate endDate) {
+//		List<OutstandingRentalSheet> list = repository
+//				.findByRentalSheetMembershipIdAndRentalSheetEventTimestampBetween(membershipId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByMembershipId(Long membershipId) {
+//		List<OutstandingRentalSheet> list = repository
+//				.findByOutstandingStatusAndLeaderIdOrWorkerIdOrApproverId(OutstandingState.READY,membershipId);
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByToolboxId(OutstandingState status, Long toolboxId, LocalDate startDate, LocalDate endDate) {
+//		List<OutstandingRentalSheet> list = repository
+//				.findByOutstandingStatusAndRentalSheetToolboxIdAndRentalSheetEventTimestampBetween(status, toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX));
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
+//	@Transactional(readOnly = true)
+//	public List<OutstandingRentalSheetDto> getListByToolboxId(Long toolboxId) {
+//		List<OutstandingRentalSheet> list = repository
+//			.findByOutstandingStatusAndRentalSheetToolboxId(OutstandingState.REQUEST, toolboxId);
+//		List<OutstandingRentalSheetDto> dtoList = new ArrayList<OutstandingRentalSheetDto>();
+//		for (OutstandingRentalSheet item : list) {
+//			dtoList.add(new OutstandingRentalSheetDto(item, rentalToolService.list(item.getRentalSheet().getId())));
+//		}
+//		return dtoList;
+//	}
+
 	@Transactional
 	public OutstandingRentalSheet addNew(RentalSheet sheet, List<RentalTool> toolList) {
+		logger.debug("OutstandingRentalSheet [Add] : start");
 		int totalCount = 0;
 		for (RentalTool tool : toolList) {
 			totalCount += tool.getCount();
 		}
 		OutstandingRentalSheet outstandingSheet = OutstandingRentalSheet.builder().rentalSheet(sheet)
-				.totalCount(totalCount).totalOutstandingCount(totalCount).build();
-
+				.totalCount(totalCount).totalOutstandingCount(totalCount).outstandingStatus(OutstandingState.READY)
+				.build();
+		logger.debug("OutstandingRentalSheet [Add] : Completed");
 		return repository.save(outstandingSheet);
 	}
-	
+
+	// 반납 승인 후
 	@Transactional
 	public OutstandingRentalSheetDto update(ReturnSheetDto returnSheetDto) {
 		OutstandingRentalSheet sheet = repository.findByRentalSheetId(returnSheetDto.getRentalSheetDto().getId());
@@ -97,18 +192,19 @@ public class OutstandingRentalSheetService {
 			logger.error("outstandingSheet not found!");
 			return null;
 		}
-		
-		//outstandingCount == 0 ? delete from pool
+
+		// outstandingCount == 0 ? delete from pool
 		List<RentalToolDto> toolList = returnSheetDto.getRentalSheetDto().getToolList();
 		int totalOutstandingCount = 0;
 		for (RentalToolDto tool : toolList) {
 			totalOutstandingCount += tool.getOutstandingCount();
 		}
-		
+		sheet.updateOutstandingState(OutstandingState.READY);
+
 		if (totalOutstandingCount == 0) {
 			repository.deleteById(sheet.getId());
 			return null;
-		}else {
+		} else {
 			sheet.updateOutstandingCount(totalOutstandingCount);
 			return new OutstandingRentalSheetDto(repository.save(sheet), toolList);
 		}

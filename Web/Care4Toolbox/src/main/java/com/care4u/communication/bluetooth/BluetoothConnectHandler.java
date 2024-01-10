@@ -5,19 +5,16 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.nio.ByteBuffer;
 
 import javax.microedition.io.StreamConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.care4u.common.GlobalConstants;
-
 import net.wimpi.modbus.util.ModbusUtil;
 
-public class BluetoothConnectHandler extends Thread{
+public class BluetoothConnectHandler extends Thread {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BluetoothConnectHandler.class);
 	
@@ -26,23 +23,8 @@ public class BluetoothConnectHandler extends Thread{
     private StreamConnection streamConnection;
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
-    private long sendingSeconds;
-    private boolean stopNow;
     
-    private Timer timer;
-	private final TimerTask timerTask = new TimerTask(){
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub			
-			if (sendingSeconds > 0 && isConnected()) {
-				if (sendingSeconds > GlobalConstants.COMMUNICATION_TIMEOUT) {
-					if (listener != null) listener.onException("COMMUNICATION_TIMEOUT");
-					disconnect();
-				}				
-				sendingSeconds++;
-			}
-		}
-	};
+    private boolean stopNow;
     	
     public interface Listener {
         public void onConnected();
@@ -54,8 +36,8 @@ public class BluetoothConnectHandler extends Thread{
 
     public BluetoothConnectHandler(StreamConnection streamConnection, Listener listener){
     	this.listener = listener;
-    	
     	this.streamConnection = streamConnection;
+    	stopNow = true;
     	
     	this.start();	
     }
@@ -69,17 +51,12 @@ public class BluetoothConnectHandler extends Thread{
 		}catch(IOException e) {
 			logger.error("run() => make data stream : " + e.toString());
     		if (listener != null) listener.onException(e.toString());
-    		disconnect();
     		return;
 		}
 		
 		if (listener != null) listener.onConnected();
 		
-		runningThreadCount++;
-		sendingSeconds = 0;
-		timer = new Timer();
-		timer.schedule(timerTask, 1000, 1000);
-		
+		runningThreadCount++;		
 		try {
 			stopNow = false;
 			while(!stopNow){
@@ -87,9 +64,8 @@ public class BluetoothConnectHandler extends Thread{
             	if (size > 0) {
             		byte[] readDatas = new byte[size];
             		dataInputStream.read(readDatas, 0, size);
-            		
-            		sendingSeconds = 0;        		
-            		logger.debug("received datas : " + ModbusUtil.toHex(readDatas));
+    				logger.info("Received size: " + size); // debug     		
+            		logger.info("received datas : " + ModbusUtil.toHex(readDatas));
             		if (listener != null) listener.onDataArrived(readDatas);
             	}else if (size == 0) {
             		try {Thread.sleep(100);}catch(InterruptedException e) {}
@@ -105,17 +81,59 @@ public class BluetoothConnectHandler extends Thread{
 			runningThreadCount--;
 			logger.debug("thread end... sRunningThreadCount = " + runningThreadCount);
 			
-			disconnect();
-			timer.cancel();
+			if (dataInputStream != null) try{dataInputStream.close();}catch(Exception e){}finally{dataInputStream = null;}
+	        if (dataOutputStream != null) try{dataOutputStream.close();}catch(Exception e){}finally{dataOutputStream = null;}
+	        if (streamConnection != null) try{streamConnection.close();}catch(Exception e){}finally{streamConnection = null;}
+	        
+	        if (listener != null) listener.onDisconnected();
 		}		
 	}
-
-	public boolean sendData(byte[] datas){		
+	
+	public boolean sendData(byte[] datas){
+		if (!isConnected()) {
+			logger.error("Error sendData : Disconnected!!!");
+			return false;
+		}
+		
 		try{
-        	dataOutputStream.write(datas);
-        	dataOutputStream.flush();
-        	sendingSeconds++;
-        	logger.debug("sent datas : " + ModbusUtil.toHex(datas));
+			ByteBuffer buffer = ByteBuffer.allocate(1024);
+			
+			int offset = 0;
+			int chunkSize;
+			
+			while (offset < datas.length) {
+				chunkSize = Math.min(buffer.remaining(), datas.length - offset);
+				buffer.put(datas, offset, chunkSize);
+				
+				offset += chunkSize;
+				
+				if (!buffer.hasRemaining()) {
+					buffer.flip();
+					byte[] sendDatas = new byte[buffer.remaining()];
+			        buffer.get(sendDatas);
+					
+					dataOutputStream.write(sendDatas);
+					dataOutputStream.flush();
+					
+					logger.debug("sent datas : " + ModbusUtil.toHex(sendDatas));
+					buffer.clear();
+				}
+			}
+			
+			if (buffer.position() > 0) {
+				buffer.flip();
+				byte[] sendDatas = new byte[buffer.remaining()];
+		        buffer.get(sendDatas);
+		        
+				dataOutputStream.write(sendDatas);
+				dataOutputStream.flush();
+				
+				logger.info("sent datas : " + ModbusUtil.toHex(sendDatas));
+			}
+			
+			//dataOutputStream.write(datas);
+			//dataOutputStream.flush();
+			logger.info("sent total : " + datas.length);
         	return true;
 		}catch(Exception e) {
 			logger.error("mDataOutputStream Error!!! : ", e);
@@ -125,23 +143,11 @@ public class BluetoothConnectHandler extends Thread{
 	}
 	
     public void disconnect(){
-    	if (timer != null) {
-    		timer.cancel();
-    		timer = null;
-    	}
-    	
     	if (!stopNow) {
     		logger.info("disconnect...");
-    		stopNow = true;
-            sendingSeconds = 0;
-            
+    		stopNow = true;            
             this.interrupt();
-            if (listener != null) listener.onDisconnected();
     	}
-    	
-        if (dataInputStream != null) try{dataInputStream.close();}catch(Exception e){}finally{dataInputStream = null;}
-        if (dataOutputStream != null) try{dataOutputStream.close();}catch(Exception e){}finally{dataOutputStream = null;}
-        if (streamConnection != null) try{streamConnection.close();}catch(Exception e){}finally{streamConnection = null;}
     }
 
 	public boolean isConnected() {

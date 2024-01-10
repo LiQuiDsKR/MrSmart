@@ -5,18 +5,39 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
+import com.care4u.hr.membership.Membership;
+import com.care4u.toolbox.group.main_group.QMainGroup;
+import com.care4u.toolbox.group.sub_group.QSubGroup;
+import com.care4u.toolbox.sheet.rental.rental_sheet.QRentalSheet;
+import com.care4u.toolbox.sheet.rental.rental_tool.QRentalTool;
+import com.care4u.toolbox.sheet.return_sheet.QReturnSheet;
+import com.care4u.toolbox.sheet.return_tool.QReturnTool;
+import com.care4u.toolbox.tool.QTool;
+import com.care4u.toolbox.tool.Tool;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
-	  private final JPAQueryFactory queryFactory;
+import groovyjarjarantlr4.v4.runtime.atn.SemanticContext.AND;
 
-	    public StockStatusRepositoryImpl(EntityManager entityManager) {
-	        this.queryFactory = new JPAQueryFactory(entityManager);
-	    }
+public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
+	private final JPAQueryFactory queryFactory;
+
+	public StockStatusRepositoryImpl(EntityManager entityManager) {
+		this.queryFactory = new JPAQueryFactory(entityManager);
+	}
 
 	private BooleanExpression searchPartEquals(Long partId) {
     	return (partId == null || partId == 0) ? null :

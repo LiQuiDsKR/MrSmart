@@ -34,7 +34,8 @@
     
     <logger name="org.springframework" level="error" />
     <logger name="org.hibernate" level="error" />
-    <logger name="com.care4u" level="info" />
+    <logger name="com.care4u" level="debug" />
+    <logger name="com.querydsl" level="debug"/>
     
     <root level="info">
         <appender-ref ref="console" />

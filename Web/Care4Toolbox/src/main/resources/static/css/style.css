@@ -1395,7 +1395,7 @@ table.style--four td .country-flag,
 #projectTaskDetails .modal-content .dashboard-date,
 .input-group.addon .input-group-prepend .input-group-text:not(:first-child),
 .input-group.addon .input-group-append .input-group-text:not(:first-child) {
-	border-radius: 0 !important;
+	border-radius: 20px !important;
 }
 
 .border-0,
@@ -13571,8 +13571,8 @@ table.table-contextual .details-btn:hover .chip .chip-content i.img,
 09.5: Authentication
 ********************* */
 .auth-card {
-	padding: 140px 30px 100px;
-	max-width: 1050px;
+	padding: 30px;
+	max-width: 800px;
 }
 
 /* ************************
@@ -15021,6 +15021,10 @@ table.table-contextual .details-btn:hover i.base-timer__path-remaining,
 /* Change Language */
 .card-localization .card-text {
 	line-height: 1.733;
+}
+
+.bg-white{
+	border-radius: 20px;
 }
 
 /*# sourceMappingURL=style.css.map */

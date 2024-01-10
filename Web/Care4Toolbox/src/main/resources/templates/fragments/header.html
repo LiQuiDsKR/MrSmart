@@ -5,11 +5,11 @@
 <!-- Page Header Start-->
 <!-- Header -->
 <header th:fragment="header" 
-	class="header white-bg fixed-top d-flex align-content-center flex-wrap">
+	class="header white-bg fixed-top d-flex align-content-center flex-wrap" style="height:100px;">
 	<!-- Logo -->
-	<div class="logo">
+	<div class="logo bg-white d-flex justify-content-center">
 		<a href="/" class="default-logo"
-			><img th:src="@{/img/logo.png}" alt=""
+			><img  style="height:100px;" th:src="@{/img/logo.png}" alt=""
 		/></a>
 		<a href="/" class="mobile-logo"
 			><img th:src="@{/img/mobile-logo.png}" alt=""
@@ -18,33 +18,34 @@
 	<!-- End Logo -->
 
 	<!-- Main Header -->
-	<div class="main-header">
+	<div class="main-header" style="height:100px;">
 		<div class="container-fluid">
 			<div class="row justify-content-between">
-				<div class="col-3 col-lg-1 col-xl-4">
+				<div class="col-3 col-lg-4 col-xl-4">
 					<!-- Header Left -->
 					<div class="main-header-left h-100 d-flex align-items-center">
 						<!-- Main Header User -->
 						<div class="main-header-user">
 							<a
-								href="#"
-								class="d-flex align-items-center">
+								href="/"
+								class="d-flex align-items-center mb-1">
 								<div
-									class="user-profile d-xl-flex align-items-center d-none">
+									class="user-profile d-lg-flex align-items-center d-none mr-1">
 									<!-- User Avatar -->
-									<div class="user-avatar">
-										<img th:src="@{/img/avatar/user.png}" alt="" />
+									<div >
+										<img style="width:50px;height:50px; border-radius: 0%;" th:src="@{/img/avatar/user.png}" alt="" />
 									</div>
 									<!-- End User Avatar -->
 
 									<!-- Header Info -->
-									<div class="user-info">
-										<h2 class="user-name">똑똑이</h2>
-										<h4 class="user-email">똑똑한공기구관리시스템</p>
+									<div class="ml-3 user-info">
+										<h2 class="user-name mb-0">똑똑이</h2>
 									</div>
+									
 									<!-- End Header Info -->
 								</div>
 							</a>
+								<p class="d-lg-flex d-none">똑똑한공기구관리시스템</p>
 						</div>
 						<!-- End Main Header User -->
 
@@ -59,10 +60,18 @@
 					</div>
 					<!-- End Header Left -->
 				</div>
-				<div class="col-9 col-lg-11 col-xl-8">
+				<div class="col-9 col-lg-8 col-xl-8">
 					<!-- Header Right -->
 					<div class="main-header-right d-flex justify-content-end">
 						<ul class="nav">
+							
+							<li class="d-none d-sm-flex">
+								<!-- Main Header Button -->
+								<div class="main-header-btn ml-md-1">
+									<a href="/download/manual" class="btn">도움말</a>
+								</div>
+								<!-- End Main Header Button -->
+							</li>
 							<li class="ml-0">
 							</li>
 							<li class="d-none d-lg-flex mr-3">
@@ -90,19 +99,20 @@
 								
 								<!-- User Info -->
 								<div class="d-flex align-items-end flex-column" sec:authorize="isAuthenticated()">
-									<h3 class="user-name" id="user-name">Name</h3>
+									<h3 class="user-name mb-2" id="user-name">Name</h3>
 									<div class="d-flex flex-row">
 										<div id="user-code" class="mr-2" sec:authentication="name"></div>
-										<div sec:authorize="hasRole('USER')">User</div>
-										<div sec:authorize="hasRole('ADMIN')">Admin</div>
-									</div>
-										<div id="user-more-info">//</div>									
+										<div class="mr-2" sec:authorize="hasRole('USER')">User</div>
+										<div class="mr-2" sec:authorize="hasRole('MANAGER')">Manager</div>
+										<div class="mr-2" sec:authorize="hasRole('ADMIN')">Admin</div>
+										<div class="mr-2" id="user-more-info">//</div>
+									</div>									
 								</div>
 								
 								<!-- End User Info -->
 								
 							</li>
-							<li class="d-none d-lg-flex">
+							<li class="d-none d-sm-flex">
 								<!-- Main Header Button -->
 								<div class="main-header-btn ml-md-1">
 									<a href="/membership/logout" class="btn">로그아웃</a>

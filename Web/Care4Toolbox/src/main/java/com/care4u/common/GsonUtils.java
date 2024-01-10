@@ -21,7 +21,7 @@ public class GsonUtils {
 	private static Gson gson 
 		= new GsonBuilder()
 			.disableHtmlEscaping()
-			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+			//.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 			.setDateFormat(PATTERN_DATETIME)
 			.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter().nullSafe())
 			.registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe())

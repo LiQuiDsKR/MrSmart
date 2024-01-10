@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.care4u.hr.membership.Membership;
 
-public interface RentalSheetRepository extends JpaRepository<RentalSheet, Long> {
+public interface RentalSheetRepository extends JpaRepository<RentalSheet, Long>, RentalSheetRepositoryCustom {
 	
 	Page<RentalSheet> findAllByEventTimestampBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 	
@@ -29,4 +29,6 @@ public interface RentalSheetRepository extends JpaRepository<RentalSheet, Long> 
 			@Param("endDate") LocalDateTime endDate,
 			Pageable pageable
 			);
+
+	RentalSheet findByEventTimestamp(LocalDateTime eventTimestamp);
 }

@@ -1,5 +1,6 @@
 package com.care4u.toolbox.sheet.rental.rental_tool;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetRepository;
 import com.care4u.toolbox.stock_status.StockStatus;
 import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusRepository;
 import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tag.TagRepository;
@@ -40,6 +42,7 @@ public class RentalToolService {
 	private final ToolRepository toolRepository;
 	private final RentalRequestSheetRepository rentalRequestSheetRepository;
 	private final TagRepository tagRepository;
+	private final StockStatusRepository stockStatusRepository;
 	
 	private final TagService tagService;
 	private final StockStatusService stockStatusService;
@@ -83,6 +86,7 @@ public class RentalToolService {
 	 */
 	@Transactional
 	public RentalTool addNew(RentalRequestToolDto requestDto, RentalSheet sheet, RentalRequestSheetDto requestSheetDto) {
+		logger.debug("RentalTool [Add] : start");
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
@@ -93,29 +97,42 @@ public class RentalToolService {
 			logger.error("requestSheet not found");
 			return null;
 		}
-		
+		logger.debug("RentalTool [Add] : tool & sheet Null check completed.");
 		
 		RentalTool rentalTool = RentalTool.builder()
 				.rentalSheet(sheet)
 				.tool(tool.get())
 				.count(requestDto.getCount())
 				.outstandingCount(requestDto.getCount())
-				.rentalRequestSheet(requestSheet.get())
+				//.rentalRequestSheet(requestSheet.get())
 				.build();
 		
 		RentalTool savedRentalTool=repository.save(rentalTool);
 		
+		logger.debug("RentalTool [Add] : RentalTool("+savedRentalTool.getId()+") saved");
+		
+		
+		logger.debug("RentalTool [Add] : Tag info upload start");
 		if (requestDto.getTags() != null && requestDto.getTags().length() > 0) {
 			String[] tags = requestDto.getTags().split(",");
 			for (String tagString : tags) {
-				Tag tag = tagService.addNew(tagString);
-				tag.updateRentalTool(savedRentalTool);
+				Tag tag = tagRepository.findByMacaddress(tagString);
+				if (tag==null) {
+					logger.error("Tag : "+tagString+" not found");
+					return null;
+				}
+					tag.updateRentalTool(savedRentalTool);
+					logger.info(tag.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
 			}
+		} else {
+			logger.debug("RentalTool [Add] : No tag info");
 		}
 		
-		StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
-		stockStatusService.rentItems(stockDto.getId(), savedRentalTool.getCount());
+		//StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
+		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(savedRentalTool.getTool().getId(), sheet.getToolbox().getId(), LocalDate.now());
+		stockStatusService.rentItems(stock.getId(), savedRentalTool.getCount());
 		
+		logger.debug("RentalTool [Add] : Completed");
 		return savedRentalTool;
 	}
 

@@ -39,9 +39,11 @@ public class StockStatusDto {
 	
 	private int discardCount;
 	
+	private int supplyCount;
+	
 	@Builder
 	public StockStatusDto(long id, Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
-			 int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+			 int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, int supplyCount) {
 		this.id = id;
 		this.toolboxDto = new ToolboxDto(toolbox);
 		this.toolDto = new ToolDto(tool);
@@ -54,6 +56,7 @@ public class StockStatusDto {
 		this.damageCount = damageCount;
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
+		this.supplyCount = supplyCount;
 	}
 	
 	public StockStatusDto(StockStatus stockStatus) {
@@ -69,6 +72,7 @@ public class StockStatusDto {
 		this.damageCount = stockStatus.getDamageCount();
 		this.lossCount = stockStatus.getLossCount();
 		this.discardCount = stockStatus.getDiscardCount();
+		this.supplyCount = stockStatus.getSupplyCount();
 	}
 	
 }

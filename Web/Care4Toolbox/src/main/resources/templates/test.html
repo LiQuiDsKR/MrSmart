@@ -19,6 +19,17 @@
 	</div>
 	<div class="contentdiv">
 		
+		
+		<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+			</span>
+				<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+			</span>
+		</div>
+		
 	</div>
 </div>
 <!-- End Main Content -->
@@ -27,20 +38,67 @@
 <script  th:inline="javascript">
 document.getElementById("btn").addEventListener("click",function(){
 	const data = JSON.parse(document.getElementById("in").value);
-		abcHttp.post(
-				`/return/sheet/approve`,
-				data,
-			).then(data => {
-				Swal.fire({
-					type: "success",
-					title: "반납 승인됨",
-					text: "반납 승인이 정상적으로 처리되었습니다",
-				})
-					.then(result => {
-						location.href = `/return/sheet/create`;
+	const list =data;
+	const mainData= {
+    "workName": {
+        "name": "새 작업 공기구 리스트"
+    },
+    "toolbox": {
+        "id": "5222",
+        "name": "\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비1실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비2실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비3실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비4실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비5실\n\t\t\t\t\t\t\t\t\t\t\t\t"
+    },
+    "worker": {
+        "id": 8,
+        "name": "고재열"
+    },
+    "leader": {
+        "id": "8",
+        "name": "고재열"
+    }
+}
+	console.log(data);
+		Swal.fire({
+				type: 'question',
+				title: '저장하시겠습니까?',
+				html: '<p>'+ '</p>',
+				showCancelButton: true,
+				confirmButtonText: '예',
+				cancelButtonText: '아니오',
+				buttonStyling: false,
+			}).then(result => {
+				if (result.value == true) {
+					abcHttp.post(
+						"/rental/request_sheet/save",
+						{
+							workName: "",
+							workerDtoId: mainData.worker.id,
+							leaderDtoId: mainData.leader.id,
+							toolboxDtoId: mainData.toolbox.id,
+							toolList: list.map(item => ({toolDtoId: item.id, count: item.count}))
+						}
+					)
+					.then(data => {
+						Swal.fire({
+							type: "success",
+							title: "대여 목록 저장 완료",
+							text: "공기구 대여 목록을 정상적으로 저장하였습니다",
+						});
+					})
+					
+					.catch(error => {
+						Swal.fire({
+							type: "error",
+							title: "대여 목록 저장 실패",
+							text: error,
+						});
 					});
+				} else {
+					return;
+				}
 			});
-})
+});
+
+/*
 abcHttp.get(
 	`/outstanding_rental_sheet/getpage`,
 	{
@@ -53,8 +111,7 @@ abcHttp.get(
 ).then(data => {
 	document.querySelector(".contentdiv").innerHTML=JSON.stringify(data);
 });
-
-
+*/
 
 
 var socket = new SockJS('/care4u_websocket');

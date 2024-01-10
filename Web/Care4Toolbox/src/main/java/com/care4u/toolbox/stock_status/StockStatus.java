@@ -59,9 +59,13 @@ public class StockStatus extends BaseEntity {
 	
 	private int discardCount;
 	
+	private int supplyCount;
+	
+	private int returnCount;
+	
 	@Builder
 	public StockStatus(Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
-			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, int supplyCount, int returnCount) {
 		this.toolbox = toolbox;
 		this.tool = tool;
 		this.currentDay = currentDay;
@@ -73,10 +77,12 @@ public class StockStatus extends BaseEntity {
 		this.damageCount = damageCount;
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
+		this.supplyCount = supplyCount;
+		this.returnCount = returnCount;
 	}
 	
 	public void update(Toolbox toolbox, Tool tool, LocalDate currentDay, int totalCount, int rentalCount, int buyCount,
-			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount) {
+			int goodCount, int faultCount, int damageCount, int lossCount, int discardCount, int supplyCount, int returnCount) {
 		this.toolbox = toolbox;
 		this.tool = tool;
 		this.currentDay = currentDay;
@@ -88,8 +94,16 @@ public class StockStatus extends BaseEntity {
 		this.damageCount = damageCount;
 		this.lossCount = lossCount;
 		this.discardCount = discardCount;
+		this.supplyCount = supplyCount;
+		this.returnCount = returnCount;
 	}
 	
+	public void requestUpdate(int count) {
+		this.goodCount-=count;
+	}
+	public void requestCancelUpdate(int count) {
+		this.goodCount+=count;
+	}
 	public void rentUpdate(int count) {
 		this.goodCount-=count;
 		this.rentalCount+=count;
@@ -101,10 +115,17 @@ public class StockStatus extends BaseEntity {
 		this.discardCount+=discardCount;
 		this.lossCount+=lossCount;
 		this.rentalCount-=(goodCount+faultCount+damageCount+discardCount+lossCount);
+		this.returnCount+=(goodCount+faultCount+damageCount+discardCount+lossCount);
 		this.totalCount-=(discardCount+lossCount);
 	}
 	public void buyUpdate(int count) {
 		this.buyCount+=count;
+		this.goodCount+=count;
 		this.totalCount+=count;
+	}
+	public void supplyUpdate(int count) {
+		this.goodCount-=count;
+		this.supplyCount+=count;
+		this.totalCount-=count;
 	}
 }

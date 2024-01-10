@@ -112,13 +112,6 @@ public class ToolRestController {
     }
     
     
-    /**
-     * @deprecated
-     * @param membershipSearchDto
-     * @param page
-     * @param model
-     * @return
-     */
     @GetMapping(value="/tool/getpage")
     public ResponseEntity<Page<ToolDto>> getToolPage(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -137,26 +130,27 @@ public class ToolRestController {
         return ResponseEntity.ok(toolPage);
     }
     
-    @PostMapping(value="/tool/getpage/rental")
-    public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(@RequestBody ToolForRentalPostFormDto data){
-
-    	logger.info("page=" + data.page + ", size=" + data.size);
-    	
-    	List<Long> subGroupId;
-    	if (data.getSubGroupId().isEmpty()) {
-    		subGroupId=subGroupService.list().stream().map(SubGroupDto::getId).collect(Collectors.toList());
-    	} else {
-    		subGroupId=data.getSubGroupId();
-    	}
-    		
-        Pageable pageable = PageRequest.of(data.page,data.size);
-        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalDtoPage(pageable, data.toolboxId, data.name, subGroupId);
-        
-        for (ToolForRentalDto item : toolForRentalDtoPage.getContent()) {
-        	logger.info(item.toString());
-        }
-        return ResponseEntity.ok(toolForRentalDtoPage);
-    }
+//    12.18 폐기 : stockStatus 가져오는걸로 바꿈 
+//    @PostMapping(value="/tool/getpage/rental")
+//    public ResponseEntity<Page<ToolForRentalDto>> getToolForRentalPage(@RequestBody ToolForRentalPostFormDto data){
+//
+//    	logger.info("page=" + data.page + ", size=" + data.size);
+//    	
+//    	List<Long> subGroupId;
+//    	if (data.getSubGroupId().isEmpty()) {
+//    		subGroupId=subGroupService.list().stream().map(SubGroupDto::getId).collect(Collectors.toList());
+//    	} else {
+//    		subGroupId=data.getSubGroupId();
+//    	}
+//    		
+//        Pageable pageable = PageRequest.of(data.page,data.size);
+//        Page<ToolForRentalDto> toolForRentalDtoPage = toolService.getToolForRentalDtoPage(pageable, data.toolboxId, data.name, subGroupId);
+//        
+//        for (ToolForRentalDto item : toolForRentalDtoPage.getContent()) {
+//        	logger.info(item.toString());
+//        }
+//        return ResponseEntity.ok(toolForRentalDtoPage);
+//    }
     
     @GetMapping(value="tool/get")
     public ResponseEntity<ToolDto> getTool(@RequestParam(name="id") Long id){

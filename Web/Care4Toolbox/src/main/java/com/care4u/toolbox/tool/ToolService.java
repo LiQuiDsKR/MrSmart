@@ -135,36 +135,43 @@ public class ToolService {
 		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
 		return toolPage.map(ToolDto::new);
 	}
+	@Transactional(readOnly = true)
+	public Page<ToolDto> getToolPage(Pageable pageable){
+		Page<Tool> toolPage = repository.findAll(pageable);
+		logger.info("tool total page : " + toolPage.getTotalPages() + ", current page : " + toolPage.getNumber());
+		return toolPage.map(ToolDto::new);
+	}
+
+	@Transactional(readOnly=true)
+	public long getToolCount() {
+		return repository.count();
+	}
 	
 
-	/**
-	 * StockStatus를 기준으로, ToolboxId에 대한 쿼리 실행 후 ToolForRentalDtoPage를 반환
-	 * @param pageable
-	 * @param toolboxId
-	 * @return
-	 */
-	@Transactional
-	public Page<ToolForRentalDto> getToolForRentalDtoPage(Pageable pageable, long toolboxId, String name, List<Long> subGroupId){
-		LocalDate date = LocalDate.now();
-		Page<StockStatus> stockPage = stockStatusRepository.findAllByToolboxIdAndCurrentDay(toolboxId, date, name, subGroupId, pageable);
-		List<ToolForRentalDto> list = new ArrayList<ToolForRentalDto>();
-		for (StockStatus stock : stockPage) {
-			Tool tool = stock.getTool();
-			Toolbox toolbox = stock.getToolbox();
-			ToolboxToolLabel label = toolboxToolLabelRepository.findByToolIdAndToolboxId(tool.getId(), toolbox.getId());
-			if (label==null) {
-				label = toolboxToolLabelService.addNew(tool, toolbox);
-			}
-			ToolDto toolDto = new ToolDto(tool);
-			ToolboxToolLabelDto labelDto = new ToolboxToolLabelDto(label);
-			StockStatusDto stockDto = new StockStatusDto(stock);
-			ToolForRentalDto toolForRentalDto = ToolForRentalDto.builder()
-					.toolDto(toolDto)
-					.labelDto(labelDto)
-					.stockDto(stockDto)
-					.build();
-			list.add(toolForRentalDto);
-		}
-		return new PageImpl<ToolForRentalDto>(list, PageRequest.of(stockPage.getNumber(), stockPage.getSize()), stockPage.getTotalElements());
-	}
+//	12.18 폐기 : stockStatus가져오는 걸로 바꿈.
+//	@Transactional
+//	public Page<ToolForRentalDto> getToolForRentalDtoPage(Pageable pageable, long toolboxId, String name, List<Long> subGroupId){
+//		LocalDate date = LocalDate.now();
+//		Page<StockStatus> stockPage = stockStatusRepository.findAllByToolboxIdAndCurrentDay(toolboxId, date, name, subGroupId, pageable);
+//		List<ToolForRentalDto> list = new ArrayList<ToolForRentalDto>();
+//		for (StockStatus stock : stockPage) {
+//			Tool tool = stock.getTool();
+//			Toolbox toolbox = stock.getToolbox();
+//			ToolboxToolLabel label = toolboxToolLabelRepository.findByToolIdAndToolboxId(tool.getId(), toolbox.getId());
+//			if (label==null) {
+//				logger.error("no label");
+//			}
+//			ToolDto toolDto = new ToolDto(tool);
+//			ToolboxToolLabelDto labelDto = new ToolboxToolLabelDto(label);
+//			StockStatusDto stockDto = new StockStatusDto(stock);
+//			ToolForRentalDto toolForRentalDto = ToolForRentalDto.builder()
+//					.toolDto(toolDto)
+//					.labelDto(labelDto)
+//					.stockDto(stockDto)
+//					.build();
+//			list.add(toolForRentalDto);
+//		}
+//		return new PageImpl<ToolForRentalDto>(list, PageRequest.of(stockPage.getNumber(), stockPage.getSize()), stockPage.getTotalElements());
+//	}
+
 }

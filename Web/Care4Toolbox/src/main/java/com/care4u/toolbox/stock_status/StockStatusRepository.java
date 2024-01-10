@@ -12,21 +12,26 @@ import org.springframework.data.repository.query.Param;
 
 public interface StockStatusRepository extends JpaRepository<StockStatus, Long>, StockStatusRepositoryCustom {
 	
+	StockStatus findByToolIdAndToolboxId(long toolId, long toolboxId);
+	
 	List<StockStatus> findAllByCurrentDay( LocalDate date);
 	
 	Page<StockStatus> findAllByToolboxIdAndCurrentDayBetween(long toolboxId, LocalDate startDate, LocalDate endDate, Pageable pageable);
 	
 	StockStatus findByToolIdAndToolboxIdAndCurrentDay(long toolId, long toolboxId, LocalDate date);
 	
-	@Query("SELECT s FROM StockStatus s WHERE s.toolbox.id = :toolboxId " +
-	           "AND s.currentDay = :date " +
-	           "AND s.tool.name LIKE %:toolName% " +
-	           "And s.tool.subGroup.id IN :subGroupIds")
-	    Page<StockStatus> findAllByToolboxIdAndCurrentDay(
-	        @Param("toolboxId") Long toolboxId,
-	        @Param("date") LocalDate date,
-	        @Param("toolName") String toolName,
-	        @Param("subGroupIds") List<Long> subGroupIds,
-	        Pageable pageable
-	    );
+//	@Query("SELECT s FROM StockStatus s WHERE s.toolbox.id = :toolboxId " +
+//	           "AND s.currentDay = :date " +
+//	           "AND s.tool.name LIKE %:toolName% " +
+//	           "And s.tool.subGroup.id IN :subGroupIds")
+//	    Page<StockStatus> findAllByToolboxIdAndCurrentDay(
+//	        @Param("toolboxId") Long toolboxId,
+//	        @Param("date") LocalDate date,
+//	        @Param("toolName") String toolName,
+//	        @Param("subGroupIds") List<Long> subGroupIds,
+//	        Pageable pageable
+//	    );
+	
+	@Query("SELECT MAX(s.currentDay) FROM StockStatus s")
+	LocalDate getLatestCurrentDay();
 }

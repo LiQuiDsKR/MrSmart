@@ -100,23 +100,22 @@
 
 
 	<div class="mn-vh-100 d-flex align-items-center">
-		<div class="container">
+		<div class="container d-flex justify-content-center">
 			<!-- Card -->
-			<div class="card justify-content-center auth-card">
+			<div class="card col-12 justify-content-center auth-card" >
 				<div class="row justify-content-center">
-					<div class="col-xl-9 col-lg-11">
+					<div class="col-12">
 						<div class="d-flex flex-direction-row align-items-center mb-2">
 							<!-- User Avatar -->
-							<div class="user-avatar mr-3" style="width:60px; height:60px;">
+							<div class="user-avatar mr-3" style="width:50px; height:50px;">
 								<img th:src="@{/img/avatar/user.png}" alt="" />
 							</div>
 							<!-- End User Avatar -->
 							<h1 class="mr-3">똑똑이</h1>
-							<h4 class="font-20">통합공기구관리시스템</h4>
 
-							<div class="default-logo ml-auto" style="width:190px"><img th:src="@{/img/logo.png}" alt="" /></div>
+							<div class="default-logo ml-auto" style="width:150px;margin:-10px;"><img th:src="@{/img/logo.png}" alt="" /></div>
 						</div>
-						<div class="mb-3"><span>회원 서비스 이용을 위해 로그인 해주세요.</span></div>
+						<div style="margin-bottom:70px;"><span style="font-size:19px;">통합공기구관리시스템</span></div>
 
 						<form role="form" method="post" action="/membership/login">
 							<!-- Form Group -->
@@ -127,25 +126,25 @@
 							<!-- End Form Group -->
 
 							<!-- Form Group -->
-							<div class="form-group mb-20">
+							<div class="form-group" style="margin-bottom:70px;">
 								<label for="password" class="mb-2 font-20 bold black">비밀번호</label>
 								<input type="password" name="password" id="password" class="theme-input-style" placeholder="********" />
 							</div>
 							<!-- End Form Group -->
 
-							<div class="d-flex justify-content-between mb-20">
-								<div class="d-flex align-items-center">
+							<div class="d-flex justify-content-between mb-20" hidden>
+								<div class="d-flex align-items-center" hidden>
 									<!-- Custom Checkbox -->
-									<label class="custom-checkbox position-relative mr-2">
-										<input type="checkbox" id="checkbox" />
+									<label class="custom-checkbox position-relative mr-2" hidden>
+										<input type="checkbox" id="checkbox" hidden/>
 										<span class="checkmark"></span>
 									</label>
 									<!-- End Custom Checkbox -->
 
-									<label for="checkbox" class="font-14">자동로그인</label>
+									<label for="checkbox" class="font-14"hidden>자동로그인</label>
 								</div>
 
-								<a href="forget-pass.html" class="font-12 text_color">비밀번호를 잊으셨나요?</a>
+								<a href="forget-pass.html" class="font-12 text_color" hidden>비밀번호를 잊으셨나요?</a>
 							</div>
 							<p th:if="${loginErrorMsg}" class="error" th:text="${loginErrorMsg}"></p>
 							<span>** 사용자 등록(ID) 신청은 각 부서장에게 문의 하시기 바랍니다.</span>
@@ -157,8 +156,7 @@
 
 							<div class="d-flex align-items-center mt-3">
 								<button type="submit" class="btn long mr-20">로그인</button>
-								<span class="font-12 d-block" hidden>아직 회원이 아니신가요? <a href="register.html"
-										class="bold">회원가입</a></span>
+								<span class="font-12 d-block" hidden>아직 회원이 아니신가요? <a href="register.html" class="bold" hidden>회원가입</a></span>
 							</div>
 							
 				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

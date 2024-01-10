@@ -1,9 +1,14 @@
 package com.care4u.toolbox.stock_status;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -19,6 +24,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Cell;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
@@ -27,10 +38,16 @@ import com.care4u.hr.part.PartDto;
 import com.care4u.hr.part.PartService;
 import com.care4u.hr.sub_part.SubPartDto;
 import com.care4u.hr.sub_part.SubPartService;
+import com.care4u.toolbox.ToolboxDto;
+import com.care4u.toolbox.ToolboxService;
+import com.care4u.toolbox.group.main_group.MainGroupDto;
+import com.care4u.toolbox.group.main_group.MainGroupService;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupService;
+import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolService;
 import com.google.gson.Gson;
+
 
 @RestController
 public class StockStatusRestController {
@@ -43,6 +60,16 @@ public class StockStatusRestController {
 	@Autowired
 	private StockStatusService stockStatusService;
 	
+	@Autowired
+	private SubGroupService subGroupService;
+	
+	@Autowired
+	private MainGroupService mainGroupService;
+	
+	@Autowired
+	private ToolboxService toolboxService;
+	
+	
     @GetMapping(value="/stock_status/get")
     public ResponseEntity<StockStatusDto> getStockStatus(
     		@RequestParam(name="toolId") Long toolId,
@@ -53,19 +80,25 @@ public class StockStatusRestController {
     }
     
     @GetMapping(value="/stock_status/get/analytics")
-    public ResponseEntity<StockStatusSummaryDto> getStockStatusSummary(
+    public ResponseEntity<StockStatusSummaryByToolStateDto> getStockStatusSummary(
     		@RequestParam(name="toolboxId") Long toolboxId,
     		@RequestParam(name="currentDate") String currentDate
     		){
     	
     	LocalDate currentLocalDate = LocalDate.parse(currentDate, DateTimeFormatter.ISO_DATE);
     	
-    	StockStatusSummaryDto summaryDto=stockStatusService.getSummary(toolboxId, currentLocalDate);
+    	StockStatusSummaryByToolStateDto summaryDto=stockStatusService.getSummary(toolboxId, currentLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
     @GetMapping(value="/stock_status/get/analytics/list")
-    public ResponseEntity<List<StockStatusSummaryDto>> getStockStatusSummaryList(
+    public ResponseEntity<List<StockStatusSummaryByToolStateDto>> getStockStatusSummaryList(    		
+    		@RequestParam(name="partId") Long partId,
+    		@RequestParam(name="membershipId") Long membershipId,
+    		@RequestParam(name="toolId") Long toolId,
     		@RequestParam(name="toolboxId") Long toolboxId,
+    		@RequestParam(name="isWorker") Boolean isWorker,
+    		@RequestParam(name="isLeader") Boolean isLeader,
+    		@RequestParam(name="isApprover") Boolean isApprover,
     		@RequestParam(name="startDate") String startDate,
     		@RequestParam(name="endDate") String endDate
     		){
@@ -73,7 +106,7 @@ public class StockStatusRestController {
     	LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
     	LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
     	
-    	List<StockStatusSummaryDto> summaryDto=stockStatusService.getSummary(toolboxId, startLocalDate, endLocalDate);
+    	List<StockStatusSummaryByToolStateDto> summaryDto=stockStatusService.getSummary(partId, membershipId, toolId, toolboxId, isWorker, isLeader, isApprover, startLocalDate, endLocalDate);
     	return ResponseEntity.ok(summaryDto);
     }
     @GetMapping(value="/stock_status/get/analytics/by_main_group")

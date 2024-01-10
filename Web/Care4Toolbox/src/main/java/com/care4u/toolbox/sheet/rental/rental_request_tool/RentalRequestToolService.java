@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.toolbox.sheet.rental.rental_request_sheet.RentalRequestSheet;
+import com.care4u.toolbox.stock_status.StockStatusDto;
+import com.care4u.toolbox.stock_status.StockStatusService;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolRepository;
 
@@ -28,6 +30,9 @@ public class RentalRequestToolService {
 	@Autowired
 	private final ToolRepository toolRepository;
 	
+	@Autowired
+	private final StockStatusService stockStatusService;
+	
 	@Transactional(readOnly = true)
 	public RentalRequestToolDto get(long id){
 		Optional<RentalRequestTool> item = repository.findById(id);
@@ -35,7 +40,6 @@ public class RentalRequestToolService {
 			logger.error("Invalid id : " + id);
 			return null;
 		}
-		
 		return new RentalRequestToolDto(item.get());
 	}
 	

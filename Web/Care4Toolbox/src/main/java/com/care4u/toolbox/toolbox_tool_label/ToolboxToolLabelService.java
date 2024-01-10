@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,8 @@ import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxDto;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.ToolboxService;
+import com.care4u.toolbox.stock_status.StockStatusService;
+import com.care4u.toolbox.tag.Tag;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolDto;
 import com.care4u.toolbox.tool.ToolRepository;
@@ -31,6 +35,7 @@ public class ToolboxToolLabelService {
 	private final ToolboxRepository toolboxRepository;
 	private final ToolRepository toolRepository;
 	private final ToolboxService toolboxService;
+	private final StockStatusService stockStatusService;
 	
 	@Transactional(readOnly = true)
 	public ToolboxToolLabelDto get(long id){
@@ -93,6 +98,7 @@ public class ToolboxToolLabelService {
 		return getDtoList(subGroupList);
 	}
 	
+	@Transactional
 	public ToolboxToolLabelDto update(ToolboxToolLabelDto toolboxToolLabelDto) {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxToolLabelDto.getToolboxDto().getId());
 		if (toolbox.isEmpty()) {
@@ -105,14 +111,96 @@ public class ToolboxToolLabelService {
 			logger.error("Invalid toolId : " + toolboxToolLabelDto.getToolDto().getId());
 			return null;
 		}
-		
 		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId());
-		if (toolboxToolLabel == null) {
-			return null;
+		if(toolboxToolLabel == null){
+			return addNew(toolboxToolLabelDto.getToolDto().getId(), toolboxToolLabelDto.getToolboxDto().getId(), toolboxToolLabelDto.getQrcode());
 		}
+		
 		toolboxToolLabel.update(toolbox.get(), toolboxToolLabelDto.getLocation(), tool.get(), toolboxToolLabelDto.getQrcode());
 		
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
+	}
+	/**
+	 * @deprecated 어짜피 register에서만 쓰니까 오버로드된 다른 버전 쓰세요.
+	 * @param toolId
+	 * @param toolboxId
+	 * @param qrcode
+	 * @return
+	 */
+	@Transactional
+	public ToolboxToolLabelDto update(long toolId, long toolboxId, String qrcode) {
+
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);		
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		if(toolboxToolLabel == null){
+			return addNew(toolId, toolboxId, qrcode);
+		}
+		
+		toolboxToolLabel.update(toolbox.get(), toolboxToolLabel.getLocation(), tool.get(), qrcode);
+		
+		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
+	}
+	@Transactional
+	public ToolboxToolLabelDto update(ToolboxToolLabel label, String qrcode) {
+		label.update(label.getToolbox(), label.getLocation(), label.getTool(), qrcode);
+		return new ToolboxToolLabelDto(repository.save(label));
+	}
+	
+	@Transactional
+	public ToolboxToolLabelDto register(long toolId, long toolboxId, String qrcode) {
+		ToolboxToolLabel tempObject = repository.findByQrcode(qrcode);
+		ToolboxToolLabel toolboxToolLabel = repository.findByToolIdAndToolboxId(toolId, toolboxId);
+		if(toolboxToolLabel!=null) {
+			if (toolboxToolLabel.equals(tempObject)||tempObject==null) {
+				return update(toolboxToolLabel,qrcode);	
+			}else {
+				logger.error(qrcode +" already exists!");
+				throw new IllegalArgumentException(qrcode +" already exists!");
+			}
+		}
+		if (tempObject == null) {
+			return addNew(toolId,toolboxId,qrcode); 
+		}else {
+			logger.error(qrcode +" already exists!");
+			throw new IllegalArgumentException(qrcode +" already exists!");
+		}
+	}
+	
+	@Transactional
+	public ToolboxToolLabelDto addNew(long toolId, long toolboxId, String qrcode) {		
+		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
+		if (toolbox.isEmpty()) {
+			logger.error("Invalid toolboxId : " + toolboxId);
+			return null;
+		}
+		
+		Optional<Tool> tool = toolRepository.findById(toolId);
+		if (tool.isEmpty()) {
+			logger.error("Invalid toolId : " + toolId);
+			return null;
+		}
+		
+		ToolboxToolLabel label = ToolboxToolLabel.builder()
+				.tool(tool.get())
+				.toolbox(toolbox.get())
+				.location("")
+				.qrcode(qrcode)
+				.build();
+		
+		repository.save(label);
+		
+		return new ToolboxToolLabelDto(label);
 	}
 	
 	
@@ -133,7 +221,7 @@ public class ToolboxToolLabelService {
 		List<ToolboxDto> toolboxList = toolboxService.list();
 		Random random = new Random();
 		int randomIndex = random.nextInt(toolboxList.size());
-		ToolboxDto toolboxDto = toolboxList.get(randomIndex);
+		ToolboxDto toolboxDto = toolboxList.get(randomIndex);	
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxDto.getId());
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxDto.getId());
@@ -150,21 +238,6 @@ public class ToolboxToolLabelService {
 		return new ToolboxToolLabelDto(repository.save(toolboxToolLabel));
 	}
 	
-	/**
-	 * buy시 생성하셔야 합니다 + 일단 기준정보 페이지에 없는 내용이라 Dto로 안하긴 했는데
-	 * @return
-	 */
-	@Transactional
-	public ToolboxToolLabel addNew(Tool tool, Toolbox toolbox) {
-		Random random = new Random();
-		ToolboxToolLabel label = ToolboxToolLabel.builder()
-			.tool(tool)
-			.toolbox(toolbox)
-			.location(toolbox.getName())
-			.qrcode(toolbox.getId()+"_"+tool.getId())
-			.build();
-		return repository.save(label);
-	}
 	
 	private List<ToolboxToolLabelDto> getDtoList(List<ToolboxToolLabel> list){
 		List<ToolboxToolLabelDto> dtoList = new ArrayList<ToolboxToolLabelDto>();
@@ -172,6 +245,15 @@ public class ToolboxToolLabelService {
 			dtoList.add(new ToolboxToolLabelDto(item));
 		}
 		return dtoList;
+	}
+
+	public long getCount(long toolboxId) {
+		return repository.countByToolboxId(toolboxId);
+	}
+
+	public Page<ToolboxToolLabelDto> getPage(long toolboxId, Pageable pageable) {
+		Page<ToolboxToolLabel> page = repository.findAllByToolboxId(toolboxId,pageable);
+		return page.map(e->new ToolboxToolLabelDto(e));
 	}
 
 }
