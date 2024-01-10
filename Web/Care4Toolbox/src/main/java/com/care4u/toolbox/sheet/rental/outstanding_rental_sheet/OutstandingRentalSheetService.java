@@ -113,4 +113,55 @@ public class OutstandingRentalSheetService {
 			return new OutstandingRentalSheetDto(repository.save(sheet), toolList);
 		}
 	}
+
+	// 반납 신청 시 outstandingState를 Request로 바꿉니다.
+	@Transactional
+	public String requestOutstandingState(long id) {
+		Optional<OutstandingRentalSheet> sheetOptional = repository.findById(id);
+		if (sheetOptional.isEmpty()) {
+			logger.error("outstandingSheet not found!");
+			return null;
+		}
+		OutstandingRentalSheet sheet = sheetOptional.get();
+		sheet.updateOutstandingState(OutstandingState.REQUEST);
+		repository.save(sheet);
+
+		return "outstandingRentalSheet Id : " + sheet.getId() + " OutstandingStatus changed to"
+				+ sheet.getOutstandingStatus();
+	}
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPage(long membershipId, Boolean isWorker,
+			Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		Optional<Toolbox> toolboxOptional = toolboxRepository.findById(toolboxId);
+		Toolbox toolbox;
+		if (toolboxOptional.isEmpty()) {
+			logger.info("no toolbox : " + membershipId + " all toolbox selected.");
+			toolbox = null;
+		} else {
+			toolbox = toolboxOptional.get();
+		}
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
+			logger.info("no membership : " + membershipId + " all membership selected.");
+			membership = null;
+			Page<OutstandingRentalSheet> page = repository.findByToolbox(OutstandingState.REQUEST, toolbox, pageable);
+			return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+		} else {
+			membership = membershipOptional.get();
+		}
+		Page<OutstandingRentalSheet> page = repository.findBySearchQuery(membership, isWorker, isLeader,
+				toolbox, LocalDateTime.of(startLocalDate, LocalTime.MIN),
+				LocalDateTime.of(endLocalDate, LocalTime.MAX), pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+	@Transactional(readOnly = true)
+	public Page<OutstandingRentalSheetDto> getPage(Pageable pageable){
+		Page<OutstandingRentalSheet> page = repository.findAll(pageable);
+		return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+	}
+	@Transactional(readOnly = true)
+	public Long getCount() {
+		return repository.count();
+	}
 }

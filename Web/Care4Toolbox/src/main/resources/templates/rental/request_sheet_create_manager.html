@@ -25,7 +25,7 @@
 				<div class="card bg-transparent">
 					<!-- Contact Header -->
 					<div class=" d-flex flex-column bg-white mb-30">
-						<h4 class="font-30 m-3">공기구 대여 신청 리스트 작성</h4>
+						<h4 class="font-30 m-3">공기구 대여 신청</h4>
 						<div class="table-responsive">
 							<!-- Invoice List Table -->
 							<table class="text-nowrap bg-white">
@@ -63,7 +63,7 @@
 										</td>
 										<td>
 											<div class="custom-select style--two" style="max-width:none">
-												<select class="theme-input-style" id="toolboxSelect">
+												<select class="theme-input-style" id="toolboxSelect" style="/*background-color: white;*/cursor: auto;">
 													<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
 														th:text="${toolbox.name}">name?</option>
 												</select>
@@ -103,7 +103,7 @@
 							<!-- End Contact List Table -->
 						</div>
 					</div>
-					<div class="overflow-auto bg-white" style="height:calc(100vh - 440px)">
+					<div class="overflow-auto bg-white" style="height:calc(100vh - 440px); border-radius:20px 20px 0px 0px;">
 						<!-- Invoice List Table -->
 						<table class="text-nowrap bg-white">
 							<thead>
@@ -148,7 +148,7 @@
 						<!-- End Contact List Table -->
 						<!-- Left Div Footer -->
 					</div>
-					<div class=" d-flex justify-content-end bg-white m-0 p-3">
+					<div class=" d-flex justify-content-end bg-white m-0 p-3" style="border-radius:0px 0px 20px 20px;">
 						<a href="#" id="addWorkingToolboxBtn" class="btn p-3 mr-2 disabled">
 							즐겨찾기
 						</a>
@@ -368,18 +368,27 @@
 				document.getElementById("worker").textContent = mainData["worker"].name;
 				
 				abcHttp.get(
-					'/toolbox/getbyname',
+					'/toolbox/getbymanagerid',
 					{
-						name:data.partDto.subPartDto.mainPartDto.name
+						managerId: data.id
 					}
 				)
-				.then(toolboxData=>{
-					if (toolboxData==null){
-						return;
-					}
-					document.getElementById("toolboxSelect").value=toolboxData.id;
-					mainData.toolbox.id=toolboxData.id;
-				});
+					.then(toolboxData => {
+						if (toolboxData == null || toolboxData?.id==null) {
+							throw error("no toolbox");
+						} else {
+							document.getElementById("toolboxSelect").value=toolboxData.id;
+							mainData.toolbox.id=toolboxData.id;
+						}
+					})
+					.catch(error => {
+						console.log('no toolbox for manager');
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(() => {rejected();});
+					});
 			});
 			
 			// =============== ▼ table ===============
@@ -390,7 +399,7 @@
 				"pageLength": 10, 		// 페이지당 항목 수
 				"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
 				"searching": false,       // 검색 기능 사용
-				"ordering": true,        // 정렬 기능 사용
+				"ordering": false,        // 정렬 기능 사용
 				"order": [
 					[0, 'asc']
 				],
@@ -399,7 +408,7 @@
 				"serverSide": true,
 				"processing": true,
 				"ajax": {
-					"url": `/tool/getpage/rental`, // 데이터를 가져올 엔드포인트 URL
+					"url": `/stock_status/getpage`, // 데이터를 가져올 엔드포인트 URL
 					//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
 					"method": "POST",
 					"contentType": "application/json",
@@ -433,7 +442,7 @@
 				},
 				"columnDefs": [
 					{
-						"targets": [0, 2, 6, 7, 8, 9],
+						"targets": [0, 2, 5, 7, 8, 9],
 						"visible": false
 					}
 				],
@@ -485,12 +494,12 @@
 					{"data": "toolDto.unit"},
 					{"data": "toolDto.price", "type": Number},
 					{"data": "toolDto.replacementCycle", "type": Number},
-					{"data": "stockDto.goodCount"},
+					{"data": "goodCount"},
 					{
 						"data": null,
 						"render": function (data, type, row) {
 							if (type === "display") {
-								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.stockDto.goodCount<1)
+								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.goodCount<1)
 								return '<a  class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
 									'<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
 									'</a>';
@@ -581,6 +590,17 @@
 						newRowString += "</td>";
 					});
 					newRowString += 
+						'<div class="input-group large col-8 bootstrap-touchspin p-1" style="min-width:150px;">'+
+							'<span class="input-group-btn input-group-prepend bootstrap-touchspin-injected">'+
+								'<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button">+</button>'+
+								'</span>'+
+								'<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center;">'+
+								'<span class="input-group-btn input-group-append bootstrap-touchspin-injected">'+
+									'<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button">-</button>'+
+								'</span>'+
+						'</div>';
+					
+					const backupstring = 
 						'<td class="d-flex justify-content-between align-item-center">' +
 							'<a  class="btn bg-success increaseBtn p-2">' +
 								'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
@@ -597,11 +617,15 @@
 
 					const increaseBtn = newRow.querySelector(".increaseBtn");
 					const decreaseBtn = newRow.querySelector(".decreaseBtn");
+					const toolCount = newRow.querySelector(".toolCount");
 					increaseBtn.addEventListener("click", function () {
 						increaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
 					});
 					decreaseBtn.addEventListener("click", function () {
 						decreaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+					toolCount.addEventListener("change", function () {
+						changeCount.apply(this,[Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr"))]);
 					});
 					stack.push({key: "a", param: id});
 
@@ -623,7 +647,7 @@
 			list.splice(index, 1);
 			const row = getTRFromTBodyByIndex(index);
 			row.remove();
-
+			table.draw();
 			stack.push({key: "r", param: id});
 		}
 		//toolId를 통해 해당 tool이 list의 몇번째 index에 위치하는지를 반환합니다.
@@ -673,7 +697,7 @@
 						}
 						list[index].count++;
 						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-						count.textContent = parseInt(count.textContent) + 1;
+						count.value=parseInt(count.value) + 1;
 
 						stack.push({key: "i", param: index});
 					}
@@ -690,12 +714,51 @@
 			} else {
 				list[index].count--;
 				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
-				count.textContent = parseInt(count.textContent) - 1;
+				count.value=parseInt(count.value) - 1;
 
 				stack.push({key: "d", param: index});
 			}
 		}
-
+//대여 신청 수량을 변경.
+		// : toolCount Input을 변경했을 때 실행.
+		function changeCount(index){
+			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
+				.then(stockData => {
+					if (index >= list.length) {
+						return "없다 그런거";
+					}
+					if (stockData.goodCount < parseInt(this.value)) {
+						Swal.fire({
+							type: "info",
+							title: "재고 부족",
+							text: "이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
+						}).then(result=>{
+							this.value=stockData.goodCount;
+							list[index].count=this.value;
+						});
+						return;
+					} else if (parseInt(this.value) < 1) {
+						Swal.fire({
+							type: 'question',
+							title: '입력 범위 밖',
+							html: '<p>0 이하의 값을 입력하셨습니다. 목록에서 현재 공기구를 제외하시겠습니까?</p>',
+							showCancelButton: true,
+							confirmButtonText: '예',
+							cancelButtonText: '아니오',
+							buttonStyling: false,
+						}).then(result => {
+							if (result.value == true) {
+								removeTool(list[index].id);
+							}else{
+								this.value=1;
+								list[index].count=this.value;
+							}
+						});
+					} else {
+						list[index].count=this.value;
+					}
+				})
+		}
 		/*
 		//만약 list와 table element가 표시하는 정보가 일치하지 않을 때 
 		//수동으로 list에 맞춰 table을 재구성합니다.
@@ -1072,7 +1135,7 @@
 						{
 							workName: mainData.workName.name,
 							workerDtoId: mainData.worker.id,
-							leaderDtoId: mainData.leader.id, addTool,
+							leaderDtoId: mainData.leader.id,
 							toolboxDtoId: mainData.toolbox.id,
 							toolList: list.map(item => ({toolDtoId: item.id, count: item.count}))
 						}
@@ -1082,11 +1145,11 @@
 							type: "success",
 							title: "대여 신청 완료",
 							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
-						});
+						}).then(result2 => {
+						location.href = '/rental/request_sheet/manager/create';
 					})
-					.then(result2 => {
-						location.href = '/rental/request_sheet/create';
 					})
+					
 					.catch(error => {
 						Swal.fire({
 							type: "error",
