@@ -93,6 +93,24 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             bluetoothManager.bluetoothOpen()
         }
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
+            }
+        })
 
         popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
         progressBar = view.findViewById(R.id.progressBar)

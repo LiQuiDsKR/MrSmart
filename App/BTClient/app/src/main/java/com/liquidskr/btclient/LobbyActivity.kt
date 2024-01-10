@@ -127,27 +127,6 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
-    fun showCustomModal(title: String, content: String, listener: CustomModalListener) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-        builder.setMessage(content)
-
-        // 확인 버튼을 눌렀을 때의 동작 정의
-        builder.setPositiveButton("확인") { _, _ ->
-            // 모달 확인 버튼을 눌렀을 때, Listener의 메서드 호출
-            listener.onConfirmButtonClicked()
-        }
-
-        // 취소 버튼을 눌렀을 때의 동작 정의
-        builder.setNegativeButton("취소") { _, _ ->
-            // 모달 취소 버튼을 눌렀을 때, Listener의 메서드 호출
-            listener.onCancelButtonClicked()
-        }
-
-        val dialog = builder.create()
-        dialog.show()
-    }
-
     fun showAlertModal(title: String, content: String, listener: AlertModalListener) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)

@@ -78,8 +78,13 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         QREditText = view.findViewById(R.id.QR_EditText)
@@ -95,8 +100,19 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
-                whenDisconnected()
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
                 Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
             }
         })
         val databaseHelper = DatabaseHelper(requireContext())
@@ -105,6 +121,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         val adapter = ToolRegisterAdapter(tools) { tool ->
             showPopup()
 
+            editTextName.clearFocus()
             editTextName.clearFocus()
             editTextName.isClickable = false
             editTextName.isFocusable = false
@@ -119,7 +136,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                     for (tagDto in tagAndTBT.tagDtoList) {
                         if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
                     }
-
                     val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
@@ -176,43 +192,48 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         QREditText.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val label = QREditText.text.toString().replace("\n", "")
-                try {
-                    showPopup()
-                    editTextName.clearFocus()
-                    editTextName.isClickable = false
-                    editTextName.isFocusable = false
-                    recyclerView.requestFocus()
-
-                    val dbHelper = DatabaseHelper(requireContext())
-                    val tool = dbHelper.getToolByTBT(label)
-                    bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                    bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
-                        override fun onSuccess(result: String, type: Type) {
-                            val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
-
-                            val tagQRList: MutableList<String> = mutableListOf()
-                            for (tagDto in tagAndTBT.tagDtoList) {
-                                if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
-                            }
-                            hidePopup()
-                            val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
-                            requireActivity().supportFragmentManager.beginTransaction()
-                                .replace(R.id.fragmentContainer, fragment)
-                                .addToBackStack(null)
-                                .commit()
-                        }
-                        override fun onError(e: Exception) {
-                            handler.post{
-                                Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
-                            }
-                            hidePopup()
-                        }
-                    })
-                } catch(e:Exception) {
-                    Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
-                    hidePopup()
-                }
                 QREditText.text.clear()
+                if (label != "") {
+                    try {
+                        showPopup()
+                        QREditText.clearFocus()
+                        recyclerView.requestFocus()
+
+                        val dbHelper = DatabaseHelper(requireContext())
+                        val tool = dbHelper.getToolByTBT(label)
+                        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+                        bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                            override fun onSuccess(result: String, type: Type) {
+                                val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
+
+                                val tagQRList: MutableList<String> = mutableListOf()
+                                for (tagDto in tagAndTBT.tagDtoList) {
+                                    if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
+                                }
+                                val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                    .replace(R.id.fragmentContainer, fragment)
+                                    .addToBackStack(null)
+                                    .commit()
+                            }
+                            override fun onError(e: Exception) {
+                                hidePopup()
+                                handler.post{
+                                    Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        })
+                    } catch (e:Exception) {
+                        Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
+                        hidePopup()
+                    }
+                } else {
+                    handler.post{
+                        Toast.makeText(activity, "QR을 읽는 중에 문제가 발생했습니다. 다시 입력해주세요.",Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                QREditText.requestFocus()
                 return@setOnEditorActionListener true
             }
             false
@@ -229,6 +250,11 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             editTextName.clearFocus()
             QREditText.requestFocus()
         }
+
+        QREditText.isClickable = true
+        QREditText.isFocusable = true
+        editTextName.isClickable = true
+        editTextName.isFocusable = true
 
         QREditText.requestFocus()
         recyclerView.adapter = adapter

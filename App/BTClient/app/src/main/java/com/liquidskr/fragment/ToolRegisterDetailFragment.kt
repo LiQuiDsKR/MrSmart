@@ -29,6 +29,8 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
 class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) : Fragment() {
@@ -102,6 +104,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                     } else {
                         handler.post {
                             Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
                         }
                     }
                     hidePopup()
@@ -216,14 +219,16 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             }
         }
         confirmBtn.setOnClickListener {
-            showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
+            if (tbtQrcode == "") {
+                Toast.makeText(context, "선반 코드가 입력되지 않았습니다.",Toast.LENGTH_SHORT).show()
+            } else {
+                showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
+            }
         }
 
         recyclerView.adapter = adapter
         qrTextEdit.requestFocus()
-        handler.postDelayed ({
-            qrTextEdit.requestFocus()
-        },500)
+
         return view
     }
 

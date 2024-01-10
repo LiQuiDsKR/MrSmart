@@ -1,7 +1,6 @@
 package com.liquidskr.btclient
 
 import android.app.AlertDialog
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +8,8 @@ import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.mrsmart.standard.rental.RentalToolDto
-import com.mrsmart.standard.tool.RentalRequestToolWithCount
 import com.mrsmart.standard.tool.RentalToolWithCount
-import com.mrsmart.standard.tool.ToolWithCount
 
 class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
                                var outstandingRentalToolWithCounts: MutableList<RentalToolWithCount>,
@@ -119,8 +115,10 @@ class OutstandingDetailAdapter(private val recyclerView: RecyclerView,
         }
         notifyDataSetChanged() // 변경된 데이터를 알림
     }
-    fun tagAdded(toolId: Long) {
+    fun tagAdded(toolId: Long, tag: String) {
         addToSelection(toolId)
+
+
         notifyDataSetChanged()
     }
     fun updateList(newList: MutableList<RentalToolWithCount>) {

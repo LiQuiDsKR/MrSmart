@@ -4,6 +4,8 @@ import SharedViewModel
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
@@ -20,7 +23,7 @@ import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
-class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
+class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var connectBtn: ImageButton
     private lateinit var rentalBtn: ImageButton
     private lateinit var returnBtn: ImageButton
@@ -31,6 +34,8 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothMa
     private lateinit var returnBtnField: LinearLayout
     private lateinit var standbyBtnField: LinearLayout
     private lateinit var registerBtnField: LinearLayout
+
+    private val handler = Handler(Looper.getMainLooper()) { true }
     val gson = Gson()
     lateinit var bluetoothManager: BluetoothManager
 
@@ -57,10 +62,32 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothMa
         welcomeMessage.text = manager.name + "님 환영합니다."
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
+
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
+
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                handler.post {
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
+            }
+        })
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -94,11 +121,5 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment(), BluetoothMa
         }
 
         return view
-    }
-
-    override fun onBluetoothDisconnected() {
-        activity?.runOnUiThread {
-            connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
     }
 }

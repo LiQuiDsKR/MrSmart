@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,7 @@ import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
-class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothManager.BluetoothConnectionListener {
+class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
     private lateinit var connectBtn: ImageView
     private lateinit var rentalBtn: ImageView
     private lateinit var returnBtn: ImageButton
@@ -49,6 +50,22 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothMana
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = worker.name + "님 환영합니다."
 
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                handler.post {
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
+            }
+        })
 
         rentalBtnField.setOnClickListener {
             rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
@@ -95,12 +112,4 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment(), BluetoothMana
             }
         })
     }*/
-    fun whenDisconnected () {
-        handler.post {
-            connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
-    }
-    override fun onBluetoothDisconnected() {
-        whenDisconnected()
-    }
 }

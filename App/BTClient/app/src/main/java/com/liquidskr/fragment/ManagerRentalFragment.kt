@@ -115,8 +115,19 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
-                whenDisconnected()
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
                 Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")                
             }
         })
 
@@ -126,7 +137,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
-
         connectBtn.setOnClickListener{
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             try {
@@ -173,13 +183,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         getRentalRequestSheetList()
 
         return view
-    }
-
-    fun whenDisconnected () {
-        handler.post {
-            hidePopup()
-            connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
     }
 
     private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
@@ -249,6 +252,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
                 } // UI블로킹 end
             }
             override fun onError(e: Exception) {
+                hidePopup()
                 e.printStackTrace()
             }
         })
