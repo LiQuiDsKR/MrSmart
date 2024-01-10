@@ -345,7 +345,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		rentalRequestSheetService.addNew(formDto,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		logger.error("bad, " , e);
 		    	}
 			}	
@@ -367,7 +367,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		rentalRequestSheetService.addNew(formDto,eventTimestamp,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -390,10 +390,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		            
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -410,10 +410,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		            
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -429,10 +429,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		rentalRequestSheetService.cancel(sheetId);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -448,10 +448,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		rentalRequestSheetService.updateState(sheetId,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -565,10 +565,10 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
 		    		handler.sendData(keyword + "good");
 		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -581,7 +581,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		returnSheetService.addNew(formDto);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -601,7 +601,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		returnSheetService.addNew(formDto,eventTimestamp);
 		    		handler.sendData(keyword + "good");
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -619,7 +619,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    		
 		    	}
@@ -644,7 +644,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
@@ -751,7 +751,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	                handler.sendData(keyword + e.getMessage());
 	                e.printStackTrace();
 	             }catch(Exception e) {
-	                handler.sendData(keyword + "bad");
+	            	 handler.sendData(keyword + "bad, "+ e.getMessage());
 	                e.printStackTrace();
 	             }
 	         }
@@ -774,7 +774,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	                handler.sendData(keyword + e.getMessage());
 	                e.printStackTrace();
 	             }catch(Exception e) {
-	                handler.sendData(keyword + "bad");
+	            	handler.sendData(keyword + "bad, "+ e.getMessage());
 	                e.printStackTrace();
 	             }
 	         }
@@ -791,7 +791,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		    		handler.sendData(keyword + e.getMessage());
 		    		e.printStackTrace();
 		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad");
+		    		handler.sendData(keyword + "bad, "+ e.getMessage());
 		    		e.printStackTrace();
 		    	}
 			}
