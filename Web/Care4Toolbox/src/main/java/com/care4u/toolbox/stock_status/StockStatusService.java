@@ -189,6 +189,7 @@ public class StockStatusService {
 		return new StockStatusDto(repository.save(stock));
 	}
 	
+	/*
 @Scheduled(cron = "00 00 00 * * ?") // 매일 자정에 실행
 
     public void copyEntities() {
@@ -228,6 +229,7 @@ public class StockStatusService {
 	        logger.info(count+"/"+formerStatus.size());
 		}
     }
+	*/
 	
 	private boolean isCorrect(StockStatus stockStatus) {
 		LocalDate currentDate = stockStatus.getCurrentDay();
