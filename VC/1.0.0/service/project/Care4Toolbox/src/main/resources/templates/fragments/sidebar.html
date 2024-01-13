@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Sidebar -->
+<nav class="sidebar" data-trigger="scrollbar" th:fragment="sidebar">
+	<!-- Sidebar Header -->
+	<div class="sidebar-header d-none d-lg-block">
+		<!-- Sidebar Toggle Pin Button -->
+		<div class="sidebar-toogle-pin">
+			<i class="icofont-tack-pin"></i>
+		</div>
+		<!-- End Sidebar Toggle Pin Button -->
+	</div>
+	<!-- End Sidebar Header -->
+
+	<!-- Sidebar Body -->
+	<div class="sidebar-body">
+		<!-- Nav -->
+		<ul class="nav">
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">기준정보</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/parts}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">조직 정보</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" >
+				<a th:href="@{/membership}">
+					<i class="icofont-ui-user"></i>
+					<span class="link-title">인원 정보</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/toolbox}">
+					<i class="icofont-database"></i>
+					<span class="link-title">정비실 정보</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/groups}">
+					<i class="icofont-automation"></i>
+					<span class="link-title">공기구 분류 정보</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/tool}">
+					<i class="icofont-automation"></i>
+					<span class="link-title">공기구 정보</span>
+				</a>
+			</li>
+			<li class="nav-category">공기구 대여</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/rental/request_sheet/manager/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('USER')">
+				<a th:href="@{/rental/request_sheet/user/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/rental/request_sheet/approve}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">승인</span>
+				</a>
+			</li>
+			<li class="">
+				<a th:href="@{/rental/sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">기록 조회</span>
+				</a>
+			</li>
+			<li class="nav-category">공기구 반납</li>
+			<li class="">
+				<a th:href="@{/return/outstanding_rental_sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">신청</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/return/sheet/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">승인</span>
+				</a>
+			</li>
+			<li class="">
+				<a th:href="@{/return/sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">기록 조회</span>
+				</a>
+			</li>
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">소모자재</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/supply/sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">지급 기록 조회</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/supply/sheet/tool}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">재지급기간 조회</span>
+				</a>
+			</li>
+			<li class="nav-category" sec:authorize="hasAnyRole('ADMIN','MANAGER')">공기구 매입</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/buy/sheet/create}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">매입 등록</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/buy/sheet}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">기록 조회</span>
+				</a>
+			</li>
+			<li class="nav-category">분석</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')" hidden>
+				<a th:href="@{/analytics/tool_states/rental_return/old}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">(구)분석 현황</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/analytics/tool_states/rental_return}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">금일 현황</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+				<a th:href="@{/analytics/tool_states/main_group}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">대여/반납 현황</span>
+				</a>
+			</li>
+			<li class="" >
+				<a th:href="@{/analytics/other_stock}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">타 공구실 재고 조회</span>
+				</a>
+			</li>
+			<li class="" sec:authorize="hasRole('ADMIN')" >
+				<a th:href="@{/initialize/stock_status}">
+					<i class="icofont-navigation-menu"></i>
+					<span class="link-title">재고 초기 설정</span>
+				</a>
+			</li>
+			<!-- 원본 -->
+			<li class="nav-category" hidden>Markets</li>
+			<li class="" hidden>
+				<a href="index.html">
+					<i class="icofont-pie-chart"></i>
+					<span class="link-title">Dashboard</span>
+				</a>
+			</li>
+			<li hidden>
+				<a href="#">
+					<i class="icofont-shopping-cart"></i>
+					<span class="link-title">Ecommerce</span>
+				</a>
+
+				<!-- Sub Menu -->
+				<ul class="nav sub-menu">
+					<li>
+						<a href="pages/ecommerce/ecommerce.html">Dashboard 1</a>
+					</li>
+					<li>
+						<a href="pages/ecommerce/ecommerce2.html">dashboard 2</a>
+					</li>
+					<li><a href="pages/ecommerce/orders.html">orders</a></li>
+					<li>
+						<a href="pages/ecommerce/product-catelog.html"
+							>Products Catalog</a
+						>
+					</li>
+					<li>
+						<a href="pages/ecommerce/product-details.html"
+							>Product Details</a
+						>
+					</li>
+					<li><a href="pages/ecommerce/cartlist.html">cart list</a></li>
+				</ul>
+				<!-- End Sub Menu -->
+			</li>
+			<li hidden>
+				<a href="pages/social-media.html">
+					<i class="icofont-chart-histogram"></i>
+					<span class="link-title">Social Media Analytics</span>
+				</a>
+			</li>
+			<!--원본 end-->
+
+		</ul>
+		<!-- End Nav -->
+	</div>
+	<!-- End Sidebar Body -->
+</nav>
+<!-- End Sidebar -->
+
+
+</html>
