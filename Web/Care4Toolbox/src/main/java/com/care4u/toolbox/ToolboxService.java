@@ -69,6 +69,18 @@ public class ToolboxService {
 		return dtoList;
 	}
 	
+	@Transactional(readOnly = true)
+	public List<ToolboxCompressDto> listCompressed(){
+		List<Toolbox> list = repository.findAllByOrderByNameAsc();
+		
+		List<ToolboxCompressDto> dtoList = new ArrayList<ToolboxCompressDto>();
+		for (Toolbox item : list) {
+			dtoList.add(new ToolboxCompressDto(item));
+			
+		}
+		return dtoList;
+	}
+	
 	public ToolboxDto addNew(ToolboxDto toolboxDto) throws IllegalStateException {
 		Toolbox findItem = repository.findByName(toolboxDto.getName());
 		if(findItem != null){

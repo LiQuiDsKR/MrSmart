@@ -797,7 +797,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		case TOOLBOX_ALL:
-			handler.sendData(GsonUtils.toJson(toolboxService.list()));
+			logger.debug(toolboxService.listCompressed().toString());
+			handler.sendData(keyword+GsonUtils.toJson(toolboxService.listCompressed()));
 			break;
 		}
 	}

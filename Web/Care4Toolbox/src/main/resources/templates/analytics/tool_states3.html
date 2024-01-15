@@ -597,6 +597,8 @@
 						}
 					}
 				));
+				setTimeout(_=>{
+					
 				this.updateOptions({
 					series: chartData,
 					xaxis: {
@@ -604,6 +606,7 @@
 						max: new Date($('#end-date').val()).getTime(),
 					}
 				});
+				},10)
 			});
 		}
 		function initializeChart4() {

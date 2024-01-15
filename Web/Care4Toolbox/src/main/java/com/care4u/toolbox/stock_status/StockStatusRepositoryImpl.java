@@ -8,11 +8,14 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import com.care4u.hr.membership.Membership;
+import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.group.main_group.QMainGroup;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
 import com.care4u.toolbox.sheet.rental.rental_sheet.QRentalSheet;
@@ -34,6 +37,8 @@ import groovyjarjarantlr4.v4.runtime.atn.SemanticContext.AND;
 public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
+	private final Logger logger = LoggerFactory.getLogger(StockStatusRepositoryImpl.class);
+	
 	public StockStatusRepositoryImpl(EntityManager entityManager) {
 		this.queryFactory = new JPAQueryFactory(entityManager);
 	}
@@ -81,20 +86,22 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 			    .select(rentalTool.count.sum())
 			    .from(rentalSheet)
 			    .join(rentalTool).on(rentalSheet.id.eq(rentalTool.rentalSheet.id))
-			    .where(rentalSheet.worker.eq(membership)
-			    	.and(rentalTool.tool.eq(tool))
-			    	.and(rentalSheet.toolbox.id.eq(toolboxId)))
+			    .where((membership==null?Expressions.asBoolean(true).isTrue():rentalSheet.worker.eq(membership))
+			    	.and(tool==null?Expressions.asBoolean(true).isTrue():rentalTool.tool.eq(tool))
+			    	.and(toolboxId==0?Expressions.asBoolean(true).isTrue():rentalSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
 
 		returnCount = queryFactory
 			    .select(returnTool.count.sum())
 			    .from(returnSheet)
 			    .join(returnTool).on(returnSheet.id.eq(returnTool.returnSheet.id))
-			    .where(returnSheet.worker.eq(membership)
-				    	.and(returnTool.rentalTool.tool.eq(tool))
-				    	.and(returnSheet.toolbox.id.eq(toolboxId)))
+			    .where((membership==null?Expressions.asBoolean(true).isTrue():returnSheet.worker.eq(membership))
+				    	.and(tool==null?Expressions.asBoolean(true).isTrue():returnTool.rentalTool.tool.eq(tool))
+				    	.and(toolboxId==0?Expressions.asBoolean(true).isTrue():returnSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
 		} catch (Exception e){
+			logger.debug(e.getMessage());
+			e.printStackTrace();
 			rentalCount=0;
 			returnCount=0;
 		}
@@ -225,25 +232,41 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		QStockStatus stock = QStockStatus.stockStatus;
 		
 		String[] keywords = toolName.split(" "); // 검색어를 공백 기준으로 분리
-		List<BooleanExpression> conditions = new ArrayList<>();
+		List<BooleanExpression> nameConditions = new ArrayList<>();
+		List<BooleanExpression> engNameConditions = new ArrayList<>();
+		List<BooleanExpression> specConditions = new ArrayList<>();
 
 		for (String keyword : keywords) {
-			BooleanExpression condition = stock.tool.name.contains(keyword);
-			conditions.add(condition);
+			BooleanExpression nameCondition = stock.tool.name.contains(keyword);
+			nameConditions.add(nameCondition);
+		}
+		for (String keyword : keywords) {
+			BooleanExpression engNameCondition = stock.tool.engName.contains(keyword);
+			engNameConditions.add(engNameCondition);
+		}
+		for (String keyword : keywords) {
+			BooleanExpression specCondition = stock.tool.spec.contains(keyword);
+			specConditions.add(specCondition);
 		}
 
-		BooleanExpression finalCondition = Expressions.allOf(conditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalNameCondition = Expressions.allOf(nameConditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalEngNameCondition = Expressions.allOf(engNameConditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalSpecCondition = Expressions.allOf(specConditions.toArray(new BooleanExpression[0]));
 
 		List<StockStatus> content = queryFactory.selectFrom(stock)
 				.where(
-						finalCondition
+						(finalNameCondition
+						.or(finalEngNameCondition)
+						.or(finalSpecCondition))
 						.and(stock.toolbox.id.eq(toolboxId))
 						.and(stock.currentDay.eq(date))
 				)
 				.orderBy(QTool.tool.id.asc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
 				.fetch();
 		long total = queryFactory.select(Wildcard.count).from(stock)
-				.where(finalCondition
+				.where((finalNameCondition
+						.or(finalEngNameCondition)
+						.or(finalSpecCondition))
 				.and(stock.toolbox.id.eq(toolboxId))
 				.and(stock.currentDay.eq(date))).fetchOne();
 		return new PageImpl<>(content, pageable, total);

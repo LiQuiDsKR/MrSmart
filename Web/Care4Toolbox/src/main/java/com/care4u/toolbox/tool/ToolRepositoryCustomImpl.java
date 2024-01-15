@@ -35,20 +35,32 @@ public class ToolRepositoryCustomImpl implements ToolRepositoryCustom {
 		QTool tool = QTool.tool;
 
 		String[] keywords = name.split(" "); // 검색어를 공백 기준으로 분리
-		List<BooleanExpression> conditions = new ArrayList<>();
+		List<BooleanExpression> nameConditions = new ArrayList<>();
+		List<BooleanExpression> engNameConditions = new ArrayList<>();
+		List<BooleanExpression> specConditions = new ArrayList<>();
 
 		for (String keyword : keywords) {
-			BooleanExpression condition = tool.name.contains(keyword);
-			conditions.add(condition);
+			BooleanExpression nameCondition = tool.name.contains(keyword);
+			nameConditions.add(nameCondition);
+		}
+		for (String keyword : keywords) {
+			BooleanExpression engNameCondition = tool.engName.contains(keyword);
+			engNameConditions.add(engNameCondition);
+		}
+		for (String keyword : keywords) {
+			BooleanExpression specCondition = tool.spec.contains(keyword);
+			specConditions.add(specCondition);
 		}
 
-		BooleanExpression finalCondition = Expressions.allOf(conditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalNameCondition = Expressions.allOf(nameConditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalEngNameCondition = Expressions.allOf(engNameConditions.toArray(new BooleanExpression[0]));
+		BooleanExpression finalSpecCondition = Expressions.allOf(specConditions.toArray(new BooleanExpression[0]));
 
-		List<Tool> content = queryFactory.selectFrom(tool).where(finalCondition)
+		List<Tool> content = queryFactory.selectFrom(tool).where(finalNameCondition.or(finalEngNameCondition).or(finalSpecCondition))
 				.orderBy(QTool.tool.id.asc()).offset(pageable.getOffset()).limit(pageable.getPageSize())
 				.fetch();
 
-		long total = queryFactory.select(Wildcard.count).from(tool).where(finalCondition).fetchOne();
+		long total = queryFactory.select(Wildcard.count).from(tool).where(finalNameCondition.or(finalEngNameCondition).or(finalSpecCondition)).fetchOne();
 
 		return new PageImpl<>(content, pageable, total);
 	}
