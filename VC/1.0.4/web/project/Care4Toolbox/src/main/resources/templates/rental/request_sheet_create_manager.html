@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
+
+		.selectable:hover {
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid" style="height:100%;">
+		<div class="row">
+
+			<!-- Left List Div -->
+			<div class="col-6">
+				<div class="card bg-transparent">
+					<!-- Contact Header -->
+					<div class=" d-flex flex-column bg-white mb-30">
+						<h4 class="font-30 m-3">공기구 대여 신청</h4>
+						<div class="table-responsive">
+							<!-- Invoice List Table -->
+							<table class="text-nowrap bg-white">
+								<thead>
+									<tr>
+										<th>
+											작업명
+										</th>
+										<th>
+											정비실
+										</th>
+										<th>
+											작업자
+										</th>
+										<th>
+											리더
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<div class="d-flex justify-content-between">
+												<div id="workName">
+													새 작업 공기구 리스트
+												</div>
+												<div>
+													<span id="workNameEditModalBtn" class="contact-edit"
+														data-toggle="modal" data-target="#workNameEditModal"
+														style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+										</td>
+										<td>
+											<div class="custom-select style--two" style="max-width:none">
+												<select class="theme-input-style" id="toolboxSelect" style="/*background-color: white;*/cursor: auto;">
+													<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+														th:text="${toolbox.name}">name?</option>
+												</select>
+											</div>
+										</td>
+										<td>
+											<div class="d-flex justify-content-between">
+												<div id="worker">
+													선택
+												</div>
+												<div>
+													<span id="workerEditModalBtn" class="contact-edit"
+														data-toggle="modal" data-target="#workerEditModal"
+														style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+										</td>
+										<td>
+											<div class="d-flex justify-content-between">
+												<div id="leader">
+													선택
+												</div>
+												<div>
+													<span id="leaderEditModalBtn" class="contact-edit"
+														data-toggle="modal" data-target="#leaderEditModal"
+														style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<!-- End Contact List Table -->
+						</div>
+					</div>
+					<div class="overflow-auto bg-white" style="height:calc(100vh - 440px); border-radius:20px 20px 0px 0px;">
+						<!-- Invoice List Table -->
+						<table class="text-nowrap bg-white">
+							<thead>
+								<tr>
+									<th hidden>
+										Id
+									</th>
+									<th>
+										이름
+									</th>
+									<th hidden>
+										영문이름
+									</th>
+									<th hidden>
+										품목번호
+									</th>
+									<th hidden>
+										대분류
+									</th>
+									<th hidden>
+										중분류
+									</th>
+									<th>
+										규격
+									</th>
+									<th hidden>
+										단위
+									</th>
+									<th hidden>
+										가격
+									</th>
+									<th hidden>
+										교체주기
+									</th>
+									<th>수량</th>
+								</tr>
+							</thead>
+							<tbody id="rentalList">
+
+							</tbody>
+						</table>
+						<!-- End Contact List Table -->
+						<!-- Left Div Footer -->
+					</div>
+					<div class=" d-flex justify-content-end bg-white m-0 p-3" style="border-radius:0px 0px 20px 20px;">
+						<a href="#" id="addWorkingToolboxBtn" class="btn p-3 mr-2 disabled">
+							즐겨찾기
+						</a>
+						<a href="#" id="applyBtn" class="btn p-3">
+							신청하기
+						</a>
+					</div>
+					<!-- End Left Div Footer -->
+				</div>
+				<!-- End Card -->
+			</div>
+
+			<!-- Right Tool Div -->
+			<div class="col-6">
+				<!-- Card -->
+				<div class="card bg-transparent" style="height:100%;">
+					<!-- Contact Header -->
+					<form class="contact-header d-flex align-items-sm-center flex-row bg-white mb-30">
+						<!-- Search header -->
+						<div
+							class="col-12 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0">
+							<!-- layer 1 -->
+							<div class="row" style="width:100%; box-sizing: content-box;">
+								<!-- Search Form -->
+								<div class="search-form" style="width:100%; box-sizing: content-box;">
+									<div class="theme-input-group style--two">
+										<input id="searchInput" type="text" class="theme-input-style"
+											placeholder="검색" />
+										<button id="searchBtn" type="submit">
+											<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+										</button>
+									</div>
+								</div>
+								<!-- End Search Form -->
+							</div>
+
+							<!-- layer 2 -->
+							<!-- Search Condition header -->
+						</div>
+						<!-- End Search Condition -->
+					</form>
+
+					<div class="table-responsive" style="height:100%;">
+						<!-- Invoice List Table -->
+						<table id="datatable" class="text-nowrap bg-white" style="height:100%;">
+							<thead>
+								<tr>
+									<th>
+										Id
+									</th>
+									<th>
+										이름
+									</th>
+									<th>
+										영문이름
+									</th>
+									<th>
+										품목번호
+									</th>
+									<th>
+										대분류
+									</th>
+									<th>
+										중분류
+									</th>
+									<th>
+										스펙
+									</th>
+									<th>
+										단위
+									</th>
+									<th>
+										가격
+									</th>
+									<th>
+										교체주기
+									</th>
+									<th>
+										재고
+									</th>
+									<th>추가</th>
+								</tr>
+							</thead>
+							<tbody style="height:100%;">
+
+							</tbody>
+						</table>
+						<!-- End Contact List Table -->
+					</div>
+
+
+				</div>
+				<!-- End Card -->
+			</div>
+
+			<!-- Work Name Edit PopUp -->
+			<div id="workNameEditModal" class="modal fade p-4">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<!-- Modal Body -->
+						<div class="modal-body">
+							<div class="media flex-column flex-sm-row">
+								<div class="contact-account-setting media-body">
+									<h4 class="font-20 mb-3">작업명을 입력하세요</h4>
+									<div class="form-group mb-3">
+										<input type="text" id="workNameInput" class="theme-input-style"
+											placeholder="작업명을 입력하세요" required />
+									</div>
+									<div class="">
+										<button id="workNameSubmitBtn" class="btn mr-4" type="button"
+											data-dismiss="modal">저장</button>
+										<a href="#" class="cancel text-danger font-14 bold" data-dismiss="modal">취소</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- End Modal Body -->
+					</div>
+				</div>
+			</div>
+			<!-- End Work Name Edit PopUp -->
+			<!-- Worker Edit PopUp -->
+			<div id="workerEditModal" class="modal fade p-4">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<!-- Modal Body -->
+						<div class="modal-body">
+							<div class="media flex-column flex-sm-row">
+								<div class="contact-account-setting media-body">
+									<h4 class="font-20 mb-3">작업자명을 입력하세요</h4>
+									<div class="form-group mb-3">
+										<label id="workerLabel">사번 : 120022 / 부서 : 선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+										<div class="search-form" style="width:100%; box-sizing: content-box;">
+											<div class="theme-input-group style--two">
+												<input id="workerInput" type="text" class="theme-input-style"
+													placeholder="검색" />
+												<button id="workerSearchBtn">
+													<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+												</button>
+											</div>
+										</div>
+										<input type="text" id="workerId" hidden />
+									</div>
+									<div class="table-responsive mb-3">
+
+									</div>
+									<div>
+										<button id="workerSubmitBtn" class="btn mr-4" type="button">저장</button>
+										<a href="#" class="cancel text-danger font-14 bold" data-dismiss="modal">취소</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- End Modal Body -->
+					</div>
+				</div>
+			</div>
+			<!-- End Worker Edit PopUp -->
+			<!-- Leader Edit PopUp -->
+			<div id="leaderEditModal" class="modal fade p-4">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<!-- Modal Body -->
+						<div class="modal-body">
+							<div class="media flex-column flex-sm-row">
+								<div class="contact-account-setting media-body">
+									<h4 class="font-20 mb-3">리더명을 입력하세요</h4>
+									<div class="form-group mb-3">
+										<label id="leaderLabel">사번 : 120022 / 부서 : 선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+										<div class="search-form" style="width:100%; box-sizing: content-box;">
+											<div class="theme-input-group style--two">
+												<input id="leaderInput" type="text" class="theme-input-style"
+													placeholder="검색" />
+												<button id="leaderSearchBtn">
+													<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+												</button>
+											</div>
+										</div>
+										<input type="text" id="leaderId" hidden />
+									</div>
+									<div class="table-responsive mb-3">
+
+									</div>
+									<div>
+										<button id="leaderSubmitBtn" class="btn mr-4" type="button">저장</button>
+										<a href="#" class="cancel text-danger font-14 bold" data-dismiss="modal">취소</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- End Modal Body -->
+					</div>
+				</div>
+			</div>
+			<!-- End Leader Edit PopUp -->
+			
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+		//datatable 초기화 전 전역 선언.
+		var table = {draw: function () {console.log('not initialized yet')}};
+		$(document).ready(function () {
+			
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code:parseInt( document.getElementById("user-code").textContent)
+				}
+			)
+			.then(data=>{
+				mainData["worker"].id = data.id;
+				mainData["worker"].name = data.name;
+				document.getElementById("worker").textContent = mainData["worker"].name;
+				
+				abcHttp.get(
+					'/toolbox/getbymanagerid',
+					{
+						managerId: data.id
+					}
+				)
+					.then(toolboxData => {
+						if (toolboxData == null || toolboxData?.id==null) {
+							throw error("no toolbox");
+						} else {
+							document.getElementById("toolboxSelect").value=toolboxData.id;
+						}
+					})
+					.catch(error => {
+						console.log('no toolbox for manager');
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(() => {rejected();});
+					});
+			});
+			
+			// =============== ▼ table ===============
+			var csrfToken = document.querySelector('meta[name="_csrf"]').content;
+			
+			table = $('#datatable').DataTable({
+				"paging": true,          // 페이지네이션 사용
+				"pageLength": 10, 		// 페이지당 항목 수
+				"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
+				"searching": false,       // 검색 기능 사용
+				"ordering": false,        // 정렬 기능 사용
+				"order": [
+					[0, 'asc']
+				],
+				"info": true,            // 정보 표시
+				"autoWidth": false,      // 너비 자동 조정 비활성화
+				"serverSide": true,
+				"processing": true,
+				"ajax": {
+					"url": `/stock_status/getpage`, // 데이터를 가져올 엔드포인트 URL
+					//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+					"method": "POST",
+					"contentType": "application/json",
+					"headers":{
+						'X-CSRF-Token': csrfToken,
+					},
+					"data": function (d) {
+						var data = {
+							"page": parseInt(d.start / d.length),
+							"size": d.length,
+							"name": $("#searchInput").val(),
+							"toolboxId": parseInt(document.getElementById("toolboxSelect").value),
+							"subGroupId": [],
+							//"order": columnsDefine[d.order[0].column].column,
+							//"search": 'tagid',
+							//"direction": d.order[0].dir.toUpperCase(),
+							//"keyword": d.search.value
+						};
+						return JSON.stringify(data);
+					},
+					"dataFilter": function (data) {
+						data.dataSrc = "content";
+						data = JSON.parse(data);
+						var json = {
+							recordsTotal: data.totalElements,
+							recordsFiltered: data.totalElements,
+							data: data.content
+						};
+						return JSON.stringify(json)
+					}
+				},
+				"columnDefs": [
+					{
+						"targets": [0, 2, 5, 7, 8, 9],
+						"visible": false
+					}
+				],
+				"columns": [
+					/*{
+						"data": null,
+						"render": function() {
+							// 제품 정보 표시
+							return '<label class="custom-checkbox">'+
+									'<input type="checkbox" />'+
+									'<span class="checkmark"></span>'+
+									'</label>'+
+									'<div class="star">'+
+									'<a href="#"'+
+									'<img'+
+									'src="/img/svg/star.svg"'+
+									'alt=""'+
+									'class="svg"'+
+									'/></a>'+
+									'</div>'
+						}
+					},*/
+					{
+						"data": "toolDto.id",
+						"type": Number
+					},
+					{"data": "toolDto.name"},
+					{"data": "toolDto.engName"},
+					{"data": "toolDto.code"},
+					{
+						"data": "toolDto.subGroupDto",
+						"render": function (data, type, row) {
+							if (type === "display") {
+								return data.mainGroupDto.name;
+							}
+							return data;
+						}
+					},
+					{
+						"data": "toolDto.subGroupDto",
+						"render": function (data, type, row) {
+							if (type === "display") {
+								return data.name;
+							}
+							return data;
+						}
+					},
+					{"data": "toolDto.spec"},
+					{"data": "toolDto.unit"},
+					{"data": "toolDto.price", "type": Number},
+					{"data": "toolDto.replacementCycle", "type": Number},
+					{"data": "goodCount"},
+					{
+						"data": null,
+						"render": function (data, type, row) {
+							if (type === "display") {
+								const flag = !list.every(e => e.id !== row.toolDto.id) || (row.goodCount<1)
+								return '<a  class="btn addRentalToolBtn p-2 ' + (flag ? 'disabled' : '') + '">' +
+									'<img src="/img/svg/plus_white.svg" alt="" class="svg m-1"/>' +
+									'</a>';
+							}
+							return data;
+						}
+					}
+				]
+			});
+			table.on('click', '.addRentalToolBtn', function () {
+				var data = table.row($(this).parents('tr')).data();
+				addTool.call(this, data.toolDto.id);
+			});
+
+			//검색
+			$("#searchBtn").on("click", e => {
+				e.preventDefault();
+				table.draw();
+			});
+			
+			//toolboxSelect동기화
+			setTimeout(_=>{table.draw();},100);
+		});
+
+		/*
+		//나중에 분류별 검색 되면 그때 살리기
+		[
+			[
+				document.getElementById("addFormMainGroupSelect"),
+				document.getElementById("addFormSubGroupSelect")
+			],
+			[
+				document.getElementById("editFormMainGroupSelect"),
+				document.getElementById("editFormSubGroupSelect")
+			],
+		].forEach(v=>{
+			v[0].addEventListener("change",e=>{
+				v[1].options.length=0;
+				loadSubGroups.apply(v[1],[parseInt(e.target.value)]);
+			});
+		});
+		*/
+
+
+
+		// =============== ▼ list editing ===============
+
+		const list = []; // List< RentalRequestToolFormDto >
+		const stack = []; // undo를 위해 혹시 몰라 남겨뒀습니다.
+
+		//왼쪽 div 리스트에 row를 추가합니다.
+		// : 오른쪽 div에서 "+"버튼을 눌렀을 때 실행.
+		function addTool(id) {
+			getToolDtoById(id)
+				.then(data => {
+					if (!list.every(e => e.id !== id)) {
+						Swal.fire({
+							title: '이미 추가됨',
+							text: '이미 추가된 항목입니다. 왼쪽의 버튼으로 수량을 조절하세요.',
+							type: 'warning',
+							confirmButtonText: '확인'
+						});
+						return;
+					}
+
+					const rowLayout = [
+						["name"],
+						["spec"],
+						//["code"],
+						//["subGroupDto","mainGroupDto","name"],
+						//["subGroupDto","name"],
+					];
+
+					list.push({
+						id: id,
+						count: 1,
+						name: data.name,
+					});
+					let newRowString = "";
+					rowLayout.forEach(e => {
+						newRowString += "<td>";
+						let tmpdata;
+						for (let i = 0; i < e.length; i++) {
+							if (i == 0) {tmpdata = data[e[i]];}
+							else tmpdata = tmpdata[e[i]];
+						}
+						newRowString += tmpdata;
+						newRowString += "</td>";
+					});
+					newRowString += 
+						'<div class="input-group large col-8 bootstrap-touchspin p-1" style="min-width:150px;">'+
+							'<span class="input-group-btn input-group-prepend bootstrap-touchspin-injected">'+
+								'<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button">+</button>'+
+								'</span>'+
+								'<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center;">'+
+								'<span class="input-group-btn input-group-append bootstrap-touchspin-injected">'+
+									'<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button">-</button>'+
+								'</span>'+
+						'</div>';
+					
+					const backupstring = 
+						'<td class="d-flex justify-content-between align-item-center">' +
+							'<a  class="btn bg-success increaseBtn p-2">' +
+								'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
+							'</a>' +
+							'<p class="d-flex align-items-center toolCount mb-0">' + list[list.length - 1].count + '</p>' +
+							'<a  class="btn bg-danger decreaseBtn p-2">' +
+								'<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
+							'</a>'+
+						'</td>';
+
+					const newRow = document.createElement("tr");
+					newRow.innerHTML = newRowString;
+					document.getElementById("rentalList").appendChild(newRow);
+
+					const increaseBtn = newRow.querySelector(".increaseBtn");
+					const decreaseBtn = newRow.querySelector(".decreaseBtn");
+					const toolCount = newRow.querySelector(".toolCount");
+					increaseBtn.addEventListener("click", function () {
+						increaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+					decreaseBtn.addEventListener("click", function () {
+						decreaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+					toolCount.addEventListener("change", function () {
+						changeCount.apply(this,[Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr"))]);
+					});
+					stack.push({key: "a", param: id});
+
+					if (!this.classList.contains('disabled')) {this.classList.add('disabled');}
+				});
+		}
+		//왼쪽 div 리스트의 row를 제거합니다.
+		// : 수량 조절 버튼 중 "-"버튼을 끝까지 눌렀을 때 실행(decreaseCount에서 참조).
+		function removeTool(id) {
+			const index = findIndexById(list, id);
+			if (index < 0) {
+				Swal.fire({
+					type: 'error',
+					title: 'No Index',
+					text: '리스트를 처리하는 중 에러가 발생했습니다.',
+				});
+				return;
+			}
+			list.splice(index, 1);
+			const row = getTRFromTBodyByIndex(index);
+			row.remove();
+			table.draw();
+			stack.push({key: "r", param: id});
+		}
+		//toolId를 통해 해당 tool이 list의 몇번째 index에 위치하는지를 반환합니다.
+		// : addTool과 removeTool에서 사용합니다. 
+		function findIndexById(arr, id) {
+			for (let i = 0; i < arr.length; i++) {
+				if (arr[i].id === id) {
+					return i; // 일치하는 객체의 인덱스를 반환합니다.
+				}
+			}
+			return -1;
+		}
+		//list의 index와 대응되는 실제 row element를 찾아 반환합니다.
+		// : increaseCount와 decreaseCount에서 사용합니다. 
+		function getTRFromTBodyByIndex(index) {
+			const tbody = document.getElementById('rentalList');
+			if (tbody) {
+				const rows = tbody.getElementsByTagName('tr');
+				if (index >= 0 && index < rows.length) {
+					return rows[index];
+				}
+			}
+			return null; // 인덱스에 해당하는 <tr>을 찾지 못한 경우
+		}
+		//list를 비우고, row element들도 화면에서 없애버립니다.
+		// : 정비실 정보가 변경되었을 때 실행됩니다.
+		function resetTool() {
+			list.length = 0;
+			const tbody = document.getElementById('rentalList');
+			tbody.innerHTML = "";
+		}
+		//대여 신청 수량을 +1.
+		// : 왼쪽 div의 "+" 버튼을 눌렀을 때 실행.
+		function increaseCount(index) {
+			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
+				.then(stockData => {
+					if (stockData.goodCount <= list[index].count) {
+						Swal.fire({
+							type: "info",
+							title: "재고 부족",
+							text: "이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
+						});
+						return;
+					} else {
+						if (index >= list.length) {
+							return "없다 그런거";
+						}
+						list[index].count++;
+						const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+						count.value=parseInt(count.value) + 1;
+
+						stack.push({key: "i", param: index});
+					}
+				})
+		}
+		//대여 신청 수량을 -1.
+		// : 왼쪽 div의 "-" 버튼을 눌렀을 때 실행.
+		function decreaseCount(index) {
+			if (index >= list.length) {
+				return "없다 그런거";
+			}
+			if (list[index].count <= 1) {
+				removeTool(list[index].id);
+			} else {
+				list[index].count--;
+				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
+				count.value=parseInt(count.value) - 1;
+
+				stack.push({key: "d", param: index});
+			}
+		}
+//대여 신청 수량을 변경.
+		// : toolCount Input을 변경했을 때 실행.
+		function changeCount(index){
+			getStockDtoByToolAndToolboxId(list[index].id, parseInt(toolboxSelect.value))
+				.then(stockData => {
+					if (index >= list.length) {
+						return "없다 그런거";
+					}
+					if (stockData.goodCount < parseInt(this.value)) {
+						Swal.fire({
+							type: "info",
+							title: "재고 부족",
+							text: "이미 정비실의 재고 전부를 담았습니다. 수량이 더 필요하다면 다른 정비실을 조회하세요.",
+						}).then(result=>{
+							this.value=stockData.goodCount;
+							list[index].count=this.value;
+						});
+						return;
+					} else if (parseInt(this.value) < 1) {
+						Swal.fire({
+							type: 'question',
+							title: '입력 범위 밖',
+							html: '<p>0 이하의 값을 입력하셨습니다. 목록에서 현재 공기구를 제외하시겠습니까?</p>',
+							showCancelButton: true,
+							confirmButtonText: '예',
+							cancelButtonText: '아니오',
+							buttonStyling: false,
+						}).then(result => {
+							if (result.value == true) {
+								removeTool(list[index].id);
+							}else{
+								this.value=1;
+								list[index].count=this.value;
+							}
+						});
+					} else {
+						list[index].count=this.value;
+					}
+				})
+		}
+		/*
+		//만약 list와 table element가 표시하는 정보가 일치하지 않을 때 
+		//수동으로 list에 맞춰 table을 재구성합니다.
+		function updateManually(){
+			const tbody=document.getElementById("rentalList");
+			tbody.children().forEach(e=>{
+				e.remove();
+			});
+			for (let i=0;i<list.length;i++){
+				getToolDtoById(list[i].id)
+				.then(data=>{				
+					const rowLayout=[
+						["name"],
+						["code"],
+						["subGroupDto","mainGroupDto","name"],
+						["subGroupDto","name"],
+					];
+					let newRowString="";
+					rowLayout.forEach(e=>{
+						newRowString+="<td>";
+						let tmpdata;
+						for(let j=0;j<e.length;j++){
+							if (j==0) { tmpdata=data[e[j]]; }
+							else tmpdata=tmpdata[e[j]];
+						}
+						newRowString+=tmpdata;
+						newRowString+="</td>";
+					});
+					newRowString+='<td class="d-flex justify-content-between align-item-center">'+
+						'<a href="#" class="btn bg-success increaseBtn p-2">' +
+							'<img src="/img/svg/plus_white.svg" alt="" class="svg "/>' +
+						'</a>'+
+						'<p class="d-flex align-items-center toolCount mb-0">'+list[list.length-1].count+'</p>'+
+						'<a href="#" class="btn bg-danger decreaseBtn p-2">' +
+							'<img src="/img/svg/minus_white.svg" alt="" class="svg "/>' +
+						'</a>';
+						
+					const newRow=document.createElement("tr");
+					newRow.innerHTML=newRowString;
+					document.getElementById("rentalList").appendChild(newRow);
+					
+					const increaseBtn = newRow.querySelector(".increaseBtn");
+					const decreaseBtn = newRow.querySelector(".decreaseBtn");
+					increaseBtn.addEventListener("click",function(){
+						increaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+					decreaseBtn.addEventListener("click",function(){
+						decreaseCount(Array.from(this.closest("tr").parentElement.children).indexOf(this.closest("tr")));
+					});
+				});
+			}
+		}
+		*/
+
+		//stack을 보고 반대로 실행합니다.
+		function undo() {
+			const action = stack.pop();
+			if (action == null) {
+				return;
+			}
+			const callbacks = {
+				a: removeTool,
+				r: addTool,
+				i: decreaseCount,
+				d: increaseCount,
+			};
+			callbacks[action.key]?.(action.param);
+		}
+
+		//fetch
+		function loadSubGroups(mainGroupId) {
+			return new Promise((resolved, rejected) => {
+				abcHttp.get(
+					'/sub_group/get',
+					{
+						mainGroupId:mainGroupId
+					}
+				)
+				.then(data => {
+					var subGroupList = '';
+					data.forEach(function (subGroup) {
+						subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
+					});
+					this.innerHTML = subGroupList;
+					resolved();
+				})
+				.catch(error => {
+					rejected();
+				});
+			});
+		}
+		//fetch
+		function getToolDtoById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/get',
+					{
+						id:id
+					}
+				)
+				.then(data => {
+					resolve(data);
+				})
+				.catch(error => {
+					reject(error);
+				});
+			});
+		}
+		//fetch
+		function getStockDtoByToolAndToolboxId(toolId, toolboxId) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/stock_status/get',
+					{
+						toolId:toolId,
+						toolboxId:toolboxId
+					}
+				)
+				.then(data => {
+					resolve(data);
+				})
+				.catch(error => {
+					reject(error);
+				});
+			});
+		}
+		//ctrl+z -> undo();
+		window.addEventListener("keypress", e => {
+			if (e.ctrlKey && e.key == "\x1A") {
+				undo();
+			}
+		})
+
+
+		// =============== ▼ Left Div header Modal ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"workName": {
+				"name": "새 작업 공기구 리스트"
+			},
+			"toolbox": {
+				"id": 1,
+				"name": "선강정비1실"
+			},
+			"worker": {
+				"id": 0,
+				"name": ""
+			},
+			"leader": {
+				"id": 0,
+				"name": ""
+			}
+		}
+
+		//작업명 수정 -> 작업명 수정 모달
+		document.getElementById("workNameEditModalBtn").addEventListener("click", function () {
+			document.getElementById("workNameInput").value = mainData.workName.name;
+		});
+		//작업명 수정 모달 -> 내용 저장
+		document.getElementById("workNameSubmitBtn").addEventListener("click", function () {
+			mainData.workName.name = document.getElementById("workNameInput").value;
+			mainData.workName.name = document.getElementById("workNameInput").focus();
+			document.getElementById("workName").textContent = mainData.workName.name;
+		});
+
+		//정비실 선택 드롭다운
+		const toolboxSelect = document.getElementById("toolboxSelect");
+		toolboxSelect.setAttribute('former-data', toolboxSelect.value);
+		toolboxSelect.addEventListener("change", toolboxChangeEventHandler)
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function toolboxChangeEventHandler() {
+			mainData.toolbox.id = this.value;
+			mainData.toolbox.name = this.textContent;
+			if (list.length > 0) {
+				Swal.fire({
+					type: 'warning',
+					title: '정비실 변경',
+					text: '목록을 작성하는 중 정비실을 변경하면, 지금까지 작성한 공기구 목록 정보는 전부 초기화됩니다. 정말로 정비실을 변경하시겠습니까?',
+					showCancelButton: true,
+					confirmButtonText: '예',
+					cancelButtonText: '아니오',
+					buttonStyling: false,
+				}).then(result => {
+					if (result.value == true) {
+						this.setAttribute('former-data', this.value);
+						resetTool();
+						table.draw();
+					} else {
+						this.value = toolboxSelect.getAttribute('former-data');
+					}
+				});
+			} else {
+				this.setAttribute('former-data', this.value);
+				table.draw();
+			}
+		}
+		toolboxChangeEventHandler.apply(document.getElementById("toolboxSelect"));
+
+		// =============== Especially, Membership(worker, leader) Search Modal ===============
+
+		//작업자 수정
+		document.getElementById("workerEditModalBtn").addEventListener("click", membershipFormEditModalBtnEventHandler.bind(null, "worker"));
+		document.getElementById("workerSearchBtn").addEventListener("click", membershipFormSearchBtnEventHandler.bind(null, "worker"));
+		document.getElementById("workerInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("workerSearchBtn").click();
+			}
+		});
+		document.getElementById("workerSubmitBtn").addEventListener("click", membershipFormSubmitBtnEventHandler.bind(null, "worker"));
+
+		//리더 수정
+		document.getElementById("leaderEditModalBtn").addEventListener("click", membershipFormEditModalBtnEventHandler.bind(null, "leader"));
+		document.getElementById("leaderSearchBtn").addEventListener("click", membershipFormSearchBtnEventHandler.bind(null, "leader"));
+		document.getElementById("leaderInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("leaderSearchBtn").click();
+			}
+		});
+		document.getElementById("leaderSubmitBtn").addEventListener("click", membershipFormSubmitBtnEventHandler.bind(null, "leader"));
+
+		//membership 수정 -> membership 수정 모달
+		function membershipFormEditModalBtnEventHandler(formName) {
+			document.getElementById(formName + "Id").value = mainData[formName].id;
+			document.getElementById(formName + "Input").value = mainData[formName].name;
+			getMembershipById(mainData[formName].id)
+				.then(data => {
+					document.getElementById(formName + "Label").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById(formName + "Label").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById(formName + "Label").hidden = true;
+				});
+			document.querySelector("#" + formName + "EditModal .table-responsive").innerHTML = "";
+		}
+		//membership 수정 모달 -> 검색
+		function membershipFormSearchBtnEventHandler(formName) {
+			const searchName = document.getElementById(formName + "Input").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById(formName + "Id").value = v.id;
+							document.getElementById(formName + "Input").value = v.name;
+							document.getElementById(formName + "Label").hidden = false;
+							const dataString =
+								"사원번호 : " + v.code + " / " +
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById(formName + "Label").textContent = dataString;
+							document.querySelector("#" + formName + "EditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#" + formName + "EditModal .table-responsive").innerHTML = "";
+					document.querySelector("#" + formName + "EditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		}
+		//membership 수정 모달 -> 모달 내용 저장
+		function membershipFormSubmitBtnEventHandler(formName) {
+			const id = document.getElementById(formName + "Id").value;
+			const name = document.getElementById(formName + "Input").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData[formName].id = id;
+			mainData[formName].name = name;
+			document.getElementById(formName).textContent = mainData[formName].name;
+			$("#" + formName + "EditModal").modal("hide");
+		}
+
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id:id
+					}
+				)
+				.then(data => {
+					resolve(data);
+				})
+				.catch(error => {
+					reject(error);
+				});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page:0,
+						size:50,
+						name:name
+					}
+				)
+				.then(data => {
+					resolve(data);
+				})
+				.catch(error => {
+					reject(error);
+				});
+			});
+		}
+
+		// =============== ▼ apply ===============
+
+		//대여 신청
+		document.getElementById("applyBtn").addEventListener("click", e => {
+			Swal.fire({
+				type: 'question',
+				title: '신청하시겠습니까?',
+				html: '<p>' + stringifyList() + '</p>',
+				showCancelButton: true,
+				confirmButtonText: '예',
+				cancelButtonText: '아니오',
+				buttonStyling: false,
+			}).then(result => {
+				if (result.value == true) {
+					abcHttp.post(
+						"/rental/request_sheet/apply",
+						{
+							workName: mainData.workName.name,
+							workerDtoId: mainData.worker.id,
+							leaderDtoId: mainData.leader.id,
+							toolboxDtoId: mainData.toolbox.id,
+							toolList: list.map(item => ({toolDtoId: item.id, count: item.count}))
+						}
+					)
+					.then(data => {
+						Swal.fire({
+							type: "success",
+							title: "대여 신청 완료",
+							text: "공기구 대여 목록을 정상적으로 신청하였습니다",
+						}).then(result2 => {
+						location.href = '/rental/request_sheet/manager/create';
+					})
+					})
+					
+					.catch(error => {
+						Swal.fire({
+							type: "error",
+							title: "대여 신청 실패",
+							text: error,
+						});
+					});
+				} else {
+					return;
+				}
+			})
+		});
+
+		//alert용
+		function stringifyList() {
+			var result = ""
+			for (let i = 0; i < list.length; i++) {
+				result += "품명:" + list[i]["name"] + ",수량:" + list[i]["count"] + "<br/>";
+			}
+			return result;
+		}
+
+	</script>
+</th:block>
+
+</html>

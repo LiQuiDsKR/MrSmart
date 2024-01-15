@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Page Header Start-->
+<!-- Header -->
+<header th:fragment="header" 
+	class="header white-bg fixed-top d-flex align-content-center flex-wrap" style="height:100px;">
+	<!-- Logo -->
+	<div class="logo bg-white d-flex justify-content-center">
+		<a href="/" class="default-logo"
+			><img  style="height:100px;" th:src="@{/img/logo.png}" alt=""
+		/></a>
+		<a href="/" class="mobile-logo"
+			><img th:src="@{/img/mobile-logo.png}" alt=""
+		/></a>
+	</div>
+	<!-- End Logo -->
+
+	<!-- Main Header -->
+	<div class="main-header" style="height:100px;">
+		<div class="container-fluid">
+			<div class="row justify-content-between">
+				<div class="col-3 col-lg-4 col-xl-4">
+					<!-- Header Left -->
+					<div class="main-header-left h-100 d-flex align-items-center">
+						<!-- Main Header User -->
+						<div class="main-header-user">
+							<a
+								href="/"
+								class="d-flex align-items-center mb-1">
+								<div
+									class="user-profile d-lg-flex align-items-center d-none mr-1">
+									<!-- User Avatar -->
+									<div >
+										<img style="width:50px;height:50px; border-radius: 0%;" th:src="@{/img/avatar/user.png}" alt="" />
+									</div>
+									<!-- End User Avatar -->
+
+									<!-- Header Info -->
+									<div class="ml-3 user-info">
+										<h2 class="user-name mb-0">똑똑이</h2>
+									</div>
+									
+									<!-- End Header Info -->
+								</div>
+							</a>
+								<p class="d-lg-flex d-none">똑똑한공기구관리시스템</p>
+						</div>
+						<!-- End Main Header User -->
+
+						<!-- Main Header Menu -->
+						<div class="main-header-menu d-block d-lg-none">
+							<div class="header-toogle-menu">
+								<!-- <i class="icofont-navigation-menu"></i> -->
+								<img th:src="@{/img/menu.png}" alt="" />
+							</div>
+						</div>
+						<!-- End Main Header Menu -->
+					</div>
+					<!-- End Header Left -->
+				</div>
+				<div class="col-9 col-lg-8 col-xl-8">
+					<!-- Header Right -->
+					<div class="main-header-right d-flex justify-content-end">
+						<ul class="nav">
+							
+							<li class="d-none d-sm-flex">
+								<!-- Main Header Button -->
+								<div class="main-header-btn ml-md-1">
+									<a href="/download/manual" class="btn">도움말</a>
+								</div>
+								<!-- End Main Header Button -->
+							</li>
+							<li class="ml-0">
+							</li>
+							<li class="d-none d-lg-flex mr-3">
+								<!-- Main Header Time -->
+								<div class="main-header-date-time text-right" hidden>
+									<h3 class="time">
+										<span id="hours">21</span>
+										<span id="point">:</span>
+										<span id="min">06</span>
+									</h3>
+									<span class="date"
+										><span id="date">Tue, 12 October 2022</span></span
+									>
+								</div>
+								<!-- End Main Header Time -->
+							</li>
+							<li class="ml-0 d-none d-lg-flex mr-3">
+								<!-- Main Header Print -->
+								<div class="main-header-print" hidden>
+									<a href="#">
+										<img th:src="@{/img/svg/print-icon.svg}" alt="" />
+									</a>
+								</div>
+								<!-- End Main Header Print -->
+								
+								<!-- User Info -->
+								<div class="d-flex align-items-end flex-column" sec:authorize="isAuthenticated()">
+									<h3 class="user-name mb-2" id="user-name">Name</h3>
+									<div class="d-flex flex-row">
+										<div id="user-code" class="mr-2" sec:authentication="name"></div>
+										<div class="mr-2" sec:authorize="hasRole('USER')">User</div>
+										<div class="mr-2" sec:authorize="hasRole('MANAGER')">Manager</div>
+										<div class="mr-2" sec:authorize="hasRole('ADMIN')">Admin</div>
+										<div class="mr-2" id="user-more-info">//</div>
+									</div>									
+								</div>
+								
+								<!-- End User Info -->
+								
+							</li>
+							<li class="d-none d-sm-flex">
+								<!-- Main Header Button -->
+								<div class="main-header-btn ml-md-1">
+									<a href="/membership/logout" class="btn">로그아웃</a>
+								</div>
+								<!-- End Main Header Button -->
+							</li>
+						</ul>
+					</div>
+					<!-- End Header Right -->
+				</div>
+				
+				<!-- csrfToken -->
+				<form>
+				    <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				</form>
+				<!-- csrfToken End -->
+			</div>
+		</div>
+	</div>
+	<!-- End Main Header -->
+	
+</header>
+<!-- End Header -->
+<!-- Page Header Ends  -->
+
+
+
+</html>
