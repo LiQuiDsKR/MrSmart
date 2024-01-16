@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+		.selected td {
+			background-color: #67CF94;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+			-webkit-transition: 0.2s ease;
+			-o-transition: 0.2s ease;
+			transition: 0.2s ease;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-20">
+					<div class="contact-header d-flex align-items-sm-center flex-row bg-white">
+						<h4 class="font-30 m-3">재고 초기화</h4>
+						<div class="m-4" style="width:300px;">
+							<div class="custom-select style--two large">
+								<select class="theme-input-style" id="toolboxSelect">
+									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+										th:text="${toolbox.name}">name?</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="row h-100">
+			<div class="col-12 h-100">
+				<!-- Card -->
+				<div class="card h-100">
+
+
+					<!-- Project Manager Upload -->
+					<div id="file-drop-area-wrappper">
+						<h4 class="font-20 mb-30">File Upload</h4>
+						<!-- Dropzone Start -->
+						<form
+							action="/stock_status/initialize"
+							id="dropzone01"
+							class="dropzone style--two"
+							method="post"
+							enctype="multipart/form-data">
+							<div
+								class="d-flex justify-content-center flex-column align-items-center align-self-center"
+								data-dz-message>
+								<div class="dz-message bold c2 font-20 mb-3">
+									Click or Drop files here to upload.
+								</div>
+								<div class="upload-icon">
+									<img
+										th:src="@{/img/svg/upload-down.svg}"
+										alt=""
+										class="svg" />
+								</div>
+							</div>
+						</form>
+						<!-- Dropzone End -->
+
+						<!-- End File drop area -->
+					</div>
+					<!-- End Project Manager Upload -->
+				</div>
+				<!-- End Card -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+		Dropzone.options.dropzone01 = {
+		    url: '/stock_status/initialize', // 서버의 엔드포인트
+		    method: 'post', // HTTP 메소드
+		    paramName: 'file', // 서버에서 기대하는 파일 파라미터 이름
+		    maxFilesize: 2, // 최대 파일 크기 (MB)
+		    acceptedFiles: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    		init: function() {
+				this.on("sending", function(file, xhr, formData) {
+		            // CSRF 토큰 값을 추가
+		            formData.append("_csrf",document.querySelector('meta[name="_csrf"]').content ); // 실제 토큰 값으로 대체
+		        });
+		        this.on('success', function(file, responseText) {
+		            // 파일 업로드 성공 시 동작
+		            alert(responseText);
+		        });
+		    }
+		};
+	</script>
+</th:block>
+
+</html>
