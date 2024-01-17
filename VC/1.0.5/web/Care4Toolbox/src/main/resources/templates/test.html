@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+</style>
+</th:block>
+
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<input id="in">
+		<button id="btn" >asdf</button>
+	</div>
+	<div class="contentdiv">
+		
+		
+		<div class="input-group large col-8 bootstrap-touchspin p-1 flex-column" style="height:120px; width:min-content;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" style="border-radius:5px 5px 0px 0px;">+</button>
+			</span>
+				<input id="demo9" type="number" value="1" name="demo0" class="form-control toolCount" style="text-align:center; padding:0px;">
+			<span class="input-group-btn bootstrap-touchspin-injected">
+				<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" style="border-radius:0px 0px 5px 5px;">-</button>
+			</span>
+		</div>
+		
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script  th:inline="javascript">
+document.getElementById("btn").addEventListener("click",function(){
+	const data = JSON.parse(document.getElementById("in").value);
+	const list =data;
+	const mainData= {
+    "workName": {
+        "name": "새 작업 공기구 리스트"
+    },
+    "toolbox": {
+        "id": "5222",
+        "name": "\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비1실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비2실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비3실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비4실\n\t\t\t\t\t\t\t\t\t\t\t\t\t선강정비5실\n\t\t\t\t\t\t\t\t\t\t\t\t"
+    },
+    "worker": {
+        "id": 8,
+        "name": "고재열"
+    },
+    "leader": {
+        "id": "8",
+        "name": "고재열"
+    }
+}
+	console.log(data);
+		Swal.fire({
+				type: 'question',
+				title: '저장하시겠습니까?',
+				html: '<p>'+ '</p>',
+				showCancelButton: true,
+				confirmButtonText: '예',
+				cancelButtonText: '아니오',
+				buttonStyling: false,
+			}).then(result => {
+				if (result.value == true) {
+					abcHttp.post(
+						"/rental/request_sheet/save",
+						{
+							workName: "",
+							workerDtoId: mainData.worker.id,
+							leaderDtoId: mainData.leader.id,
+							toolboxDtoId: mainData.toolbox.id,
+							toolList: list.map(item => ({toolDtoId: item.id, count: item.count}))
+						}
+					)
+					.then(data => {
+						Swal.fire({
+							type: "success",
+							title: "대여 목록 저장 완료",
+							text: "공기구 대여 목록을 정상적으로 저장하였습니다",
+						});
+					})
+					
+					.catch(error => {
+						Swal.fire({
+							type: "error",
+							title: "대여 목록 저장 실패",
+							text: error,
+						});
+					});
+				} else {
+					return;
+				}
+			});
+});
+
+/*
+abcHttp.get(
+	`/outstanding_rental_sheet/getpage`,
+	{
+		toolboxId: 5222,//로그인한 관리자 담당 정비실로 변경해야 함. 일단 기본값 정비1실
+		page: 0,
+		size: 10,
+		startDate:'2023-01-01',
+		endDate: '2023-12-31',
+	}
+).then(data => {
+	document.querySelector(".contentdiv").innerHTML=JSON.stringify(data);
+});
+*/
+
+
+var socket = new SockJS('/care4u_websocket');
+var stompClient = Stomp.over(socket);
+
+stompClient.connect({}, function(frame) {
+    console.log('웹 소켓에 연결되었습니다.');
+
+    // 서버로 메시지 전송 예시
+    //stompClient.send("/care4u/send-message", {}, "안녕하세요!");
+    
+	stompClient.subscribe('/topic/greetings', function(response) {
+	    console.log('서버에서 받은 메시지:', response.body);
+	    // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	});
+});
+/*
+1. SockJs 의존성 추가, SockJs 스크립트 추가
+2. StompJs 스크립트 추가
+3. WebSocketConfig Class 생성 : WebSocketMessageBrokerConfigurer 상속
+	@Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topicName"); // 클라이언트에게 메시지 전달을 위한 브로커 구성
+        config.setApplicationDestinationPrefixes("/appName"); // 클라이언트에서 메시지를 수신하기 위한 엔드포인트 prefix 설정
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/endpoint").withSockJS(); // 클라이언트가 웹 소켓에 연결할 때 사용할 엔드포인트 설정
+    }
+4. WebSocketController Class 생성
+	@MessageMapping("/") // 클라이언트가 /your-app-prefix/your-message-path로 메시지를 보낼 때 호출되는 메소드
+	@SendTo("/your-topic-prefix/receive-message") // 해당 주제로 메시지를 브로드캐스팅
+	public String yourMethodName(String message) {
+	    return "서버에서 받은 메시지: " + message;
+	}
+	
+	or 
+	
+	@GetMapping("/send-message")
+    public void sendMessage() {
+        String message = "안녕하세요!";
+        messagingTemplate.convertAndSend("/topic/greetings", message); // 서버 -> 클라이언트 주소
+    }
+5. js
+	var socket = new SockJS('/your-websocket-endpoint');
+	var stompClient = Stomp.over(socket);
+	
+	stompClient.connect({}, function(frame) {
+	    console.log('웹 소켓에 연결되었습니다.');
+	
+	    // 서버로 메시지 전송 예시
+	    stompClient.send("/your-app-prefix/your-message-path", {}, "안녕하세요!");
+	});
+	
+	stompClient.subscribe('/your-topic-prefix/receive-message', function(response) {
+	    console.log('서버에서 받은 메시지:', response.body);
+	    // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	});
+
+
+ 	or
+ 	
+	var socket = new SockJS('/websocket-example');
+	var stompClient = Stomp.over(socket);
+	
+	stompClient.connect({}, function(frame) {
+	    console.log('웹 소켓에 연결되었습니다.');
+	
+	    stompClient.subscribe('/topic/greetings', function(response) {
+	        var message = response.body;
+	        console.log('서버에서 받은 메시지:', message);
+	        // TODO: 서버에서 받은 메시지를 처리하는 로직 추가
+	    });
+	});
+*/
+
+</script>
+</th:block>
+</html>

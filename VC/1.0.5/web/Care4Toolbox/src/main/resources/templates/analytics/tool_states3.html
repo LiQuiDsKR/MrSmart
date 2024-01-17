@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-20">
+					<div class="d-flex flex-column flex-md-row align-items-center">
+
+						<h3 class="m-4 font-30">분석</h3>
+						<div class="m-4">
+							<div class="custom-select style--two large">
+								<select class="theme-input-style" id="toolboxSelect">
+									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+										th:text="${toolbox.name}">name?</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="row">
+
+
+
+			<div class="col-md-4 col-12">
+				<!-- Card -->
+				<div class="card mb-30 progress_3 bg-white mr-0">
+					<div class="card-body">
+						<h3 class="progress-title mb-1">대여 / 반납 현황</h3>
+						<p class="progress-title mb-1 date-today">2023-12-10</p>
+
+						<div class="ProgressBar-wrap position-relative mb-4">
+							<div id="progressBar-circle" class="ProgressBar ProgressBar_3" data-progress="90">
+								<svg class="ProgressBar-contentCircle" viewBox="0 0 200 200">
+									<circle transform="rotate(135, 100, 100)" class="ProgressBar-background" cx="100"
+										cy="100" r="85" stroke-width="20" />
+									<circle transform="rotate(135, 100, 100)" class="ProgressBar-circle" cx="100"
+										cy="100" r="85" stroke-width="20" />
+								</svg>
+								<span class="ProgressBar-percentage--text">
+									현 재고량
+								</span>
+								<span class="ProgressBar-percentage ProgressBar-percentage--count"></span>
+							</div>
+						</div>
+
+						<!-- Product List Item -->
+						<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+							<div class="process-bar-wrapper">
+								<span class="process-name font-16">대여중</span>
+								<span id="rental-count" class="process-width font-16">1023</span>
+								<span id="rental-bar" class="process-bar style--four" data-process-width="72"
+									style="transition: all 2.25s ease 0s;"></span>
+							</div>
+						</div>
+						<!-- End Product List Item -->
+
+						<!-- Product List Item -->
+						<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+							<div class="process-bar-wrapper">
+								<span class="process-name font-16">현 재고</span>
+								<span id="return-count" class="process-width font-16">1023</span>
+								<span id="return-bar" class="process-bar style--four" data-process-width="72"
+									style="transition: all 2.25s ease 0s;"></span>
+							</div>
+						</div>
+						<!-- End Product List Item -->
+
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+
+			<div class="col-md-4 col-12">
+				<div class="card mb-30">
+					<div class="card-body pb-1">
+						<h3>공기구 상태 현황</h3>
+						<p class="progress-title mb-1 date-today">2023-12-10</p>
+					</div>
+					<div class="p-2">
+						<div id="multiple-color-donut-chart" style="height: 300px"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-4 col-12">
+
+				<!-- Card -->
+				<div class="card mb-30 bg-white" style="overflow-x:auto;">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">재고 증감 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+						<div class="product-list">
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">매입 수량</span>
+									<span id="buy-count" class="process-width font-20">1023</span>
+									<span id="buy-count-bar" class="process-bar style--two" data-process-width="72"
+										style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">지급 수량</span>
+									<span id="supply-count" class="process-width font-20">1023</span>
+									<span id="supply-count-bar" class="process-bar style--one" data-process-width="72"
+										style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">망실 수량</span>
+									<span id="loss-count" class="process-width font-20">1023</span>
+									<span id="loss-count-bar" class="process-bar style--three" data-process-width="72"
+										style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">폐기 수량</span>
+									<span id="discard-count" class="process-width font-20">1023</span>
+									<span id="discard-count-bar" class="process-bar style--three"
+										data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card-->
+
+			</div>
+
+		</div>
+
+		<div class="row">
+
+
+			<div class="col-12">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+							<div class="d-flex flex-md-row flex-column align-items-center ml-auto">
+								<h3 class="m-3">기간별 대여 현황</h3>
+								<div class="col-12 col-md-5">
+									<div class="d-flex align-items-center flex-nowrap m-4"
+										style="box-sizing: content-box;">
+										<div class="custom-select style--two mr-4" style="max-width:200px;">
+											<select class=" theme-input-style" id="searchBySelect"
+												style="cursor: auto;">
+												<option value="part">부서</option>
+												<option value="membership" selected>작업자/리더</option>
+												<option value="leader" hidden>리더</option>
+												<option value="tool">공기구</option>
+											</select>
+										</div>
+										<div id="searchByForm" style="width: 200px;">
+											<div id="partForm" class="justify-content-between d-none">
+												<div id="part">
+													선택
+												</div>
+												<div>
+													<span id="partEditModalBtn" class="contact-edit" data-toggle="modal"
+														data-target="#partEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+											<div id="membershipForm" class="d-flex justify-content-between">
+												<div id="membership">
+													선택
+												</div>
+												<div>
+													<span id="membershipEditModalBtn" class="contact-edit"
+														data-toggle="modal" data-target="#membershipEditModal"
+														style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+											<div id="toolForm" class="justify-content-between d-none">
+												<div id="tool">
+													선택
+												</div>
+												<div>
+													<span id="toolEditModalBtn" class="contact-edit" data-toggle="modal"
+														data-target="#toolEditModal" style="cursor:pointer;">
+														<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Search header -->
+								<div
+									class="d-flex col-12 col-md-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+									<!-- layer 1 -->
+									<div class="row flex-wrap">
+
+
+										<!-- Form Group -->
+										<div class="form-group mr-2 col-12 col-md-5">
+											<label class="mb-2 font-14 bold">시작 날짜</label>
+
+											<!-- Date Picker -->
+											<div class="dashboard-date style--four">
+												<span id="start-date-btn" class="input-group-addon">
+													<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+												</span>
+
+												<input type="text" id="start-date" placeholder="Select Date" />
+											</div>
+											<!-- End Date Picker -->
+										</div>
+										<!-- End Form Group -->
+
+										<!-- Form Group -->
+										<div class="form-group col-12 col-md-5">
+											<label class="mb-2 font-14 bold">종료 날짜</label>
+
+											<!-- Date Picker -->
+											<div class="dashboard-date style--four">
+												<span id="end-date-btn" class="input-group-addon">
+													<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+												</span>
+
+												<input type="text" id="end-date" placeholder="Select Date" />
+											</div>
+											<!-- End Date Picker -->
+										</div>
+										<!-- End Form Group -->
+
+
+										<!-- 새로고침 / 알림? 등등 -->
+
+									</div>
+
+									<!-- layer 2 -->
+									<!-- Search Condition header -->
+
+									<!-- End Search Condition -->
+								</div>
+								<!-- End Contact Header -->
+							</div>
+
+						<div id="sector1">
+
+						</div>
+					</div>
+					<!-- End Card -->
+					<!-- Membership Edit PopUp -->
+					<div id="membershipEditModal" class="modal fade p-4">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<!-- Modal Body -->
+								<div class="modal-body">
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h4 id="membershipModalHeader" class="font-20 mb-3">작업자명을 입력하세요</h4>
+											<div class="form-group mb-3">
+												<label id="membershipLabel">사번 : 120022 / 부서 :
+													선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+												<div class="search-form" style="width:100%; box-sizing: content-box;">
+													<div class="theme-input-group style--two">
+														<input id="membershipInput" type="text"
+															class="theme-input-style" placeholder="검색" />
+														<button id="membershipSearchBtn">
+															<img th:src="@{/img/svg/search-icon.svg}" alt=""
+																class="svg" />
+														</button>
+													</div>
+												</div>
+												<input type="text" id="membershipId" hidden />
+											</div>
+											<div class="table-responsive mb-3">
+
+											</div>
+											<div>
+												<button id="membershipSubmitBtn" class="btn mr-4"
+													type="button">저장</button>
+												<a href="#" class="cancel text-danger font-14 bold"
+													data-dismiss="modal">취소</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End Modal Body -->
+							</div>
+						</div>
+					</div>
+					<!-- End Membership Edit PopUp -->
+					<!-- Part Edit PopUp -->
+					<div id="partEditModal" class="modal fade p-4">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<!-- Modal Body -->
+								<div class="modal-body">
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h4 class="font-20 mb-3">부서명을 입력하세요</h4>
+											<div class="form-group mb-3">
+												<label id="partLabel">부서 : 선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+												<div class="search-form" style="width:100%; box-sizing: content-box;">
+													<div class="theme-input-group style--two">
+														<input id="partInput" type="text" class="theme-input-style"
+															placeholder="검색" />
+														<button id="partSearchBtn">
+															<img th:src="@{/img/svg/search-icon.svg}" alt=""
+																class="svg" />
+														</button>
+													</div>
+												</div>
+												<input type="text" id="partId" hidden />
+											</div>
+											<div class="table-responsive mb-3">
+
+											</div>
+											<div>
+												<button id="partSubmitBtn" class="btn mr-4" type="button">저장</button>
+												<a href="#" class="cancel text-danger font-14 bold"
+													data-dismiss="modal">취소</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End Modal Body -->
+							</div>
+						</div>
+					</div>
+					<!-- End Part Edit PopUp -->
+					<!-- Tool Edit PopUp -->
+					<div id="toolEditModal" class="modal fade p-4">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<!-- Modal Body -->
+								<div class="modal-body">
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h4 class="font-20 mb-3">공기구명을 입력하세요</h4>
+											<div class="form-group mb-3">
+												<label id="toolLabel">품목코드 : 72 / 규격 : asdf1234</label>
+												<div class="search-form" style="width:100%; box-sizing: content-box;">
+													<div class="theme-input-group style--two">
+														<input id="toolInput" type="text" class="theme-input-style"
+															placeholder="검색" />
+														<button id="toolSearchBtn">
+															<img th:src="@{/img/svg/search-icon.svg}" alt=""
+																class="svg" />
+														</button>
+													</div>
+												</div>
+												<input type="text" id="toolId" hidden />
+											</div>
+											<div class="table-responsive mb-3">
+
+											</div>
+											<div>
+												<button id="toolSubmitBtn" class="btn mr-4" type="button">저장</button>
+												<a href="#" class="cancel text-danger font-14 bold"
+													data-dismiss="modal">취소</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End Modal Body -->
+							</div>
+						</div>
+					</div>
+					<!-- End Tool Edit PopUp -->
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+
+		var toolboxId = 5222;
+		initializeDatepicker();
+		document.querySelectorAll(".date-today").forEach(e => {
+			e.textContent = formatDate(new Date());
+		})
+
+		var chart1 = initializeChart1();
+		var chart4 = initializeChart4();
+		abcHttp.get(
+			'/membership/getbycode',
+			{
+				code: parseInt(document.getElementById("user-code").textContent)
+			}
+		)
+			.then(data => {
+				membershipId = data.id;
+				//mainData.membership.id = data.id;
+				//mainData.membership.name = data.name;
+				document.getElementById("membership").textContent = data.name;
+				return new Promise((resolved, rejected) => {
+					abcHttp.get(
+						'/toolbox/getbymanagerid',
+						{
+							managerId: data.id
+						}
+					)
+						.then(toolboxData => {
+							if (toolboxData == null || toolboxData?.id == null) {
+								throw error("no toolbox");
+							} else {
+								document.getElementById("toolboxSelect").value = toolboxData.id;
+								resolved(toolboxData.id);
+							}
+						})
+						.catch(error => {
+							console.log('no toolbox for manager');
+							Swal.fire({
+								type: 'error',
+								title: '정비실 없음',
+								text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+							}).then(() => {rejected();});
+						});
+				});
+			})
+			.then(toolboxId => {
+				document.getElementById("toolboxSelect").value = toolboxId;
+				loadChart1.apply(chart1, [toolboxId]);
+				loadChart2(toolboxId);
+				loadChart3(toolboxId);
+				loadChart4.apply(chart4, [toolboxId]);
+			});
+
+		//apex initialize
+		function initializeChart1() {
+
+			/*
+			const chartData2 = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.totalCount
+			}));
+			*/
+
+			// ApexCharts 설정
+			const options = {
+				series: [
+					{
+						name: '대여 수량',
+						data: [0]
+					}
+				],
+				chart: {
+					id: 'area-datetime',
+					type: 'area',
+					height: 300,
+					zoom: {
+						autoScaleYaxis: true
+					},
+					toolbar: {
+						show: false
+					},
+				},
+				dataLabels: {
+					enabled: false
+				},
+				markers: {
+					size: 0,
+					style: 'hollow',
+				},
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						datetimeFormatter: {
+							year: 'yyyy',
+							month: 'yyyy-MM',
+							day: 'yyyy-MM-dd'
+						}
+					},
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
+					tickAmount: 6,
+					axisTicks: {
+						show: false,
+					},
+					axisBorder: {
+						show: false
+					},
+				},
+				tooltip: {
+					x: {
+						format: 'yyyy-MM-dd'
+					},
+				},
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shadeIntensity: 1,
+						opacityFrom: 0.7,
+						opacityTo: 0.9,
+						stops: [0, 100]
+					}
+				},
+
+
+				//colors: [],
+			};
+			var chart = new ApexCharts(document.querySelector("#sector1"), options);
+			chart.render();
+			return chart;
+		}
+		//apex update
+		function loadChart1(toolboxId) {
+
+			abcHttp.get(
+				'/stock_status/get/analytics/list',
+				{
+					toolboxId: toolboxId,
+					partId: $('#searchBySelect').val()==="part"?mainData.part.id:0,
+					membershipId:$('#searchBySelect').val()==="membership"?mainData.membership.id:0,
+					toolId: $('#searchBySelect').val()==="tool"?mainData.tool.id:0,
+					isWorker: $('#searchBySelect').val()==="membership",
+					isLeader: $('#searchBySelect').val()==="membership",
+					isApprover: $('#searchBySelect').val()==="membership",
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
+				}
+			).then(data => {
+				console.log(data);
+				const chartData = [
+					{
+						name: '대여 수량',
+						data: []
+					},
+					{
+						name: '반납 수량',
+						data: []
+					}
+				];
+				for (const item of data) {
+					chartData[0].data.push({
+						x: new Date(item.currentDay),
+						y: item.rentalCount
+					});
+					chartData[1].data.push({
+						x: new Date(item.currentDay),
+						y: item.returnCount
+					});
+				}
+				data.map(item => (
+					{
+						name: '대여 수량',
+						data: {
+							x: new Date(item.currentDay),
+							y: item.rentalCount
+						}
+					},
+					{
+						name: '반납 수량',
+						data: {
+							x: new Date(item.currentDay),
+							y: item.returnCount
+						}
+					}
+				));
+				this.updateOptions({
+					series: chartData,
+					xaxis: {
+						min: new Date($('#start-date').val()).getTime(),
+						max: new Date($('#end-date').val()).getTime(),
+					}
+				});
+				
+				setTimeout( _=>{$('#sector1').replaceAll();},1000);
+			});
+		}
+		function initializeChart4() {
+			return new Morris.Donut({
+				element: 'multiple-color-donut-chart',
+				data: [
+					{
+						value: 25,
+						label: '양호',
+					},
+					{
+						value: 15,
+						label: '고장',
+					},
+					{
+						value: 15,
+						label: '파손',
+					},
+				],
+				backgroundColor: '#fff',
+				labelColor: '#060',
+				colors: [
+					//'#8280FD',
+					'#67CF94',
+					'#09D1DE',
+					'#FFB959',
+					'#FC7383',
+					'#727272',
+					'#727272',
+				],
+				formatter: function (x) {
+					return x + '%';
+				},
+			});
+		}
+		function loadChart4(toolboxId) {
+			abcHttp.get(
+				'/stock_status/get/analytics',
+				{
+					toolboxId: toolboxId,
+					currentDate: formatDate(new Date())
+				}
+			).then(data => {
+				var newData = [
+					//{ label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
+					{label: '양호', value: Math.floor(data.goodCount / data.totalCount * 100)},
+					{label: '고장', value: Math.floor(data.faultCount / data.totalCount * 100)},
+					{label: '파손', value: Math.floor(data.damageCount / data.totalCount * 100)},
+					//{ label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
+					//{ label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
+				];
+				this.setData(newData);
+			});
+		}
+
+		//대여/반납현황
+		function loadChart2(toolboxId) {
+			abcHttp.get(
+				"/stock_status/get/analytics",
+				{
+					toolboxId: toolboxId,
+					currentDate: formatDate(new Date())
+				}
+			)
+				.then(data => {
+					document.getElementById("progressBar-circle").setAttribute('data-progress',
+						Math.floor(100 - data.rentalCount / data.totalCount * 100));
+
+					document.getElementById("rental-count").textContent = data.rentalCount;
+					document.getElementById("return-count").textContent = data.totalCount - data.rentalCount;
+
+					$("#rental-bar").data('process-width', Math.floor(data.rentalCount / data.totalCount * 100));
+					$("#return-bar").data('process-width', Math.floor((data.totalCount - data.rentalCount) / data.totalCount * 100));
+
+					$('.ProgressBar_3').bekeyProgressbar();
+					processControl();
+				})
+		}
+		//재고 증감현황
+		function loadChart3(toolboxId) {
+			abcHttp.get(
+				"/stock_status/get/analytics",
+				{
+					toolboxId: toolboxId,
+					currentDate: formatDate(new Date())
+				}
+			)
+				.then(data => {
+					document.getElementById("buy-count").textContent = data.buyCount;
+					document.getElementById("supply-count").textContent = data.supplyCount;
+					document.getElementById("loss-count").textContent = data.lossCount;
+					document.getElementById("discard-count").textContent = data.discardCount;
+
+					$("#buy-count-bar").data('process-width', Math.floor(data.buyCount / data.totalCount * 100));
+					$("#supply-count-bar").data('process-width', Math.floor(data.supplyCount / data.totalCount * 100));
+					$("#loss-count-bar").data('process-width', Math.floor(data.lossCount / data.totalCount * 100));
+					$("#discard-count-bar").data('process-width', Math.floor(data.discardCount / data.totalCount * 100));
+					processControl();
+				});
+		}
+
+		//script.js에서 참조.
+		//막대 표시용
+		function processControl() {
+			var processBarWrapper = $('.process-bar-wrapper');
+			if (processBarWrapper.length) {
+				processBarWrapper.each(function () {
+					var processBarOffset = $(this).offset().top - $(window).height(),
+						processTime = '2.25s',
+						processBarWidth = $(this)
+							.children('[data-process-width]')
+							.data('process-width');
+
+					if ($(window).scrollTop() > processBarOffset) {
+						if (processBarWidth > 100) {
+							$(this).children('.process-bar').css({
+								width: '100%',
+								transition: processTime,
+							});
+						} else {
+							$(this)
+								.children('.process-bar')
+								.css({
+									width: processBarWidth + '%',
+									transition: processTime,
+								});
+						}
+					}
+				});
+			}
+		}
+
+		const toolboxSelect = document.getElementById("toolboxSelect");
+		toolboxSelect.addEventListener("change", toolboxChangeEventHandler)
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function toolboxChangeEventHandler() {
+			toolboxId = this.value;
+
+			loadChart1.apply(chart1, [toolboxId]);
+			loadChart2(toolboxId);
+			loadChart3(toolboxId);
+			loadChart4.apply(chart4, [toolboxId]);
+		}
+
+
+		function formatDate(date) {
+			const year = date.getFullYear();
+			let month = (date.getMonth() + 1).toString();
+			let day = date.getDate().toString();
+
+			if (month.length < 2) {
+				month = '0' + month;
+			}
+			if (day.length < 2) {
+				day = '0' + day;
+			}
+
+			return `${year}-${month}-${day}`;
+		}
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		function initializeDatepicker() {
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = today.getMonth() + 1;
+			const day = today.getDate();
+			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 36); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+
+			const currentDate = new Date();
+			const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
+			const lastDayOfYear = new Date(currentDate.getFullYear() + 1, 0, 0);
+
+			$('#start-date').val(formatDate(firstDayOfYear));
+			$('#end-date').val(formatDate(lastDayOfYear));
+			$('#today-date').val(formattedTodayDate);
+
+			$('#start-date').on('change', function () {
+				loadChart1.apply(chart1, [toolboxId]);
+				console.log('start changed');
+			});
+			$('#end-date').on('change', function () {
+				loadChart1.apply(chart1, [toolboxId]);
+				console.log('end changed');
+			});
+			$('#today-date').on('change', function () {
+
+				console.log('today changed');
+			});
+
+			$('#start-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('start changed');
+				}
+			});
+			$('#start-date-btn').on('click', function () {
+				$('#start-date').datepicker('show');
+			});
+			$('#end-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('end changed');
+				}
+			});
+			$('#end-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+			$('#today-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('end changed');
+				}
+			});
+			$('#today-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+		}
+
+
+		function formatDateTime(inputDate) {
+			const dateObject = new Date(inputDate);
+			const year = dateObject.getFullYear();
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const hours = dateObject.getHours().toString().padStart(2, '0');
+			const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+			return formattedDate;
+		}
+		function formatDate(inputDate) {
+			const year = inputDate.getFullYear();
+			const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+			const day = inputDate.getDate().toString().padStart(2, '0');
+			const formattedDate = `${year}-${month}-${day}`;
+			return formattedDate;
+		}
+
+
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"membership": {
+				"id": 0,
+				"name": "",
+				"type": "worker"
+			},
+			"tool": {
+				"id": 0,
+				"name": "",
+			},
+			"part": {
+				"id": 0,
+				"name": "",
+			},
+		}
+
+		// =============== Membership Search Modal ===============
+
+		//작업자 수정
+		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
+			document.getElementById("membershipId").value = mainData.membership.id;
+			document.getElementById("membershipInput").value = mainData.membership.name;
+			getMembershipById(mainData.membership.id)
+				.then(data => {
+					document.getElementById("membershipLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("membershipLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("membershipLabel").hidden = true;
+				});
+			document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+		});
+		//membership 수정 -> membership 수정 모달
+		document.getElementById("membershipSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("membershipInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("membershipId").value = v.id;
+							document.getElementById("membershipInput").value = v.name;
+							document.getElementById("membershipLabel").hidden = false;
+							const dataString =
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById("membershipLabel").textContent = dataString;
+							document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#membershipEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//membership 수정 모달 -> 검색
+		document.getElementById("membershipInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("membershipSearchBtn").click();
+			}
+		});
+		//membership 수정 모달 -> 모달 내용 저장
+		document.getElementById("membershipSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("membershipId").value;
+			const name = document.getElementById("membershipInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.membership.id = id;
+			mainData.membership.name = name;
+			document.getElementById("membership").textContent = mainData.membership.name;
+			$("#membershipEditModal").modal("hide");
+			loadChart1.apply(chart1, [toolboxId]);
+		});
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+
+		// =============== Part Search Modal ===============
+
+		//부서 수정
+		document.getElementById("partEditModalBtn").addEventListener("click", function () {
+			document.getElementById("partId").value = mainData.part.id;
+			document.getElementById("partInput").value = mainData.part.name;
+			getMembershipById(mainData.part.id)
+				.then(data => {
+					document.getElementById("partLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("partLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("partLabel").hidden = true;
+				});
+			document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+		});
+		//part 수정 -> part 수정 모달
+		document.getElementById("partSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("partInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getPartsPageByName(searchName)
+				.then(data => {
+					console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 분류 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						const dtoType = {
+							"MAIN_PART": "mainPartDto",
+							"SUB_PART": "subPartDto",
+							"PART": "partDto"
+						};
+						const nameType = {
+							"MAIN_PART": "메인부서",
+							"SUB_PART": "서브부서",
+							"PART": "부서"
+						}
+						let newRowString = "";
+						newRowString += "<td>" + nameType[v.type] + "</td>";
+						newRowString += "<td>" + v.mainPartDto?.name + (v.subPartDto ? " / " + v.subPartDto.name + (v.partDto ? " / " + v.partDto.name : "") : "") + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							const dtoType = {
+								"MAIN_PART": "mainPartDto",
+								"SUB_PART": "subPartDto",
+								"PART": "partDto"
+							};
+							document.getElementById("partId").value = v[dtoType[v.type]].id;
+							document.getElementById("partInput").value = v[dtoType[v.type]].name;
+							document.getElementById("partLabel").hidden = false;
+							const dataString =
+								v.mainPartDto?.name + (v.subPartDto ? " / " + v.subPartDto.name + (v.partDto ? " / " + v.partDto.name : "") : "")
+							document.getElementById("partLabel").textContent = dataString;
+							document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#partEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#partEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//part 수정 모달 -> 검색
+		document.getElementById("partInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("partSearchBtn").click();
+			}
+		});
+		//part 수정 모달 -> 모달 내용 저장
+		document.getElementById("partSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("partId").value;
+			const name = document.getElementById("partInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "부서 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.part.id = id;
+			mainData.part.name = name;
+			document.getElementById("part").textContent = mainData.part.name;
+			$("#partEditModal").modal("hide");
+			loadChart1.apply(chart1, [toolboxId]);
+		});
+
+		//fetch
+		function getPartsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/get',
+					{
+						partId: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getPartsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/parts/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+
+		// =============== Tool Search Modal ===============
+
+		//부서 수정
+		document.getElementById("toolEditModalBtn").addEventListener("click", function () {
+			document.getElementById("toolId").value = mainData.tool.id;
+			document.getElementById("toolInput").value = mainData.tool.name;
+			getMembershipById(mainData.tool.id)
+				.then(data => {
+					document.getElementById("toolLabel").hidden = false;
+					const dataString =
+						"품목번호 : " + data.code + " , " +
+						"분류 : " + data.subGroupDto.mainGroupDto.name +
+						"/" + data.subToolDto.name + " , " +
+						"규격 : " + data.spec;
+					document.getElementById("toolLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("toolLabel").hidden = true;
+				});
+			document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+		});
+		//tool 수정 -> tool 수정 모달
+		document.getElementById("toolSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("toolInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getToolsPageByName(searchName)
+				.then(data => {
+					console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 이름 </th><th> 규격 </th><th> 분류 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.spec + "</td>";
+						newRowString += "<td>" + v.subGroupDto.mainGroupDto.name + " / " + v.subGroupDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("toolId").value = v.id;
+							document.getElementById("toolInput").value = v.name;
+							document.getElementById("toolLabel").hidden = false;
+							const dataString =
+								"품목번호 : " + v.code + " , " +
+								"분류 : " + v.subGroupDto.mainGroupDto.name +
+								"/" + v.subGroupDto.name + " , " +
+								"규격 : " + v.spec;
+							document.getElementById("toolLabel").textContent = dataString;
+							document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#toolEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//tool 수정 모달 -> 검색
+		document.getElementById("toolInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("toolSearchBtn").click();
+			}
+		});
+		//tool 수정 모달 -> 모달 내용 저장
+		document.getElementById("toolSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("toolId").value;
+			const name = document.getElementById("toolInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "부서 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.tool.id = id;
+			mainData.tool.name = name;
+			document.getElementById("tool").textContent = mainData.tool.name;
+			$("#toolEditModal").modal("hide");
+			loadChart1.apply(chart1, [toolboxId]);
+		});
+
+		//fetch
+		function getToolsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getToolsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+
+
+		document.getElementById("searchBySelect").addEventListener("change", function () {
+			const membership = document.getElementById("membershipForm");
+			const part = document.getElementById("partForm");
+			const tool = document.getElementById("toolForm");
+			switch (this.value) {
+				case "part":
+					membership.classList.toggle("d-flex", false);
+					membership.classList.toggle("d-none", true);
+					part.classList.toggle("d-flex", true);
+					part.classList.toggle("d-none", false);
+					tool.classList.toggle("d-flex", false);
+					tool.classList.toggle("d-none", true);
+					break;
+				case "worker":
+				case "leader":
+					membership.classList.toggle("d-flex", true);
+					membership.classList.toggle("d-none", false);
+					part.classList.toggle("d-flex", false);
+					part.classList.toggle("d-none", true);
+					tool.classList.toggle("d-flex", false);
+					tool.classList.toggle("d-none", true);
+					break;
+				case "tool":
+					membership.classList.toggle("d-flex", false);
+					membership.classList.toggle("d-none", true);
+					part.classList.toggle("d-flex", false);
+					part.classList.toggle("d-none", true);
+					tool.classList.toggle("d-flex", true);
+					tool.classList.toggle("d-none", false);
+					break;
+			}
+		});
+
+	</script>
+</th:block>
+
+</html>
