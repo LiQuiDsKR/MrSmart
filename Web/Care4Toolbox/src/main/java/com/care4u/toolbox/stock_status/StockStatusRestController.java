@@ -30,6 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
@@ -241,7 +242,8 @@ public class StockStatusRestController {
 	    	    			code = cell.getStringCellValue();
 	    	    			break;
 	    	    		case 5:
-	    	    			spec = cell.getStringCellValue();
+	    	    			spec = cell.getCellType().equals(CellType.STRING)? cell.getStringCellValue() :
+	    	    				cell.getCellType().equals(CellType.NUMERIC)? String.valueOf(cell.getNumericCellValue()): "";
 	    	    			break;
 	    	    		case 6:
 	    	    			unit = cell.getStringCellValue();
@@ -257,6 +259,7 @@ public class StockStatusRestController {
 	    	    		}
 	    	    		}catch (Exception e){
 	    	    			results.add(cell.getAddress() + e.getMessage());
+	    	    			e.printStackTrace();
 	    	    			exceptionFlag = true;
 	    	    		}
 	    	    	}

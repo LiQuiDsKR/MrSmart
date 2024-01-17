@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,9 @@ import groovyjarjarantlr4.v4.runtime.atn.SemanticContext.AND;
 public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
+	private final Logger logger = LoggerFactory.getLogger(StockStatusRepositoryImpl.class);
+
+	
 	public StockStatusRepositoryImpl(EntityManager entityManager) {
 		this.queryFactory = new JPAQueryFactory(entityManager);
 	}
@@ -78,65 +83,26 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		Integer rentalCount;
 		Integer returnCount;
 		try {
-			
-			/*
 		rentalCount = queryFactory
 			    .select(rentalTool.count.sum())
 			    .from(rentalSheet)
 			    .join(rentalTool).on(rentalSheet.id.eq(rentalTool.rentalSheet.id))
-			    .where(rentalSheet.worker.eq(membership)
-			    	.and(rentalTool.tool.eq(tool))
-			    	.and(rentalSheet.toolbox.id.eq(toolboxId)))
+			    .where((membership==null?Expressions.asBoolean(true).isTrue():rentalSheet.worker.eq(membership))
+			    	.and(tool==null?Expressions.asBoolean(true).isTrue():rentalTool.tool.eq(tool))
+			    	.and(toolboxId==0?Expressions.asBoolean(true).isTrue():rentalSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
 
 		returnCount = queryFactory
 			    .select(returnTool.count.sum())
 			    .from(returnSheet)
 			    .join(returnTool).on(returnSheet.id.eq(returnTool.returnSheet.id))
-			    .where(returnSheet.worker.eq(membership)
-				    	.and(returnTool.rentalTool.tool.eq(tool))
-				    	.and(returnSheet.toolbox.id.eq(toolboxId)))
+			    .where((membership==null?Expressions.asBoolean(true).isTrue():returnSheet.worker.eq(membership))
+				    	.and(tool==null?Expressions.asBoolean(true).isTrue():returnTool.rentalTool.tool.eq(tool))
+				    	.and(toolboxId==0?Expressions.asBoolean(true).isTrue():returnSheet.toolbox.id.eq(toolboxId)))
 			    .fetchOne();
-			    */
-		
-		List<Tuple> rentalResults = queryFactory.select(rentalTool.rentalSheet.eventTimestamp, rentalTool.count.sum())
-                .from(rentalTool)
-                .join(rentalTool.rentalSheet, rentalSheet)
-                .where(rentalSheet.worker.eq(membership)
-    			    	.and(rentalTool.tool.eq(tool))
-    			    	.and(rentalSheet.toolbox.id.eq(toolboxId)))
-                .groupBy(rentalTool.rentalSheet.eventTimestamp)
-                .fetch();
-
-		List<Tuple> returnResults = queryFactory.select(returnSheet.eventTimestamp, returnTool.count.sum())
-                .from(returnTool)
-                .join(returnTool.returnSheet, returnSheet)
-                .where(returnSheet.worker.eq(membership)
-    			    	.and(returnTool.rentalTool.tool.eq(tool))
-    			    	.and(returnSheet.toolbox.id.eq(toolboxId)))
-                .groupBy(returnSheet.eventTimestamp)
-                .fetch();
-		
-		//3. 추가적인 데이터 처리
-		//stock_status 테이블에서 데이터를 가져와서, 존재하지 않는 날짜에 대해 0을 할당합니다.
-		List<Tuple> stockResults = queryFactory.select(stockStatus.currentDay, Expressions.constant(0), Expressions.constant(0))
-				.distinct()
-                .from(stockStatus)
-                .fetch();
-		
-		//4. QueryDSL 문법 적용
-		//최종적으로 모든 결과를 하나의 리스트로 합치고, 날짜별로 정렬합니다.
-		List<Tuple> resultQuery = new ArrayList<>();
-		resultQuery.addAll(rentalResults);
-		resultQuery.addAll(returnResults);
-		resultQuery.addAll(stockResults);
-		
-		resultQuery.sort(Comparator.comparing(o -> o.get(0, LocalDate.class)));
-		
-		List<StockStatusSummaryByToolStateDto> finalList = convertToDtoList(resultQuery);
-
-		return finalList;
 		} catch (Exception e){
+			logger.debug(e.getMessage());
+			e.printStackTrace();
 			rentalCount=0;
 			returnCount=0;
 		}
@@ -152,7 +118,7 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 				.where(stockStatus.toolbox.id.eq(toolboxId).and(stockStatus.currentDay.between(startDate, endDate)))
 				.groupBy(stockStatus.currentDay).fetch();
 		
-/*
+
 		List<StockStatusSummaryByToolStateDto> resultList;
 		if(tool!=null || membership!=null || partId!=0) {
 		resultList = new ArrayList<>();
@@ -165,9 +131,9 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		}else {
 			resultList=tempList;
 		}
-		*/
 		
-		return tempList;
+		
+		return resultList;
 	}
 	
 	private List<StockStatusSummaryByToolStateDto> convertToDtoList(List<Tuple> tuples) {
