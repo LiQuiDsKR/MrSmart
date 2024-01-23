@@ -49,9 +49,9 @@ public class VehicleTrackingRestController {
                     .collect(Collectors.toList());
 			return ResponseEntity.badRequest().body(String.join(" / ", errors));
     	}
-    	logger.info(vehicleTrackingDto);
 		VehicleTrackingDto resultDto = vehicleTrackingService.update(vehicleTrackingDto);
 		logger.info(resultDto);
-		return ResponseEntity.ok("good");
+		Gson gson = new Gson();
+		return ResponseEntity.ok(gson.toJson(resultDto));
 	}
 }

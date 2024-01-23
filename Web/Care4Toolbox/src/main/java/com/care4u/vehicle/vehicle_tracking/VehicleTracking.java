@@ -1,5 +1,6 @@
 package com.care4u.vehicle.vehicle_tracking;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -39,6 +40,7 @@ public class VehicleTracking extends BaseEntity {
 	private String name;
 	
 	@NotNull
+	@Column(name="`group`")
 	private String group;
 	
 	@Enumerated(EnumType.STRING)
