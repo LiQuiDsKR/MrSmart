@@ -49,7 +49,7 @@
 					<span class="link-title">공기구 정보</span>
 				</a>
 			</li>
-			<li class="nav-category">공기구 대여</li>
+			<li class="nav-category">공기구 대여 / 소모자재 지급</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/rental/request_sheet/manager/create}">
 					<i class="icofont-navigation-menu"></i>
@@ -141,7 +141,7 @@
 			<li class="" >
 				<a th:href="@{/analytics/other_stock}">
 					<i class="icofont-navigation-menu"></i>
-					<span class="link-title">타 공구실 재고 조회</span>
+					<span class="link-title">각 공구실 재고 조회</span>
 				</a>
 			</li>
 			<li class="" sec:authorize="hasRole('ADMIN')" >

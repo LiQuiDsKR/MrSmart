@@ -536,15 +536,17 @@
 			if (index >= list.length) {
 				return "없다 그런거";
 			}
+			/*
 			if (list[index].count <= 1) {
 				removeTool(list[index].id);
 			} else {
+				*/
 				list[index].count--;
 				const count = getTRFromTBodyByIndex(index).querySelector(".toolCount");
 				count.value=parseInt(count.value) - 1;
 
 				stack.push({key: "d", param: index});
-			}
+			//}
 		}
 //대여 신청 수량을 변경.
 		// : toolCount Input을 변경했을 때 실행.
@@ -552,7 +554,7 @@
 			if (index >= list.length) {
 				return "없다 그런거";
 			}
-			if (parseInt(this.value) < 1) {
+			/*if (parseInt(this.value) < 1) {
 				Swal.fire({
 					type: 'question',
 					title: '입력 범위 밖',
@@ -569,9 +571,9 @@
 						list[index].count=this.value;
 					}
 				});
-			} else {
+			} else {*/
 				list[index].count=this.value;
-			}
+			//}
 		}
 		/*
 		//만약 list와 table element가 표시하는 정보가 일치하지 않을 때 
