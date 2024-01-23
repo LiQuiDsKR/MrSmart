@@ -230,19 +230,21 @@ public class OutstandingRentalSheetService {
 			Boolean isLeader, long toolboxId, LocalDate startLocalDate, LocalDate endLocalDate, Pageable pageable) {
 		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
 		Optional<Toolbox> toolboxOptional = toolboxRepository.findById(toolboxId);
-		Membership membership;
-		if (membershipOptional.isEmpty()) {
-			logger.info("no membership : " + membershipId + " all membership selected.");
-			membership = null;
-		} else {
-			membership = membershipOptional.get();
-		}
 		Toolbox toolbox;
 		if (toolboxOptional.isEmpty()) {
 			logger.info("no toolbox : " + membershipId + " all toolbox selected.");
 			toolbox = null;
 		} else {
 			toolbox = toolboxOptional.get();
+		}
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
+			logger.info("no membership : " + membershipId + " all membership selected.");
+			membership = null;
+			Page<OutstandingRentalSheet> page = repository.findByToolbox(OutstandingState.REQUEST, toolbox, pageable);
+			return page.map(e -> new OutstandingRentalSheetDto(e, rentalToolService.list(e.getRentalSheet().getId())));
+		} else {
+			membership = membershipOptional.get();
 		}
 		Page<OutstandingRentalSheet> page = repository.findBySearchQuery(membership, isWorker, isLeader,
 				toolbox, LocalDateTime.of(startLocalDate, LocalTime.MIN),

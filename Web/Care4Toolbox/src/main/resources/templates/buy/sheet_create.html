@@ -221,9 +221,9 @@
 				document.getElementById("approver").textContent = approver.name;
 				
 				abcHttp.get(
-					'/toolbox/getbyname',
+					'/toolbox/getbymanagerid',
 					{
-						name:data.partDto.subPartDto.mainPartDto.name
+						managerId:data.id
 					}
 				)
 				.then(toolboxData=>{

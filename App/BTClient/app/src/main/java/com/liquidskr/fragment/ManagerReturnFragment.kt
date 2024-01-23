@@ -100,9 +100,32 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
+        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+            override fun onBluetoothDisconnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
+            }
+        })
 
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
@@ -118,24 +141,6 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
-            override fun onBluetoothDisconnected() {
-                try {
-                    whenDisconnected()
-                    val dbHelper = DatabaseHelper(mContext)
-                    handler.post {
-                        (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
-                    }
-                    Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
-                } catch (e: Exception) {
-                    handler.post {
-                        Toast.makeText(mContext, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-            }
-        })
 
         recyclerView.layoutManager = LinearLayoutManager(mContext)
         val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
@@ -236,13 +241,6 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         return view
     }
 
-    fun whenDisconnected () {
-        handler.post {
-            hidePopup()
-            connectBtn.setImageResource(R.drawable.group_11_copy)
-        }
-    }
-
     fun getOutstandingRentalSheetListByMembership(id: Long) {
         outStandingRentalSheetList.clear()
         var sheetCount = 0
@@ -317,14 +315,24 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
 
                 override fun onError(e: Exception) {
                     e.printStackTrace()
+                    try {
+                        val dbHelper = DatabaseHelper(requireContext())
+                        (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
+                        Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+                    } catch (e: Exception) {
+                        handler.post {
+                            Toast.makeText(activity, "반납 전표를 불러오지 못했습니다. 다시 시도하세요.",Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             })
+            showPopup()
         } catch (e: Exception) {
+            Log.d("a","a")
             handler.post {
                 Toast.makeText(activity, "목록을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-        showPopup()
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
@@ -341,6 +349,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             }
             override fun onError(e: Exception) {
                 e.printStackTrace()
+                hidePopup()
             }
         })
     }

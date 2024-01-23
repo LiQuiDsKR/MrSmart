@@ -188,10 +188,9 @@ public class StockStatusService {
 		logger.info("stock updated to (supply) : "+stock.toString());
 		return new StockStatusDto(repository.save(stock));
 	}
-	
-	/*
-@Scheduled(cron = "00 00 00 * * ?") // 매일 자정에 실행
 
+
+	@Scheduled(cron = "00 00 00 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		
 		LocalDate latestDate = repository.getLatestCurrentDay();
@@ -229,7 +228,6 @@ public class StockStatusService {
 	        logger.info(count+"/"+formerStatus.size());
 		}
     }
-	*/
 	
 	private boolean isCorrect(StockStatus stockStatus) {
 		LocalDate currentDate = stockStatus.getCurrentDay();

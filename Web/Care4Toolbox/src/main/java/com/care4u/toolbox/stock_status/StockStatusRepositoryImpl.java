@@ -3,6 +3,7 @@ package com.care4u.toolbox.stock_status;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,6 +134,23 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 		
 		
 		return resultList;
+	}
+	
+	private List<StockStatusSummaryByToolStateDto> convertToDtoList(List<Tuple> tuples) {
+	    List<StockStatusSummaryByToolStateDto> dtoList = new ArrayList<>();
+	    for (Tuple tuple : tuples) {
+	        LocalDate date = tuple.get(0, LocalDate.class);
+	        int rentalCount = tuple.get(1, Integer.class);
+	        int returnCount = tuple.get(2, Integer.class);
+
+	        StockStatusSummaryByToolStateDto dto = new StockStatusSummaryByToolStateDto();
+	        dto.setCurrentDay(date);
+	        dto.setRentalCount(rentalCount);
+	        dto.setReturnCount(returnCount);
+
+	        dtoList.add(dto);
+	    }
+	    return dtoList;
 	}
 
 	@Override

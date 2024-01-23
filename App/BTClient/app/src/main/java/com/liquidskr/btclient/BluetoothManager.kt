@@ -63,6 +63,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
     interface BluetoothConnectionListener {
         fun onBluetoothDisconnected()
+        fun onBluetoothConnected()
     }
 
     fun setBluetoothConnectionListener (listener: BluetoothConnectionListener) {
@@ -160,10 +161,10 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                                 continue
                             } else {
                                 isConnected = false
+                                Log.d("bluetooth_","Disconnected1")
+                                Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
                                 handler.post {
-                                    Log.d("bluetooth_","Disconnected1")
                                     bluetoothConnectionListener?.onBluetoothDisconnected()
-                                    Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -192,6 +193,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             messageQueue.offer(BluetoothMessage(type, params, callback))
         }*/
     }
+
     private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
         try {
             outputStream = bluetoothSocket.outputStream
@@ -248,9 +250,9 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             })
         } catch (e: Exception) {
             // 전송 중 에러
+            bluetoothConnectionListener?.onBluetoothDisconnected()
             handler.post {
                 Log.d("bluetooth_","Disconnected1")
-                bluetoothConnectionListener?.onBluetoothDisconnected()
             }
             callback.onError(e)
         }

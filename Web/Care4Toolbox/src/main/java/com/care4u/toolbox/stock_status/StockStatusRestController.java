@@ -30,6 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 import com.care4u.constant.EmploymentState;
 import com.care4u.constant.Role;
@@ -143,7 +144,7 @@ public class StockStatusRestController {
     }
     
     @PostMapping("/stock_status/initialize")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<List<String>> handleFileUpload(@RequestParam("file") MultipartFile file) {
     	try (
     			InputStream inputStream = file.getInputStream();
     		     Workbook workbook = new XSSFWorkbook(inputStream)
@@ -153,7 +154,7 @@ public class StockStatusRestController {
     		List<String> results = new ArrayList<String> ();
 			Map<String, Integer> resultMap = new HashMap<>();
     		Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트
-    		List<Integer> columnIndices = new ArrayList<Integer>(10);
+    		Map<Integer, Integer> columnIndices = new HashMap<Integer,Integer>();
 	    	for (Row row : sheet) {
 	    		String mainGroup = null;
 	    		String subGroup = null;
@@ -164,40 +165,66 @@ public class StockStatusRestController {
 	    		String unit = null;
 	    		String toolbox = null;
 	    		Integer count = null;
+	    		boolean exceptionFlag= false;
 	    	    for (Cell cell : row) {
 	    	    	if (row.getRowNum()==0) {
 	    	    		switch(cell.getStringCellValue()) {
 	    	    		case "대분류" :
-	    	    			columnIndices.set(0, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),0);
 	    	    			break;
 	    	    		case "중분류" :
-	    	    			columnIndices.set(1, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),1);
 	    	    			break;
 	    	    		case "한글명" :
-	    	    			columnIndices.set(2, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),2);
 	    	    			break;
 	    	    		case "영문명" :
-	    	    			columnIndices.set(3, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),3);
 	    	    			break;
 	    	    		case "품목코드" :
 	    	    		case "코드":
-	    	    			columnIndices.set(4, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),4);
 	    	    			break;
 	    	    		case "규격" :
-	    	    			columnIndices.set(5, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),5);
 	    	    			break;
 	    	    		case "단위" :
-	    	    			columnIndices.set(6, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),6);
 	    	    			break;
 	    	    		case "정비실" :
 	    	    		case "부서명" :
-	    	    			columnIndices.set(7, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),7);
 	    	    			break;
 	    	    		case "수량" :
-	    	    			columnIndices.set(8, cell.getColumnIndex());
+	    	    			columnIndices.put(cell.getColumnIndex(),8);
 	    	    			break;	    	    			
 	    	    		}
-	    	    	} else {
+	    	    	} else if (columnIndices.containsKey(cell.getColumnIndex())) {
+	    	    		try {
+	    	    		switch(cell.getCellType()) {
+		    	    	case STRING:
+		                    logger.debug(cell.getAddress()+": String value: " + cell.getStringCellValue());
+		                    break;
+		                case NUMERIC:
+		                	logger.debug(cell.getAddress()+": Numeric value: " + cell.getNumericCellValue());
+		                    break;
+		                case BOOLEAN:
+		                    logger.debug(cell.getAddress()+": Boolean value: " + cell.getBooleanCellValue());
+		                    break;
+		                case FORMULA:
+		                    logger.debug(cell.getAddress()+": Formula: " + cell.getCellFormula());
+		                    break;
+		                case BLANK:
+		                    logger.debug(cell.getAddress()+": Blank cell");
+		                    break;
+		                case ERROR:
+		                    logger.debug(cell.getAddress()+": Error in cell");
+		                    break;
+		                default:
+		                    logger.debug(cell.getAddress()+": Unknown cell type");
+		                    break;
+		    	    	}
+	    	    		
 	    	    		switch (columnIndices.get(cell.getColumnIndex())) {
 	    	    		case 0:
 	    	    			mainGroup = cell.getStringCellValue();
@@ -215,7 +242,8 @@ public class StockStatusRestController {
 	    	    			code = cell.getStringCellValue();
 	    	    			break;
 	    	    		case 5:
-	    	    			spec = cell.getStringCellValue();
+	    	    			spec = cell.getCellType().equals(CellType.STRING)? cell.getStringCellValue() :
+	    	    				cell.getCellType().equals(CellType.NUMERIC)? String.valueOf(cell.getNumericCellValue()): "";
 	    	    			break;
 	    	    		case 6:
 	    	    			unit = cell.getStringCellValue();
@@ -229,38 +257,20 @@ public class StockStatusRestController {
 	    	    		default:
 	    	    			continue;
 	    	    		}
-	    	    	}
-	    	    	switch(cell.getCellType()) {
-	    	    	case STRING:
-	                    logger.debug(cell.getAddress()+": String value: " + cell.getStringCellValue());
-	                    break;
-	                case NUMERIC:
-	                	logger.debug(cell.getAddress()+": Numeric value: " + cell.getNumericCellValue());
-	                    break;
-	                case BOOLEAN:
-	                    logger.debug(cell.getAddress()+": Boolean value: " + cell.getBooleanCellValue());
-	                    break;
-	                case FORMULA:
-	                    logger.debug(cell.getAddress()+": Formula: " + cell.getCellFormula());
-	                    break;
-	                case BLANK:
-	                    logger.debug(cell.getAddress()+": Blank cell");
-	                    break;
-	                case ERROR:
-	                    logger.debug(cell.getAddress()+": Error in cell");
-	                    break;
-	                default:
-	                    logger.debug(cell.getAddress()+": Unknown cell type");
-	                    break;
+	    	    		}catch (Exception e){
+	    	    			results.add(cell.getAddress() + e.getMessage());
+	    	    			e.printStackTrace();
+	    	    			exceptionFlag = true;
+	    	    		}
 	    	    	}
 	    	    }
-	    	    if (row.getRowNum()!=0) {
-	    	    	
+	    	    if (row.getRowNum()!=0 && !exceptionFlag) {
+	    	    	try {
 						SubGroupDto subGroupDto = parseGroup(mainGroup,subGroup);
 						
 						if (subGroupDto == null) {
 							logger.error("subGroupDto is NULL");
-							return null;
+							throw new NullPointerException("subGroupDto is NULL");
 						}
 						
 						ToolDto tool = ToolDto.builder()
@@ -282,7 +292,10 @@ public class StockStatusRestController {
 						
 						logCount++;
 	    	    	
-	    	    	
+	    	    	}catch (Exception e) {
+	    	    			results.add(row.getRowNum() + e.getMessage());
+	    	    			exceptionFlag = true;
+	    	    		}
 //					ToolDto toolDto = toolService.getByCode(code);
 //					if (toolDto==null) {
 //						logger.info(logCount + " : NULL");
@@ -301,13 +314,20 @@ public class StockStatusRestController {
 //				        }
 //					}
 //					logCount++;
+	    	    } else if (exceptionFlag) {
+	    	    	continue;
 	    	    }
 	    	}
-	    	
+	    	logger.debug("total" + logCount+" items updated(added)");
+	    	logger.debug("total "+ results.size() +" items skipped(error)");
+	    	for (String s : results) {
+	    		logger.error(s);
+	    	}
+	        return ResponseEntity.ok(results);
 		} catch (Exception e) {
-		    logger.error(e.getStackTrace());
+		    e.printStackTrace();
+		    return ResponseEntity.ok(null);
 		}
-        return ResponseEntity.ok().body("{\"message\":\"["+file.getOriginalFilename()+"] upload complete\"}");
     }
     
     private SubGroupDto parseGroup(String mainGroupName, String subGroupName) {				
@@ -335,10 +355,7 @@ public class StockStatusRestController {
 		ToolboxDto toolboxDto = toolboxService.get(toolboxName);
 		if (toolboxDto == null) {
 			logger.debug(toolboxName + " toolbox is NULL");
-			toolboxDto = ToolboxDto.builder()
-					.name(toolboxName)
-					.build();
-			toolboxDto = toolboxService.update(toolboxDto);
+			return null;
 		}
 
 		StockStatusDto stock= stockStatusService.get(toolId, toolboxDto.getId());

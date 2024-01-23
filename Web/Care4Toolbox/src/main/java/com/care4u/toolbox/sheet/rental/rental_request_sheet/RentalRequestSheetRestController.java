@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.care4u.common.GsonUtils;
 import com.care4u.constant.SheetState;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetDto;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheetService;
@@ -147,7 +148,7 @@ public class RentalRequestSheetRestController {
         if(response!=null) {
             return new ResponseEntity<String>(response, HttpStatus.BAD_REQUEST);
         }
-        response = gson.toJson(result.toString());
+        response = GsonUtils.toJson("{}");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping(value="/rental/request_sheet/cancel")

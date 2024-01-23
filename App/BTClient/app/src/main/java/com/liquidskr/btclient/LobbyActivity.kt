@@ -88,8 +88,6 @@ class LobbyActivity : AppCompatActivity() {
 
         bluetoothManager = BluetoothManager(this, this)
         popupLayout = findViewById(R.id.bluetoothPopupLayout)
-        progressBar = findViewById(R.id.bluetoothProgressBar)
-        progressText = findViewById(R.id.bluetoothProgressText)
 
         workerBtn = findViewById(R.id.workerBtn)
         managerBtn = findViewById(R.id.managerBtn)
@@ -99,6 +97,7 @@ class LobbyActivity : AppCompatActivity() {
         bluetoothManager.bluetoothOpen()
 
         workerBtn.setOnClickListener {
+            showPopup()
             val fragment = WorkerFragment.newInstance()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -106,6 +105,7 @@ class LobbyActivity : AppCompatActivity() {
                 .commit()
         }
         managerBtn.setOnClickListener {
+            showPopup()
             val fragment = ManagerFragment.newInstance()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -125,27 +125,6 @@ class LobbyActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
         }
-    }
-
-    fun showCustomModal(title: String, content: String, listener: CustomModalListener) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-        builder.setMessage(content)
-
-        // 확인 버튼을 눌렀을 때의 동작 정의
-        builder.setPositiveButton("확인") { _, _ ->
-            // 모달 확인 버튼을 눌렀을 때, Listener의 메서드 호출
-            listener.onConfirmButtonClicked()
-        }
-
-        // 취소 버튼을 눌렀을 때의 동작 정의
-        builder.setNegativeButton("취소") { _, _ ->
-            // 모달 취소 버튼을 눌렀을 때, Listener의 메서드 호출
-            listener.onCancelButtonClicked()
-        }
-
-        val dialog = builder.create()
-        dialog.show()
     }
 
     fun showAlertModal(title: String, content: String, listener: AlertModalListener) {

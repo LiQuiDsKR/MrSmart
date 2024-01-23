@@ -172,8 +172,18 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                                     if (rtwc.rentalTool.toolDto.id == taggedTool.id) {
                                         rtwc.rentalTool.Tags = tag.macaddress
                                         handler.post {
+                                            adapter.tagAdded(taggedTool.id, tag.macaddress) // 태그 넣는거 안됨
+                                            lateinit var newReturnToolForm: ReturnToolFormDto
+                                            for (returnToolForm in returnToolFormList) {
+                                                if (returnToolForm.toolDtoId == taggedTool.id) {
+                                                    newReturnToolForm = returnToolForm
+                                                }
+                                            }
+                                            returnToolFormList = returnToolFormList.filter { it.toolDtoId != taggedTool.id }.toMutableList()
+                                            val newTag = tag.macaddress
+                                            returnToolFormList.add(ReturnToolFormDto(newReturnToolForm.rentalToolDtoId, newReturnToolForm.toolDtoId, newTag, newReturnToolForm.goodCount, newReturnToolForm.faultCount,newReturnToolForm.damageCount,newReturnToolForm.lossCount, newReturnToolForm.comment))
+
                                             adapter.updateList(adapter.outstandingRentalToolWithCounts)
-                                            adapter.tagAdded(taggedTool.id)
                                             Toast.makeText(requireContext(),"${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.",Toast.LENGTH_SHORT).show()
                                         }
                                     }
@@ -260,7 +270,9 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
             standbyAlreadySent = true
         }
-        qrEditText.requestFocus()
+        handler.postDelayed({
+            qrEditText.requestFocus()
+        }, 200)
         return view
     }
 

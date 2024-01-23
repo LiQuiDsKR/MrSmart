@@ -145,9 +145,11 @@
 
             }
         }
-        private val customModalLisener = object : LobbyActivity.CustomModalListener {
+        private val importStandardModalListener = object : LobbyActivity.AlertModalListener {
             override fun onConfirmButtonClicked() {
-
+                showPopup() // progressBar appear
+                progressText.text = ""
+                importMembership(dbHelper)
             }
 
             override fun onCancelButtonClicked() {
@@ -157,11 +159,11 @@
         private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
             ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         }
-        private fun showCustomModal(title: String, content: String) {
-            lobbyActivity.showCustomModal(title, content, customModalLisener)
-        }
         private fun showAlertModal(title: String, content: String) {
             lobbyActivity.showAlertModal(title, content, alertModalListener)
+        }
+        private fun showImportStandardModal(title: String, content: String) {
+            lobbyActivity.showAlertModal(title, content, importStandardModalListener)
         }
         @SuppressLint("MissingInflatedId")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -189,7 +191,7 @@
                 }
             }
 
-            var toolboxArray = arrayOf("선강정비1실", "선강정비2실", "선강정비3실", "선강정비4실", "선강정비5실")
+            var toolboxArray = arrayOf("선강정비1실", "선강정비2실", "선강정비3실 2그룹", "선강정비3실 3그룹", "선강정비4실", "선강정비5실")
 
             setToolBox.setOnClickListener {
                 var selectedToolbox = "선강정비1실"
@@ -199,22 +201,26 @@
                 } else if (sharedViewModel.toolBoxId.toInt() == 5223) {
                     selectedToolbox = "선강정비2실"
                 } else if (sharedViewModel.toolBoxId.toInt() == 5224) {
-                    selectedToolbox = "선강정비3실"
+                    selectedToolbox = "선강정비3실 2그룹"
                 } else if (sharedViewModel.toolBoxId.toInt() == 5225) {
                     selectedToolbox = "선강정비4실"
                 } else if (sharedViewModel.toolBoxId.toInt() == 5226) {
                     selectedToolbox = "선강정비5실"
+                } else if (sharedViewModel.toolBoxId.toInt() == 5232) {
+                    selectedToolbox = "선강정비3실 3그룹"
                 }
                 showSelectionDialog(requireContext(), "정비실을 선택하세요.", toolboxArray, selectedToolbox) {string ->
                     if (string == toolboxArray[0]) { // 선강정비1실
                         sharedViewModel.toolBoxId = 5222
                     } else if (string == toolboxArray[1]) { // 선강정비2실
                         sharedViewModel.toolBoxId = 5223
-                    } else if (string == toolboxArray[2]) { // 선강정비3실
+                    } else if (string == toolboxArray[2]) { // 선강정비3실 2그룹
                         sharedViewModel.toolBoxId = 5224
-                    } else if (string == toolboxArray[3]) { // 선강정비4실
+                    } else if (string == toolboxArray[4]) { // 선강정비4실
                         sharedViewModel.toolBoxId = 5225
-                    } else if (string == toolboxArray[4]) { // 선강정비5실
+                    } else if (string == toolboxArray[5]) { // 선강정비5실
+                        sharedViewModel.toolBoxId = 5226
+                    } else if (string == toolboxArray[3]) { // 선강정비3실 3그룹
                         sharedViewModel.toolBoxId = 5226
                     }
                     dbHelper.RefreshToolboxData(sharedViewModel.toolBoxId)
@@ -222,9 +228,7 @@
             }
 
             importStandard.setOnClickListener {
-                showPopup() // progressBar appear
-                progressText.text = ""
-                importMembership(dbHelper)
+                showImportStandardModal("안내", "기준정보를 새로 불러오시겠습니까?\n기준정보를 모두 받는 데 5~6 분 정도가 소요됩니다.")
             }
             importQRData.setOnClickListener{
                 showPopup() // progressBar appear

@@ -29,6 +29,8 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
 class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) : Fragment() {
@@ -102,6 +104,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                     } else {
                         handler.post {
                             Toast.makeText(context, "이미 다른 공기구에 등록된 라벨입니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
                         }
                     }
                     hidePopup()
@@ -184,13 +187,27 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
         }
 
         qrTextEdit.setOnEditorActionListener { _, actionId, event ->
+            Log.d("qr", "#1")
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+                Log.d("qr", "#2")
                 val qrcode = qrTextEdit.text.toString().replace("\n", "")
+                Log.d("qr", "#3")
                 if (isLabelMode) { // Label 모드
+                    Log.d("qr", "#4")
                     qrTextEdit.requestFocus()
+                    Log.d("qr", "#5")
                     tbtQrcode = qrcode
+                    Log.d("qr", "#6")
+                    handler.post{
+                        Log.d("qr", "#7")
+                        Toast.makeText(requireContext(), "TBT_QRCODE : ${tbtQrcode}",Toast.LENGTH_SHORT).show()
+
+                        Log.d("qr", "#8")
+                        qrDisplay.text = "${tbtQrcode}"
+
+                        Log.d("qr", "#9")
+                    }
                     // qrcode가 이미 쓰인건지 체크
-                    qrDisplay.text = "${tbtQrcode}"
                 } else { // Tag 모드
                     qrTextEdit.requestFocus()
                     var list = adapter.qrcodes.toMutableList()
@@ -216,14 +233,25 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             }
         }
         confirmBtn.setOnClickListener {
-            showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
+            if (tbtQrcode == "") {
+                Toast.makeText(context, "선반 코드가 입력되지 않았습니다.",Toast.LENGTH_SHORT).show()
+            } else {
+                showBluetoothModal("알림","라벨 정보를 등록하시겠습니까?")
+            }
         }
 
         recyclerView.adapter = adapter
         qrTextEdit.requestFocus()
-        handler.postDelayed ({
-            qrTextEdit.requestFocus()
-        },500)
+
+        handler.post {
+            val currentFocus: View? = requireActivity().currentFocus
+
+            if (currentFocus != null) {
+                Toast.makeText(requireContext(), "${currentFocus.id}",Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "det : ${qrTextEdit.id}",Toast.LENGTH_SHORT).show()
+            }
+        }
+
         return view
     }
 

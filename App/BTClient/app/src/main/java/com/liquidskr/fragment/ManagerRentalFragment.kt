@@ -115,8 +115,19 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
-                whenDisconnected()
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
                 Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")                
             }
         })
 
@@ -126,7 +137,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
-
         connectBtn.setOnClickListener{
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
             try {
@@ -175,14 +185,21 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         return view
     }
 
-    fun whenDisconnected () {
-        handler.post {
-            hidePopup()
-            connectBtn.setImageResource(R.drawable.group_11_copy)
+    override fun onResume() {
+        super.onResume()
+        connectBtn.setOnClickListener(null)
+        connectBtn.setOnClickListener{
+            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
+        private fun fragmentTransform(frag: Fragment, backStackTag: String?) {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, frag)
             .addToBackStack(backStackTag)
@@ -249,6 +266,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
                 } // UI블로킹 end
             }
             override fun onError(e: Exception) {
+                hidePopup()
                 e.printStackTrace()
             }
         })

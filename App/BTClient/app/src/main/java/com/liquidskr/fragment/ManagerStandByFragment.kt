@@ -56,8 +56,13 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager.bluetoothOpen()
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            try {
+                bluetoothManager.bluetoothOpen()
+                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+            } catch (e: Exception) {
+                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
@@ -72,8 +77,19 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
         bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
-                whenDisconnected()
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.group_11_copy)
+                }
                 Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
+            }
+
+            override fun onBluetoothConnected() {
+                handler.post {
+                    hidePopup()
+                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
+                }
+                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
             }
         })
 
@@ -124,20 +140,26 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
             showPopup()
             try {
                 bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                if (bluetoothManager.isConnected) {
-                    bluetoothManager.standbyProcess()
-                    handler.postDelayed({
-                        adapter.updateList(dbHelper.getAllStandby())
-                    }, 500)
-                    if (adapter.sheets.isEmpty()) {
+                if (adapter.sheets.size > 0) {
+                    if (bluetoothManager.isConnected) {
+                        bluetoothManager.standbyProcess()
+                        handler.postDelayed({
+                            adapter.updateList(dbHelper.getAllStandby())
+                        }, 500)
+                        if (adapter.sheets.isEmpty()) {
+                            handler.post {
+                                Toast.makeText(context ,"모든 보류 항목을 처리했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        hidePopup()
+                    } else {
                         handler.post {
-                            Toast.makeText(context ,"모든 보류 항목을 처리했습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context ,"보류 항목을 전송하려면 블루투스 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    hidePopup()
                 } else {
                     handler.post {
-                        Toast.makeText(context ,"보류 항목을 전송하려면 블루투스 연결이 필요합니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context ,"보류 항목이 비어있습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {

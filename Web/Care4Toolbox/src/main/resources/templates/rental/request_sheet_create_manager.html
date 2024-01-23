@@ -378,6 +378,7 @@
 							throw error("no toolbox");
 						} else {
 							document.getElementById("toolboxSelect").value=toolboxData.id;
+							mainData.toolbox.id=toolboxData.id;
 						}
 					})
 					.catch(error => {
