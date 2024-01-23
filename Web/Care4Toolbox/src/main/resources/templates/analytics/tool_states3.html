@@ -597,7 +597,6 @@
 						}
 					}
 				));
-				setTimeout(_=>{
 					
 				this.updateOptions({
 					series: chartData,
@@ -606,6 +605,8 @@
 						max: new Date($('#end-date').val()).getTime(),
 					}
 				});
+				setTimeout(_=>{
+					window.dispatchEvent(new Event("resize"));
 				},10)
 			});
 		}
