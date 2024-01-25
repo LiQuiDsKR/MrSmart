@@ -110,7 +110,7 @@ public class BuySheetService {
 			logger.error("invalid toolbox id : "+toolboxId);
 			return null;
 		}
-		Page<BuySheet> page = repository.findByToolboxIdAndEventTimestampBetween(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
+		Page<BuySheet> page = repository.findByToolboxIdAndEventTimestampBetweenOrderByEventTimestampDesc(toolboxId,LocalDateTime.of(startDate, LocalTime.MIN), LocalDateTime.of(endDate, LocalTime.MAX), pageable);
 		return page.map(e->convertToDto(e));
 	}
 

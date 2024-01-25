@@ -16,5 +16,7 @@ public interface BuySheetRepository extends JpaRepository<BuySheet, Long> {
 
 	Page<BuySheet> findByToolboxIdAndEventTimestampBetween(long toolboxId, LocalDateTime startDate, LocalDateTime endDate,Pageable pageable);
 
+	Page<BuySheet> findByToolboxIdAndEventTimestampBetweenOrderByEventTimestampDesc(long toolboxId, LocalDateTime of, LocalDateTime of2, Pageable pageable);
+
 	
 }

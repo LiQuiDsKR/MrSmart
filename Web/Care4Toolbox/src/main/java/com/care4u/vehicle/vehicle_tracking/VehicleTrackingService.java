@@ -99,7 +99,7 @@ public class VehicleTrackingService {
 	}
 
 	public List<String> groupList() {
-		List<String> list = repository.findDistinctBBy();
+		List<String> list = repository.findDistinctGroupBy();
 		return list;
 	}
 

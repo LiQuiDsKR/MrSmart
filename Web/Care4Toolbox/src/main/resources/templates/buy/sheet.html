@@ -175,7 +175,7 @@
 				{
 					toolboxId:toolboxId,
 					page: 0,
-					size: 10,
+					size: 100,
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
@@ -185,7 +185,7 @@
 				containerDiv.innerHTML='';
 				let htmlString = ``
 				if (data.empty) {
-					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
+					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">매입한 기록이 없습니다</div>`
 					containerDiv.innerHTML = htmlString;
 					return;
 				}
