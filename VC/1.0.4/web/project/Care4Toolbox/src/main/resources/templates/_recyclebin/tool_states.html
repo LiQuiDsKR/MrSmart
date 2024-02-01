@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		
+	.td_btn,
+	.th_btn{
+		text-align: end;
+	}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-20">
+					<div class="d-flex flex-row align-items-center">
+						
+						<h2 class="ml-4">분석 현황 </h2>
+						<div class="m-4" style="width:500px;">
+							<div class="custom-select style--two large">
+								<select class="theme-input-style" id="toolboxSelect">
+									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+														th:text="${toolbox.name}">name?</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+		
+		<div class="row">
+			
+			
+			
+			<div class="col-4">
+				<!-- Card -->
+				<div class="card mb-30 progress_3 bg-white mr-0">
+					<div class="card-body">
+						<h3 class="progress-title mb-1">대여 / 반납 현황</h3>
+						<p class="progress-title mb-1 date-today">2023-12-10</p>
+
+						<div class="ProgressBar-wrap position-relative mb-4">
+							<div
+								id = "progressBar-circle"
+								class="ProgressBar ProgressBar_3"
+								data-progress="90">
+								<svg
+									class="ProgressBar-contentCircle"
+									viewBox="0 0 200 200">
+									<circle
+										transform="rotate(135, 100, 100)"
+										class="ProgressBar-background"
+										cx="100"
+										cy="100"
+										r="85"
+										stroke-width="20" />
+									<circle
+										transform="rotate(135, 100, 100)"
+										class="ProgressBar-circle"
+										cx="100"
+										cy="100"
+										r="85"
+										stroke-width="20" />
+								</svg>
+								<span class="ProgressBar-percentage--text">
+									현 재고량
+								</span>
+								<span class="ProgressBar-percentage ProgressBar-percentage--count"></span>
+							</div>
+						</div>
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-16">대여중</span>
+									<span id="rental-count" class="process-width font-16">1023</span>
+									<span id="rental-bar"class="process-bar style--four" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-16">반납중</span>
+									<span id="return-count" class="process-width font-16">1023</span>
+									<span id="return-bar" class="process-bar style--four" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+			
+			<div class="col-4">
+				<div class="card mb-30">
+					<div class="card-body pb-1">
+						<h3>공기구 상태 현황</h3>
+						<p class="progress-title mb-1 date-today">2023-12-10</p>
+					</div>
+					<div class="p-2">
+						<div
+							id="multiple-color-donut-chart"
+							style="height: 300px"></div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-4">
+				
+				<!-- Card -->
+				<div class="card mb-30 bg-white"style="overflow-x:auto;">
+					<div class="card-body">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
+							<div class="">
+								<h3 class="mb-1">공기구 상태 현황</h3>
+								<p class="font-16 date-today">
+									2023-12-10
+								</p>
+							</div>
+						</div>
+						<div class="product-list">
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">양호 수량</span>
+									<span id="good-count" class="process-width font-20">1023</span>
+									<span id="good-count-bar" class="process-bar style--two" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">고장 수량</span>
+									<span id="fault-count" class="process-width font-20">1023</span>
+									<span id="fault-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">파손 수량</span>
+									<span id="damage-count" class="process-width font-20">1023</span>
+									<span id="damage-count-bar" class="process-bar style--one" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">망실 수량</span>
+									<span id="loss-count" class="process-width font-20">1023</span>
+									<span id="loss-count-bar" class="process-bar style--three" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+							<!-- Product List Item -->
+							<div class="product-list-item mb-10 d-flex justify-content-between align-items-center">
+								<div class="process-bar-wrapper">
+									<span class="process-name font-20">폐기 수량</span>
+									<span id="discard-count" class="process-width font-20">1023</span>
+									<span id="discard-count-bar" class="process-bar style--three" data-process-width="72" style="transition: all 2.25s ease 0s;"></span>
+								</div>
+							</div>
+							<!-- End Product List Item -->
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card-->
+				
+			</div>
+			
+		</div>
+		
+		<div class="row">
+			
+			
+			<div class="col-12">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+					<div class="d-flex ml-3">
+						<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3 mr-3">
+							<div class="">
+								<h3 class="mb-1">기간별 대여 현황</h3>
+							</div>
+						</div>
+						<!-- Form Group -->
+						<div class="form-group m-2">
+							<label class="mb-2 font-14 bold">시작 날짜</label>
+		
+							<!-- Date Picker -->
+							<div class="dashboard-date style--four">
+								<span id="start-date-btn" class="input-group-addon">
+									<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+								</span>
+		
+								<input type="text" id="start-date" placeholder="Select Date" />
+							</div>
+							<!-- End Date Picker -->
+						</div>
+						<!-- End Form Group -->
+		
+						<!-- Form Group -->
+						<div class="form-group m-2 mr-4">
+							<label class="mb-2 font-14 bold">종료 날짜</label>
+		
+							<!-- Date Picker -->
+							<div class="dashboard-date style--four">
+								<span id="end-date-btn" class="input-group-addon">
+									<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+								</span>
+		
+								<input type="text" id="end-date" placeholder="Select Date" />
+							</div>
+							<!-- End Date Picker -->
+						</div>
+						<!-- End Form Group -->
+					</div>
+					
+					<div id="sector1">
+						
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+			
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+		
+	var toolboxId=5222;
+	initializeDatepicker();
+	document.querySelectorAll(".date-today").forEach(e=>{
+		e.textContent=formatDate(new Date());
+	})
+	
+	var chart1=initializeChart1();
+	var chart4=initializeChart4();
+	abcHttp.get(
+		'/membership/getbycode',
+		{
+			code:parseInt( document.getElementById("user-code").textContent)
+		}
+	)
+	.then(data=>{
+		return new Promise((resolved,rejected)=>{
+			abcHttp.get(
+				'/toolbox/getbyname',
+				{
+					name:data.partDto.subPartDto.mainPartDto.name
+				}
+			)
+			.then(toolboxData=>{
+				if (toolboxData==null){
+					throw error("no toolbox");
+				} else{
+					toolboxId=toolboxData.id;
+					resolved(toolboxData.id);
+				}
+			})
+			.catch(error=>{
+				Swal.fire({
+					type: 'error',
+					title: '정비실 없음',
+					text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+				}).then(()=>{rejected();});
+			});
+		});
+	})
+	.then(toolboxId=>{
+		document.getElementById("toolboxSelect").value=toolboxId;
+		loadChart1.apply(chart1,[toolboxId]);
+		loadChart2(toolboxId);
+		loadChart3(toolboxId);
+		loadChart4.apply(chart4,[toolboxId]);
+	});
+		
+	//apex initialize
+	function initializeChart1(){
+		
+			/*
+			const chartData2 = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.totalCount
+			}));
+			*/
+	
+			// ApexCharts 설정
+			const options = {
+				series: [
+				{
+					name: '대여 수량',
+					data: [0]
+				}
+				],
+				chart: {
+					id: 'area-datetime',
+					type: 'area',
+					height: 300,
+					zoom: {
+					    autoScaleYaxis: true
+					},
+					toolbar: {
+					    show: false
+					},
+				},
+				dataLabels: {
+					enabled: false
+				},
+				markers: {
+					size: 0,
+					style: 'hollow',
+				},
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						datetimeFormatter: {
+							year: 'yyyy',
+							month: 'yyyy-MM',
+							day: 'yyyy-MM-dd'
+						}
+					},
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
+					tickAmount: 6,
+					axisTicks: {
+						show: false,
+					},
+					axisBorder: {
+						show: false
+					},
+				},
+				tooltip: {
+					x: {
+						format: 'yyyy-MM-dd'
+					},
+				},
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shadeIntensity: 1,
+						opacityFrom: 0.7,
+						opacityTo: 0.9,
+						stops: [0, 100]
+					}
+				},
+				
+
+				//colors: [],
+			};
+			var chart = new ApexCharts(document.querySelector("#sector1"), options);
+			chart.render();	
+			return chart;
+	}
+	//apex update
+	function loadChart1(toolboxId){
+		
+		abcHttp.get(
+			'/stock_status/get/analytics/list',
+			{
+				toolboxId:toolboxId,
+				startDate: $('#start-date').val(),
+				endDate: $('#end-date').val(),
+			}
+		).then(data=>{
+			console.log(data);
+			const chartData = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.rentalCount
+			}));
+			this.updateOptions({
+				series:[
+				{
+					name:'대여 수량',
+					data:chartData
+				}
+				],
+				xaxis:{
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
+				}
+			});
+		});
+	}
+	function initializeChart4(){
+		return new Morris.Donut({
+			element: 'multiple-color-donut-chart',
+			data: [
+				{
+					value: 35,
+					label: '대여',
+				},
+				{
+					value: 25,
+					label: '양호',
+				},
+				{
+					value: 15,
+					label: '고장',
+				},
+				{
+					value: 15,
+					label: '파손',
+				},
+				{
+					value: 10,
+					label: '망실',
+				},
+				{
+					value: 10,
+					label: '폐기',
+				},
+			],
+			backgroundColor: '#fff',
+			labelColor: '#060',
+			colors: [
+				'#8280FD',
+				'#67CF94',
+				'#09D1DE',
+				'#FFB959',
+				'#FC7383',
+				'#727272',
+				'#727272',
+			],
+			formatter: function (x) {
+				return x + '%';
+			},
+		});
+	}
+	function loadChart4(toolboxId){
+		abcHttp.get(
+			'/stock_status/get/analytics',
+			{
+				toolboxId:toolboxId,
+				currentDate:formatDate(new Date())
+			}
+		).then(data=>{
+			var newData = [
+		        { label: '대여', value: Math.floor(data.rentalCount/ data.totalCount * 100)},
+		        { label: '양호', value: Math.floor(data.goodCount/ data.totalCount * 100)},
+		        { label: '고장', value: Math.floor(data.faultCount/ data.totalCount * 100)},
+		        { label: '파손', value: Math.floor(data.damageCount/ data.totalCount * 100)},
+		        { label: '망실', value: Math.floor(data.lossCount/ data.totalCount * 100)},
+		        { label: '폐기', value: Math.floor(data.discardCount/ data.totalCount * 100)},
+		    ];
+		    this.setData(newData);
+	    });	
+	}
+	
+	//대여/반납현황
+	function loadChart2(toolboxId){
+		abcHttp.get(
+			"/stock_status/get/analytics",
+			{
+				toolboxId:toolboxId,
+				currentDate: formatDate(new Date())
+			}
+		)
+		.then(data=>{
+			document.getElementById("progressBar-circle").setAttribute('data-progress',
+				Math.floor(100 - data.rentalCount/data.totalCount*100));
+			
+			document.getElementById("rental-count").textContent=data.rentalCount;
+			document.getElementById("return-count").textContent=data.totalCount-data.rentalCount;
+
+			$("#rental-bar").data('process-width', Math.floor(data.rentalCount / data.totalCount * 100));
+			$("#return-bar").data('process-width', Math.floor((data.totalCount - data.rentalCount) / data.totalCount * 100));
+			
+			$('.ProgressBar_3').bekeyProgressbar();
+			processControl();
+		})
+	}
+	//공기구 상태 현황
+	function loadChart3(toolboxId){
+		abcHttp.get(
+			"/stock_status/get/analytics",
+			{
+				toolboxId:toolboxId,
+				currentDate: formatDate(new Date())
+			}
+		)
+		.then(data=>{
+			document.getElementById("good-count").textContent=data.goodCount;
+			document.getElementById("fault-count").textContent=data.faultCount;
+			document.getElementById("damage-count").textContent=data.damageCount;
+			document.getElementById("loss-count").textContent=data.lossCount;
+			document.getElementById("discard-count").textContent=data.discardCount;
+
+			$("#good-count-bar").data('process-width', Math.floor(data.goodCount / data.totalCount * 100));
+			$("#fault-count-bar").data('process-width', Math.floor(data.faultCount / data.totalCount * 100));
+			$("#damage-count-bar").data('process-width', Math.floor(data.damageCount / data.totalCount * 100));
+			$("#loss-count-bar").data('process-width', Math.floor(data.lossCount / data.totalCount * 100));
+			$("#discard-count-bar").data('process-width', Math.floor(data.discardCount / data.totalCount * 100));
+			processControl();
+		});
+	}
+	
+	//script.js에서 참조.
+	//막대 표시용
+	function processControl() {
+		var processBarWrapper = $('.process-bar-wrapper');
+		if (processBarWrapper.length) {
+				processBarWrapper.each(function () {
+					var processBarOffset = $(this).offset().top - $(window).height(),
+						processTime = '2.25s',
+						processBarWidth = $(this)
+							.children('[data-process-width]')
+							.data('process-width');
+
+					if ($(window).scrollTop() > processBarOffset) {
+						if (processBarWidth > 100) {
+							$(this).children('.process-bar').css({
+								width: '100%',
+								transition: processTime,
+							});
+						} else {
+							$(this)
+								.children('.process-bar')
+								.css({
+									width: processBarWidth + '%',
+									transition: processTime,
+								});
+						}
+					}
+				});
+		}
+	}
+	
+	const toolboxSelect = document.getElementById("toolboxSelect");
+		toolboxSelect.addEventListener("change", toolboxChangeEventHandler)
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function toolboxChangeEventHandler() {
+			toolboxId=this.value;
+			
+			loadChart1.apply(chart1,[toolboxId]);
+			loadChart2(toolboxId);
+			loadChart3(toolboxId);
+			loadChart4.apply(chart4,[toolboxId]);
+		}
+	
+	//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+	function initializeDatepicker(){
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = today.getMonth() + 1;
+		const day = today.getDate();
+		const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+		const lastMonthDate = new Date();lastMonthDate.setDate(today.getDate()-30);const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth()+1 < 10 ? '0' : '') + (lastMonthDate.getMonth()+1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+		$('#start-date').val(formattedLastMonthDate);
+		$('#end-date').val(formattedTodayDate);
+
+		$('#start-date').on('change', function () {
+			loadChart1.apply(chart1,[toolboxId]);
+			console.log('start changed');
+		});
+		$('#end-date').on('change', function () {
+			loadChart1.apply(chart1,[toolboxId]);
+			console.log('end changed');
+		})
+
+		$('#start-date').datepicker({
+			language: 'en',
+			dateFormat: 'yyyy-mm-dd',
+			onSelect: function () {
+				loadChart1.apply(chart1,[toolboxId]);
+				console.log('start changed');
+			}
+		});
+		$('#start-date-btn').on('click', function () {
+			$('#start-date').datepicker('show');
+		});
+		$('#end-date').datepicker({
+			language: 'en',
+			dateFormat: 'yyyy-mm-dd',
+			onSelect: function () {
+				loadChart1.apply(chart1,[toolboxId]);
+				console.log('end changed');
+			}
+		});
+		$('#end-date-btn').on('click', function () {
+			$('#end-date').datepicker('show');
+		});
+	}
+
+
+	function formatDateTime(inputDate) {
+		const dateObject = new Date(inputDate);
+		const year = dateObject.getFullYear();
+		const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+		const day = dateObject.getDate().toString().padStart(2, '0');
+		const hours = dateObject.getHours().toString().padStart(2, '0');
+		const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+		const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+		return formattedDate;
+	}
+	function formatDate(inputDate){
+		const year = inputDate.getFullYear();
+		const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+		const day = inputDate.getDate().toString().padStart(2, '0');
+		const formattedDate = `${year}-${month}-${day}`;
+		return formattedDate;
+	}
+
+	</script>
+</th:block>
+
+</html>

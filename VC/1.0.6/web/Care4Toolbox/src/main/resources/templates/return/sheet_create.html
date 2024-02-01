@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
+
+		.selected {
+			-webkit-transition: 0.2s ease;
+			-o-transition: 0.2s ease;
+			transition: 0.2s ease;
+		}
+
+		.selected .selected-danger td {
+			background-color: #FFE2E6;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+
+		.selected .selected-danger .custom-select {
+			background-color: #FC7383;
+			color: white;
+		}
+
+		.selected .selected-warning td {
+			background-color: #FFF4E6;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+
+		.selected .selected-warning .custom-select {
+			background-color: #FFB959;
+			color: white;
+		}
+
+		.selected .selected-success td {
+			background-color: #DBF7E8;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+
+		.selected .selected-success .custom-select {
+			background-color: #67CF94;
+			color: white;
+		}
+
+		.selected .selected-primary td {
+			background-color: #E9E7FF;
+			/* 선택한 행의 배경색을 원하는 색상으로 변경 */
+			color: white;
+			font-weight: 600;
+		}
+
+		.selected .selected-primary .custom-select {
+			background-color: #8280FD;
+			color: white;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div id="mainCard" class="card bg-transparent">
+					<!-- Contact Header -->
+					<div class="contact-header d-flex align-items-sm-center flex-column flex-md-row bg-white mb-4">
+
+						<h4 class="font-30 m-3">공기구 반납</h4>
+						<!-- Btn header -->
+						<div class="d-flex row align-items-center ml-auto">
+							<div class="col-12 col-md-5">
+								<div class="d-flex align-items-center flex-nowrap mr-4"style="box-sizing: content-box;">
+									<div class="custom-select style--two mr-4" style="max-width:200px;">
+										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
+											<option value="membership" selected>작업자/리더</option>
+										</select>
+									</div>
+									<div id="searchByForm" style="width: 200px;">
+										<div id="membershipForm" class="d-flex justify-content-between">											
+											<div id="membership">
+												선택
+											</div>
+											<div>
+												<span id="membershipEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#membershipEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Search header -->
+							<div
+								class="d-flex col-12 col-md-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+								<!-- layer 1 -->
+								<div class="row flex-wrap">
+
+
+									<!-- Form Group -->
+									<div class="form-group mr-2 col-12 col-md-5">
+										<label class="mb-2 font-14 bold">시작 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="start-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="start-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+									<!-- Form Group -->
+									<div class="form-group col-12 col-md-5">
+										<label class="mb-2 font-14 bold">종료 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="end-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="end-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+
+									<!-- 새로고침 / 알림? 등등 -->
+
+								</div>
+
+								<!-- layer 2 -->
+								<!-- Search Condition header -->
+
+								<!-- End Search Condition -->
+							</div>
+							<!-- End Contact Header -->
+						</div>
+
+					</div>
+
+
+					<div id="containerdiv"></div>
+
+
+
+				</div>
+				<!-- End Card -->
+				<!-- Membership Edit PopUp -->
+				<div id="membershipEditModal" class="modal fade p-4">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<div class="media flex-column flex-sm-row">
+									<div class="contact-account-setting media-body">
+										<h4 id="membershipModalHeader" class="font-20 mb-3">사원명을 입력하세요</h4>
+										<div class="form-group mb-3">
+											<label id="membershipLabel">사번 : 120022 / 부서 :
+												선강정비실1/정비안전지원섹션/정비안전지원팀</label>
+											<div class="search-form" style="width:100%; box-sizing: content-box;">
+												<div class="theme-input-group style--two">
+													<input id="membershipInput" type="text" class="theme-input-style"
+														placeholder="검색" />
+													<button id="membershipSearchBtn">
+														<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+													</button>
+												</div>
+											</div>
+											<input type="text" id="membershipId" hidden />
+										</div>
+										<div class="table-responsive mb-3">
+
+										</div>
+										<div>
+											<button id="membershipSubmitBtn" class="btn listener-added mr-4" type="button">저장</button>
+											<a href="#" class="cancel text-danger font-14 bold"
+												data-dismiss="modal">취소</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Membership Edit PopUp -->
+
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+
+		var membershipId = 1;
+		var toolboxId = 5222;
+		$(document).ready(function () {
+			initializeDatepicker();
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code: parseInt(document.getElementById("user-code").textContent)
+				}
+			)
+				.then(data => {
+					membershipId = data.id;
+					//mainData.membership.id = membershipId;
+					return new Promise((resolved, rejected) => {
+						abcHttp.get(
+					'/toolbox/getbymanagerid',
+					{
+						managerId: data.id
+					}
+				)
+					.then(toolboxData => {
+						if (toolboxData == null || toolboxData?.id==null) {
+							throw error("no toolbox");
+						} else {
+							toolboxId = toolboxData.id;
+									resolved(toolboxId);
+						}
+					})
+					.catch(error => {
+						console.log('no toolbox for manager');
+						Swal.fire({
+							type: 'error',
+							title: '정비실 없음',
+							text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+						}).then(() => {rejected();});
+					});					});
+				})
+				.then(toolboxId => {
+					load(toolboxId);
+				})
+		});
+
+		//fetch
+		function load(toolboxId) {
+
+			abcHttp.get(
+				`/outstanding_rental_sheet/getpage`,
+				{
+					page: 0,
+					size: 10,
+					toolboxId: toolboxId,
+					membershipId: mainData.membership.id,
+					isWorker: true,
+					isLeader: true,
+					startDate: $('#start-date').val(),
+					endDate: $('#end-date').val(),
+				}
+			).then(data => {
+				console.log(data);
+				const containerDiv = document.getElementById("containerdiv");
+				containerDiv.innerHTML = '';
+				let htmlString = ``
+				if (data.empty) {
+					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">반납 대기 중인 대여 목록이 없습니다.</div>`
+					containerDiv.innerHTML = htmlString;
+				}
+				data.content.forEach(sheet => {
+					const element = sheet.rentalSheetDto;
+					htmlString = `
+						<!-- Sheet -->
+						<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+							<!-- Header Table -->
+							<div class="col-12" style="overflow-x:auto;">
+								<table class="text-nowrap bg-white">
+									<thead>
+										<tr>
+											<th>대여승인시간</th>
+											<th>정비실</th>
+											<th>작업자</th>
+											<th>리더</th>
+											<th>승인자</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="time">${formatDate(element.eventTimestamp)}</td>
+											<td class="toolbox">${element.toolboxDto.name}</td>
+											<td class="worker">${element.workerDto.name}</td>
+											<td class="leader">${element.leaderDto.name}</td>
+											<td class="approver">${element.approverDto.name}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<!-- End Header Table-->
+							<div class="col-12" style="overflow-x:auto;">
+								<table class="tool-list invoice-list-table text-nowrap bg-white">
+									<thead>
+										<tr>
+											<th>정비실명</th>
+											<th>이름</th>
+											<th>규격</th>
+											<th>신청수량</th>
+											<th>미반납수량</th>
+											<th>QR코드</th>
+											<th>양호수량</th>
+											<th>고장수량</th>
+											<th>파손수량</th>
+											<th>망실수량</th>
+											<th hidden>공기구상태</th>
+											<th>비고<th>
+										</tr>
+									</thead>
+									<tbody>
+					   `;
+
+					for (let tool of element.toolList) {
+						htmlString +=
+							`
+										<tr>
+											<td class="toolbox">${element.toolboxDto.name}</td>
+											<td class="name">${tool.toolDto.name}</td>
+											<td class="spec">${tool.toolDto.spec}</td>
+											<td class="retnalcount">${tool.count}</td>
+											<td class="outstandingcount">${tool.outstandingCount}</td>
+											<td class="qrcode">${tool.tags}</td>
+											<td class="" style="width:80px;">
+												<div class="input-group large  bootstrap-touchspin  flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="goodCount" style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount goodCount" data-name="goodCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="goodCount" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="" style="width:80px;">
+												<div class="input-group large  bootstrap-touchspin  flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="faultCount"  style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount faultCount" data-name="faultCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="faultCount" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="" style="width:80px;">
+												<div class="input-group large  bootstrap-touchspin  flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button" data-name="damageCount"  style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount damageCount" data-name="damageCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button"  data-name="damageCount" style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="" style="width:80px;">
+												<div class="input-group large  bootstrap-touchspin  flex-column" style="height:120px; width:min-content;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn increaseBtn btn-primary bootstrap-touchspin-down" type="button"  data-name="lossCount" style="border-radius:5px 5px 0px 0px;">+</button>
+													</span>
+														<input id="demo9" type="number" value="0" name="demo0" class="form-control toolCount lossCount" data-name="lossCount" style="text-align:center; padding:0px;">
+													<span class="input-group-btn bootstrap-touchspin-injected">
+														<button class="btn decreaseBtn btn-primary bootstrap-touchspin-up" type="button" data-name="lossCount"  style="border-radius:0px 0px 5px 5px;">-</button>
+													</span>
+												</div>
+											</td>
+											<td class="toolstate" hidden>
+												<div class="custom-select style--two" style="max-width:none">
+													<select class="theme-input-style">
+														<option value="GOOD">양호</option>									
+														<option value="FAULT">고장</option>
+														<option value="DAMAGE">파손</option>
+														<option value="LOSS">망실</option>
+														<option value="DISCARD" hidden>폐기</option>
+													</select>
+												</div>
+											</td>
+											<td class="comment">
+												<textarea id="exampleTextarea1" class="theme-input-style" placeholder="50자 내로 입력해주세요." style="height:120px; min-width:150px;"></textarea>
+											</td>
+										</tr>
+						`;
+					}
+					htmlString += `
+						        </tbody>
+							  </table>
+						    </div>
+						    <div class="col-12 d-flex justify-content-end mt-3 pr-3">
+							    <div class="">
+							      <a href="#" class="mr-3 approveBtn btn disabled" style="width:fit-content; height:fit-content;">
+							        <span style="width:100%;">반납승인</span>
+							      </a>
+							    </div>
+						    </div>
+						  </div>
+						  <!-- End Sheet -->`;
+
+					var outerDiv = document.createElement('div');
+					outerDiv.innerHTML = htmlString;
+					containerDiv.appendChild(outerDiv);
+
+					// 서버 전송용. ReturnSheetFormDto, toolList는 ReturnToolFormDto.
+					const dataObj = {
+						rentalSheetDtoId: element.id,
+						workerDtoId: element.workerDto.id,
+						leaderDtoId: element.leaderDto.id,
+						approverDtoId: membershipId,
+						toolboxDtoId: toolboxId,
+						toolList: element.toolList.map(e => {
+							return {
+								rentalToolDtoId: e.id,
+								toolId: e.toolDto.id,
+								//count: 0,
+								goodCount:0,
+								faultCount:0,
+								damageCount:0,
+								lossCount:0,
+								//discardCount:0,
+								//status: "GOOD", // 한 번에 여러 상태를 반납하지 못하므로 개별 개수보다 state 사용. 변동 가능
+								tags: "",
+								comment: "",
+							}
+						}),
+					}
+					console.log(dataObj);
+
+					//addListenerApproveBtn(dataObj);
+					//addListenerDeleteBtn(dataObj);
+					document.querySelectorAll(".increaseBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							const name = this.dataset.name;
+							increaseCount.call(this, dataObj, name);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".decreaseBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							const name = this.dataset.name;
+							decreaseCount.call(this, dataObj, name);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".toolCount:not(.listener-added)").forEach(element => {
+						element.addEventListener("change", function () {
+							const name = this.dataset.name;
+							changeCount.call(this, dataObj, name);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".toolstate select:not(.listener-added)").forEach(element => {
+						element.addEventListener("change", function () {
+							toolStateChangeHandler.call(this, dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+					document.querySelectorAll(".comment textarea:not(.listener-added)").forEach(element => {
+		                element.addEventListener("input", function() {
+							const row = this.closest("tr");
+							const index = Array.from(row.parentNode.children).indexOf(row);
+			
+			                var maxBytes = 150; // 바이트 제한 설정
+			                let text = this.value;
+				            let currentBytes = new TextEncoder().encode(text).length;
+				
+				            while (currentBytes > maxBytes) {
+				                // 텍스트를 한 글자씩 줄입니다.
+				                text = text.substring(0, text.length - 1);
+				                currentBytes = new TextEncoder().encode(text).length;
+				            }
+				
+				            // 최종 텍스트를 설정합니다.
+				            this.value = text;
+							dataObj.toolList[index].comment=text;
+		                });
+		                element.classList.add("listener-added");
+		            });
+					document.querySelectorAll(".approveBtn:not(.listener-added)").forEach(element => {
+						element.addEventListener("click", function () {
+							approveBtnClickHandler.call(this, dataObj);
+						});
+						element.classList.add("listener-added");
+					});
+				});
+				//activateCheckbox();
+			});
+			//})
+		}
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		function initializeDatepicker() {
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = today.getMonth() + 1;
+			const day = today.getDate();
+			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 30); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+			$('#start-date').val(formattedLastMonthDate);
+			$('#end-date').val(formattedTodayDate);
+
+			$('#start-date').on('change', function () {
+				load(toolboxId);
+				console.log('start changed')
+			});
+			$('#end-date').on('change', function () {
+				load(toolboxId);
+				console.log('end changed')
+			})
+
+			$('#start-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					load(toolboxId);
+					console.log('start changed')
+				}
+			});
+			$('#start-date-btn').on('click', function () {
+				$('#start-date').datepicker('show');
+			});
+			$('#end-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					load(toolboxId);
+					console.log('end changed')
+				}
+			});
+			$('#end-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+		}
+
+		//비고 바이트 제한.
+        document.querySelectorAll("comment").forEach(e=>{
+			e.addEventListener("input",function(){
+				console.log(this);
+				var byteLimit = 100; // 여기서 바이트 제한을 설정합니다.
+
+	            var currentBytes = new TextEncoder().encode(this.value).length;
+	
+	            if (currentBytes > byteLimit) {
+	                alert("입력 바이트 수가 제한을 초과했습니다.");
+	                textArea.value = textArea.value.substring(0, this.value.length - 1);
+	            }
+			})
+		})
+           
+
+		function activateApproveBtn(tableElement) {
+			const sheet = tableElement.closest("div.sheet");
+			const btn = sheet.querySelector("a.approveBtn");
+			const condition = Array.from(sheet.querySelectorAll(".tool-list tbody tr")).every(e => !e.classList.contains("selected"));
+			btn.classList.toggle("disabled", condition);
+		}
+		//비동기적으로 새로 생성된 html element들의 이벤트리스너 설정
+		//sheet단위 카드의 "반납 승인" 버튼 클릭 이벤트리스너 설정
+		function approveBtnClickHandler(dataObj) {
+			dataObj.toolList=dataObj.toolList.filter(e=>(e.goodCount+e.faultCount+e.damageCount+e.lossCount>0))
+			abcHttp.post(
+				`/return/sheet/approve`,
+				dataObj,
+			).then(data => {
+				Swal.fire({
+					type: "success",
+					title: "반납 승인됨",
+					text: "반납 승인이 정상적으로 처리되었습니다",
+				})
+					.then(result => {
+						location.href = `/return/sheet/create`;
+					});
+			});
+		}
+
+		//반납 수량을 +1
+		function increaseCount(dataObj, name) {
+			const row = this.closest("tr");
+			const count = row.querySelector("."+name);
+			const countList = row.querySelectorAll(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (outstandingCount <= sum()) {
+				/*
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "반납 수량이 대여 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
+				});
+				*/
+				return;
+			} else {
+				dataObj.toolList[index][name]++;
+				count.value = dataObj.toolList[index][name];
+				console.log(dataObj.toolList[index][name])
+			}
+			row.classList.toggle('selected', sum() > 0);
+			activateApproveBtn(this);
+		}
+		//반납 수량을 -1.
+		function decreaseCount(dataObj, name) {
+			const row = this.closest("tr");
+			const count = row.querySelector("."+name);
+			const countList = row.querySelectorAll(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (0 >= dataObj.toolList[index][name]) {
+				/*
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "0 이하의 수량을 선택할 수 없습니다.",
+				});
+				*/
+				return;
+			} else {
+				dataObj.toolList[index][name]--;
+				count.value = dataObj.toolList[index][name];
+				console.log(dataObj.toolList[index][name])
+			}
+			row.classList.toggle('selected', sum() > 0);
+			activateApproveBtn(this);
+		}
+		//반납 수량을 변경 (<input>)
+		function changeCount(dataObj, name) {
+			const row = this.closest("tr");
+			const countList = row.querySelectorAll(".toolCount");
+			const outstandingCount = parseInt(this.closest("tr").querySelector(".outstandingcount").textContent);
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			
+			dataObj.toolList[index][name] = this.value;
+			const sum = function(){
+				return dataObj.toolList[index].goodCount +
+				dataObj.toolList[index].faultCount +
+				dataObj.toolList[index].damageCount +
+				dataObj.toolList[index].lossCount;
+			};
+			if (outstandingCount < sum()) {
+				Swal.fire({
+					type: "warning",
+					title: "반납 수량 경고",
+					text: "반납 수량이 대여 수량보다 많습니다. 확인 후 반납하시기 바랍니다.",
+				}).then(result=>{
+					this.value = 0;
+					dataObj.toolList[index][name] = 0;
+					
+			row.classList.toggle('selected', sum() > 0);
+			activateApproveBtn(this);
+				});
+			} else if (this.value<0){
+					this.value = 0;
+					dataObj.toolList[index][name] = 0;
+			}else{
+				dataObj.toolList[index][name] = this.value;
+			}
+			row.classList.toggle('selected', sum() > 0);
+			activateApproveBtn(this);
+		}
+		
+		
+		//공기구 상태 드롭다운 선택 시.
+		function toolStateChangeHandler(dataObj) {
+			const row = this.closest("tr");
+			const index = Array.from(row.parentNode.children).indexOf(row);
+			dataObj.toolList[index].status = this.value;
+			console.log(dataObj.toolList[index].status);
+		}
+
+
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"membership": {
+				"id": 0,
+				"name": ""
+			}
+		}
+
+		// =============== Membership Search Modal ===============
+
+		//작업자 수정
+		document.getElementById("membershipEditModalBtn").addEventListener("click", function () {
+			document.getElementById("membershipId").value = mainData.membership.id;
+			document.getElementById("membershipInput").value = mainData.membership.name;
+			getMembershipById(mainData.membership.id)
+				.then(data => {
+					document.getElementById("membershipLabel").hidden = false;
+					const dataString =
+						"사원번호 : " + data.code + " , " +
+						"부서 : " + data.partDto.subPartDto.mainPartDto.name +
+						"/" + data.partDto.subPartDto.name +
+						"/" + data.partDto.name;
+					document.getElementById("membershipLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("membershipLabel").hidden = true;
+				});
+			document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+		});
+		//membership 수정 -> membership 수정 모달
+		document.getElementById("membershipSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("membershipInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getMembershipPageByName(searchName)
+				.then(data => {
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr> <th> 이름 </th><th> 사원번호 </th><th> 부서 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.code + "</td>";
+						newRowString += "<td>" + v.partDto.subPartDto.mainPartDto.name + " / " + v.partDto.subPartDto.name + " / " + v.partDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("membershipId").value = v.id;
+							document.getElementById("membershipInput").value = v.name;
+							document.getElementById("membershipLabel").hidden = false;
+							const dataString =
+								"부서 : " + v.partDto.subPartDto.mainPartDto.name +
+								"/" + v.partDto.subPartDto.name +
+								"/" + v.partDto.name;
+							document.getElementById("membershipLabel").textContent = dataString;
+							document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#membershipEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#membershipEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//membership 수정 모달 -> 검색
+		document.getElementById("membershipInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("membershipSearchBtn").click();
+			}
+		});
+		//membership 수정 모달 -> 모달 내용 저장
+		document.getElementById("membershipSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("membershipId").value;
+			const name = document.getElementById("membershipInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "사원 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.membership.id = id;
+			mainData.membership.name = name;
+			document.getElementById("membership").textContent = mainData.membership.name;
+			$("#membershipEditModal").modal("hide");
+			load(toolboxId);
+		});
+
+		//fetch
+		function getMembershipById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getMembershipPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/membership/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		function formatDate(inputDate) {
+			const dateObject = new Date(inputDate);
+			const year = dateObject.getFullYear();
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const hours = dateObject.getHours().toString().padStart(2, '0');
+			const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+			return formattedDate;
+		}
+
+	</script>
+</th:block>
+
+</html>

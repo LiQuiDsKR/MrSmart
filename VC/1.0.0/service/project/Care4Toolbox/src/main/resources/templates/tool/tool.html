@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+<style>
+	.td_btn,
+	.th_btn{
+		display: flex;
+		justify-content: end;
+	}
+	#datatable th{
+		padding:12px 20px;
+	}
+</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div class="card bg-transparent">
+					<!-- Contact Header -->
+					<form class="contact-header d-flex align-items-sm-center flex-row bg-white mb-30" >
+					
+						<!-- Btn header -->
+						<div class="col-12 col-sm-2 d-flex align-items-center">
+							<!-- Add New Contact Btn -->
+							<!-- a의 class=btn을 btn-circle로 하면 원래버튼 -->
+							<div class="add-new-contact">
+								<a
+									href="#"
+									class="btn"
+									data-toggle="modal"
+									data-target="#contactAddModal">
+									<img
+										th:src="@{/img/svg/plus_white.svg}"
+										alt=""
+										class="svg" />
+									<span>추가</span>
+								</a>
+							</div>
+							<!-- End Add New Contact Btn -->
+						</div>
+						<!-- Search header -->
+						<div
+							class="col-12 col-sm-10 d-flex flex-column align-items-center justify-content-end media-body mt-3 mt-sm-0"
+							>
+							<!-- layer 1 -->
+							<div class="row" style="width:100%; box-sizing: content-box;" >			
+								<!-- Search Form -->								
+								<div class="search-form" style="width:100%; box-sizing: content-box;">
+									<div class="theme-input-group style--two">
+										<input
+											id="searchInput"
+											type="text"
+											class="theme-input-style"
+											placeholder="검색" />
+										<button id="searchBtn" type="submit">
+											<img
+												th:src="@{/img/svg/search-icon.svg}"
+												alt=""
+												class="svg" />
+										</button>
+									</div>
+								</div>
+								<!-- End Search Form -->
+							</div>
+						
+							<!-- layer 2 -->
+							<!-- Search Condition header -->
+						</form>
+						<!-- End Search Condition -->
+					</div>
+	
+					<div class="table-responsive">
+						<!-- Invoice List Table -->
+						<table id="datatable" class="invoice-list-table text-nowrap bg-white">
+							<thead>
+								<tr>
+									<th>
+										Id
+									</th>
+									<th>
+										이름
+									</th>
+									<th>
+										영문이름
+									</th>
+									<th>
+										품목번호
+									</th>
+									<th>
+										대분류
+									</th>
+									<th>
+										중분류
+									</th>
+									<th>
+										규격
+									</th>
+									<th>
+										단위
+									</th>
+									<th>
+										가격
+									</th>
+									<th>
+										교체주기
+									</th>
+									<th>수정</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+							</tbody>
+						</table>
+						<!-- End Contact List Table -->
+					</div>
+					
+					
+				</div>
+				<!-- End Card -->
+				
+				<!-- Contact Add New PopUp -->
+				<div id="contactAddModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 class="mb-4">공기구 정보 추가</h1>											
+											<div class="form-group mb-2">
+												<label class="bold black mb-2" for="addFormName">
+													이름
+												</label>
+												<input
+													type="text"
+													id="addFormName"
+													class="theme-input-style"
+													placeholder="이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-2">
+												<label class="bold black mb-2" for="addFormEngName">
+													영문이름
+												</label>
+												<input
+													type="text"
+													id="addFormEngName"
+													class="theme-input-style"
+													placeholder="영문이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-2">
+												<label class="mb-2 black bold" for="addFormCode">
+													품목번호
+												</label>
+												<input
+													type="text"
+													class="theme-input-style"
+													id="addFormCode"
+													placeholder="품목번호를 입력하세요" 
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="addFormBuyCode">
+													구매코드
+												</label>
+												<input
+													type="text"
+													id="addFormBuyCode"
+													class="theme-input-style"
+													placeholder="구매코드를 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="addFormSpec">
+													규격
+												</label>
+												<input
+													type="text"
+													id="addFormSpec"
+													class="theme-input-style"
+													placeholder="규격을 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="addFormUnit">
+													단위
+												</label>
+												<input
+													type="text"
+													id="addFormUnit"
+													class="theme-input-style"
+													placeholder="단위를 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="addFormPrice">
+													가격
+												</label>
+												<input
+													type="number"
+													id="addFormPrice"
+													class="theme-input-style"
+													placeholder="가격을 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="addFormReplacementCycle">
+													교체주기
+												</label>
+												<input
+													type="number"
+													id="addFormReplacementCycle"
+													class="theme-input-style"
+													placeholder="교체주기를 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-4">
+												<div class="row">
+													<div class="col-4">
+														<label for="addFormMainGroupSelect" class="mb-1 black bold d-block">대분류</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormMainGroupSelect">
+																<option th:each="mainGroupDto : ${mainGroupDtoList}"th:value="${mainGroupDto.id}" th:text="${mainGroupDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="addFormSubGroupSelect" class="mb-1 black bold d-block">중분류</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="addFormSubGroupSelect">
+																
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="mb-2">
+												<button id="addFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Add New PopUp -->
+
+				<!-- Contact Edit PopUp -->
+				<div id="contactEditModal" class="modal fade">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<!-- Modal Body -->
+							<div class="modal-body">
+								<form>
+									<div class="media flex-column flex-sm-row">
+										<div class="contact-account-setting media-body">
+											<h1 class="mb-4">공기구 정보 수정</h1>											
+											<div class="form-group mb-2">
+												<label class="bold black mb-2" for="editFormName">
+													이름
+												</label>
+												<input
+													type="text"
+													id="editFormName"
+													class="theme-input-style"
+													placeholder="이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-2">
+												<label class="bold black mb-2" for="editFormEngName">
+													영문이름
+												</label>
+												<input
+													type="text"
+													id="editFormEngName"
+													class="theme-input-style"
+													placeholder="영문이름을 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-2">
+												<label class="mb-2 black bold" for="editFormCode">
+													품목번호
+												</label>
+												<input
+													type="text"
+													class="theme-input-style"
+													id="editFormCode"
+													placeholder="품목번호를 입력하세요" 
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="editFormBuyCode">
+													구매코드
+												</label>
+												<input
+													type="text"
+													id="editFormBuyCode"
+													class="theme-input-style"
+													placeholder="구매코드를 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="editFormSpec">
+													규격
+												</label>
+												<input
+													type="text"
+													id="editFormSpec"
+													class="theme-input-style"
+													placeholder="규격을 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="editFormUnit">
+													단위
+												</label>
+												<input
+													type="text"
+													id="editFormUnit"
+													class="theme-input-style"
+													placeholder="단위를 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="editFormPrice">
+													가격
+												</label>
+												<input
+													type="number"
+													id="editFormPrice"
+													class="theme-input-style"
+													placeholder="가격을 입력하세요"
+													required />
+											</div>
+											<div class="mb-2">
+												<label class="bold black mb-2" for="editFormReplacementCycle">
+													교체주기
+												</label>
+												<input
+													type="number"
+													id="editFormReplacementCycle"
+													class="theme-input-style"
+													placeholder="교체주기를 입력하세요"
+													required />
+											</div>
+											<div class="form-group mb-4">
+												<div class="row">
+													<div class="col-4">
+														<label for="editFormMainGroupSelect" class="mb-1 black bold d-block">대분류</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="editFormMainGroupSelect">
+																<option th:each="mainGroupDto : ${mainGroupDtoList}"th:value="${mainGroupDto.id}" th:text="${mainGroupDto.name}">name?</option>
+															</select>
+														</div>
+													</div>
+													<div class="col-4">
+														<label for="editFormSubGroupSelect" class="mb-1 black bold d-block">중분류</label>
+														<div class="custom-select style--two">
+															<select class="theme-input-style" id="editFormSubGroupSelect">
+																
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="mb-2">
+												<button id="editFormBtn" class="btn mr-4" type="button">저장</button>
+												<a
+													href="#"
+													class="cancel font-14 bold"
+													data-dismiss="modal"
+													>취소</a>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+							<!-- End Modal Body -->
+						</div>
+					</div>
+				</div>
+				<!-- End Contact Edit PopUp -->
+				
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+
+	
+	$(document).ready(function(){
+		
+		//231025 검색 기능
+       /*
+        $("#searchBtn").on("click",function(e) {
+            e.preventDefault();
+            page(0);
+        });
+        */            
+		var table = $('#datatable').DataTable({
+			"paging": true,          // 페이지네이션 사용
+			"pageLength": 10, 		// 페이지당 항목 수
+			"lengthChange": false,   // 페이지 크기 변경 기능 비활성화
+			"searching": false,       // 검색 기능 사용
+			"ordering": false,        // 정렬 기능 사용
+			"order":[
+				[0,'asc']
+			],
+			"info": true,            // 정보 표시
+			"autoWidth": false,      // 너비 자동 조정 비활성화
+			"serverSide": true,
+			"processing": true,
+			"ajax": {
+				"url": "/tool/getpage", // 데이터를 가져올 엔드포인트 URL
+				//"dataSrc": "content",   // JSON 응답에서 실제 데이터가 포함된 위치
+				"data": function (d) {
+					var data = {
+			           "page": parseInt(d.start / d.length),
+			           "size": d.length,	
+			           "name": $("#searchInput").val()
+			           //"order": columnsDefine[d.order[0].column].column,
+			           //"search": 'tagid',
+			           //"direction": d.order[0].dir.toUpperCase(),
+			           //"keyword": d.search.value
+			        };
+			        return data;
+				},
+				"dataFilter": function (data) {
+					data.dataSrc="content";
+					data = JSON.parse(data);
+					var json = {
+						recordsTotal: data.totalElements,
+						recordsFiltered: data.totalElements,
+						data: data.content
+					};
+					return JSON.stringify(json)
+			    }
+			},
+			"columnDefs":[
+				{
+					"targets":[0,9],
+					"visible":false
+				},
+				{
+					"targets":[0,4,5,6,7,9,10],
+					"orderable":false
+				},
+				{
+					"targets":[10],
+					"className":"td_btn"
+				}
+			],			
+			"columns": [
+				/*{
+					"data": null,
+					"render": function() {
+					    // 제품 정보 표시
+					    return '<label class="custom-checkbox">'+
+								'<input type="checkbox" />'+
+								'<span class="checkmark"></span>'+
+								'</label>'+
+								'<div class="star">'+
+								'<a href="#"'+
+								'<img'+
+								'src="/img/svg/star.svg"'+
+								'alt=""'+
+								'class="svg"'+
+								'/></a>'+
+								'</div>'
+					}
+                },*/
+				{
+					"data": "id",
+					"type": Number
+				},
+				{"data": "name"},
+				{"data": "engName"},
+				{"data": "code"},
+				{
+					"data": "subGroupDto",
+					"render":function(data,type,row){
+						if(type==="display"){
+							return data.mainGroupDto.name;
+						}
+						return data;
+					}
+				},
+				{
+					"data": "subGroupDto",
+					"render":function(data,type,row){
+						if(type==="display"){
+							return data.name;
+						}
+						return data;
+					}
+				},
+				{"data": "spec"},
+				{"data": "unit"},
+				{"data": "price", "type":Number},
+				{"data": "replacementCycle", "type":Number},
+				{
+					"data": null,
+					"render": function(data, type, full, meta) {
+						// 상태 뱃지 표시
+						return '<span class="contact-edit" data-toggle="modal" data-target="#contactEditModal" style="cursor:pointer;">' +
+								'<img src="/img/svg/c-edit.svg" alt="" class="svg" />' +
+								'</span>';
+					}
+				}
+			]
+		});
+		table.on('click', '.contact-edit', function() {
+			var data = table.row($(this).parents('tr')).data();
+			document.getElementById('editFormName').value = data.name;
+            document.getElementById('editFormEngName').value = data.engName;
+            document.getElementById('editFormCode').value = data.code;
+			document.getElementById('editFormBuyCode').value = data.buyCode;
+			document.getElementById('editFormSpec').value = data.spec;
+			document.getElementById('editFormUnit').value = data.unit;
+			document.getElementById('editFormPrice').value = data.price;
+			document.getElementById('editFormReplacementCycle').value = data.replacementCycle;
+			loadSubGroups.apply(document.getElementById('editFormSubGroupSelect'),[data.subGroupDto.mainGroupDto.id])
+			.then(resolved=>
+            	document.getElementById('editFormSubGroupSelect').value = data.subGroupDto.id
+            );
+			
+	    });
+	    $("#searchBtn").on("click",e=>{
+			e.preventDefault();
+			table.draw();
+		});
+	});
+    
+	
+	[
+		[
+			document.getElementById("addFormMainGroupSelect"),
+			document.getElementById("addFormSubGroupSelect")
+		],
+		[
+			document.getElementById("editFormMainGroupSelect"),
+			document.getElementById("editFormSubGroupSelect")
+		],
+	].forEach(v=>{
+		v[0].addEventListener("change",e=>{
+			v[1].options.length=0;
+			loadSubGroups.apply(v[1],[parseInt(e.target.value)]);
+		});
+	});
+	$("#addFormBtn").click(e=>{
+		e.preventDefault();
+		submitFormBtn('add');
+	});
+	$("#editFormBtn").click(e=>{
+		e.preventDefault();
+		submitFormBtn('edit');
+	});
+	function submitFormBtn(mode){
+		if (mode==='add' || mode==='edit'){
+			abcHttp.post(
+				`tool/${mode ==='add' ? 'new' : mode }`,
+				{
+				    name: document.getElementById(`${mode}FormName`).value,
+				    engName: document.getElementById(`${mode}FormEngName`).value,
+				    code: document.getElementById(`${mode}FormCode`).value,
+				    buyCode: document.getElementById(`${mode}FormBuyCode`).value,
+				    spec: document.getElementById(`${mode}FormSpec`).value,
+				    unit: document.getElementById(`${mode}FormUnit`).value,
+				    price: document.getElementById(`${mode}FormPrice`).value,
+				    replacementCycle: document.getElementById(`${mode}FormReplacementCycle`).value,
+				    subGroupDtoId: parseInt(document.getElementById(`${mode}FormSubGroupSelect`).value),
+				}
+			)
+			.then(response=>{
+				Swal.fire({
+					type:"success",
+					title:"저장됨",
+					text:"정상적으로 저장되었습니다.",
+				})
+				.then(result=>{
+					location.href='tool';
+				});
+				setTimeout(() => {
+					$("#contactAddModal").modal("hide");
+					$("#contactEditModal").modal("hide");
+				}, 0);
+			});
+		}else{
+			console.log("choose add or edit. you've selected " + mode);
+		}
+	}
+	
+	
+	function loadSubGroups(mainGroupId) {
+		return new Promise((resolved, rejected)=>{
+	        abcHttp.get(
+				'/sub_group/get',
+				{
+					mainGroupId:mainGroupId
+				}
+			)
+			.then(data => {
+	            var subGroupList = '';
+	            data.forEach(function (subGroup) {
+					subGroupList += '<option value="' + subGroup.id + '">' + subGroup.name + '</option>';
+	            });
+	            this.innerHTML = subGroupList;
+	            resolved();
+	        })
+	        .catch(error => {
+	            rejected();
+	        });
+	    });
+	}
+</script>
+</th:block>
+
+</html>
