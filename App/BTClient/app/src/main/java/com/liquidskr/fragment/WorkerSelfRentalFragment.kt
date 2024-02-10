@@ -64,7 +64,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
-        val dbHelper = DatabaseHelper(requireContext())
+        val dbHelper = DatabaseHelper.getInstance()
 
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
 

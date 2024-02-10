@@ -52,7 +52,7 @@ class ManagerFragment : Fragment() {
         loginBtn.setOnClickListener {
             try {
                 var code = idTextField.text.toString()
-                var dbHelper = DatabaseHelper(requireContext())
+                var dbHelper = DatabaseHelper.getInstance()
                 var password = dbHelper.getMembershipPasswordById(code)
                 var member = dbHelper.getMembershipByCode(code)
                 if (member.role == "MANAGER") {

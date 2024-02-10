@@ -1,46 +1,25 @@
 package com.liquidskr.btclient
 
+import PermissionManager
 import SharedViewModel
 import android.bluetooth.BluetoothSocket
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.KeyEvent
-import android.view.KeyEvent.KEYCODE_0
-import android.view.KeyEvent.KEYCODE_1
-import android.view.KeyEvent.KEYCODE_2
-import android.view.KeyEvent.KEYCODE_3
-import android.view.KeyEvent.KEYCODE_4
-import android.view.KeyEvent.KEYCODE_5
-import android.view.KeyEvent.KEYCODE_6
-import android.view.KeyEvent.KEYCODE_7
-import android.view.KeyEvent.KEYCODE_8
-import android.view.KeyEvent.KEYCODE_9
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.KeyEventDispatcher
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.liquidskr.fragment.ManagerFragment
-import com.liquidskr.fragment.ManagerRentalFragment
-import com.liquidskr.fragment.ManagerReturnFragment
 import com.liquidskr.fragment.SettingsFragment
-import com.liquidskr.fragment.ToolRegisterFragment
 import com.liquidskr.fragment.WorkerFragment
-import com.liquidskr.fragment.WorkerSelfRentalFragment
-import com.mrsmart.standard.membership.MembershipSQLite
-import java.lang.reflect.Type
+
 
 class LobbyActivity : AppCompatActivity() {
     lateinit var workerBtn: ImageButton
@@ -80,7 +59,9 @@ class LobbyActivity : AppCompatActivity() {
         val gson = Gson()
         val context = this
 
-        val dbHelper = DatabaseHelper(this)
+        val dbHelper = DatabaseHelper.initInstance(this)
+        val permissionManager = PermissionManager
+        permissionManager.initialize(this)
 
         sharedViewModel.toolBoxId = dbHelper.getToolboxName()
 
@@ -169,16 +150,26 @@ class LobbyActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 123) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                // Bluetooth 권한이 허용됨
-                // 여기에 Bluetooth 작업을 수행
+        if (requestCode == PermissionManager.REQUEST_CODE) { // REQUEST_CODE는 권한 요청 코드와 일치해야 합니다.
+            var allPermissionsGranted = true
+            for (result in grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false
+                    break
+                }
+            }
+            if (allPermissionsGranted) {
+                // 모든 권한이 부여되었습니다. 필요한 작업을 계속할 수 있습니다.
+                Log.d("Permissions", "All required permissions have been granted.")
             } else {
-                // Bluetooth 권한이 거부됨
-                // 권한 요청에 대한 사용자의 응답 처리
+                // 필요한 권한 중 하나 이상이 거부되었습니다.
+                Log.d("Permissions", "Required permissions are not granted.")
             }
         }
     }

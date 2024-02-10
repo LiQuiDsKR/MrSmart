@@ -38,7 +38,7 @@ class WorkerMembershipFindFragment : Fragment(){
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // DatabaseHelper 인스턴스 생성
-        val databaseHelper = DatabaseHelper(requireContext())
+        val databaseHelper = DatabaseHelper.getInstance()
         val memberships: List<MembershipSQLite> = databaseHelper.getAllMemberships()
 
         val adapter = MembershipAdapter(memberships) { membership ->

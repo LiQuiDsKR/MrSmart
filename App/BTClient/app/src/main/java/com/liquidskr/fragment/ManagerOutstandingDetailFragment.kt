@@ -232,7 +232,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                             if (result == "good") {
                                 hidePopup() // UI 블로킹
                                 try {
-                                    val dbHelper = DatabaseHelper(requireContext())
+                                    val dbHelper = DatabaseHelper.getInstance()
                                     dbHelper.updateOutstandingStatusBySheetId(outstandingRentalSheet.id)
                                 } catch (e: Exception) {
                                     Log.d("outstaning", "승인한 반납 시트는 보류 목록에 없습니다.")
@@ -303,7 +303,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
         val returnSheetForm = sheet
         val toolList = returnSheetForm.toolList
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
         val names: Pair<String, String> = Pair(dbHelper.getMembershipById(workerId).name, dbHelper.getMembershipById(leaderId).name)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 

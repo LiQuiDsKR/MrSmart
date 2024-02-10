@@ -64,7 +64,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
             if (!active) {
                 return
             }
-            val dbHelper = DatabaseHelper(requireContext())
+            val dbHelper = DatabaseHelper.getInstance()
             val adapter = recyclerView.adapter as RentalToolAdapter
             val tbt = sharedViewModel.qrScannerText
             sharedViewModel.qrScannerText = ""
@@ -108,7 +108,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_self_rental, container, false)
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
 
         workerSearchBtn = view.findViewById(R.id.BorrowerSearchBtn)
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
@@ -315,7 +315,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     }
 
     fun recyclerViewUpdate(adapter: RentalToolAdapter) {
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
         var toolList: MutableList<ToolWithCount> = mutableListOf()
         for (id in sharedViewModel.rentalRequestToolIdList) {
             toolList.add(ToolWithCount(dbHelper.getToolById(id),1))
@@ -332,7 +332,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
 
         val rentalRequestSheetForm = sheet
         val toolList = rentalRequestSheetForm.toolList
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
         val names: Pair<String, String> = Pair(dbHelper.getMembershipById(rentalRequestSheetForm.workerDtoId).name ,dbHelper.getMembershipById(rentalRequestSheetForm.leaderDtoId).name)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 

@@ -129,7 +129,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
             requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = StandByAdapter(dbHelper.getAllStandby())

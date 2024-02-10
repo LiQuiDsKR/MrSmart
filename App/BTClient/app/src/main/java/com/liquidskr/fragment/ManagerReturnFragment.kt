@@ -223,7 +223,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             false
         }
         sheetSearchBtn.setOnClickListener {
-            val dbHelper = DatabaseHelper(mContext)
+            val dbHelper = DatabaseHelper.getInstance()
             val name = searchSheetEdit.text.toString()
             try {
                 val id = dbHelper.getMembershipIdByName(name)
@@ -322,7 +322,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
                 override fun onError(e: Exception) {
                     e.printStackTrace()
                     try {
-                        val dbHelper = DatabaseHelper(requireContext())
+                        val dbHelper = DatabaseHelper.getInstance()
                         (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(dbHelper.getAllOutstanding())
                         Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
                     } catch (e: Exception) {

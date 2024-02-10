@@ -42,8 +42,6 @@ import java.lang.reflect.Type
 class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var selfRentalBtn: ImageButton
-    private lateinit var searchSheetEdit: EditText
-    private lateinit var sheetSearchBtn: ImageButton
     private lateinit var connectBtn: ImageButton
 
     private lateinit var rentalBtnField: LinearLayout
@@ -98,8 +96,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
-        searchSheetEdit = view.findViewById(R.id.searchSheetEdit)
-        sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
 
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
@@ -164,10 +160,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        }
-
-        sheetSearchBtn.setOnClickListener {
-            filterByName(adapter, rentalRequestSheetList, searchSheetEdit.text.toString())
         }
 
         recyclerView.adapter = adapter

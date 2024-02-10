@@ -87,7 +87,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         try {
-                            val dbHelper = DatabaseHelper(context)
+                            val dbHelper = DatabaseHelper.getInstance()
                             dbHelper.updateQRCodeById(tool.id, tbtQrcode, sharedViewModel.toolBoxId)
                             handler.post {
                                 Toast.makeText(context, "공기구 등록 완료", Toast.LENGTH_SHORT).show()
@@ -156,7 +156,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
 
         qrDisplay.text = "미등록"
         try {
-            val dbHepler = DatabaseHelper(requireContext())
+            val dbHepler = DatabaseHelper.getInstance()
             val label = dbHepler.getTBTByToolId(tool.id)
             qrDisplay.text = label
             tbtQrcode = label

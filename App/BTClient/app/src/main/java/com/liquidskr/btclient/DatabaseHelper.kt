@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -17,10 +18,29 @@ import java.lang.reflect.Type
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    val context: Context = context
+    class DatabaseHelperInitializationException(message: String) : Exception(message)
+
     lateinit var bluetoothManager: BluetoothManager
 
     companion object {
+        @Volatile
+        private var instance: DatabaseHelper? = null
+
+        fun initInstance(context: Context) : DatabaseHelper {
+            if (instance == null) {
+                synchronized(DatabaseHelper::class.java) {
+                    if (instance == null) {
+                        instance = DatabaseHelper(context.applicationContext)
+                    }
+                }
+            }
+            return getInstance()
+        }
+
+        fun getInstance(): DatabaseHelper {
+            return instance ?: throw DatabaseHelperInitializationException("DatabaseHelper not initialized")
+        }
+
         private const val DATABASE_VERSION = 1
         private const val DATABASE_NAME = "StandardInfo.db"
 
@@ -954,13 +974,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             cursor.close()
             db.close()
         } catch (e:Exception) {
-            Toast.makeText(context,"QR 태그 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context,"QR 태그 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+            Log.i("dbHelper", "QR 태그 목록을 조회하는데 실패했습니다.")
         }
 
         try {
             tool =  getToolById(toolId.toLong())
         } catch (e:Exception) {
-            Toast.makeText(context,"공기구 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context,"공기구 목록을 조회하는데 실패했습니다.",Toast.LENGTH_SHORT).show()
+            Log.i("dbHelper", "공기구 목록을 조회하는데 실패했습니다.")
         }
         return tool
     }

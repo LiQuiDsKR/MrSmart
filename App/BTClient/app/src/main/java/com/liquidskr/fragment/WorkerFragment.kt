@@ -42,7 +42,7 @@ class WorkerFragment : Fragment() {
         loginBtn.setOnClickListener {
             try {
                 var code = idTextField.text.toString()
-                var dbHelper = DatabaseHelper(requireContext())
+                var dbHelper = DatabaseHelper.getInstance()
                 var member = dbHelper.getMembershipByCode(code)
                 if (member.role == "USER") {
                     val fragment = WorkerLobbyFragment(member.toMembership())

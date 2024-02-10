@@ -1,5 +1,7 @@
 package com.liquidskr.btclient
 
+import PermissionManager
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -74,6 +76,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
 
 
     var gson = Gson()
+    @SuppressLint("MissingPermission")
     fun bluetoothOpen() {
         try {
             try {
@@ -84,8 +87,6 @@ class BluetoothManager (private val context: Context, private val activity: Acti
             val dbHelper = DatabaseHelper(context)
             pcName = dbHelper.getDeviceName()
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            val permissionManager = PermissionManager(activity)
-            permissionManager.checkAndRequestPermission()
             val pairedDevices = bluetoothAdapter.bondedDevices
             if (pairedDevices.size > 0) {
                 var flag = false// 서버와 연결 부분
@@ -159,15 +160,13 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                                 dataSize = -1
                             }
                         } else if (size == 0) {
-                            if (bluetoothSocket.isConnected) {
-                                continue
-                            } else {
-                                isConnected = false
-                                Log.d("bluetooth_","Disconnected1")
-                                Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
-                                handler.post {
-                                    bluetoothConnectionListener?.onBluetoothDisconnected()
-                                }
+                            continue
+                        } else {
+                            isConnected = false
+                            Log.d("bluetooth_","Disconnected1")
+                            Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.",Toast.LENGTH_SHORT).show()
+                            handler.post {
+                                bluetoothConnectionListener?.onBluetoothDisconnected()
                             }
                         }
                     }

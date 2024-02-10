@@ -48,7 +48,7 @@ class ToolFindFragment() : Fragment() {
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
 
-        val databaseHelper = DatabaseHelper(requireContext())
+        val databaseHelper = DatabaseHelper.getInstance()
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
         val adapter = ToolAdapter(tools) {
 

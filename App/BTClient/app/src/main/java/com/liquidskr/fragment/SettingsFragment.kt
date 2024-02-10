@@ -52,7 +52,7 @@
 
         private val handler = Handler(Looper.getMainLooper())
         private val gson = Gson()
-        private val dbHelper = DatabaseHelper(context)
+        private val dbHelper = DatabaseHelper.getInstance()
 
         private lateinit var membershipRequest: MembershipRequest
         private lateinit var toolRequest: ToolRequest

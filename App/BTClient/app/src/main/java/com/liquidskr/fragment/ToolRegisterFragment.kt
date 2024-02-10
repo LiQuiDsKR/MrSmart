@@ -135,7 +135,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
             }
         })
-        val databaseHelper = DatabaseHelper(requireContext())
+        val databaseHelper = DatabaseHelper.getInstance()
         val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
 
         val adapter = ToolRegisterAdapter(tools) { tool ->
@@ -210,7 +210,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                         QREditText.clearFocus()
                         recyclerView.requestFocus()
 
-                        val dbHelper = DatabaseHelper(requireContext())
+                        val dbHelper = DatabaseHelper.getInstance()
                         val tool = dbHelper.getToolByTBT(label)
                         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
                         bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
@@ -280,7 +280,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
-        val dbHelper = DatabaseHelper(requireContext())
+        val dbHelper = DatabaseHelper.getInstance()
         try {
             val newList = dbHelper.getToolsByQuery(keyword)
             adapter.updateList(newList)

@@ -241,7 +241,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private fun handleBluetoothError(sheet: RentalRequestSheetApproveFormDto) {
         Log.d("STANDBY","STANDBY ACCESS")
         val toolList = sheet.toolList
-        var dbHelper = DatabaseHelper(requireContext())
+        var dbHelper = DatabaseHelper.getInstance()
         val names: Pair<String, String> = Pair(dbHelper.getMembershipById(sheet.workerDtoId).name, dbHelper.getMembershipById(sheet.leaderDtoId).name)
         val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
