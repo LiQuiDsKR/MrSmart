@@ -126,6 +126,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                         if (size > 0) {
                             val readDatas = ByteArray(size)
                             inputStream.read(readDatas, 0, size)
+
                             outputStream.write(readDatas)
                             if (dataSize == -1 && outputStream.size() > 4) {
                                 try {
