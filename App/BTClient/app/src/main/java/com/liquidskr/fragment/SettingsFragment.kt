@@ -20,18 +20,17 @@
     import androidx.lifecycle.ViewModelProvider
     import com.google.gson.Gson
     import com.liquidskr.btclient.BluetoothManager
+    import com.liquidskr.btclient.Constants
     import com.liquidskr.btclient.DatabaseHelper
     import com.liquidskr.btclient.LobbyActivity
-    import com.liquidskr.listener.MembershipRequest
     import com.liquidskr.btclient.R
-    import com.liquidskr.btclient.RequestType
+    import com.liquidskr.listener.MembershipRequest
     import com.liquidskr.listener.OutstandingRequest
     import com.liquidskr.listener.TagRequest
     import com.liquidskr.listener.ToolBoxToolLabelRequest
     import com.liquidskr.listener.ToolRequest
     import com.mrsmart.standard.page.Page
     import com.mrsmart.standard.tool.ToolboxCompressDto
-    import com.mrsmart.standard.tool.ToolboxDto
     import java.lang.reflect.Type
 
     class SettingsFragment(context: Context) : Fragment() {
@@ -197,7 +196,7 @@
 
                 showPopup()
                 try {
-                    bluetoothManager.requestData(RequestType.TOOLBOX_ALL,"",object: BluetoothManager.RequestCallback {
+                    bluetoothManager.requestData(Constants.BluetoothMessageType.TOOLBOX_ALL,"",object: BluetoothManager.RequestCallback {
                         override fun onSuccess(result: String, type: Type) {
                             try {
                                 var toolboxList: List<ToolboxCompressDto> = gson.fromJson(result, type)
@@ -265,7 +264,7 @@
 
         private fun importMembership(dbHelper: DatabaseHelper) {
             var membershipCnt = 0
-            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL_COUNT,"",object: BluetoothManager.RequestCallback {
+            bluetoothManager.requestData(Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT,"",object: BluetoothManager.RequestCallback {
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         membershipCnt = result.toInt()
@@ -289,7 +288,7 @@
         }
         private fun importTool(dbHelper: DatabaseHelper) {
             var toolCnt = 0
-            bluetoothManager.requestData(RequestType.TOOL_ALL_COUNT,"",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TOOL_ALL_COUNT,"",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         toolCnt = result.toInt()
@@ -313,7 +312,7 @@
         }
         private fun importTBT(dbHelper: DatabaseHelper) {
             var toolboxToolLabelCnt = 0
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback {
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback {
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         toolboxToolLabelCnt = result.toInt()
@@ -337,7 +336,7 @@
         }
         private fun importTag(dbHelper: DatabaseHelper) {
             var tagCnt = 0
-            bluetoothManager.requestData(RequestType.TAG_ALL_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback {
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_ALL_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback {
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         tagCnt = result.toInt()
@@ -361,7 +360,7 @@
         }
         private fun importOutstanding(dbHelper: DatabaseHelper) {
             var outstandingCnt = 0
-            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT,"{}",object: BluetoothManager.RequestCallback {
+            bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT,"{}",object: BluetoothManager.RequestCallback {
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         outstandingCnt = result.toInt()
@@ -384,7 +383,7 @@
             })
         }
         fun requestMembership(pageNum: Int) {
-            bluetoothManager.requestData(RequestType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.MEMBERSHIP_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
                     membershipRequest.process(page)
@@ -404,7 +403,7 @@
             })
         }
         fun requestTool(pageNum: Int) {
-            bluetoothManager.requestData(RequestType.TOOL_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TOOL_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
                     toolRequest.process(page) //
@@ -425,7 +424,7 @@
             })
         }
         fun requestToolboxToolLabel(pageNum: Int) {
-            bluetoothManager.requestData(RequestType.TOOLBOX_TOOL_LABEL_ALL,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
                     toolBoxToolLabelRequest.process(page)
@@ -446,7 +445,7 @@
             })
         }
         fun requestTag(pageNum: Int) {
-            bluetoothManager.requestData(RequestType.TAG_ALL,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_ALL,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
                     tagRequest.process(page)
@@ -467,7 +466,7 @@
             })
         }
         fun requestOutstanding(pageNum: Int) {
-            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL,"{\"size\":${10},\"page\":${pageNum}}",object: BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     var page: Page = gson.fromJson(result, type)
                     outstandingRequest.process(page)

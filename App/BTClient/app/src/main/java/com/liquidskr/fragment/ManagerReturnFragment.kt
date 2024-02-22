@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -27,17 +26,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
 class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
@@ -195,7 +192,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val qrcode = qrEditText.text.toString().replace("\n", "")
                 qrEditText.text.clear()
-                bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG, "{tag:\"${qrcode}\"}", object: BluetoothManager.RequestCallback{
+                bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_BY_TAG, "{tag:\"${qrcode}\"}", object: BluetoothManager.RequestCallback{
                     override fun onSuccess(result: String, type: Type) {
                         try {
                             val outstandingRentalSheet: OutstandingRentalSheetDto = gson.fromJson(result, type)
@@ -252,7 +249,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         var sheetCount = 0
         try {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${id}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         sheetCount = result.toInt()
@@ -282,7 +279,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
     }
     fun requestOutstandingRentalSheetByMembership(pageNum: Int, id: Long) {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)
@@ -303,7 +300,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
         var sheetCount = 0
         try {
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     try {
                         sheetCount = result.toInt()
@@ -342,7 +339,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment() {
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX ,"{\"size\":${10},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)

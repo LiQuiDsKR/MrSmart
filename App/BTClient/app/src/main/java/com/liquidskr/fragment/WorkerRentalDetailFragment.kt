@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.WorkerRentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
@@ -99,7 +99,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
                     }
                     val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id, rentalRequestSheet.toolboxDto.id, rentalRequestToolFormList)
                     try {
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPLY, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPLY, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
@@ -135,7 +135,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     }
     fun sheetCancel() {
         try {
-            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
@@ -166,7 +166,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     }
     fun sheetCancelAfterForm() {
         try {
-            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {

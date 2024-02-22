@@ -21,17 +21,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
-import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.tool.RentalRequestToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
@@ -101,7 +100,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                 val tag = qrEditText.text.toString().replace("\n", "")
                 try {
                     lateinit var taggedTool: ToolDto
-                    bluetoothManager.requestData(RequestType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                    bluetoothManager.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
                         override fun onSuccess(result: String, type: Type) {
                             if (result != null) {
                                 val tag: TagDto = gson.fromJson(result, type)
@@ -157,7 +156,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
 
                     try {
-                        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
+                        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
@@ -209,7 +208,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
 
     fun sheetCancel() {
         try {
-            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {

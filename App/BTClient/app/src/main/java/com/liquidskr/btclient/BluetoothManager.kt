@@ -1,6 +1,5 @@
 package com.liquidskr.btclient
 
-import PermissionManager
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -19,7 +18,6 @@ import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolboxCompressDto
-import com.mrsmart.standard.tool.ToolboxDto
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -27,8 +25,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
-import java.util.LinkedList
-import java.util.Queue
 import java.util.UUID
 
 class BluetoothManager (private val context: Context, private val activity: Activity) {
@@ -185,7 +181,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         if (bluetoothSocket != null) bluetoothSocket.close()
     }
 
-    fun requestData(type:RequestType, params:String, callback:RequestCallback) {
+    fun requestData(type:Constants.BluetoothMessageType, params:String, callback:RequestCallback) {
         performSend(type, params, callback)
         /*
         if (!isSending) {
@@ -196,7 +192,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }*/
     }
 
-    private fun performSend(type: RequestType, params: String, callback: RequestCallback) {
+    private fun performSend(type:Constants.BluetoothMessageType, params: String, callback: RequestCallback) {
         try {
             outputStream = bluetoothSocket.outputStream
             var sendMsg: ByteArray = byteArrayOf()
@@ -274,189 +270,189 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         val (type, jsonString) = parseInputString(receivedString)
 
         when (type) {
-            RequestType.MEMBERSHIP_ALL.name -> {
+            Constants.BluetoothMessageType.MEMBERSHIP_ALL.name -> {
                 val listType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
-            RequestType.MEMBERSHIP_ALL_COUNT.name -> {
+            Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT.name -> {
                 val listType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
-            RequestType.TOOL_ALL.name -> {
+            Constants.BluetoothMessageType.TOOL_ALL.name -> {
                 val listType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
-            RequestType.TOOL_ALL_COUNT.name -> {
+            Constants.BluetoothMessageType.TOOL_ALL_COUNT.name -> {
                 val listType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
 
-            RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
 
-            RequestType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+            Constants.BluetoothMessageType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
 
-            RequestType.RETURN_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+            Constants.BluetoothMessageType.RETURN_SHEET_PAGE_BY_MEMBERSHIP.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
 
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
 
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
-            RequestType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX.name -> {
                 val listType: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
-            RequestType.RENTAL_REQUEST_SHEET_FORM.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
                 val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RETURN_SHEET_FORM.name -> {
+            Constants.BluetoothMessageType.RETURN_SHEET_FORM.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
                 val pageType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
-            RequestType.TOOLBOX_TOOL_LABEL_FORM.name -> {
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_FORM.name -> {
                 val pageType: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, pageType)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
                 val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, listType)
             }
-            RequestType.RETURN_SHEET_REQUEST.name -> {
+            Constants.BluetoothMessageType.RETURN_SHEET_REQUEST.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_FORM.name -> {
+            Constants.BluetoothMessageType.TAG_FORM.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TOOLBOX_TOOL_LABEL.name -> {
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL.name -> {
                 val type: Type = object : TypeToken<ToolboxToolLabelDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_LIST.name -> {
+            Constants.BluetoothMessageType.TAG_LIST.name -> {
                 val type: Type = object : TypeToken<List<String>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_ALL.name -> {
+            Constants.BluetoothMessageType.TAG_ALL.name -> {
                 val type: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_ALL_COUNT.name -> {
+            Constants.BluetoothMessageType.TAG_ALL_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TOOLBOX_TOOL_LABEL_ALL.name -> {
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL.name -> {
                 val type: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TOOLBOX_TOOL_LABEL_ALL_COUNT.name -> {
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_GROUP.name -> {
+            Constants.BluetoothMessageType.TAG_GROUP.name -> {
                 val type: Type = object : TypeToken<TagDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
                 val type: Type = object : TypeToken<OutstandingRentalSheetDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG.name -> {
+            Constants.BluetoothMessageType.TAG.name -> {
                 val type: Type = object : TypeToken<TagDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM_STANDBY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RETURN_SHEET_FORM_STANDBY.name -> {
+            Constants.BluetoothMessageType.RETURN_SHEET_FORM_STANDBY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.name -> {
                 val type: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_CANCEL.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.RENTAL_REQUEST_SHEET_APPLY.name -> {
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPLY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
+            Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
+            Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
                 val type: Type = object : TypeToken<TagAndToolboxToolLabelDto>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL.name -> {
                 val type: Type = object : TypeToken<Page>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT.name -> {
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
-            RequestType.TOOLBOX_ALL.name -> {
+            Constants.BluetoothMessageType.TOOLBOX_ALL.name -> {
                 val type: Type = object : TypeToken<List<ToolboxCompressDto>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
 
             // ###################
-            RequestType.TEST.name -> {
+            Constants.BluetoothMessageType.TEST.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
@@ -491,7 +487,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 "RENTALREQUEST" -> {
                     try {
                         isReady = false
-                        requestData(RequestType.RENTAL_REQUEST_SHEET_FORM_STANDBY, standby.second.json, object :
+                        requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM_STANDBY, standby.second.json, object :
                                 BluetoothManager.RequestCallback {
                                 override fun onSuccess(result: String, type: Type) {
                                     Log.d("standby",result)
@@ -518,7 +514,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 "RENTAL" -> {
                     isReady = false
                     try {
-                        requestData(RequestType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, standby.second.json, object:
+                        requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY, standby.second.json, object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 Log.d("standby",result)
@@ -544,7 +540,7 @@ class BluetoothManager (private val context: Context, private val activity: Acti
                 "RETURN" -> {
                     isReady = false
                     try {
-                        requestData(RequestType.RETURN_SHEET_FORM_STANDBY, standby.second.json, object:
+                        requestData(Constants.BluetoothMessageType.RETURN_SHEET_FORM_STANDBY, standby.second.json, object:
                             BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 Log.d("standby",result)
@@ -580,4 +576,29 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
         dbHelper.close()
     }
+        private val bluetoothCommunicationHandlerListener : BluetoothCommunicationHandler.Listener = object:BluetoothCommunicationHandler.Listener{
+            override fun onConnected() {
+                var message : String
+                message = Constants.BluetoothMessageType.MEMBERSHIP_ALL.toString()
+                message+=",{\"size\":${10},\"page\":${1}}"
+                Log.d("bluetooth",message)
+                bluetoothCommunicationHandler.send(message.trim())
+            }
+
+            override fun onDataArrived(data: String) {
+                Log.d("bluetooth","final : ${data}")
+            }
+
+            override fun onDataSent(data: String) {
+                Log.d("bluetooth","good send")
+            }
+
+            override fun onException(type: Constants.BluetoothExceptionType, description: String) {
+                Log.d("bluetooth","exception final : ${type.name} : ${description}")
+            }
+
+        }
+        private val bluetoothCommunicationHandler : BluetoothCommunicationHandler = BluetoothCommunicationHandler(bluetoothCommunicationHandlerListener)
+
+
 }

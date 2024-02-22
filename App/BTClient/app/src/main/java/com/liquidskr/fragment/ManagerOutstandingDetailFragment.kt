@@ -21,24 +21,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.CustomModal
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.OutstandingState
 import com.mrsmart.standard.rental.RentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
-import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.returns.ReturnSheetFormDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
 import com.mrsmart.standard.standby.ReturnSheetFormStandbySheet
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.tool.RentalToolWithCount
 import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolDto
-import com.mrsmart.standard.tool.ToolWithCount
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.lang.reflect.Type
@@ -163,7 +162,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                 val tag = fixCode(qrEditText.text.toString().replace("\n", ""))
                 try {
                     lateinit var taggedTool: ToolDto
-                    bluetoothManager.requestData(RequestType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                    bluetoothManager.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
                         override fun onSuccess(result: String, type: Type) {
                             if (result != "null") {
                                 val tag: TagDto = gson.fromJson(result, type)
@@ -226,7 +225,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     val sheet = outstandingRentalSheet
                     returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.toolDtoId) }.toMutableList()
                     val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
-                    bluetoothManager.requestData(RequestType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
+                    bluetoothManager.requestData(Constants.BluetoothMessageType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             if (result == "good") {

@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolAdapter
 import com.mrsmart.standard.tool.ToolDtoSQLite

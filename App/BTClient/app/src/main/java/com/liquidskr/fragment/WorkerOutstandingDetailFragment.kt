@@ -4,7 +4,6 @@ import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -19,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.WorkerOutstandingDetailAdapter
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalToolDto
@@ -88,7 +87,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
             confirmBtn.isClickable = false
             showPopup() // UI 블로킹
 
-            bluetoothManager.requestData(RequestType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
+            bluetoothManager.requestData(Constants.BluetoothMessageType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
                 BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {

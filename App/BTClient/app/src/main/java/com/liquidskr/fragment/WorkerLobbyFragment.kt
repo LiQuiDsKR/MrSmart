@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
@@ -99,7 +98,7 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
     /*
     fun getOutstandingRentalSheetList() {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
                 requireActivity().runOnUiThread {

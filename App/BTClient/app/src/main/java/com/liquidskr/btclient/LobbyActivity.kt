@@ -75,7 +75,7 @@ class LobbyActivity : AppCompatActivity() {
         bluetoothBtn = findViewById(R.id.bluetoothBtn)
         settingBtn = findViewById(R.id.SettingBtn)
 
-        bluetoothManager.bluetoothOpen()
+        //bluetoothManager.bluetoothOpen()
 
         workerBtn.setOnClickListener {
             showPopup()

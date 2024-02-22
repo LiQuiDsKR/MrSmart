@@ -10,17 +10,18 @@ class BluetoothMessageParser (
 ) {
     interface Listener {
         fun onDataArrived(datas: ByteArray)
-        fun onException(type: Constansts.BluetoothExceptionType, description: String)
+        fun onException(type: Constants.BluetoothExceptionType, description: String)
     }
 
     private val byteArrayOutputStream = ByteArrayOutputStream()
-    private var mSizeDataHolder: DataHolder = DataHolder()
+    private var mSizeDataHolder: DataHolder = DataHolder(ByteArray(Constants.INTEGER_BYTE_SIZE))
     private var mBodyDataHolder: DataHolder = DataHolder()
     private var mDataIndex: Int = 0
     private var mSizeReadFlag: Boolean = false //SizeDataHolder가 값을 다 읽었는지 여부
     private var mBodyReadFlag: Boolean = false //BodyDataHolder가 값을 다 읽었는지 여부
 
     fun initialize() {
+        byteArrayOutputStream.reset()
         mBodyDataHolder.reset()
         mDataIndex = 0
         mSizeDataHolder.index = 0
@@ -51,7 +52,7 @@ class BluetoothMessageParser (
                 return nextData
             }
         } catch (e: Exception) {
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION, e.toString())
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION, e.toString())
         }
         initialize()
         return ByteArray(0)
@@ -98,7 +99,7 @@ class BluetoothMessageParser (
 
     fun byte2int(buffer: ByteArray, startIndex: Int): Int {
         //Big_endian체크 필요없으면 이거 안써도 됨
-        val byteBuffer = ByteBuffer.wrap(buffer, startIndex, Constansts.INTEGER_BYTE_SIZE)
+        val byteBuffer = ByteBuffer.wrap(buffer, startIndex, Constants.INTEGER_BYTE_SIZE)
             .order(ByteOrder.BIG_ENDIAN)
         return byteBuffer.int
     }

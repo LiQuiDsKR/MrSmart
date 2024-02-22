@@ -22,22 +22,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
-import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.standby.RentalRequestSheetFormStandbySheet
-
+import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.tool.ToolWithCount
-import java.lang.reflect.Type
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
+import java.lang.reflect.Type
 
 class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     private lateinit var workerSearchBtn: LinearLayout
@@ -241,7 +240,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList())
-                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
+                            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     if  (result == "good") {

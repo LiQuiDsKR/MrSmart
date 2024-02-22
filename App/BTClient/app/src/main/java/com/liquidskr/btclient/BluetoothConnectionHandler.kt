@@ -9,8 +9,7 @@ import android.database.sqlite.SQLiteException
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.liquidskr.btclient.Constansts.BLUETOOTH_MAX_CHUNK_LENGTH
-import java.io.ByteArrayOutputStream
+import com.liquidskr.btclient.Constants.BLUETOOTH_MAX_CHUNK_LENGTH
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -22,6 +21,7 @@ class BluetoothConnectionHandler (
 ) : Thread() {
 
     private var isConnected = false
+    private var running = false
 
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
@@ -37,11 +37,11 @@ class BluetoothConnectionHandler (
         fun onConnected()
         fun onDataArrived(datas: ByteArray)
         fun onDataSent(datas: ByteArray)
-        fun onException(type:Constansts.BluetoothExceptionType,description: String)
+        fun onException(type:Constants.BluetoothExceptionType, description: String)
     }
 
     init {
-        start()
+        this.start()
     }
 
     @SuppressLint("MissingPermission")//아니 분명히 권한 체크를 했는데도 지혼자 막 안했다고 뭐라해요 자꾸
@@ -50,13 +50,13 @@ class BluetoothConnectionHandler (
             val dbHelper = DatabaseHelper.getInstance()
             pcName = dbHelper.getDeviceName()
         } catch (e: DatabaseHelper.DatabaseHelperInitializationException){
-            listener.onException(Constansts.BluetoothExceptionType.DATABASE_HELPER_NOT_INITIALIZED,"DatabaseHelper가 초기화되지 않았습니다.")
+            listener.onException(Constants.BluetoothExceptionType.DATABASE_HELPER_NOT_INITIALIZED,"DatabaseHelper가 초기화되지 않았습니다.")
         } catch (e: SQLiteException){
-            listener.onException(Constansts.BluetoothExceptionType.SQLITE_EXCEPTION,"SQL QUERY ERROR!")
+            listener.onException(Constants.BluetoothExceptionType.SQLITE_EXCEPTION,"SQL QUERY ERROR!")
         } catch (e: SecurityException) {
-            listener.onException(Constansts.BluetoothExceptionType.EXTERNAL_DATABASE_PERMISSION_MISSING,"데이터베이스 접근 권한이 설정되지 않았습니다.")
+            listener.onException(Constants.BluetoothExceptionType.EXTERNAL_DATABASE_PERMISSION_MISSING,"데이터베이스 접근 권한이 설정되지 않았습니다.")
         } catch (e: Exception){
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
         }
         // 로컬 db에서 연결할 장치 이름을 확인합니다.
         
@@ -69,12 +69,12 @@ class BluetoothConnectionHandler (
             pairedDevices = bluetoothAdapter.bondedDevices
         } catch(e: Exception) {
             //분기 더 나눕시다
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
         }
         // 권한 확인 후 페어링된 기기 목록을 가져옵니다.
 
         if (pairedDevices.isEmpty()){
-            listener.onException(Constansts.BluetoothExceptionType.NO_PAIRED_DEVICE,"페어링된 기기가 없습니다.")
+            listener.onException(Constants.BluetoothExceptionType.NO_PAIRED_DEVICE,"페어링된 기기가 없습니다.")
         }else{
             isConnected = false// 서버와 연결 부분
             for (device in pairedDevices) {
@@ -96,7 +96,7 @@ class BluetoothConnectionHandler (
                 }
             }
             if (!isConnected) {
-                listener.onException(Constansts.BluetoothExceptionType.CONNECTION_FAILED,"[${pcName}]와의 연결에 실패했습니다.")
+                listener.onException(Constants.BluetoothExceptionType.CONNECTION_FAILED,"[${pcName}]와의 연결에 실패했습니다.")
                 //Toast.makeText(context, "[${pcName}] 에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show()
             } else{
                 listener.onConnected()
@@ -107,14 +107,15 @@ class BluetoothConnectionHandler (
         try {
             inputStream = bluetoothSocket.inputStream
         } catch (e: IOException) {
-            listener.onException(Constansts.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
         } catch (e : Exception){
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
         }
         // i/o stream을 설정합니다.
 
         try {
-            while (bluetoothSocket.isConnected) {
+            running=true
+            while (running) {
                 val dataSize = inputStream.available()
                 if (dataSize > 0) {
                     //데이터를 받은 경우.
@@ -130,15 +131,21 @@ class BluetoothConnectionHandler (
                     Log.d("bluetooth", "Disconnected")
                     //Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
                     handler.post {
-                        listener.onException(Constansts.BluetoothExceptionType.DISCONNECTED,"블루투스 연결이 끊겼습니다.")
+                        listener.onException(Constants.BluetoothExceptionType.DISCONNECTED,"블루투스 연결이 끊겼습니다.")
                     }
                     // post로 해야 하는지는 의문이다.
                 }
             }
         } catch(e:IOException){
-            listener.onException(Constansts.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
         } catch(e: Exception) {
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+        } finally {
+            Log.d("bluetooth","thread end")
+            try{inputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","InputStream Closed")}
+            try{outputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","OutputStream Closed")}
+            try{bluetoothSocket.close()}catch(e:Exception){}finally {Log.d("bluetooth","Socket Closed")}
+            listener.onException(Constants.BluetoothExceptionType.DISCONNECTED,"Disconnected")
         }
     }
     fun send(datas:ByteArray){
@@ -154,23 +161,15 @@ class BluetoothConnectionHandler (
         try {
             outputStream = bluetoothSocket.outputStream
 
-            val dataSize = datas.size
-
-            val sizeByteBuffer = ByteBuffer.allocate(4)
-            sizeByteBuffer.putInt(dataSize)
-            val sizeByteArray = sizeByteBuffer.array()
-
-            val finalByteArray = sizeByteArray + datas
-
             var buffer = ByteBuffer.allocate(BLUETOOTH_MAX_CHUNK_LENGTH)
             var chunkSize = 0
             var offset = 0
-            while (offset < finalByteArray.size) {
-                chunkSize = minOf(buffer.remaining(), finalByteArray.size - offset)
-                buffer.put(finalByteArray, offset, chunkSize)
+            while (offset < datas.size) {
+                chunkSize = minOf(buffer.remaining(), datas.size - offset)
+                buffer.put(datas, offset, chunkSize)
                 offset += chunkSize
 
-                if (!buffer.hasRemaining() || offset >= finalByteArray.size) {
+                if (!buffer.hasRemaining() || offset >= datas.size) {
                     buffer.flip()
                     val byteArray = ByteArray(buffer.remaining())
                     buffer.get(byteArray)
@@ -180,22 +179,19 @@ class BluetoothConnectionHandler (
                     buffer.clear()
                 }
             }
-            listener.onDataSent(finalByteArray)
+            listener.onDataSent(datas)
         } catch (e: IOException) {
-            listener.onException(Constansts.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            close()
+            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
         } catch (e: Exception) {
-            listener.onException(Constansts.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
-        } finally {
-            Log.d("bluetooth","thread end")
-            try{inputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","InputStream Closed")}
-            try{outputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","OutputStream Closed")}
-            try{bluetoothSocket.close()}catch(e:Exception){}finally {Log.d("bluetooth","Socket Closed")}
-            listener.onException(Constansts.BluetoothExceptionType.DISCONNECTED,"Disconnected")
+            close()
+            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
         }
     }
 
     fun close(){
         Log.d("bluetooth","disconnect...")
+        running=false
         this.interrupt()
     }
 

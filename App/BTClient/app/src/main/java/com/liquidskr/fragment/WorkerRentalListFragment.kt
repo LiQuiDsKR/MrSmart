@@ -24,11 +24,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
@@ -188,7 +188,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         showPopup()
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -213,7 +213,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)

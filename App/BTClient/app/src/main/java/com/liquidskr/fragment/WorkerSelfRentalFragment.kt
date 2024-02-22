@@ -22,12 +22,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
-import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
-import com.liquidskr.btclient.RequestType
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
@@ -191,7 +190,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                            bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
                                 BluetoothManager.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     handler.post {

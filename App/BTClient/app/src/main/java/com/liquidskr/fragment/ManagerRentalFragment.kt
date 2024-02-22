@@ -6,13 +6,11 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -26,13 +24,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
-import com.liquidskr.btclient.RequestType
-import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
@@ -221,7 +217,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -246,7 +242,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)

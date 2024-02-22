@@ -14,7 +14,7 @@ class BluetoothCommunicationHandler (
         fun onConnected()
         fun onDataArrived(data: String)
         fun onDataSent(data: String)
-        fun onException(type:Constansts.BluetoothExceptionType,description: String)
+        fun onException(type:Constants.BluetoothExceptionType, description: String)
     }
 
     private val bluetoothMessageParserlistener : BluetoothMessageParser.Listener = object : BluetoothMessageParser.Listener {
@@ -22,7 +22,7 @@ class BluetoothCommunicationHandler (
             listener.onDataArrived(String(data,Charsets.UTF_8))
             commTimeInMillis=0L
         }
-        override fun onException(type: Constansts.BluetoothExceptionType, description: String) {
+        override fun onException(type: Constants.BluetoothExceptionType, description: String) {
             bluetoothConnectionHandler.close()
             listener.onException(type,description)
         }
@@ -36,8 +36,9 @@ class BluetoothCommunicationHandler (
         }
         override fun onDataArrived(data: ByteArray) {
             commTimeInMillis=Calendar.getInstance().timeInMillis
+            var data = data
             while (data.isNotEmpty()) {
-                bluetoothMessageParser.process(data)
+                data = bluetoothMessageParser.process(data)
             }
         }
 
@@ -45,7 +46,7 @@ class BluetoothCommunicationHandler (
             Log.d("bluetooth", "send complete : ${byteArrayToHex(datas)}")
         }
 
-        override fun onException(type: Constansts.BluetoothExceptionType, description: String) {
+        override fun onException(type: Constants.BluetoothExceptionType, description: String) {
                 listener.onException(type,description)
             }
         }
@@ -90,7 +91,7 @@ class BluetoothCommunicationHandler (
                 return true
             }
             val diff : Long = Calendar.getInstance().timeInMillis -commTimeInMillis
-            if(diff<Constansts.COMMUNICATION_TIMEOUT){
+            if(diff<Constants.COMMUNICATION_TIMEOUT){
                 return true
             }
         }

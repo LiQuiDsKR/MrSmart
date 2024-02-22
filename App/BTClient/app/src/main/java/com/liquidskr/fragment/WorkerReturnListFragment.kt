@@ -10,7 +10,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -25,17 +24,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
-import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.liquidskr.btclient.RequestType
+import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.OutstandingState
-import com.mrsmart.standard.rental.RentalRequestSheetDto
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
@@ -171,7 +168,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         showPopup() // UI블로킹
         var sheetCount = 0
         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -196,7 +193,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         })
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
-        bluetoothManager.requestData(RequestType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)

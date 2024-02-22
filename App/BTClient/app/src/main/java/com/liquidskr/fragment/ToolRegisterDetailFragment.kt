@@ -14,7 +14,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -24,13 +23,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
 class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) : Fragment() {
@@ -83,7 +80,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
             for (tag in tagList) {
                 tagLists.add("\"${tag}\"")
             }
-            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbtQrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbtQrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         try {

@@ -24,12 +24,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.LobbyActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RequestType
 import com.liquidskr.btclient.ToolRegisterAdapter
-import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.ToolDtoSQLite
@@ -143,7 +142,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             recyclerView.requestFocus()
 
             bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
 
@@ -213,7 +212,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                         val dbHelper = DatabaseHelper.getInstance()
                         val tool = dbHelper.getToolByTBT(label)
                         bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                        bluetoothManager.requestData(RequestType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                        bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
 
@@ -263,7 +262,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         }
 
         bluetoothManager
-        bluetoothManager.requestData(RequestType.TEST,"{string:\"check\"}",object:BluetoothManager.RequestCallback{
+        bluetoothManager.requestData(Constants.BluetoothMessageType.TEST,"{string:\"check\"}",object:BluetoothManager.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
 
             }
