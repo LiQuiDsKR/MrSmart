@@ -20,10 +20,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
@@ -57,7 +57,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -66,7 +66,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
@@ -100,7 +100,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                 val tag = qrEditText.text.toString().replace("\n", "")
                 try {
                     lateinit var taggedTool: ToolDto
-                    bluetoothManager.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                    bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager_Old.RequestCallback{ // TagDto 받기
                         override fun onSuccess(result: String, type: Type) {
                             if (result != null) {
                                 val tag: TagDto = gson.fromJson(result, type)
@@ -156,8 +156,8 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
 
                     try {
-                        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
-                            BluetoothManager.RequestCallback{
+                        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
+                            BluetoothManager_Old.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
                                     hidePopup() // UI 블로킹
@@ -208,8 +208,8 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
 
     fun sheetCancel() {
         try {
-            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
-                BluetoothManager.RequestCallback{
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         handler.post {

@@ -15,56 +15,62 @@ object Constants {
         NO_QUERY_RESULT,
         DATABASE_INSERT_EXCEPTION,
     }
-    enum class BluetoothMessageType {
-        MEMBERSHIP_ALL,
-        MEMBERSHIP_ALL_COUNT,
-        TOOL_ALL,
-        TOOL_ALL_COUNT,
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,
-        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX,
-        RENTAL_SHEET_PAGE_BY_MEMBERSHIP,
-        RETURN_SHEET_PAGE_BY_MEMBERSHIP,
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP,
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX,
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX,
-        RENTAL_REQUEST_SHEET_FORM,
-        RENTAL_REQUEST_SHEET_APPROVE,
-        RETURN_SHEET_FORM,
-        TOOLBOX_TOOL_LABEL_FORM,
-        RETURN_SHEET_REQUEST,
-        TAG_FORM,
-        TOOLBOX_TOOL_LABEL,
-        TAG_LIST,
-        TAG_ALL,
-        TOOLBOX_TOOL_LABEL_ALL,
-        TAG_GROUP,
-        OUTSTANDING_RENTAL_SHEET_BY_TAG, TAG_ALL_COUNT,
-        TOOLBOX_TOOL_LABEL_ALL_COUNT,
-        TAG, RENTAL_REQUEST_SHEET_APPROVE_STANDBY,
-        RENTAL_REQUEST_SHEET_FORM_STANDBY,
-        RETURN_SHEET_FORM_STANDBY,
-        RENTAL_REQUEST_SHEET_CANCEL,
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT,
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,
-        RENTAL_REQUEST_SHEET_APPLY,
-        TAG_AND_TOOLBOX_TOOL_LABEL_FORM,
-        TAG_AND_TOOLBOX_TOOL_LABEL,
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT,
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL,
-        TOOLBOX_ALL,
+    enum class BluetoothMessageType(val processMessage:String) {
+        MEMBERSHIP_ALL("사원 기준정보 불러오는 중..."),
+        MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중..."),
+        TOOL_ALL("공기구 기준정보 불러오는 중..."),
+        TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중..."),
 
-        TEST,
+        //TODO("이 아래로 메시지 변경 해야함")
+
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("사원 정보 불러오는 중..."),
+        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
+        RETURN_SHEET_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_FORM("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_APPROVE("사원 정보 불러오는 중..."),
+        RETURN_SHEET_FORM("사원 정보 불러오는 중..."),
+        TOOLBOX_TOOL_LABEL_FORM("사원 정보 불러오는 중..."),
+        RETURN_SHEET_REQUEST("사원 정보 불러오는 중..."),
+        TAG_FORM("사원 정보 불러오는 중..."),
+        TOOLBOX_TOOL_LABEL("사원 정보 불러오는 중..."),
+        TAG_LIST("사원 정보 불러오는 중..."),
+        TAG_ALL("사원 정보 불러오는 중..."),
+        TOOLBOX_TOOL_LABEL_ALL("사원 정보 불러오는 중..."),
+        TAG_GROUP("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_BY_TAG("사원 정보 불러오는 중..."), TAG_ALL_COUNT("사원 정보 불러오는 중..."),
+        TOOLBOX_TOOL_LABEL_ALL_COUNT("사원 정보 불러오는 중..."),
+        TAG("사원 정보 불러오는 중..."), RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_FORM_STANDBY("사원 정보 불러오는 중..."),
+        RETURN_SHEET_FORM_STANDBY("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_CANCEL("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("사원 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_APPLY("사원 정보 불러오는 중..."),
+        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("사원 정보 불러오는 중..."),
+        TAG_AND_TOOLBOX_TOOL_LABEL("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("사원 정보 불러오는 중..."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("사원 정보 불러오는 중..."),
+        TOOLBOX_ALL("사원 정보 불러오는 중..."),
+
+        TEST("사원 정보 불러오는 중..."),
 
     }
 
+
+    const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000
     const val MEMBERSHIP_PAGE_SIZE = 10
     const val COMMUNICATION_TIMEOUT = 10000 //10초
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024
     const val INTEGER_BYTE_SIZE = 4
+    const val REQUEST_CODE = 123 // permissionManager에서 사용.
 
 
     // database 테이블,컬럼명
@@ -132,7 +138,6 @@ object Constants {
     const val COLUMN_TOOLBOX_ID = "toolbox_id"
     const val COLUMN_TOOLBOX_TOOLBOX_ID = "toolbox_toolbox_id"
     const val COLUMN_TOOLBOX_NAME = "toolbox_name"
-
 
     const val TABLE_OUTSTANDING_NAME = "OutstandingRentalSheet"
     const val COLUMN_OUTSTANDING_ID = "outstanding_id"

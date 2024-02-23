@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.liquidskr.btclient.Constants.REQUEST_CODE
 
 @SuppressLint("StaticFieldLeak") // 단일 activity로 이루어진 앱이므로 싱글톤 객체에서 액티비티 참조가 메모리 누수에 영향을 미치지 않습니다.
 object PermissionManager { // 싱글톤 해버렸습니다
@@ -13,31 +14,9 @@ object PermissionManager { // 싱글톤 해버렸습니다
     class PermissionManagerInitializationException(message: String) : Exception(message)
 
     private lateinit var activity: Activity
-    val REQUEST_CODE = 123
 
     fun initialize(activity: Activity) {
         this.activity = activity
-    }
-
-    /*
-    fun asdf(permission: String, onPermissionGranted: () -> Unit, onPermissionDenied: () -> Unit) {
-        if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
-            onPermissionGranted()
-        } else {
-            onPermissionDenied()
-            Log.d("asdf", "Permission Fail")
-            ActivityCompat.requestPermissions(activity, arrayOf(permission), REQUEST_CODE)
-            Log.d("asdf", "Try to get Permission ")
-        }
-    }
-     */
-
-    @Deprecated("그냥 쓰기 싫음")
-    fun checkAndRequestPermission() {
-        if (ContextCompat.checkSelfPermission(activity, "Manifest.permission.BLUETOOTH") != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(activity, "Manifest.permission.BLUETOOTH_ADMIN") != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, arrayOf("Manifest.permission.BLUETOOTH", "Manifest.permission.BLUETOOTH_ADMIN"), REQUEST_CODE)
-        }
     }
 
     fun checkAndRequestBluetoothPermissions() {

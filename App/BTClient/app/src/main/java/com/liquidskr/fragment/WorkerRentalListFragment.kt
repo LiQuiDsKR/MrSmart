@@ -23,9 +23,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
@@ -42,7 +42,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
     private lateinit var selfRentalBtn: ImageButton
     private lateinit var searchSheetEdit: EditText
     private lateinit var sheetSearchBtn: ImageButton
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
 
@@ -90,11 +90,11 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.connectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.bluetoothOpen()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld.bluetoothOpen()
         }
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     hidePopup()
@@ -161,7 +161,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
 
         recyclerView.layoutManager = layoutManager
         selfRentalBtn.setOnClickListener {
-            val lobbyActivity = activity as? LobbyActivity
+            val mainActivity = activity as? MainActivity
 
             // managerRentalFragment가 null이 아니라면 프래그먼트 교체
             sharedViewModel.worker = MembershipSQLite(0, "", "", "", "", "", "", "", "")
@@ -187,8 +187,8 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         rentalRequestSheetList.clear()
         showPopup()
         var sheetCount = 0
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager.RequestCallback{
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -213,7 +213,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)

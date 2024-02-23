@@ -17,9 +17,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.WorkerOutstandingDetailAdapter
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
@@ -31,7 +31,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
     private var toolList: List<RentalToolDto> = outstandingRentalSheet.rentalSheetDto.toolList
 
     val outstandingRentalSheet: OutstandingRentalSheetDto = outstandingRentalSheet
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
     private lateinit var popupLayout: View
@@ -54,7 +54,7 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_return_detail, container, false)
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         returnerName = view.findViewById(R.id.returnerName)
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -87,8 +87,8 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
             confirmBtn.isClickable = false
             showPopup() // UI 블로킹
 
-            bluetoothManager.requestData(Constants.BluetoothMessageType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
-                BluetoothManager.RequestCallback{
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RETURN_SHEET_REQUEST, "{outstandingRentalSheetId:${outstandingRentalSheet.id}}", object:
+                BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         handler.post {

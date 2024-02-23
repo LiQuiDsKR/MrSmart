@@ -17,9 +17,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.WorkerRentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetDto
@@ -48,7 +48,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -56,7 +56,7 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_rental_detail, container, false)
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
@@ -99,8 +99,8 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
                     }
                     val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultName", rentalRequestSheet.workerDto.id, rentalRequestSheet.leaderDto.id, rentalRequestSheet.toolboxDto.id, rentalRequestToolFormList)
                     try {
-                        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPLY, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
-                            BluetoothManager.RequestCallback{
+                        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPLY, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                            BluetoothManager_Old.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 if (result == "good") {
                                     handler.post {
@@ -135,8 +135,8 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     }
     fun sheetCancel() {
         try {
-            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
-                BluetoothManager.RequestCallback{
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         handler.post {
@@ -166,8 +166,8 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     }
     fun sheetCancelAfterForm() {
         try {
-            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
-                BluetoothManager.RequestCallback{
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
+                BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         requireActivity().supportFragmentManager.popBackStack()

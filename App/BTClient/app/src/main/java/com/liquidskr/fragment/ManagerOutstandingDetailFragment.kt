@@ -20,11 +20,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.CustomModal
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
@@ -60,7 +60,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
 
@@ -70,7 +70,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_return_detail, container, false)
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         returnerName = view.findViewById(R.id.returnerName)
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -162,7 +162,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                 val tag = fixCode(qrEditText.text.toString().replace("\n", ""))
                 try {
                     lateinit var taggedTool: ToolDto
-                    bluetoothManager.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager.RequestCallback{ // TagDto 받기
+                    bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager_Old.RequestCallback{ // TagDto 받기
                         override fun onSuccess(result: String, type: Type) {
                             if (result != "null") {
                                 val tag: TagDto = gson.fromJson(result, type)
@@ -225,8 +225,8 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     val sheet = outstandingRentalSheet
                     returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.toolDtoId) }.toMutableList()
                     val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
-                    bluetoothManager.requestData(Constants.BluetoothMessageType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
-                        BluetoothManager.RequestCallback{
+                    bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
+                        BluetoothManager_Old.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
                             if (result == "good") {
                                 hidePopup() // UI 블로킹

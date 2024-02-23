@@ -21,10 +21,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
 import com.mrsmart.standard.membership.MembershipSQLite
@@ -50,7 +50,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     var worker: MembershipSQLite? = null
     var leader: MembershipSQLite? = null
@@ -65,7 +65,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
         val dbHelper = DatabaseHelper.getInstance()
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
 
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
         qrEditText = view.findViewById((R.id.QR_EditText))
@@ -190,8 +190,8 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
-                                BluetoothManager.RequestCallback{
+                            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
+                                BluetoothManager_Old.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     handler.post {
                                         Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()

@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolAdapter
@@ -24,7 +24,7 @@ import com.mrsmart.standard.tool.ToolDtoSQLite
 class ToolFindFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var confirmBtn: LinearLayout
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
@@ -36,7 +36,7 @@ class ToolFindFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        bluetoothManager = BluetoothManager(requireContext(), requireActivity())
+        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
         val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_list, container, false)
 

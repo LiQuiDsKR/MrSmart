@@ -40,6 +40,7 @@
                     android:scaleType="fitCenter"
                     android:scaleX="1.5"
                     android:scaleY="1.5"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_refresh" />
 
                 <ImageButton

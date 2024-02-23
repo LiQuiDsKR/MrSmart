@@ -16,8 +16,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.BluetoothManager_Old
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
@@ -35,7 +35,7 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
 
     private val handler = Handler(Looper.getMainLooper()) { true }
     val gson = Gson()
-    lateinit var bluetoothManager: BluetoothManager
+    lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private lateinit var welcomeMessage: TextView
 
@@ -55,23 +55,23 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
-        bluetoothManager = BluetoothManager(requireContext(), requireActivity())
+        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
 
         welcomeMessage.text = manager.name + "님 환영합니다."
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
 
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             try {
-                bluetoothManager.bluetoothOpen()
+                bluetoothManagerOld.bluetoothOpen()
                 connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
             } catch (e: Exception) {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     connectBtn.setImageResource(R.drawable.group_11_copy)

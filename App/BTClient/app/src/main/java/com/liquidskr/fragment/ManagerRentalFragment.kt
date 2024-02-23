@@ -23,9 +23,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
@@ -57,7 +57,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     private lateinit var welcomeMessage: TextView
 
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
     var rentalRequestSheetList: MutableList<RentalRequestSheetDto> = mutableListOf()
 
     private val gson = Gson()
@@ -88,7 +88,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_rental, container, false)
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
@@ -105,7 +105,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     hidePopup()
@@ -130,9 +130,9 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             try {
-                bluetoothManager.bluetoothOpen()
+                bluetoothManagerOld.bluetoothOpen()
                 connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
             } catch (e: Exception) {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
@@ -177,9 +177,9 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         super.onResume()
         connectBtn.setOnClickListener(null)
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             try {
-                bluetoothManager.bluetoothOpen()
+                bluetoothManagerOld.bluetoothOpen()
                 connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
             } catch (e: Exception) {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
@@ -216,8 +216,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         rentalRequestSheetList.clear()
 
         var sheetCount = 0
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT,"{toolboxId:${sharedViewModel.toolBoxId}}",object:BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -241,8 +241,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     }
 
     fun requestRentalRequestSheetReady(pageNum: Int) {
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager.RequestCallback{
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},toolboxId:${sharedViewModel.toolBoxId}}",object: BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 rentalRequestSheetReadyByMemberReq.process(page)
@@ -286,7 +286,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is LobbyActivity) {
+        if (context is MainActivity) {
             mContext = context
         }
     }

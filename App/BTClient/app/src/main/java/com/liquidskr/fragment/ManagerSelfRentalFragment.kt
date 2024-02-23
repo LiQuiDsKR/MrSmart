@@ -21,10 +21,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.MyScannerListener
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
@@ -55,7 +55,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private var active = false
     val listener: MyScannerListener.Listener = object : MyScannerListener.Listener {
@@ -115,7 +115,7 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
         confirmBtn = view.findViewById(R.id.ConfirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
         qrEditText = view.findViewById(R.id.QREditText)
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         backButton = view.findViewById(R.id.backButton)
 
         workerName = view.findViewById(R.id.workerName)
@@ -240,8 +240,8 @@ class ManagerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCl
                     if (!(worker!!.code.equals(""))) {
                         if (!(leader!!.code.equals(""))) {
                             val rentalRequestSheetForm = RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList())
-                            bluetoothManager.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
-                                BluetoothManager.RequestCallback{
+                            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, gson.toJson(rentalRequestSheetForm), object:
+                                BluetoothManager_Old.RequestCallback{
                                 override fun onSuccess(result: String, type: Type) {
                                     if  (result == "good") {
                                         hidePopup() // UI 블로킹

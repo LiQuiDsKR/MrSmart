@@ -21,10 +21,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
 import com.mrsmart.standard.tool.ToolDto
@@ -57,30 +57,30 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
-    private val lobbyActivity: LobbyActivity
-        get() = requireActivity() as LobbyActivity
+    private val mainActivity: MainActivity
+        get() = requireActivity() as MainActivity
 
     private fun showBluetoothModal(title: String, content: String) {
-        lobbyActivity.showBluetoothModal(title, content, bluetoothModalListener)
+        mainActivity.showBluetoothModal(title, content, bluetoothModalListener)
     }
-    private val bluetoothModalListener = object : LobbyActivity.BluetoothModalListener {
+    private val bluetoothModalListener = object : MainActivity.BluetoothModalListener {
         override fun onConfirmButtonClicked() {
             showPopup()
             val handler = Handler(Looper.getMainLooper())
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             val tagGroup = if (tagList.size > 0) tagList[0] else ""
             val tagLists: MutableList<String> = mutableListOf()
             for (tag in tagList) {
                 tagLists.add("\"${tag}\"")
             }
-            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbtQrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager.RequestCallback{
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId},\"qrcode\":\"${tbtQrcode}\",\"tagGroup\":\"${tagGroup}\",\"tagList\":${tagLists}}" ,object:BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     if (result == "good") {
                         try {
@@ -127,7 +127,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
         val handler = Handler(Looper.getMainLooper())
         context = requireContext()
         scannerReceiver = view.findViewById(R.id.scannerReceiver)
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         toolName = view.findViewById(R.id.Register_ToolName)
         toolSpec = view.findViewById(R.id.Register_ToolSpec)
 

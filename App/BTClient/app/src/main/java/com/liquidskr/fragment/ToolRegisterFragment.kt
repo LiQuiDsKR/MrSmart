@@ -23,10 +23,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.membership.MembershipDto
@@ -38,7 +38,7 @@ import java.lang.reflect.Type
 class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var confirmBtn: ImageButton
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
     private lateinit var connectBtn: ImageButton
 
     lateinit var rentalBtnField: LinearLayout
@@ -66,7 +66,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        bluetoothManager = BluetoothManager(requireContext(), requireActivity())
+        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
         val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
 
@@ -78,17 +78,17 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             try {
-                bluetoothManager.bluetoothOpen()
+                bluetoothManagerOld.bluetoothOpen()
                 connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
             } catch (e: Exception) {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     hidePopup()
@@ -117,7 +117,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
         standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
 
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     hidePopup()
@@ -141,8 +141,8 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             showPopup()
             recyclerView.requestFocus()
 
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager_Old.RequestCallback{
                 override fun onSuccess(result: String, type: Type) {
                     val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
 
@@ -211,8 +211,8 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
                         val dbHelper = DatabaseHelper.getInstance()
                         val tool = dbHelper.getToolByTBT(label)
-                        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-                        bluetoothManager.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager.RequestCallback{
+                        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+                        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager_Old.RequestCallback{
                             override fun onSuccess(result: String, type: Type) {
                                 val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
 
@@ -261,8 +261,8 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             QREditText.requestFocus()
         }
 
-        bluetoothManager
-        bluetoothManager.requestData(Constants.BluetoothMessageType.TEST,"{string:\"check\"}",object:BluetoothManager.RequestCallback{
+        bluetoothManagerOld
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TEST,"{string:\"check\"}",object:BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
 
             }

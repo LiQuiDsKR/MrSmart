@@ -20,9 +20,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.StandByAdapter
 import com.mrsmart.standard.membership.MembershipDto
@@ -31,7 +31,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     lateinit var standbySyncBtn: ImageButton
     val gson = Gson()
-    lateinit var bluetoothManager: BluetoothManager
+    lateinit var bluetoothManagerOld: BluetoothManager_Old
     private lateinit var connectBtn: ImageButton
 
     private val handler = Handler(Looper.getMainLooper()) { true } // UI블로킹 start
@@ -56,9 +56,9 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
 
         connectBtn = view.findViewById(R.id.ConnectBtn)
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
             try {
-                bluetoothManager.bluetoothOpen()
+                bluetoothManagerOld.bluetoothOpen()
                 connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
             } catch (e: Exception) {
                 Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
@@ -74,8 +74,8 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     hidePopup()
@@ -139,10 +139,10 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         standbySyncBtn.setOnClickListener {
             showPopup()
             try {
-                bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
+                bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
                 if (adapter.sheets.size > 0) {
-                    if (bluetoothManager.isConnected) {
-                        bluetoothManager.standbyProcess()
+                    if (bluetoothManagerOld.isConnected) {
+                        bluetoothManagerOld.standbyProcess()
                         handler.postDelayed({
                             adapter.updateList(dbHelper.getAllStandby())
                         }, 500)

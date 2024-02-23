@@ -16,8 +16,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.LobbyActivity
+import com.liquidskr.btclient.BluetoothManager_Old
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
@@ -32,7 +32,7 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
 
     lateinit var welcomeMessage: TextView
     val gson = Gson()
-    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothManagerOld: BluetoothManager_Old
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
@@ -49,8 +49,8 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = worker.name + "님 환영합니다."
 
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.setBluetoothConnectionListener(object : BluetoothManager.BluetoothConnectionListener {
+        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
             override fun onBluetoothDisconnected() {
                 handler.post {
                     connectBtn.setImageResource(R.drawable.group_11_copy)
@@ -88,8 +88,8 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
         }
 
         connectBtn.setOnClickListener{
-            bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-            bluetoothManager.bluetoothOpen()
+            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+            bluetoothManagerOld.bluetoothOpen()
         }
 
         //getOutstandingRentalSheetList()
