@@ -1,16 +1,19 @@
 package com.liquidskr.btclient
 
 object Constants {
-    enum class BluetoothExceptionType{
-        DEFAULT_EXCEPTION,
-        PERMISSION_MISSING,
-        NO_PAIRED_DEVICE,
-        CONNECTION_FAILED,
+    enum class ExceptionType{
+        BLUETOOTH_DEFAULT_EXCEPTION,
+        BLUETOOTH_PERMISSION_MISSING,
+        BLUETOOTH_NO_PAIRED_DEVICE,
+        BLUETOOTH_CONNECTION_FAILED,
         DATABASE_HELPER_NOT_INITIALIZED,
         SQLITE_EXCEPTION,
         EXTERNAL_DATABASE_PERMISSION_MISSING,
-        DISCONNECTED,
-        IO_EXCEPTION,
+        BLUETOOTH_DISCONNECTED,
+        BLUETOOTH_IO_EXCEPTION,
+        DATABASE_DEFAULT_EXCEPTION,
+        NO_QUERY_RESULT,
+        DATABASE_INSERT_EXCEPTION,
     }
     enum class BluetoothMessageType {
         MEMBERSHIP_ALL,
@@ -58,6 +61,7 @@ object Constants {
 
     }
 
+    const val MEMBERSHIP_PAGE_SIZE = 10
     const val COMMUNICATION_TIMEOUT = 10000 //10초
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024
     const val INTEGER_BYTE_SIZE = 4

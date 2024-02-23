@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
@@ -576,29 +577,264 @@ class BluetoothManager (private val context: Context, private val activity: Acti
         }
         dbHelper.close()
     }
-        private val bluetoothCommunicationHandlerListener : BluetoothCommunicationHandler.Listener = object:BluetoothCommunicationHandler.Listener{
-            override fun onConnected() {
-                var message : String
-                message = Constants.BluetoothMessageType.MEMBERSHIP_ALL.toString()
-                message+=",{\"size\":${10},\"page\":${1}}"
-                Log.d("bluetooth",message)
+
+
+    //new
+
+    private val bluetoothCommunicationHandlerListener = object:BluetoothCommunicationHandler.Listener{
+        override fun onConnected() {
+            var message : String
+            message = Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT.toString()
+            //message = Constants.BluetoothMessageType.MEMBERSHIP_ALL.toString()
+            //message+=",{\"size\":${10},\"page\":${1}}"
+            Log.d("bluetooth",message)
+            bluetoothCommunicationHandler.send(message.trim())
+        }
+
+        override fun onDataArrived(data: String) {
+            Log.d("bluetooth","final : ${data}")
+            processData(data)
+        }
+
+        override fun onDataSent(data: String) {
+            Log.d("bluetooth","good send")
+        }
+
+        override fun onException(type: Constants.ExceptionType, description: String) {
+            Log.d("bluetooth","exception final : [${type.name}] : [${description}]")
+        }
+
+    }
+    private val bluetoothCommunicationHandler : BluetoothCommunicationHandler = BluetoothCommunicationHandler(bluetoothCommunicationHandlerListener)
+
+    private val membershipServiceListener = object: MembershipService.Listener{
+        override fun onException(type: Constants.ExceptionType, description: String) {
+            Log.d("membership","exception final : [${type.name}] : [${description}]")
+        }
+
+        override fun onInserted(size: Int, index: Int, total: Int) {
+            val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
+
+            Log.d("membership","${index} / ${total/pageSize} pages inserted. (size : ${size})")
+
+            loadingPageIndex+=1
+
+            if (loadingPageIndex>total/pageSize) {
+                Log.d("membership", "membership insert complete (size : ${total})")
+                return
+            }
+
+            val message : String =
+                Constants.BluetoothMessageType.MEMBERSHIP_ALL.toString() +
+                        ",{\"size\":${pageSize},\"page\":${loadingPageIndex}}"
+            bluetoothCommunicationHandler.send(message.trim())
+        }
+    }
+    private val membershipService = MembershipService(membershipServiceListener)
+
+    private var loadingPageIndex : Int = -1 // -1 : not loading , 0~ : loading index
+
+
+    fun processData(data:String) {
+        val (typeStr, jsonStr) = data.split(',', limit = 2)
+        when(typeStr){
+            Constants.BluetoothMessageType.MEMBERSHIP_ALL.name -> {
+                //response
+                val membershipPage = gson.fromJson(jsonStr,Page::class.java)
+
+                membershipService.insertMembershipByPage(membershipPage)
+            }
+
+            Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT.name -> {
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
+
+                val size = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
+
+                loadingPageIndex=0
+
+                val message : String =
+                    Constants.BluetoothMessageType.MEMBERSHIP_ALL.toString() +
+                            ",{\"size\":${size},\"page\":${loadingPageIndex}}"
                 bluetoothCommunicationHandler.send(message.trim())
             }
 
-            override fun onDataArrived(data: String) {
-                Log.d("bluetooth","final : ${data}")
+            Constants.BluetoothMessageType.TOOL_ALL.name -> {
+                val listType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
             }
 
-            override fun onDataSent(data: String) {
-                Log.d("bluetooth","good send")
+            Constants.BluetoothMessageType.TOOL_ALL_COUNT.name -> {
+                val listType: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
             }
 
-            override fun onException(type: Constants.BluetoothExceptionType, description: String) {
-                Log.d("bluetooth","exception final : ${type.name} : ${description}")
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
             }
 
+            Constants.BluetoothMessageType.RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+
+            Constants.BluetoothMessageType.RETURN_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
+                val pageType: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX.name -> {
+                val listType: Type = object : TypeToken<List<RentalRequestSheetDto>>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
+                val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RETURN_SHEET_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE.name -> {
+                val pageType: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_FORM.name -> {
+                val pageType: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
+                val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RETURN_SHEET_REQUEST.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL.name -> {
+                val type: Type = object : TypeToken<ToolboxToolLabelDto>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_LIST.name -> {
+                val type: Type = object : TypeToken<List<String>>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_ALL.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_GROUP.name -> {
+                val type: Type = object : TypeToken<TagDto>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
+                val type: Type = object : TypeToken<OutstandingRentalSheetDto>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG.name -> {
+                val type: Type = object : TypeToken<TagDto>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RETURN_SHEET_FORM_STANDBY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPLY.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
+                val type: Type = object : TypeToken<TagAndToolboxToolLabelDto>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL.name -> {
+                val type: Type = object : TypeToken<Page>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
+            Constants.BluetoothMessageType.TOOLBOX_ALL.name -> {
+                val type: Type = object : TypeToken<List<ToolboxCompressDto>>() {}.type
+                TODO("not implemented yet")
+            }
+
+            // ###################
+            Constants.BluetoothMessageType.TEST.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
+                TODO("not implemented yet")
+            }
         }
-        private val bluetoothCommunicationHandler : BluetoothCommunicationHandler = BluetoothCommunicationHandler(bluetoothCommunicationHandlerListener)
-
-
+    }
 }

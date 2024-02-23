@@ -10,7 +10,7 @@ class BluetoothMessageParser (
 ) {
     interface Listener {
         fun onDataArrived(datas: ByteArray)
-        fun onException(type: Constants.BluetoothExceptionType, description: String)
+        fun onException(type: Constants.ExceptionType, description: String)
     }
 
     private val byteArrayOutputStream = ByteArrayOutputStream()
@@ -52,7 +52,7 @@ class BluetoothMessageParser (
                 return nextData
             }
         } catch (e: Exception) {
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION, e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION, e.toString())
         }
         initialize()
         return ByteArray(0)

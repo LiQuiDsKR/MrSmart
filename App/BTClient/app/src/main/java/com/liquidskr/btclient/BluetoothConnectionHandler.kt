@@ -37,7 +37,7 @@ class BluetoothConnectionHandler (
         fun onConnected()
         fun onDataArrived(datas: ByteArray)
         fun onDataSent(datas: ByteArray)
-        fun onException(type:Constants.BluetoothExceptionType, description: String)
+        fun onException(type:Constants.ExceptionType, description: String)
     }
 
     init {
@@ -50,13 +50,13 @@ class BluetoothConnectionHandler (
             val dbHelper = DatabaseHelper.getInstance()
             pcName = dbHelper.getDeviceName()
         } catch (e: DatabaseHelper.DatabaseHelperInitializationException){
-            listener.onException(Constants.BluetoothExceptionType.DATABASE_HELPER_NOT_INITIALIZED,"DatabaseHelper가 초기화되지 않았습니다.")
+            listener.onException(Constants.ExceptionType.DATABASE_HELPER_NOT_INITIALIZED,"DatabaseHelper가 초기화되지 않았습니다.")
         } catch (e: SQLiteException){
-            listener.onException(Constants.BluetoothExceptionType.SQLITE_EXCEPTION,"SQL QUERY ERROR!")
+            listener.onException(Constants.ExceptionType.SQLITE_EXCEPTION,"SQL QUERY ERROR!")
         } catch (e: SecurityException) {
-            listener.onException(Constants.BluetoothExceptionType.EXTERNAL_DATABASE_PERMISSION_MISSING,"데이터베이스 접근 권한이 설정되지 않았습니다.")
+            listener.onException(Constants.ExceptionType.EXTERNAL_DATABASE_PERMISSION_MISSING,"데이터베이스 접근 권한이 설정되지 않았습니다.")
         } catch (e: Exception){
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
         }
         // 로컬 db에서 연결할 장치 이름을 확인합니다.
         
@@ -69,12 +69,12 @@ class BluetoothConnectionHandler (
             pairedDevices = bluetoothAdapter.bondedDevices
         } catch(e: Exception) {
             //분기 더 나눕시다
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
         }
         // 권한 확인 후 페어링된 기기 목록을 가져옵니다.
 
         if (pairedDevices.isEmpty()){
-            listener.onException(Constants.BluetoothExceptionType.NO_PAIRED_DEVICE,"페어링된 기기가 없습니다.")
+            listener.onException(Constants.ExceptionType.BLUETOOTH_NO_PAIRED_DEVICE,"페어링된 기기가 없습니다.")
         }else{
             isConnected = false// 서버와 연결 부분
             for (device in pairedDevices) {
@@ -96,7 +96,7 @@ class BluetoothConnectionHandler (
                 }
             }
             if (!isConnected) {
-                listener.onException(Constants.BluetoothExceptionType.CONNECTION_FAILED,"[${pcName}]와의 연결에 실패했습니다.")
+                listener.onException(Constants.ExceptionType.BLUETOOTH_CONNECTION_FAILED,"[${pcName}]와의 연결에 실패했습니다.")
                 //Toast.makeText(context, "[${pcName}] 에 연결할 수 없습니다.", Toast.LENGTH_SHORT).show()
             } else{
                 listener.onConnected()
@@ -107,9 +107,9 @@ class BluetoothConnectionHandler (
         try {
             inputStream = bluetoothSocket.inputStream
         } catch (e: IOException) {
-            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_IO_EXCEPTION,e.toString())
         } catch (e : Exception){
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
         }
         // i/o stream을 설정합니다.
 
@@ -131,21 +131,21 @@ class BluetoothConnectionHandler (
                     Log.d("bluetooth", "Disconnected")
                     //Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
                     handler.post {
-                        listener.onException(Constants.BluetoothExceptionType.DISCONNECTED,"블루투스 연결이 끊겼습니다.")
+                        listener.onException(Constants.ExceptionType.BLUETOOTH_DISCONNECTED,"블루투스 연결이 끊겼습니다.")
                     }
                     // post로 해야 하는지는 의문이다.
                 }
             }
         } catch(e:IOException){
-            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_IO_EXCEPTION,e.toString())
         } catch(e: Exception) {
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
         } finally {
             Log.d("bluetooth","thread end")
             try{inputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","InputStream Closed")}
             try{outputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","OutputStream Closed")}
             try{bluetoothSocket.close()}catch(e:Exception){}finally {Log.d("bluetooth","Socket Closed")}
-            listener.onException(Constants.BluetoothExceptionType.DISCONNECTED,"Disconnected")
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DISCONNECTED,"Disconnected")
         }
     }
     fun send(datas:ByteArray){
@@ -182,10 +182,10 @@ class BluetoothConnectionHandler (
             listener.onDataSent(datas)
         } catch (e: IOException) {
             close()
-            listener.onException(Constants.BluetoothExceptionType.IO_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_IO_EXCEPTION,e.toString())
         } catch (e: Exception) {
             close()
-            listener.onException(Constants.BluetoothExceptionType.DEFAULT_EXCEPTION,e.toString())
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
         }
     }
 

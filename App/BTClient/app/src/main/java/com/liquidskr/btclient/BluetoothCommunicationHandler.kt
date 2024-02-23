@@ -14,7 +14,7 @@ class BluetoothCommunicationHandler (
         fun onConnected()
         fun onDataArrived(data: String)
         fun onDataSent(data: String)
-        fun onException(type:Constants.BluetoothExceptionType, description: String)
+        fun onException(type:Constants.ExceptionType, description: String)
     }
 
     private val bluetoothMessageParserlistener : BluetoothMessageParser.Listener = object : BluetoothMessageParser.Listener {
@@ -22,7 +22,7 @@ class BluetoothCommunicationHandler (
             listener.onDataArrived(String(data,Charsets.UTF_8))
             commTimeInMillis=0L
         }
-        override fun onException(type: Constants.BluetoothExceptionType, description: String) {
+        override fun onException(type: Constants.ExceptionType, description: String) {
             bluetoothConnectionHandler.close()
             listener.onException(type,description)
         }
@@ -46,7 +46,7 @@ class BluetoothCommunicationHandler (
             Log.d("bluetooth", "send complete : ${byteArrayToHex(datas)}")
         }
 
-        override fun onException(type: Constants.BluetoothExceptionType, description: String) {
+        override fun onException(type: Constants.ExceptionType, description: String) {
                 listener.onException(type,description)
             }
         }

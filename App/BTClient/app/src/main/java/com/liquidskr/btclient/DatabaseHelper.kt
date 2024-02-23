@@ -6,7 +6,6 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.Constants.COLUMN_DEVICE_ID
@@ -45,6 +44,8 @@ import com.liquidskr.btclient.Constants.COLUMN_TBT_LOCATION
 import com.liquidskr.btclient.Constants.COLUMN_TBT_QRCODE
 import com.liquidskr.btclient.Constants.COLUMN_TBT_TOOLBOX_ID
 import com.liquidskr.btclient.Constants.COLUMN_TBT_TOOL_ID
+import com.liquidskr.btclient.Constants.COLUMN_TOOLBOX_ID
+import com.liquidskr.btclient.Constants.COLUMN_TOOLBOX_NAME
 import com.liquidskr.btclient.Constants.COLUMN_TOOLBOX_TOOLBOX_ID
 import com.liquidskr.btclient.Constants.COLUMN_TOOL_BUYCODE
 import com.liquidskr.btclient.Constants.COLUMN_TOOL_CODE
@@ -57,6 +58,8 @@ import com.liquidskr.btclient.Constants.COLUMN_TOOL_REPLACEMENTCYCLE
 import com.liquidskr.btclient.Constants.COLUMN_TOOL_SPEC
 import com.liquidskr.btclient.Constants.COLUMN_TOOL_SUBGROUP
 import com.liquidskr.btclient.Constants.COLUMN_TOOL_UNIT
+import com.liquidskr.btclient.Constants.DATABASE_NAME
+import com.liquidskr.btclient.Constants.DATABASE_VERSION
 import com.liquidskr.btclient.Constants.TABLE_DEVICE_NAME
 import com.liquidskr.btclient.Constants.TABLE_Membership_NAME
 import com.liquidskr.btclient.Constants.TABLE_OUTSTANDING_NAME
@@ -64,6 +67,7 @@ import com.liquidskr.btclient.Constants.TABLE_RENTALSHEET_NAME
 import com.liquidskr.btclient.Constants.TABLE_STANDBY_NAME
 import com.liquidskr.btclient.Constants.TABLE_TAG_NAME
 import com.liquidskr.btclient.Constants.TABLE_TBT_NAME
+import com.liquidskr.btclient.Constants.TABLE_TOOLBOX_NAME
 import com.liquidskr.btclient.Constants.TABLE_TOOL_NAME
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
@@ -75,8 +79,6 @@ import java.lang.reflect.Type
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     class DatabaseHelperInitializationException(message: String) : Exception(message)
-
-    lateinit var bluetoothManager: BluetoothManager
 
     companion object {
         @Volatile
@@ -96,78 +98,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         fun getInstance(): DatabaseHelper {
             return instance ?: throw DatabaseHelperInitializationException("DatabaseHelper not initialized")
         }
-
-        private const val DATABASE_VERSION = 1
-        private const val DATABASE_NAME = "StandardInfo.db"
-
-        private const val TABLE_Membership_NAME = "Membership"
-        private const val COLUMN_Membership_ID = "id"
-        private const val COLUMN_Membership_CODE = "code"
-        private const val COLUMN_Membership_PASSWORD = "password"
-        private const val COLUMN_Membership_NAME = "name"
-        private const val COLUMN_Membership_PART = "part"
-        private const val COLUMN_Membership_SUBPART = "subpart"
-        private const val COLUMN_Membership_MAINPART = "mainpart"
-        private const val COLUMN_Membership_ROLE = "role"
-        private const val COLUMN_Membership_EMPLOYMENT_STATE = "employment_state"
-
-        private const val TABLE_TOOL_NAME = "Tool"
-        private const val COLUMN_TOOL_ID = "tool_id"
-        private const val COLUMN_TOOL_MAINGROUP = "tool_maingroup"
-        private const val COLUMN_TOOL_SUBGROUP = "tool_subgroup"
-        private const val COLUMN_TOOL_CODE = "tool_code"
-        private const val COLUMN_TOOL_KRNAME = "tool_krname"
-        private const val COLUMN_TOOL_ENGNAME = "tool_engname"
-        private const val COLUMN_TOOL_SPEC = "tool_spec"
-        private const val COLUMN_TOOL_UNIT = "tool_unit"
-        private const val COLUMN_TOOL_PRICE = "tool_price"
-        private const val COLUMN_TOOL_REPLACEMENTCYCLE = "tool_replacementcycle"
-        private const val COLUMN_TOOL_BUYCODE = "tool_buycode"
-
-        private const val TABLE_STANDBY_NAME = "Standby"
-        private const val COLUMN_STANDBY_ID = "standby_id"
-        private const val COLUMN_STANDBY_JSON = "standby_json"
-        private const val COLUMN_STANDBY_TYPE = "standby_type"
-        private const val COLUMN_STANDBY_STATUS = "standby_status"
-        private const val COLUMN_STANDBY_DETAIL = "standby_detail"
-
-        private const val TABLE_TBT_NAME = "ToolboxToolLabel"
-        private const val COLUMN_TBT_ID = "tbt_id"
-        private const val COLUMN_TBT_TOOLBOX_ID = "tbt_toolboxid"
-        private const val COLUMN_TBT_LOCATION = "tbt_location"
-        private const val COLUMN_TBT_TOOL_ID = "tbt_toolid"
-        private const val COLUMN_TBT_QRCODE = "tbt_qrcode"
-
-        private const val TABLE_TAG_NAME = "Tag"
-        private const val COLUMN_TAG_ID = "tag_id"
-        private const val COLUMN_TAG_MACADDRESS = "tag_macaddress"
-        private const val COLUMN_TAG_TOOL_ID = "tag_toolid"
-        private const val COLUMN_TAG_TAGGROUP = "tag_taggroup"
-
-        private const val TABLE_RENTALSHEET_NAME = "RentalSheet"
-        private const val COLUMN_RENTALSHEET_ID = "rentalSheet_id"
-        private const val COLUMN_RENTALSHEET_WOKRER = "rentalSheet_workerid"
-        private const val COLUMN_RENTALSHEET_LEADER = "rentalSheet_leaderid"
-        private const val COLUMN_RENTALSHEET_TIMESTAMP = "rentalSheet_timestamp"
-        private const val COLUMN_RENTALSHEET_TOOLLIST = "rentalSheet_toolList"
-
-        private const val TABLE_DEVICE_NAME = "Devices"
-        private const val COLUMN_DEVICE_ID = "device_id"
-        private const val COLUMN_DEVICE_NAME = "device_name"
-
-        private const val TABLE_TOOLBOX_NAME = "Toolbox"
-        private const val COLUMN_TOOLBOX_ID = "toolbox_id"
-        private const val COLUMN_TOOLBOX_TOOLBOX_ID = "toolbox_toolbox_id"
-        private const val COLUMN_TOOLBOX_NAME = "toolbox_name"
-
-
-        private const val TABLE_OUTSTANDING_NAME = "OutstandingRentalSheet"
-        private const val COLUMN_OUTSTANDING_ID = "outstanding_id"
-        private const val COLUMN_OUTSTANDING_RENTALSHEET = "outstanding_rentalSheet"
-        private const val COLUMN_OUTSTANDING_TOTALCOUNT = "outstanding_count"
-        private const val COLUMN_OUTSTANDING_OUTSTANDINGCOUNT = "outstanding_outstandingCount"
-        private const val COLUMN_OUTSTANDING_STATUS = "outstanding_status"
-        private const val COLUMN_OUTSTANDING_JSON = "outstanding_json"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -265,7 +195,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onCreate(db)
     }
 
-    fun RefreshDeviceData(
+    fun refreshDeviceData(
         deviceName: String
     ): Long {
 
@@ -285,7 +215,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
-    fun RefreshToolboxData(
+    fun refreshToolboxData(
         toolboxId: Long,
         toolboxName: String
     ): Long {

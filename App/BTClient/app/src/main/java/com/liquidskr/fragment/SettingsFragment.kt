@@ -188,7 +188,7 @@
                 var currentPCName = bluetoothManager.pcName
                 showTextDialog(requireContext(), "정비실 노트북(PC)의 이름을 입력하세요.", currentPCName) { string ->
                     bluetoothManager.pcName = string
-                    dbHelper.RefreshDeviceData(string)
+                    dbHelper.refreshDeviceData(string)
                 }
             }
 
@@ -225,7 +225,7 @@
                                                 sharedViewModel.toolBoxId = toolboxDto.id
                                             }
                                         }
-                                        dbHelper.RefreshToolboxData(sharedViewModel.toolBoxId, string)
+                                        dbHelper.refreshToolboxData(sharedViewModel.toolBoxId, string)
                                     }
                                 }
                             } catch (e: Exception) {
