@@ -1,6 +1,13 @@
 package com.liquidskr.btclient
 
+import PermissionManager
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.database.sqlite.SQLiteException
+import android.opengl.ETC1.isValid
 import android.util.Log
+import androidx.core.app.PendingIntentCompat.send
 import com.liquidskr.btclient.Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT
 import com.liquidskr.btclient.Constants.BLUETOOTH_RECONNECT_INTERVAL
 import com.liquidskr.btclient.Constants.INITIAL_MESSAGE_DELAY
@@ -10,7 +17,9 @@ import java.nio.ByteBuffer
 import java.util.Calendar
 import java.util.Timer
 import java.util.TimerTask
+import java.util.UUID
 
+@SuppressLint("MissingPermission")//아니 분명히 권한 체크를 했는데도 지혼자 막 안했다고 뭐라해요 자꾸
 class BluetoothCommunicationHandler (
     private val listener : Listener
 ){
@@ -80,14 +89,16 @@ class BluetoothCommunicationHandler (
             listener.onException(type,description)
         }
     }
-    private var bluetoothConnectionHandler : BluetoothConnectionHandler = BluetoothConnectionHandler(bluetoothConnectionHandlerListener)
+    private lateinit var bluetoothConnectionHandler : BluetoothConnectionHandler
     // ** var ▲ **
     private var isBluetoothConnectionHandlerNull:Boolean=true
+
     private var reconnectAttempt:Int =0
     private var commTimeInMillis : Long = 0L
-    private var validCheckTimer: Timer = Timer()
-    private var heartBeatTimer: Timer = Timer()
 
+
+    private val validCheckTimer: Timer = Timer()
+    private val heartBeatTimer: Timer = Timer()
     private val validCheckTimerTask = object : TimerTask() {
         override fun run() {
             val isValid = isValid()
@@ -105,6 +116,62 @@ class BluetoothCommunicationHandler (
         }
     }
 
+    var pcName: String = "정비실PC이름"
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothDevice: BluetoothDevice
+
+    init {
+
+        try {
+            val dbHelper = DatabaseHelper.getInstance()
+            pcName = dbHelper.getDeviceName()
+        } catch (e: DatabaseHelper.DatabaseHelperInitializationException){
+            listener.onException(Constants.ExceptionType.DATABASE_HELPER_NOT_INITIALIZED,"DatabaseHelper가 초기화되지 않았습니다.")
+        } catch (e: SQLiteException){
+            listener.onException(Constants.ExceptionType.SQLITE_EXCEPTION,"SQL QUERY ERROR!")
+        } catch (e: SecurityException) {
+            listener.onException(Constants.ExceptionType.EXTERNAL_DATABASE_PERMISSION_MISSING,"데이터베이스 접근 권한이 설정되지 않았습니다.")
+        } catch (e: Exception){
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
+        }
+        // 로컬 db에서 연결할 장치 이름을 확인합니다.
+
+        val permissionManager : PermissionManager
+        var pairedDevices : Set<BluetoothDevice> = emptySet()
+        try{
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            permissionManager = PermissionManager
+            permissionManager.checkAndRequestBluetoothPermissions()
+            pairedDevices = bluetoothAdapter.bondedDevices
+        } catch(e: Exception) {
+            //분기 더 나눕시다
+            listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
+        }
+        // 권한 확인 후 페어링된 기기 목록을 가져옵니다.
+
+        var flag = false
+        if (pairedDevices.isEmpty()){
+            listener.onException(Constants.ExceptionType.BLUETOOTH_NO_PAIRED_DEVICE,"페어링된 기기가 없습니다.")
+        }else {
+            for (device in pairedDevices) {
+                if (device.name == pcName) {
+                    flag = true
+                    bluetoothDevice = device
+                }
+            }
+        }
+        // 페어링된 기기 목록에서 기기 이름과 맞는 device Mac주소를 가져옵니다.
+
+        if (flag){
+            connect()
+        } else{
+            listener.onException(Constants.ExceptionType.BLUETOOTH_NO_PAIRED_DEVICE,"기기[${pcName}]를 찾을 수 없습니다.")
+        }
+        //ConnectionHandler를 생성합니다.
+
+    }
+
+
     fun send(message:String){
         Log.d("bluetooth","send message : ${message}")
         val data :ByteArray = message.toByteArray()
@@ -112,7 +179,7 @@ class BluetoothCommunicationHandler (
         buffer.putInt(data.size)
         val sizeByte = buffer.array()
 
-        val outputStream : ByteArrayOutputStream = ByteArrayOutputStream()
+        val outputStream = ByteArrayOutputStream()
         try{
             outputStream.write(sizeByte)
             outputStream.write(data)
@@ -130,7 +197,7 @@ class BluetoothCommunicationHandler (
             Log.d("bluetooth","BluetoothConnectionHandler Is Not Null. Disconnecting...")
             disconnect()
         }
-        bluetoothConnectionHandler= BluetoothConnectionHandler(bluetoothConnectionHandlerListener)
+        bluetoothConnectionHandler= BluetoothConnectionHandler(bluetoothConnectionHandlerListener,bluetoothDevice)
         heartBeatTimer.schedule(heartBeatTimerTask,INITIAL_MESSAGE_DELAY,Constants.HEARTBEAT_INTERVAL)
         validCheckTimer.schedule(validCheckTimerTask,INITIAL_MESSAGE_DELAY, Constants.VALIDCHECK_INTERVAL)
         isBluetoothConnectionHandlerNull=false

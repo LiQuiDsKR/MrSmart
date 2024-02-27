@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        bluetoothManager.connect()
+        //bluetoothManager.connect()
     }
 
     fun showBluetoothModal(title: String, content: String, listener: BluetoothModalListener) {

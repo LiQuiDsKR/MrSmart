@@ -99,6 +99,7 @@ public class BluetoothCommunicationHandler {
 		translator = new Translator(traslatorListener);
 		
 		commTimeInMillis = 0;
+		heartBeat=Calendar.getInstance().getTimeInMillis();
 		
 		connectorHandler = new BluetoothConnectHandler(streamConnection, connectorHandlerListener);
 	}
@@ -136,7 +137,9 @@ public class BluetoothCommunicationHandler {
 	
 	public boolean isValid() {
 		if (startedOK && connectorHandler.isConnected()) {
-			if (heartBeat>GlobalConstants.HEARTBEAT_TIMEOUT * 1000) {
+			long diff1 = Calendar.getInstance().getTimeInMillis() - heartBeat;
+			if (diff1 > GlobalConstants.HEARTBEAT_TIMEOUT * 1000) {
+				logger.debug("heartBeat timeout : "+diff1);
 				return false;
 			}
 			
@@ -144,8 +147,8 @@ public class BluetoothCommunicationHandler {
 				return true;
 			}
 			
-			long diff = Calendar.getInstance().getTimeInMillis() - commTimeInMillis;
-			if (diff < GlobalConstants.COMMUNICATION_TIMEOUT * 1000) {
+			long diff2 = Calendar.getInstance().getTimeInMillis() - commTimeInMillis;
+			if (diff2 < GlobalConstants.COMMUNICATION_TIMEOUT * 1000) {
 				return true;
 			}
 			

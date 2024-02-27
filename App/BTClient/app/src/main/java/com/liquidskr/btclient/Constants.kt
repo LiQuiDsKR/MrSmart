@@ -74,7 +74,7 @@ object Constants {
     const val COMMUNICATION_TIMEOUT = 3000 //3초
     const val INITIAL_MESSAGE_DELAY = 1000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
     const val VALIDCHECK_INTERVAL = 3000L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
-    const val HEARTBEAT_INTERVAL = 5000L // 1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )
+    const val HEARTBEAT_INTERVAL = 60000L //  1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024 // 블루투스 데이터 통신 간 1회 처리 바이트 수
     const val INTEGER_BYTE_SIZE = 4
     const val REQUEST_CODE = 123 // permissionManager에서 사용.
