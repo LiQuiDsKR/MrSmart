@@ -20,21 +20,19 @@ class BluetoothConnectionHandler (
     private val listener: Listener
 ) : Thread() {
 
-    private var isConnected = false
-    private var running = false
+    var isConnected = false
 
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothSocket: BluetoothSocket
 
-    private val handler = Handler(Looper.getMainLooper())
-
     var pcName: String = "정비실PC이름"
 
 
     interface Listener {
         fun onConnected()
+        fun onDisconnected()
         fun onDataArrived(datas: ByteArray)
         fun onDataSent(datas: ByteArray)
         fun onException(type:Constants.ExceptionType, description: String)
@@ -114,8 +112,7 @@ class BluetoothConnectionHandler (
         // i/o stream을 설정합니다.
 
         try {
-            running=true
-            while (running) {
+            while (isConnected) {
                 val dataSize = inputStream.available()
                 if (dataSize > 0) {
                     //데이터를 받은 경우.
@@ -130,9 +127,12 @@ class BluetoothConnectionHandler (
                     isConnected = false
                     Log.d("bluetooth", "Disconnected")
                     //Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
+                    /*
                     handler.post {
-                        listener.onException(Constants.ExceptionType.BLUETOOTH_DISCONNECTED,"블루투스 연결이 끊겼습니다.")
+                        listener.onException(Constants.ExceptionType.BLUETOOTH_DISCONNECTED,"Disconnected.")
                     }
+                    // finally에서 처리하기 때문에 주석처리함.
+                     */
                     // post로 해야 하는지는 의문이다.
                 }
             }
@@ -145,7 +145,7 @@ class BluetoothConnectionHandler (
             try{inputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","InputStream Closed")}
             try{outputStream.close()}catch(e:Exception){}finally {Log.d("bluetooth","OutputStream Closed")}
             try{bluetoothSocket.close()}catch(e:Exception){}finally {Log.d("bluetooth","Socket Closed")}
-            listener.onException(Constants.ExceptionType.BLUETOOTH_DISCONNECTED,"Disconnected")
+            listener.onDisconnected()
         }
     }
     fun send(datas:ByteArray){
@@ -191,7 +191,7 @@ class BluetoothConnectionHandler (
 
     fun close(){
         Log.d("bluetooth","disconnect...")
-        running=false
+        isConnected=false
         this.interrupt()
     }
 

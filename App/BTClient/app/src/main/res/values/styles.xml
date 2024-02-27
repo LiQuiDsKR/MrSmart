@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <!-- Base application theme. -->
+        <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+            <!-- Customize your theme here. -->
+        </style>
+
+        <!-- Custom Progress Bar Style -->
+        <style name="CustomProgressBarHorizontal" parent="@android:style/Widget.ProgressBar.Horizontal">
+            <item name="android:progressDrawable">@drawable/custom_progressbar_horizontal</item>
+            <item name="android:minHeight">48dp</item> <!-- 높이 조정 -->
+            <item name="android:maxHeight">48dp</item> <!-- 높이 조정 -->
+        </style>
+</resources>

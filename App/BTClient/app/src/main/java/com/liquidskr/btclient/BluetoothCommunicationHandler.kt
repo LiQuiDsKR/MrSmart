@@ -1,10 +1,15 @@
 package com.liquidskr.btclient
 
 import android.util.Log
+import com.liquidskr.btclient.Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT
+import com.liquidskr.btclient.Constants.BLUETOOTH_RECONNECT_INTERVAL
+import com.liquidskr.btclient.Constants.INITIAL_MESSAGE_DELAY
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.Calendar
+import java.util.Timer
+import java.util.TimerTask
 
 class BluetoothCommunicationHandler (
     private val listener : Listener
@@ -12,6 +17,8 @@ class BluetoothCommunicationHandler (
 
     interface Listener {
         fun onConnected()
+        fun onDisconnected()
+        fun onReconnectTry(reconnectAttempt: Int)
         fun onDataArrived(data: String)
         fun onDataSent(data: String)
         fun onException(type:Constants.ExceptionType, description: String)
@@ -32,8 +39,31 @@ class BluetoothCommunicationHandler (
     private val bluetoothConnectionHandlerListener :BluetoothConnectionHandler.Listener = object :BluetoothConnectionHandler.Listener{
         override fun onConnected() {
             Log.d("bluetooth", "블루투스 연결에 성공했습니다")
+            reconnectAttempt=0
             listener.onConnected()
         }
+
+        override fun onDisconnected() {
+
+            validCheckTimer.cancel()
+            heartBeatTimer.cancel()
+            isBluetoothConnectionHandlerNull=true
+
+            if (reconnectAttempt<1) {
+                listener.onDisconnected()
+                return
+            }
+            if (reconnectAttempt> Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT){
+                listener.onReconnectTry(reconnectAttempt)
+                return
+            }
+            reconnectAttempt+=1
+            Log.d("bluetooth","bluetoothReconnecting... Attempt : $reconnectAttempt")
+            listener.onReconnectTry(reconnectAttempt)
+            Thread.sleep(Constants.BLUETOOTH_RECONNECT_INTERVAL)
+            connect()
+        }
+
         override fun onDataArrived(data: ByteArray) {
             commTimeInMillis=Calendar.getInstance().timeInMillis
             var data = data
@@ -47,15 +77,33 @@ class BluetoothCommunicationHandler (
         }
 
         override fun onException(type: Constants.ExceptionType, description: String) {
-                listener.onException(type,description)
-            }
+            listener.onException(type,description)
         }
+    }
     private var bluetoothConnectionHandler : BluetoothConnectionHandler = BluetoothConnectionHandler(bluetoothConnectionHandlerListener)
     // ** var ▲ **
-    private var isBluetoothConnectionHandlerNull:Boolean=false
-
-
+    private var isBluetoothConnectionHandlerNull:Boolean=true
+    private var reconnectAttempt:Int =0
     private var commTimeInMillis : Long = 0L
+    private var validCheckTimer: Timer = Timer()
+    private var heartBeatTimer: Timer = Timer()
+
+    private val validCheckTimerTask = object : TimerTask() {
+        override fun run() {
+            val isValid = isValid()
+            Log.d("bluetooth", "connection valid check : $isValid")
+            if (!isValid) {
+                disconnect()
+            }
+        }
+    }
+    private val heartBeatTimerTask = object : TimerTask() {
+        override fun run() {
+            val now = Calendar.getInstance().timeInMillis
+            Log.d("bluetooth", "HeartBeat set : $now")
+            send(Constants.BluetoothMessageType.HI.name + ",${Calendar.getInstance().timeInMillis}")
+        }
+    }
 
     fun send(message:String){
         Log.d("bluetooth","send message : ${message}")
@@ -77,11 +125,28 @@ class BluetoothCommunicationHandler (
         listener.onDataSent(message)
     }
 
+    fun connect(){
+        if(!isBluetoothConnectionHandlerNull){
+            Log.d("bluetooth","BluetoothConnectionHandler Is Not Null. Disconnecting...")
+            disconnect()
+        }
+        bluetoothConnectionHandler= BluetoothConnectionHandler(bluetoothConnectionHandlerListener)
+        heartBeatTimer.schedule(heartBeatTimerTask,INITIAL_MESSAGE_DELAY,Constants.HEARTBEAT_INTERVAL)
+        validCheckTimer.schedule(validCheckTimerTask,INITIAL_MESSAGE_DELAY, Constants.VALIDCHECK_INTERVAL)
+        isBluetoothConnectionHandlerNull=false
+    }
+
     fun disconnect(){
         Log.d("bluetooth","disconnect...")
-        if(!isBluetoothConnectionHandlerNull){
-            bluetoothConnectionHandler.close()
+        try{
+            if(!isBluetoothConnectionHandlerNull) {
+                bluetoothConnectionHandler.close()
+            }
+        }catch(e:Exception){
+            Log.d("bluetooth","disconnect failed : ${e.toString()}")
         }
+        validCheckTimer.cancel()
+        heartBeatTimer.cancel()
         isBluetoothConnectionHandlerNull=true
     }
 

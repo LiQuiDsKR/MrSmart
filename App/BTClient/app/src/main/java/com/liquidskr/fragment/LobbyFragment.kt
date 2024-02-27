@@ -40,31 +40,36 @@ class LobbyFragment : Fragment() {
 
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
 
         override fun onReconnected() {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
 
         override fun onRequestStarted() {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
+            val progressBarFrag = ProgressBarFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.bluetoothPopupLayout,progressBarFrag)
+                .addToBackStack(null)
+                .commit()
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
 
         override fun onRequestEnded() {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
 
         override fun onRequestFailed(message: String) {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
 
         override fun onException(message: String) {
-            TODO("Not yet implemented")
+            //TODO("Not yet implemented")
         }
     }
 

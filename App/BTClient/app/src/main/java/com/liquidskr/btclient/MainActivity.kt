@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("old")
     lateinit var bluetoothManagerOld: BluetoothManager_Old
 
-    private val bluetoothManager : BluetoothManager = BluetoothManager(Handler(Looper.getMainLooper()))
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager(Handler(Looper.getMainLooper())) }
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(this).get(SharedViewModel::class.java)
@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         val dbHelper = DatabaseHelper.initInstance(this)
         val permissionManager = PermissionManager
         permissionManager.initialize(this)
+        DialogUtils.initialize(this)
 
         sharedViewModel.toolBoxId = dbHelper.getToolboxName()
 
@@ -64,6 +65,15 @@ class MainActivity : AppCompatActivity() {
         bluetoothManager.disconnect()
     }
 
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager.disconnect()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager.connect()
+    }
 
     fun showBluetoothModal(title: String, content: String, listener: BluetoothModalListener) {
         val builder = AlertDialog.Builder(this)

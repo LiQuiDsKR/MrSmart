@@ -800,6 +800,11 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			logger.debug(toolboxService.listCompressed().toString());
 			handler.sendData(keyword+GsonUtils.toJson(toolboxService.listCompressed()));
 			break;
+			
+			
+		case HI :
+			logger.debug("");
+			handler.setHeartBeat();
 		}
 	}
 }

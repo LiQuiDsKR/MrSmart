@@ -6,48 +6,55 @@ import android.content.DialogInterface
 import android.widget.EditText
 
 object DialogUtils {
-    fun createAlertDialog(context:Context, title: String, message: String): AlertDialog {
-        val builder = AlertDialog.Builder(context)
+
+    lateinit var activity:MainActivity
+
+    fun initialize(activity :MainActivity){
+        this.activity = activity
+    }
+
+    fun showAlertDialog(title: String, message: String) {
+        val builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton("확인",null)
-        return builder.create()
+            .create().show()
     }
-    fun createAlertDialog(context: Context, title: String, message: String, callback : DialogInterface.OnClickListener): AlertDialog {
-        val builder = AlertDialog.Builder(context)
+    fun showAlertDialog(title: String, message: String, callback : DialogInterface.OnClickListener) {
+        val builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton("확인", callback)
-        return builder.create()
+            .create().show()
     }
-    fun createAlertDialog(context: Context, title: String, message: String, label:String, callback : DialogInterface.OnClickListener): AlertDialog {
-        val builder = AlertDialog.Builder(context)
+    fun showAlertDialog(title: String, message: String, label:String, callback : DialogInterface.OnClickListener) {
+        val builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton(label, callback)
-        return builder.create()
+            .create().show()
     }
-    fun createAlertDialog(context: Context, title: String, message: String, positiveCallback :DialogInterface.OnClickListener,negativeCallback:DialogInterface.OnClickListener): AlertDialog {
-        val builder = AlertDialog.Builder(context)
+    fun showAlertDialog(title: String, message: String, positiveCallback :DialogInterface.OnClickListener,negativeCallback:DialogInterface.OnClickListener) {
+        val builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton("확인",positiveCallback)
             .setNegativeButton("취소",negativeCallback)
-        return builder.create()
+            .create().show()
     }
 
-    fun createTextDialog(context: Context, title: String, defaultText: String, callback: (String)->Unit) :AlertDialog{
-        val editText = EditText(context)
+    fun showTextDialog(title: String, defaultText: String, callback: (String)->Unit){
+        val editText = EditText(activity)
         editText.setText(defaultText)
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(activity)
             .setTitle(title)
             .setView(editText)
             .setPositiveButton("확인"){_,_->
                 callback(editText.text.toString())
             }
             .setNegativeButton("취소", null)
-        return builder.create()
+            .create().show()
     }
 
 }

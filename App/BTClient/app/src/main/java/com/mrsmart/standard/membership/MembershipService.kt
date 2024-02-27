@@ -49,6 +49,7 @@ class MembershipService (private val listener : Listener){
 
     fun insertMembershipByPage(page : Page) {
         try {
+            dbHelper.clearMembershipTable()
             val membershipListType: Type = object : TypeToken<List<MembershipDto>>() {}.type
             val membershipList: List<MembershipDto> = gson.fromJson(gson.toJson(page.content), membershipListType)
             for (member in membershipList) {

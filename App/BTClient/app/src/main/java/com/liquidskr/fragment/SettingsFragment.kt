@@ -2,7 +2,9 @@
 
     import SharedViewModel
     import android.annotation.SuppressLint
+    import android.app.ProgressDialog.show
     import android.os.Bundle
+    import android.util.Log
     import android.view.LayoutInflater
     import android.view.View
     import android.view.ViewGroup
@@ -13,8 +15,8 @@
     import androidx.lifecycle.ViewModelProvider
     import com.liquidskr.btclient.BluetoothManager
     import com.liquidskr.btclient.Constants
-    import com.liquidskr.btclient.DialogUtils.createAlertDialog
-    import com.liquidskr.btclient.DialogUtils.createTextDialog
+    import com.liquidskr.btclient.DialogUtils
+    import com.liquidskr.btclient.DialogUtils.showTextDialog
     import com.liquidskr.btclient.MainActivity
     import com.liquidskr.btclient.PCNameService
     import com.liquidskr.btclient.R
@@ -31,6 +33,8 @@
         private lateinit var progressBar: ProgressBar
         private lateinit var progressText: TextView
         private var isPopupVisible = false
+
+        var bluetoothManager : BluetoothManager? = null
 
         private val pcNameService = PCNameService(object : PCNameService.Listener{
             override fun onException(type: Constants.ExceptionType, description: String) {
@@ -51,7 +55,12 @@
             }
 
             override fun onRequestStarted() {
-                TODO("Not yet implemented")
+                //TODO("Not yet implemented")
+                val fragment = ProgressBarFragment()
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.popupLayout, fragment)
+                    .addToBackStack(null)
+                    .commit()
             }
 
             override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
@@ -99,21 +108,22 @@
                 val callback: (String) -> Unit = { text ->
                     pcNameService.insertPCName(text)
                 }
-                createTextDialog(requireContext(),"정비실 노트북(PC)의 이름을 입력하세요.",currentPCName,callback).show()
+                showTextDialog("정비실 노트북(PC)의 이름을 입력하세요.",currentPCName,callback)
             }
 
             toolboxSetBtn.setOnClickListener {
-                TODO("야호")
+                DialogUtils.showAlertDialog("ㅑ","호")
             }
 
             toolImportBtn.setOnClickListener {
-                createAlertDialog(
-                    requireContext(),
+                DialogUtils.showAlertDialog(
                     "안내",
-                    "기준정보를 새로 불러오시겠습니까?\n기준정보를 모두 받는 데 5~6 분 정도가 소요됩니다.",
-                ){ _,_->
-
-                }
+                    "기준정보를 새로 불러오시겠습니까?\n기준정보를 모두 받는 데 5~6 분 정도가 소요됩니다."
+                    ,{ _,_->
+                        //기준정보는 뭐 별 거 없지만 rentalRequestSheetForm같은 것들은 검수과정 필요
+                        Log.d("bluetooth","${bluetoothManager}")
+                        bluetoothManager?.send(Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT,"")
+                    }, { _,_->} )
 
             }
             labelImportBtn.setOnClickListener{
@@ -126,11 +136,12 @@
 
         override fun onResume() {
             super.onResume()
-            requireActivity().
+            bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
         }
 
         override fun onPause() {
             super.onPause()
+            bluetoothManager=null
         }
 
     }

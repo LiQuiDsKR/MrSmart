@@ -21,7 +21,8 @@ public class BluetoothCommunicationHandler {
 	private String macaddress;
 	private boolean startedOK;
 	
-	private long commTimeInMillis;
+	private long commTimeInMillis; //메시지 하나에 대한 통신 타임아웃 체크
+	private long heartBeat; //연결이 끊긴 채널의 리소스 해제를 위한 타임아웃 체크
 	
 	private Translator translator;
 	private Translator.Listener traslatorListener = new Translator.Listener() {
@@ -135,6 +136,10 @@ public class BluetoothCommunicationHandler {
 	
 	public boolean isValid() {
 		if (startedOK && connectorHandler.isConnected()) {
+			if (heartBeat>GlobalConstants.HEARTBEAT_TIMEOUT * 1000) {
+				return false;
+			}
+			
 			if (commTimeInMillis == 0) {
 				return true;
 			}
@@ -143,9 +148,15 @@ public class BluetoothCommunicationHandler {
 			if (diff < GlobalConstants.COMMUNICATION_TIMEOUT * 1000) {
 				return true;
 			}
+			
 		}
 		
 		return false;
+	}
+	
+	public void setHeartBeat() {
+		heartBeat = Calendar.getInstance().getTimeInMillis();
+		logger.debug("heartBeat set : "+heartBeat);
 	}
 
 }

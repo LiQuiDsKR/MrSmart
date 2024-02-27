@@ -51,6 +51,7 @@ public class GlobalConstants {
 	
 	public static final int REQUEST_MEMBER_LIST = 1;
 	public static final int REQUEST_TOOL_LIST = 2;
+	public static final int HEARTBEAT_TIMEOUT = 120;
 
 	
 	
