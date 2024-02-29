@@ -39,18 +39,12 @@ class BluetoothManager (private val handler : Handler){
         }
 
         override fun onDisconnected() {
-            bluetoothCommunicationHandler.reconnect()
+            Log.d("bluetooth","Mngr : Disconnected!")
         }
 
         override fun onReconnectStarted() {
             handler.post {
                 listener?.onDisconnected()
-            }
-        }
-
-        override fun onReconnected() {
-            handler.post {
-                listener?.onRequestEnded()
             }
         }
 

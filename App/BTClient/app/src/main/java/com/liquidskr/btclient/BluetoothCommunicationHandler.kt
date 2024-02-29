@@ -10,11 +10,15 @@ import android.util.Log
 import androidx.core.app.PendingIntentCompat.send
 import com.liquidskr.btclient.Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT
 import com.liquidskr.btclient.Constants.BLUETOOTH_RECONNECT_INTERVAL
+import com.liquidskr.btclient.Constants.HEARTBEAT_INTERVAL
 import com.liquidskr.btclient.Constants.INITIAL_MESSAGE_DELAY
+import com.liquidskr.btclient.Constants.VALIDCHECK_INTERVAL
+import com.liquidskr.btclient.Constants.ConnectionState
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
+import java.sql.Connection
 import java.util.Calendar
 import java.util.Timer
 import java.util.TimerTask
@@ -38,7 +42,6 @@ class BluetoothCommunicationHandler (
         fun onConnected()
         fun onDisconnected()
         fun onReconnectStarted()
-        fun onReconnected()
         fun onReconnectFailed()
         fun onDataArrived(data: String)
         fun onDataSent(data: String)
@@ -59,12 +62,14 @@ class BluetoothCommunicationHandler (
 
     private val bluetoothConnectionHandlerListener :BluetoothConnectionHandler.Listener = object :BluetoothConnectionHandler.Listener{
         override fun onConnected() {
+            connectionState=ConnectionState.CONNECTED
             Log.d("bluetooth", "블루투스 연결에 성공했습니다")
-            reconnectAttempt=0
             listener.onConnected()
         }
 
         override fun onDisconnected() {
+            connectionState=ConnectionState.DISCONNECTED
+            isBluetoothConnectionHandlerNull=true
             listener.onDisconnected()
         }
 
@@ -89,6 +94,7 @@ class BluetoothCommunicationHandler (
     private var isBluetoothConnectionHandlerNull:Boolean=true
     private var isInitialized : Boolean = false
 
+    private var connectionState : ConnectionState = ConnectionState.DISCONNECTED
     private var reconnectAttempt:Int =0
     private var commTimeInMillis : Long = 0L
 
@@ -98,9 +104,13 @@ class BluetoothCommunicationHandler (
     private val validCheckTimerTask = object : TimerTask() {
         override fun run() {
             val isValid = isValid()
-            Log.d("bluetooth", "connection valid check : $isValid")
-            if (!isValid) {
-                disconnect()
+            Log.d("bluetooth", "connection : $connectionState, isValid : $isValid")
+
+            if (reconnectAttempt > BLUETOOTH_MAX_RECONNECT_ATTEMPT){
+                listener.onReconnectFailed()
+            }
+            if ( connectionState == ConnectionState.DISCONNECTED && !isValid) {
+                reconnect()
             }
         }
     }
@@ -118,6 +128,7 @@ class BluetoothCommunicationHandler (
     private lateinit var bluetoothDevice: BluetoothDevice
 
     init {
+        connectionState=ConnectionState.CONNECTING
         if (initialize()){
             connect()
             isBluetoothConnectionHandlerNull=false
@@ -126,7 +137,8 @@ class BluetoothCommunicationHandler (
             isBluetoothConnectionHandlerNull=true
         }
         //ConnectionHandler를 생성합니다.
-
+        validCheckTimer.schedule(validCheckTimerTask, BLUETOOTH_RECONNECT_INTERVAL, VALIDCHECK_INTERVAL)
+        heartBeatTimer.schedule(heartBeatTimerTask, BLUETOOTH_RECONNECT_INTERVAL, HEARTBEAT_INTERVAL)
     }
     private fun initialize(): Boolean {
         if (isInitialized) return true
@@ -174,7 +186,7 @@ class BluetoothCommunicationHandler (
             }
         }
         // 페어링된 기기 목록에서 기기 이름과 맞는 device Mac주소를 가져옵니다.
-
+        connectionState=ConnectionState.DISCONNECTED
         return false
     }
 
@@ -200,14 +212,14 @@ class BluetoothCommunicationHandler (
     }
 
     fun connect(){
-        if(!isBluetoothConnectionHandlerNull){
-            Log.d("bluetooth","BluetoothConnectionHandler Is Not Null. Disconnecting...")
-            disconnect()
+        connectionState=ConnectionState.CONNECTING
+
+        if(isInitialized){
+            bluetoothConnectionHandler= BluetoothConnectionHandler(bluetoothConnectionHandlerListener,bluetoothDevice)
+            isBluetoothConnectionHandlerNull=false
+        }else{
+            Log.d("bluetooth","Not initialzied.")
         }
-        bluetoothConnectionHandler= BluetoothConnectionHandler(bluetoothConnectionHandlerListener,bluetoothDevice)
-        //heartBeatTimer.schedule(heartBeatTimerTask,INITIAL_MESSAGE_DELAY,Constants.HEARTBEAT_INTERVAL)
-        //validCheckTimer.schedule(validCheckTimerTask,INITIAL_MESSAGE_DELAY, Constants.VALIDCHECK_INTERVAL)
-        isBluetoothConnectionHandlerNull=false
     }
 
     fun disconnect(){
@@ -221,9 +233,11 @@ class BluetoothCommunicationHandler (
         }catch(e:Exception){
             Log.d("bluetooth","disconnect failed : ${e.toString()}")
         }
+        connectionState=ConnectionState.DISCONNECTED
         isBluetoothConnectionHandlerNull=true
     }
     fun reconnect(){
+        connectionState=ConnectionState.CONNECTING
         isBluetoothConnectionHandlerNull=true
 
         //시도를 충분히 했는데도 재접속 안됨
@@ -240,11 +254,6 @@ class BluetoothCommunicationHandler (
         val reconnectAttempt = reconnectAttempt
         Log.d("bluetooth","bluetoothReconnecting... Attempt : $reconnectAttempt")
 
-        try {
-            Thread.sleep(Constants.BLUETOOTH_RECONNECT_INTERVAL)
-        } catch (e: InterruptedException) {}
-        //listener.onReconnectTry(reconnectAttempt)
-
         if(!isInitialized){
             if(initialize()){
                 isBluetoothConnectionHandlerNull=false
@@ -258,7 +267,7 @@ class BluetoothCommunicationHandler (
     }
 
     fun isValid():Boolean{
-        Log.d("bluetooth","isNull:$isBluetoothConnectionHandlerNull,cmTime:$commTimeInMillis,isInit:$isInitialized")
+        Log.d("bluetooth","reAtmp:$reconnectAttempt isNull:$isBluetoothConnectionHandlerNull,cmTime:$commTimeInMillis,isInit:$isInitialized")
         if (!isBluetoothConnectionHandlerNull){
             if (commTimeInMillis==0L){
                 return true

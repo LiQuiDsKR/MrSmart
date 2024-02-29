@@ -1,5 +1,8 @@
 package com.liquidskr.btclient
 
+import android.net.http.UrlRequest.Status.CONNECTING
+import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
+
 object Constants {
     enum class ExceptionType{
         BLUETOOTH_DEFAULT_EXCEPTION,
@@ -68,6 +71,12 @@ object Constants {
 
     }
 
+    enum class ConnectionState(val value: Int)
+    {
+        DISCONNECTED(0),
+        CONNECTED(1),
+        CONNECTING(2)
+    }
 
     const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000 //2초 안에 백버튼 두번 누르면 앱 종료
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
@@ -78,7 +87,7 @@ object Constants {
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024 // 블루투스 데이터 통신 간 1회 처리 바이트 수
     const val INTEGER_BYTE_SIZE = 4
     const val REQUEST_CODE = 123 // permissionManager에서 사용.
-    const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 30 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
+    const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 10 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
     const val BLUETOOTH_RECONNECT_INTERVAL = 500L // 500밀리초 간격으로 재접속 시도.
 
 
