@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -805,6 +806,8 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		case HI :
 			logger.debug("");
 			handler.setHeartBeat();
+			handler.sendData(keyword+Calendar.getInstance().getTimeInMillis());
+			break;
 		}
 	}
 }

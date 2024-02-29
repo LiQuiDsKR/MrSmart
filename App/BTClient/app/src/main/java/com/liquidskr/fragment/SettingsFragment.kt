@@ -2,15 +2,12 @@
 
     import SharedViewModel
     import android.annotation.SuppressLint
-    import android.app.ProgressDialog.show
     import android.os.Bundle
     import android.util.Log
     import android.view.LayoutInflater
     import android.view.View
     import android.view.ViewGroup
     import android.widget.LinearLayout
-    import android.widget.ProgressBar
-    import android.widget.TextView
     import androidx.fragment.app.Fragment
     import androidx.lifecycle.ViewModelProvider
     import com.liquidskr.btclient.BluetoothManager
@@ -30,9 +27,6 @@
         private lateinit var closeBtn: LinearLayout
 
         private lateinit var popupLayout: View
-        private lateinit var progressBar: ProgressBar
-        private lateinit var progressText: TextView
-        private var isPopupVisible = false
 
         var bluetoothManager : BluetoothManager? = null
 
@@ -47,11 +41,11 @@
 
         private val bluetoothManagerListener = object : BluetoothManager.Listener{
             override fun onDisconnected() {
-                TODO("Not yet implemented")
-            }
-
-            override fun onReconnected() {
-                TODO("Not yet implemented")
+                val reconnectFrag = ReconnectFragment()
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.bluetoothPopupLayout,reconnectFrag)
+                    .addToBackStack(null)
+                    .commit()
             }
 
             override fun onRequestStarted() {

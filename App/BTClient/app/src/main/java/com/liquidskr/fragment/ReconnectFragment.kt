@@ -9,23 +9,22 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 
-class ProgressBarFragment : Fragment() {
+class ReconnectFragment : Fragment() {
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
 
+    var bluetoothManager : BluetoothManager? = null
+
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,reconnectFrag)
-                .addToBackStack(null)
-                .commit()
+            //do nothing
         }
 
         override fun onRequestStarted() {
@@ -34,25 +33,34 @@ class ProgressBarFragment : Fragment() {
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
             //TODO("Not yet implemented")
+            Log.d("reconnecting", "$context : $processedAmount/$totalAmount")
             setProgressBar(processedAmount,totalAmount,context)
         }
 
         override fun onRequestEnded() {
-            close()
+            DialogUtils.showAlertDialog("연결됨", "블루투스 연결 성공"){_,_->close()}
         }
 
         override fun onRequestFailed(message: String) {
-            DialogUtils.showAlertDialog("통신 실패", message){_,_->close()}
+            DialogUtils.showAlertDialog(
+                title = "재접속 실패",
+                message = "서버와 접속에 실패했습니다. 다시 시도하시겠습니까?",
+                positiveCallback = {_,_-> bluetoothManager?.connect() },
+                negativeCallback = {_,_->
+                    DialogUtils.showAlertDialog("종료","앱을 종료합니다. 블루투스 연결 상태를 다시 확인하고 실행해주세요.")
+                    {_,_-> activity?.finish() }
+                }
+            )
         }
 
         override fun onException(message: String) {
-            DialogUtils.showAlertDialog("통신 실패", message){_,_->close()}
+            DialogUtils.showAlertDialog("재접속 실패", message){_,_->close()}
         }
     }
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_progress_bar, container, false)
+        val view = inflater.inflate(R.layout.fragment_reconnect, container, false)
         popupLayout = view.findViewById(R.id.popupLayout)
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
@@ -83,6 +91,22 @@ class ProgressBarFragment : Fragment() {
     }
 
     fun close(){
-        requireActivity().supportFragmentManager.popBackStack()
+        try{
+            val activity = requireActivity()
+            val fragmentManager : FragmentManager = activity.supportFragmentManager
+            fragmentManager.popBackStack()
+        }catch (e : Exception){
+            Log.d("bluetooth",e.toString())
+        }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+    }
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
 }

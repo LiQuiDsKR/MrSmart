@@ -72,13 +72,13 @@ object Constants {
     const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000 //2초 안에 백버튼 두번 누르면 앱 종료
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
     const val COMMUNICATION_TIMEOUT = 3000 //3초
-    const val INITIAL_MESSAGE_DELAY = 1000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
+    const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
     const val VALIDCHECK_INTERVAL = 3000L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
     const val HEARTBEAT_INTERVAL = 60000L //  1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024 // 블루투스 데이터 통신 간 1회 처리 바이트 수
     const val INTEGER_BYTE_SIZE = 4
     const val REQUEST_CODE = 123 // permissionManager에서 사용.
-    const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 3 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
+    const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 30 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
     const val BLUETOOTH_RECONNECT_INTERVAL = 500L // 500밀리초 간격으로 재접속 시도.
 
 

@@ -23,7 +23,7 @@ class BluetoothConnectionHandler (
 
     private lateinit var bluetoothSocket: BluetoothSocket
 
-    val uuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
+    private val uuid: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP (Serial Port Profile) UUID
 
 
     interface Listener {
@@ -35,6 +35,7 @@ class BluetoothConnectionHandler (
     }
 
     init {
+        Log.d("bluetooth","ConnectionHandler created / device : $bluetoothDevice, uuid : $uuid")
         this.start()
     }
 
@@ -149,7 +150,7 @@ class BluetoothConnectionHandler (
     }
 
     fun close(){
-        Log.d("bluetooth","disconnect...")
+        Log.d("bluetooth","Conn : disconnecting...")
         isConnected=false
         this.interrupt()
     }

@@ -22,7 +22,6 @@ class BluetoothManager (private val handler : Handler){
 
     interface Listener {
         fun onDisconnected()
-        fun onReconnected()
         fun onRequestStarted()
         fun onRequestProcessed(context : String, processedAmount : Int , totalAmount : Int)
         fun onRequestEnded()
@@ -33,33 +32,36 @@ class BluetoothManager (private val handler : Handler){
 
     private val bluetoothCommunicationHandlerListener = object:BluetoothCommunicationHandler.Listener{
         override fun onConnected() {
-            //val message : String = MEMBERSHIP_ALL_COUNT.toString()
-            val message : String = "Connected"
-            Log.d("bluetooth",message)
-            //bluetoothCommunicationHandler.send(message.trim())
-        }
-
-        override fun onDisconnected() {
+            Log.d("bluetooth","Connected")
             handler.post{
-                listener?.onDisconnected()
-                listener?.onRequestStarted()
+                listener?.onRequestEnded()
             }
         }
 
-        override fun onReconnectTry(reconnectAttempt: Int) {
-            if (reconnectAttempt<=Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT){
-                handler.post{
-                    listener?.onRequestProcessed("재접속 중...",reconnectAttempt,Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT)
-                }
-            } else {
-                handler.post{
-                    listener?.onRequestFailed("재접속에 실패했습니다. 1. 블루투스 기능이 활성화되어 있는지 확인해주세요. 2. 핸드폰이 노트북과 너무 멀리 떨어져 있는지 확인해주세요. 3. 앱을 껐다가 다시 켜주세요.")
-                }
+        override fun onDisconnected() {
+            bluetoothCommunicationHandler.reconnect()
+        }
+
+        override fun onReconnectStarted() {
+            handler.post {
+                listener?.onDisconnected()
+            }
+        }
+
+        override fun onReconnected() {
+            handler.post {
+                listener?.onRequestEnded()
+            }
+        }
+
+        override fun onReconnectFailed() {
+            handler.post{
+                listener?.onRequestFailed("abcsdfwlo")
             }
         }
 
         override fun onDataArrived(data: String) {
-            Log.d("bluetooth","final : ${data}")
+            Log.d("bluetooth","final : $data")
             processData(data)
         }
 
@@ -69,6 +71,14 @@ class BluetoothManager (private val handler : Handler){
 
         override fun onException(type: Constants.ExceptionType, description: String) {
             Log.d("bluetooth","exception final : [${type.name}] : [${description}]")
+            when (type){
+                Constants.ExceptionType.BLUETOOTH_NO_PAIRED_DEVICE ->{
+                    handler.post {
+                        listener?.onDisconnected()
+                    }
+                }
+                else -> {}
+            }
         }
 
     }
@@ -82,7 +92,7 @@ class BluetoothManager (private val handler : Handler){
         override fun onInserted(size: Int, index: Int, total: Int) {
             val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
 
-            Log.d("membership","${index} / ${total/pageSize} pages inserted. (size : ${size})")
+            Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${size})")
 
             loadingPageIndex+=1
 
@@ -329,6 +339,9 @@ class BluetoothManager (private val handler : Handler){
             TEST.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 TODO("not implemented yet")
+            }
+            HI.name -> {
+                Log.d("bluetooth",jsonStr)
             }
         }
     }

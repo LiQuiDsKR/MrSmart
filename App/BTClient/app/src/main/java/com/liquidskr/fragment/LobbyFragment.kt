@@ -40,11 +40,11 @@ class LobbyFragment : Fragment() {
 
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
-            //TODO("Not yet implemented")
-        }
-
-        override fun onReconnected() {
-            //TODO("Not yet implemented")
+            val reconnectFrag = ReconnectFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.bluetoothPopupLayout,reconnectFrag)
+                .addToBackStack(null)
+                .commit()
         }
 
         override fun onRequestStarted() {
