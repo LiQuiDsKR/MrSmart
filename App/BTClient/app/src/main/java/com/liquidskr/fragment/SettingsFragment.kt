@@ -108,7 +108,10 @@
                     ,{ _,_->
                         //기준정보는 뭐 별 거 없지만 rentalRequestSheetForm같은 것들은 검수과정 필요
                         Log.d("bluetooth","${bluetoothManager}")
-                        bluetoothManager?.send(Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT,"")
+
+                        val type =Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT
+                        val data =""
+                        bluetoothManager?.send(type,data)
                     }, { _,_->} )
 
             }

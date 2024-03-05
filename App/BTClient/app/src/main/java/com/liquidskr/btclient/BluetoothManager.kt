@@ -14,6 +14,7 @@ import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolboxCompressDto
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import com.liquidskr.btclient.Constants.BluetoothMessageType.*
+import com.mrsmart.standard.tool.ToolService
 import java.lang.reflect.Type
 
 class BluetoothManager (private val handler : Handler){
@@ -82,10 +83,12 @@ class BluetoothManager (private val handler : Handler){
     private val bluetoothCommunicationHandler : BluetoothCommunicationHandler = BluetoothCommunicationHandler(bluetoothCommunicationHandlerListener)
 
     private val membershipService = MembershipService.getInstance()
+    private val toolService = ToolService.getInstance()
 
     private var loadingPageIndex : Int = -1 // -1 : not loading , 0~ : loading index
-    private var loadingType : Constants.BluetoothMessageType = NULL // reload시 Send.
-    private var isReloadNeed : Boolean =false // false : insert , true : replace (upsert)
+    private var reloadFlag : Boolean = false // false : 안끊김 (insert) , true : 끊겼었음. 재송신중 (upsert)
+    private var lastSendedMessageType : Constants.BluetoothMessageType = NULL
+    private var lastSendedMessageData : String = ""
 
 
     fun send(type:Constants.BluetoothMessageType,data:String){
@@ -94,9 +97,22 @@ class BluetoothManager (private val handler : Handler){
             listener?.onRequestStarted()
         }
 
+        //cache
+        lastSendedMessageType = type
+        lastSendedMessageData = data
+
         when(type){
+            NULL -> {
+                Log.d("bluetooth","NULL")
+            }
+            MEMBERSHIP_ALL ->{
+                bluetoothCommunicationHandler.send(type.toString()+","+data)
+            }
             MEMBERSHIP_ALL_COUNT ->{
                 bluetoothCommunicationHandler.send(type.toString())
+            }
+            TOOL_ALL ->{
+                bluetoothCommunicationHandler.send(type.toString()+","+data)
             }
             TOOL_ALL_COUNT ->{
                 bluetoothCommunicationHandler.send(type.toString())
@@ -112,29 +128,47 @@ class BluetoothManager (private val handler : Handler){
                 //response
                 val membershipPage = gson.fromJson(jsonStr, Page::class.java)
 
-                val size = membershipPage.size
+                //database update
+                if (reloadFlag) {
+                    membershipService.upsertMembershipByPage(membershipPage)
+                    reloadFlag=false
+                } else {
+                    membershipService.insertMembershipByPage(membershipPage)
+                }
+
+                //preprocess - parse
+                //val size = membershipPage.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
                 val index = membershipPage.pageable.page
                 val total = membershipPage.total
 
+                //preprocess - logic
                 val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
-
-                Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${size})")
-
+                Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
                 loadingPageIndex+=1
 
-                if (loadingPageIndex>total/pageSize) {
-                    Log.d("membership", "membership insert complete (size : ${total})")
-                    return
-                }
 
-                val message = Constants.BluetoothMessageType.membershipAll()
-
+                //event
                 handler.post{
                     listener?.onRequestProcessed(MEMBERSHIP_ALL.processMessage,index,total/pageSize)
                 }
 
-                bluetoothCommunicationHandler.send(message.trim())
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
 
+                    //send 1 - membership load finished
+                    Log.d("membership", "membership insert complete (size : ${total})")
+                    val type = TOOL_ALL_COUNT
+                    val data = ""
+                    send(type, data)
+
+                } else{
+
+                    //send 2 - membership load not finished
+                    val type = MEMBERSHIP_ALL
+                    val data = "{\"size\":${pageSize},\"page\":${loadingPageIndex}}"
+                    send(type, data)
+
+                }
 
             }
 
@@ -142,30 +176,89 @@ class BluetoothManager (private val handler : Handler){
                 //response
                 val total = gson.fromJson(jsonStr,Int::class.java)
 
+                //database update
+                membershipService.resetTable()
+
                 //event
                 handler.post{
                     listener?.onRequestProcessed(MEMBERSHIP_ALL_COUNT.processMessage,1,1)
                 }
 
+                //postprocess - logic
                 val size = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
-
                 loadingPageIndex=0
 
-                val message : String =
-                    MEMBERSHIP_ALL.toString() +
-                            ",{\"size\":${size},\"page\":${loadingPageIndex}}"
-
-                bluetoothCommunicationHandler.send(message.trim())
+                //send
+                val type = MEMBERSHIP_ALL
+                val data = "{\"size\":${size},\"page\":${loadingPageIndex}}"
+                send(type,data)
             }
 
             TOOL_ALL.name -> {
-                val listType: Type = object : TypeToken<Page>() {}.type
-                TODO("not implemented yet")
+                //response
+                val toolPage = gson.fromJson(jsonStr, Page::class.java)
+
+                //database update
+                if (reloadFlag){
+                    toolService.upsertToolByPage(toolPage)
+                    reloadFlag=false
+                } else {
+                    toolService.insertToolByPage(toolPage)
+                }
+
+                //preprocess - parse
+                //val size = toolPage.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
+                val index = toolPage.pageable.page
+                val total = toolPage.total
+
+                //preprocess - logic
+                val pageSize = Constants.TOOL_PAGE_SIZE.coerceAtMost(total)
+                Log.d("tool","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                loadingPageIndex+=1
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(TOOL_ALL.processMessage,index,total/pageSize)
+                }
+
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
+
+                    //send 1 - tool load finished
+                    Log.d("tool", "tool insert complete (size : ${total})")
+                    handler.post{
+                        listener?.onRequestEnded()
+                    }
+                } else{
+
+                    //send 2 - membership load not finished
+                    val type = TOOL_ALL
+                    val data = "{\"size\":${pageSize},\"page\":${loadingPageIndex}}"
+                    send(type, data)
+
+                }
             }
 
             TOOL_ALL_COUNT.name -> {
-                val listType: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
+
+                //database update
+                toolService.resetTable()
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(TOOL_ALL_COUNT.processMessage,1,1)
+                }
+
+                //postprocess - logic
+                val size = Constants.TOOL_PAGE_SIZE.coerceAtMost(total)
+                loadingPageIndex=0
+
+                //send
+                val type = TOOL_ALL
+                val data = "{\"size\":${size},\"page\":${loadingPageIndex}}"
+                send(type,data)
             }
 
             RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
@@ -364,5 +457,9 @@ class BluetoothManager (private val handler : Handler){
     }
 
     fun continueRequest() {
+        if (lastSendedMessageType != NULL) {
+            reloadFlag = true
+            send(lastSendedMessageType, lastSendedMessageData)
+        }
     }
 }

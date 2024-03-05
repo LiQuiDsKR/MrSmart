@@ -45,7 +45,7 @@ class WorkerFragment : Fragment() {
                 var dbHelper = DatabaseHelper.getInstance()
                 var member = dbHelper.getMembershipByCode(code)
                 if (member.role == "USER") {
-                    val fragment = WorkerLobbyFragment(member.toMembership())
+                    val fragment = WorkerLobbyFragment(member.toMembershipDto())
                     sharedViewModel.loginWorker = member
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)

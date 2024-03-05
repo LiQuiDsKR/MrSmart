@@ -29,7 +29,7 @@ class ProgressBarFragment : Fragment() {
         }
 
         override fun onRequestStarted() {
-            Log.d("progressbar","엥 여긴 왜 실행됩니까 여기는 실행될 리가 없어야 합니다")
+            Log.d("progressbar","Progress started 사실 이게 계속 뜨는게 의도된게 아니긴 한데 분기 나누기 귀찮고 문제 없어서 그냥 냅둠")
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
@@ -38,7 +38,10 @@ class ProgressBarFragment : Fragment() {
         }
 
         override fun onRequestEnded() {
-            close()
+            Log.d("progressbar","Request Ended Successfully")
+            DialogUtils.showAlertDialog("성공","처리가 정상적으로 완료되었습니다."){
+                _,_-> close()
+            }
         }
 
         override fun onRequestFailed(message: String) {

@@ -1,12 +1,12 @@
 package com.mrsmart.standard.membership
 
+import android.nfc.Tag
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.mrsmart.standard.page.Page
-import java.lang.reflect.Type
+
 class MembershipService private constructor() {
     val dbHelper: DatabaseHelper by lazy { DatabaseHelper.getInstance() }
     val gson = Gson()
@@ -14,7 +14,7 @@ class MembershipService private constructor() {
     fun getMembershipById(id: Long): MembershipDto {
         try {
             val membershipEntity = dbHelper.getMembershipById(id)
-            return membershipEntity.toMembership()
+            return membershipEntity.toMembershipDto()
         } catch (e: UninitializedPropertyAccessException) {
             // Log.e(TAG, "Database not initialized for ID: $id", e)
             throw IllegalStateException("Database has not been initialized.", e)
@@ -28,7 +28,7 @@ class MembershipService private constructor() {
         try {
             val membershipEntity = dbHelper.getMembershipByCode(code)
             Log.v(TAG,membershipEntity.toString())
-            return membershipEntity.toMembership()
+            return membershipEntity.toMembershipDto()
         } catch (e: UninitializedPropertyAccessException) {
             Log.e(TAG, "Database not initialized for code: $code", e)
             throw IllegalStateException("Database has not been initialized.", e)
@@ -59,7 +59,7 @@ class MembershipService private constructor() {
                 val employmentStatus = member.employmentStatus.toString()
 
                 dbHelper.insertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                Log.d("membership", "code : ${code}, name : ${name} inserted.")
+                Log.d(TAG, "code : ${code}, name : ${name} inserted.")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to insert membership data", e)
@@ -83,7 +83,7 @@ class MembershipService private constructor() {
                 val employmentStatus = member.employmentStatus.toString()
 
                 dbHelper.upsertMembershipData(id, code, password, name, part, subPart, mainPart, role, employmentStatus)
-                Log.d("membership", "code : ${code}, name : ${name} upserted.")
+                Log.d(TAG, "code : ${code}, name : ${name} upserted.")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to insert membership data", e)

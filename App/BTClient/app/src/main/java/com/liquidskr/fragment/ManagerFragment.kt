@@ -58,7 +58,7 @@ class ManagerFragment : Fragment() {
                 if (member.role == "MANAGER") {
                     if (pwTextField.text.toString().equals(password)) {
                         sharedViewModel.loginManager = member
-                        val fragment = ManagerLobbyFragment(member.toMembership())
+                        val fragment = ManagerLobbyFragment(member.toMembershipDto())
                         requireActivity().supportFragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainer, fragment)
                             .addToBackStack("ManagerLogin")

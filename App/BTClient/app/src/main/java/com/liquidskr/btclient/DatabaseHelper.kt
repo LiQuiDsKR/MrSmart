@@ -351,6 +351,51 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return id
     }
+    fun upsertToolData(
+        toolId: Long,
+        toolMaingroup: String,
+        toolSubgroup: String,
+        toolCode: String,
+        toolKrName: String,
+        toolEngName: String,
+        toolSpec: String,
+        toolUnit: String,
+        toolPrice: Int,
+        toolReplacementCycle: Int,
+        toolBuyCode: String
+    ): Long{
+        val values = ContentValues()
+        values.put(COLUMN_TOOL_ID, toolId)
+        values.put(COLUMN_TOOL_MAINGROUP, toolMaingroup)
+        values.put(COLUMN_TOOL_SUBGROUP, toolSubgroup)
+        values.put(COLUMN_TOOL_CODE, toolCode)
+        values.put(COLUMN_TOOL_KRNAME, toolKrName)
+        values.put(COLUMN_TOOL_ENGNAME, toolEngName)
+        values.put(COLUMN_TOOL_SPEC, toolSpec)
+        values.put(COLUMN_TOOL_UNIT, toolUnit)
+        values.put(COLUMN_TOOL_PRICE, toolPrice)
+        values.put(COLUMN_TOOL_REPLACEMENTCYCLE, toolReplacementCycle)
+        values.put(COLUMN_TOOL_BUYCODE, toolBuyCode)
+
+        val db = this.writableDatabase
+
+        val numberOfRowsUpdated = db.update(
+            TABLE_TOOL_NAME,
+            values,
+            "$COLUMN_TOOL_ID = ?",
+            arrayOf(toolId.toString())
+        )
+
+        val id :Long
+        if (numberOfRowsUpdated == 0) {
+            id = db.insert(TABLE_TOOL_NAME, null, values)
+        } else {
+            id = toolId
+        }
+
+        db.close()
+        return id
+    }
 
     fun insertStandbyData(
         //standbyId: Long,
@@ -565,6 +610,34 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_ID = ?"
         val selectionArgs = arrayOf(id.toString())
+        lateinit var toolDtoSQLite: ToolDtoSQLite
+        val cursor = db.rawQuery(query, selectionArgs)
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
+            val subGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SUBGROUP))
+            val mainGroup = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_MAINGROUP))
+            val code = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_CODE))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_KRNAME))
+            val engName = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_ENGNAME))
+            val spec = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_SPEC))
+            val unit = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_UNIT))
+            val price = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_PRICE))
+            val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
+            val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
+
+            toolDtoSQLite = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+        }
+
+        cursor.close()
+        db.close()
+        return toolDtoSQLite
+    }
+
+    @SuppressLint("Range")
+    fun getToolByCode(code: String): ToolDtoSQLite {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
+        val selectionArgs = arrayOf(code.toString())
         lateinit var toolDtoSQLite: ToolDtoSQLite
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
@@ -1141,4 +1214,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DELETE FROM $TABLE_OUTSTANDING_NAME")
         db.close()
     }
+
+
 }

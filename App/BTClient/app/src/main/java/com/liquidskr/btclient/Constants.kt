@@ -21,9 +21,9 @@ object Constants {
         BLUETOOTH_CONNECTION_RETRY_FAILED,
     }
     enum class BluetoothMessageType(val processMessage:String){
-        NULL("불러올 수 없는 타입입니다..."),
+        NULL("불러올 수 없는 타입입니다...",),
 
-        MEMBERSHIP_ALL("사원 기준정보 불러오는 중..."),
+        MEMBERSHIP_ALL("사원 기준정보 불러오는 중...",),
         MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중..."),
         TOOL_ALL("공기구 기준정보 불러오는 중..."),
         TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중..."),
@@ -72,7 +72,7 @@ object Constants {
         // 연결 상태 확인용. CommunicationHandler에서 사용.
         HI("heartBeat set")
 
-
+/*
         // 각 함수들도 정의해줍니다.
         fun membershipAll(size: Int, index: Int): String {
             return MEMBERSHIP_ALL.toString() + ",{\"size\":${size},\"page\":${index}}"
@@ -244,6 +244,8 @@ object Constants {
         fun test() {
             // 함수 구현
         }
+
+ */
     }
 
     enum class ConnectionState(val value: Int)
@@ -253,8 +255,10 @@ object Constants {
         CONNECTING(2)
     }
 
+
     const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000 //2초 안에 백버튼 두번 누르면 앱 종료
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
+    const val TOOL_PAGE_SIZE = 10 // 한 페이지당 처리할 공기구 수
     const val COMMUNICATION_TIMEOUT = 3000 //3초
     const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
     const val VALIDCHECK_INTERVAL = 500L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
