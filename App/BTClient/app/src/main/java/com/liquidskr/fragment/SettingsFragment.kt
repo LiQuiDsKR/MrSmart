@@ -15,7 +15,7 @@
     import com.liquidskr.btclient.DialogUtils
     import com.liquidskr.btclient.DialogUtils.showTextDialog
     import com.liquidskr.btclient.MainActivity
-    import com.liquidskr.btclient.PCNameService
+    import com.liquidskr.btclient.BluetoothDeviceSaveService
     import com.liquidskr.btclient.R
 
     class SettingsFragment() : Fragment() {
@@ -30,14 +30,7 @@
 
         var bluetoothManager : BluetoothManager? = null
 
-        private val pcNameService = PCNameService(object : PCNameService.Listener{
-            override fun onException(type: Constants.ExceptionType, description: String) {
-                TODO("Not yet implemented")
-            }
-            override fun onInserted(size: Int, index: Int, total: Int) {
-                TODO("Not yet implemented")
-            }
-        })
+        private val bluetoothDeviceSaveService = BluetoothDeviceSaveService.getInstance()
 
         private val bluetoothManagerListener = object : BluetoothManager.Listener{
             override fun onDisconnected() {
@@ -49,7 +42,6 @@
             }
 
             override fun onRequestStarted() {
-                //TODO("Not yet implemented")
                 val fragment = ProgressBarFragment()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.popupLayout, fragment)
@@ -98,11 +90,11 @@
                 requireActivity().supportFragmentManager.popBackStack()
             }
             pcNameSetBtn.setOnClickListener {
-                val currentPCName = pcNameService.getPCName()?:""
+                val currentPCName = bluetoothDeviceSaveService.getPCName()?:""
                 val callback: (String) -> Unit = { text ->
-                    pcNameService.insertPCName(text)
+                    bluetoothDeviceSaveService.insertPCName(text)
                 }
-                showTextDialog("정비실 노트북(PC)의 이름을 입력하세요.",currentPCName,callback)
+                showTextDialog("정비실 노트북의 Mac 주소를 입력해주세요.",currentPCName,callback)
             }
 
             toolboxSetBtn.setOnClickListener {

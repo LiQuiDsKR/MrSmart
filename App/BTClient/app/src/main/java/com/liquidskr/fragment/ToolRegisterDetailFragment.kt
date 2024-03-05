@@ -68,7 +68,7 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>) :
         get() = requireActivity() as MainActivity
 
     private fun showBluetoothModal(title: String, content: String) {
-        mainActivity.showBluetoothModal(title, content, bluetoothModalListener)
+        //mainActivity.showBluetoothModal(title, content, bluetoothModalListener)
     }
     private val bluetoothModalListener = object : MainActivity.BluetoothModalListener {
         override fun onConfirmButtonClicked() {

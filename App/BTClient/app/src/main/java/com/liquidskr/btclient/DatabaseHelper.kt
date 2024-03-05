@@ -280,6 +280,46 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
+    fun upsertMembershipData(membershipId: Long,
+                             membershipCode: String,
+                             membershipPassword: String,
+                             membershipName: String,
+                             membershipPart: String,
+                             membershipSubpart: String,
+                             membershipMainpart: String,
+                             membershipRole: String,
+                             membershipEmploymentState: String) : Long{
+        val values = ContentValues()
+        values.put(COLUMN_Membership_ID, membershipId)
+        values.put(COLUMN_Membership_CODE, membershipCode)
+        values.put(COLUMN_Membership_PASSWORD, membershipPassword)
+        values.put(COLUMN_Membership_NAME, membershipName)
+        values.put(COLUMN_Membership_PART, membershipPart)
+        values.put(COLUMN_Membership_SUBPART, membershipSubpart)
+        values.put(COLUMN_Membership_MAINPART, membershipMainpart)
+        values.put(COLUMN_Membership_ROLE, membershipRole)
+        values.put(COLUMN_Membership_EMPLOYMENT_STATE, membershipEmploymentState)
+
+        val db = this.writableDatabase
+
+        val numberOfRowsUpdated = db.update(
+            TABLE_Membership_NAME,
+            values,
+            "$COLUMN_Membership_ID = ?",
+            arrayOf(membershipId.toString())
+        )
+
+        val id :Long
+        if (numberOfRowsUpdated == 0) {
+            id = db.insert(TABLE_Membership_NAME, null, values)
+        } else {
+            id = membershipId
+        }
+
+        db.close()
+        return id
+    }
+
     fun insertToolData(
         toolId: Long,
         toolMaingroup: String,

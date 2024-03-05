@@ -2,6 +2,7 @@ package com.liquidskr.btclient
 
 import android.net.http.UrlRequest.Status.CONNECTING
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
+import java.lang.reflect.Type
 
 object Constants {
     enum class ExceptionType{
@@ -19,7 +20,9 @@ object Constants {
         DATABASE_INSERT_EXCEPTION,
         BLUETOOTH_CONNECTION_RETRY_FAILED,
     }
-    enum class BluetoothMessageType(val processMessage:String) {
+    enum class BluetoothMessageType(val processMessage:String){
+        NULL("불러올 수 없는 타입입니다..."),
+
         MEMBERSHIP_ALL("사원 기준정보 불러오는 중..."),
         MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중..."),
         TOOL_ALL("공기구 기준정보 불러오는 중..."),
@@ -69,6 +72,178 @@ object Constants {
         // 연결 상태 확인용. CommunicationHandler에서 사용.
         HI("heartBeat set")
 
+
+        // 각 함수들도 정의해줍니다.
+        fun membershipAll(size: Int, index: Int): String {
+            return MEMBERSHIP_ALL.toString() + ",{\"size\":${size},\"page\":${index}}"
+        }
+
+        fun membershipAllCount(): String {
+            return MEMBERSHIP_ALL_COUNT.toString()
+        }
+
+        fun toolAll(size: Int, index: Int): String {
+            return TOOL_ALL.toString() + ",{\"size\":${size},\"page\":${index}}"
+        }
+
+        fun toolAllCount(): String {
+            return TOOL_ALL_COUNT.toString()
+        }
+        fun rentalRequestSheetPageByToolbox() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetListByToolbox() {
+            // 함수 구현
+        }
+
+        fun rentalSheetPageByMembership() {
+            // 함수 구현
+        }
+
+        fun returnSheetPageByMembership() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageByMembership() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetListByMembership() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageByToolbox() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetListByToolbox() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetForm() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetApprove() {
+            // 함수 구현
+        }
+
+        fun returnSheetForm() {
+            // 함수 구현
+        }
+
+        fun toolboxToolLabelForm() {
+            // 함수 구현
+        }
+
+        fun returnSheetRequest() {
+            // 함수 구현
+        }
+
+        fun tagForm() {
+            // 함수 구현
+        }
+
+        fun toolboxToolLabel() {
+            // 함수 구현
+        }
+
+        fun tagList() {
+            // 함수 구현
+        }
+
+        fun tagAll() {
+            // 함수 구현
+        }
+
+        fun toolboxToolLabelAll() {
+            // 함수 구현
+        }
+
+        fun tagGroup() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetByTag() {
+            // 함수 구현
+        }
+
+        fun tagAllCount() {
+            // 함수 구현
+        }
+
+        fun toolboxToolLabelAllCount() {
+            // 함수 구현
+        }
+
+        fun tag() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetApproveStandby() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetFormStandby() {
+            // 함수 구현
+        }
+
+        fun returnSheetFormStandby() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetCancel() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetReadyPageByMembership() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageByMembershipCount() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetReadyPageByMembershipCount() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageByToolboxCount() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetPageByToolboxCount() {
+            // 함수 구현
+        }
+
+        fun rentalRequestSheetApply() {
+            // 함수 구현
+        }
+
+        fun tagAndToolboxToolLabelForm() {
+            // 함수 구현
+        }
+
+        fun tagAndToolboxToolLabel() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageAllCount() {
+            // 함수 구현
+        }
+
+        fun outstandingRentalSheetPageAll() {
+            // 함수 구현
+        }
+
+        fun toolboxAll() {
+            // 함수 구현
+        }
+
+        fun test() {
+            // 함수 구현
+        }
     }
 
     enum class ConnectionState(val value: Int)
@@ -82,7 +257,7 @@ object Constants {
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
     const val COMMUNICATION_TIMEOUT = 3000 //3초
     const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
-    const val VALIDCHECK_INTERVAL = 3000L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
+    const val VALIDCHECK_INTERVAL = 500L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
     const val HEARTBEAT_INTERVAL = 60000L //  1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024 // 블루투스 데이터 통신 간 1회 처리 바이트 수
     const val INTEGER_BYTE_SIZE = 4

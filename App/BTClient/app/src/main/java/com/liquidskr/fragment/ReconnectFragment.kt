@@ -34,7 +34,6 @@ class ReconnectFragment : Fragment() {
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
             //TODO("Not yet implemented")
             Log.d("reconnecting", "$context : $processedAmount/$totalAmount")
-            setProgressBar(processedAmount,totalAmount,context)
         }
 
         override fun onRequestEnded() {
@@ -45,7 +44,10 @@ class ReconnectFragment : Fragment() {
             DialogUtils.showAlertDialog(
                 title = "재접속 실패",
                 message = "서버와 접속에 실패했습니다. 다시 시도하시겠습니까?",
-                positiveCallback = {_,_-> bluetoothManager?.connect() },
+                positiveCallback = {_,_->
+                    bluetoothManager?.connect()
+                    bluetoothManager?.resetReconnectAttempt()
+                                   },
                 negativeCallback = {_,_->
                     DialogUtils.showAlertDialog("종료","앱을 종료합니다. 블루투스 연결 상태를 다시 확인하고 실행해주세요.")
                     {_,_-> activity?.finish() }
@@ -54,7 +56,7 @@ class ReconnectFragment : Fragment() {
         }
 
         override fun onException(message: String) {
-            DialogUtils.showAlertDialog("재접속 실패", message){_,_->close()}
+            DialogUtils.showAlertDialog("재접속 실패", message){_,_->activity?.finish()}
         }
     }
 
@@ -81,20 +83,12 @@ class ReconnectFragment : Fragment() {
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }
-
-    fun setProgressBar(progress:Int,total:Int,context:String){
-        progressBar.max=total
-        progressBar.progress=progress
-
-        val finalStr : String = "$context [$progress/$total]"
-        progressText.text = finalStr
-    }
-
     fun close(){
         try{
             val activity = requireActivity()
             val fragmentManager : FragmentManager = activity.supportFragmentManager
             fragmentManager.popBackStack()
+            bluetoothManager?.continueRequest()
         }catch (e : Exception){
             Log.d("bluetooth",e.toString())
         }

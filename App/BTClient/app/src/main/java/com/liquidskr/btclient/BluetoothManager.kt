@@ -1,5 +1,6 @@
 package com.liquidskr.btclient
 
+import android.bluetooth.BluetoothDevice
 import android.os.Handler
 import android.util.Log
 import com.google.gson.Gson
@@ -30,6 +31,8 @@ class BluetoothManager (private val handler : Handler){
     }
     var listener : Listener? = null
 
+
+    private lateinit var bluetoothDevice : BluetoothDevice
     private val bluetoothCommunicationHandlerListener = object:BluetoothCommunicationHandler.Listener{
         override fun onConnected() {
             Log.d("bluetooth","Connected")
@@ -78,37 +81,11 @@ class BluetoothManager (private val handler : Handler){
     }
     private val bluetoothCommunicationHandler : BluetoothCommunicationHandler = BluetoothCommunicationHandler(bluetoothCommunicationHandlerListener)
 
-    private val membershipServiceListener = object: MembershipService.Listener{
-        override fun onException(type: Constants.ExceptionType, description: String) {
-            Log.d("membership","exception final : [${type.name}] : [${description}]")
-        }
-
-        override fun onInserted(size: Int, index: Int, total: Int) {
-            val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
-
-            Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${size})")
-
-            loadingPageIndex+=1
-
-            if (loadingPageIndex>total/pageSize) {
-                Log.d("membership", "membership insert complete (size : ${total})")
-                return
-            }
-
-            val message : String =
-                MEMBERSHIP_ALL.toString() +
-                        ",{\"size\":${pageSize},\"page\":${loadingPageIndex}}"
-
-            handler.post{
-                listener?.onRequestProcessed(MEMBERSHIP_ALL.processMessage,index,total/pageSize)
-            }
-
-            bluetoothCommunicationHandler.send(message.trim())
-        }
-    }
-    private val membershipService = MembershipService(membershipServiceListener)
+    private val membershipService = MembershipService.getInstance()
 
     private var loadingPageIndex : Int = -1 // -1 : not loading , 0~ : loading index
+    private var loadingType : Constants.BluetoothMessageType = NULL // reload시 Send.
+    private var isReloadNeed : Boolean =false // false : insert , true : replace (upsert)
 
 
     fun send(type:Constants.BluetoothMessageType,data:String){
@@ -135,7 +112,30 @@ class BluetoothManager (private val handler : Handler){
                 //response
                 val membershipPage = gson.fromJson(jsonStr, Page::class.java)
 
-                membershipService.insertMembershipByPage(membershipPage)
+                val size = membershipPage.size
+                val index = membershipPage.pageable.page
+                val total = membershipPage.total
+
+                val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
+
+                Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${size})")
+
+                loadingPageIndex+=1
+
+                if (loadingPageIndex>total/pageSize) {
+                    Log.d("membership", "membership insert complete (size : ${total})")
+                    return
+                }
+
+                val message = Constants.BluetoothMessageType.membershipAll()
+
+                handler.post{
+                    listener?.onRequestProcessed(MEMBERSHIP_ALL.processMessage,index,total/pageSize)
+                }
+
+                bluetoothCommunicationHandler.send(message.trim())
+
+
             }
 
             MEMBERSHIP_ALL_COUNT.name -> {
@@ -346,5 +346,23 @@ class BluetoothManager (private val handler : Handler){
 
     fun connect() {
         bluetoothCommunicationHandler.connect()
+    }
+
+    fun setDevice(device: BluetoothDevice) {
+        bluetoothDevice=device
+        bluetoothCommunicationHandler.setDevice(device)
+    }
+    fun resetReconnectAttempt(){
+        bluetoothCommunicationHandler.resetReconnectAttempt()
+    }
+    fun startTimer(){
+        bluetoothCommunicationHandler.startTimer()
+    }
+
+    fun stopTimer(){
+        bluetoothCommunicationHandler.stopTimer()
+    }
+
+    fun continueRequest() {
     }
 }
