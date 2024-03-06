@@ -16,31 +16,70 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 
 class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
-    private lateinit var connectBtn: ImageButton
     private lateinit var rentalBtn: ImageButton
     private lateinit var returnBtn: ImageButton
-    private lateinit var standbyBtn: ImageButton
+    //private lateinit var standbyBtn: ImageButton
     private lateinit var registerBtn: ImageButton
-
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
-    private lateinit var standbyBtnField: LinearLayout
+    //private lateinit var standbyBtnField: LinearLayout
     private lateinit var registerBtnField: LinearLayout
 
-    private val handler = Handler(Looper.getMainLooper()) { true }
+    private lateinit var popupLayout: View
+
     val gson = Gson()
-    lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private lateinit var welcomeMessage: TextView
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    // not using in this Fragment
+    private var bluetoothManager : BluetoothManager? = null
+
+    private val bluetoothManagerListener = object : BluetoothManager.Listener{
+        override fun onDisconnected() {
+            val reconnectFrag = ReconnectFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,reconnectFrag)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        override fun onRequestStarted() {
+            //TODO("Not yet implemented")
+            val progressBarFrag = ProgressBarFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,progressBarFrag)
+                .addToBackStack(null)
+                .commit()
+
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
+        }
+
+        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
+        }
+
+        override fun onRequestEnded() {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
+        }
+
+        override fun onRequestFailed(message: String) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
+        }
+
+        override fun onException(message: String) {
+            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
+        }
     }
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -48,44 +87,19 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         rentalBtn = view.findViewById(R.id.RentalBtn)
         returnBtn = view.findViewById(R.id.ReturnBtn)
-        standbyBtn = view.findViewById(R.id.StandbyBtn)
+        //standbyBtn = view.findViewById(R.id.StandbyBtn)
         registerBtn = view.findViewById(R.id.RegisterBtn)
 
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
-        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
-        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
 
+        popupLayout = view.findViewById(R.id.popupLayout)
         welcomeMessage.text = manager.name + "님 환영합니다."
 
-        connectBtn = view.findViewById(R.id.ConnectBtn)
+        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
-        connectBtn.setOnClickListener{
-            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-            try {
-                bluetoothManagerOld.bluetoothOpen()
-                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-            } catch (e: Exception) {
-                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
-            override fun onBluetoothDisconnected() {
-                handler.post {
-                    connectBtn.setImageResource(R.drawable.group_11_copy)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
-            }
-
-            override fun onBluetoothConnected() {
-                handler.post {
-                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
-            }
-        })
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -102,13 +116,13 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
                 .commit()
         }
 
-        standbyBtnField.setOnClickListener {
-            val fragment = ManagerStandByFragment(manager)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack("ManagerLobbyFragment")
-                .commit()
-        }
+//        standbyBtnField.setOnClickListener {
+//            val fragment = ManagerStandByFragment(manager)
+//            requireActivity().supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragmentContainer, fragment)
+//                .addToBackStack("ManagerLobbyFragment")
+//                .commit()
+//        }
 
         registerBtnField.setOnClickListener {
             val fragment = ToolRegisterFragment(manager)
@@ -119,5 +133,14 @@ class ManagerLobbyFragment(val manager: MembershipDto) : Fragment() {
         }
 
         return view
+    }
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+    }
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
 }
