@@ -43,11 +43,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var recyclerView: RecyclerView
     private var toolList: MutableList<RentalRequestToolWithCount> = mutableListOf()
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
-    private lateinit var popupLayout: View
-    private lateinit var progressText: TextView
-    private var isPopupVisible = false // UI블로킹 end
-
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
@@ -57,7 +52,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
 
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
-    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -81,9 +75,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         workerName.text = rentalRequestSheet.workerDto.name
         leaderName.text = rentalRequestSheet.leaderDto.name
         timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         for (rentalRequestTool in rentalRequestSheet.toolList) {
             toolList.add(RentalRequestToolWithCount(rentalRequestTool, rentalRequestTool.count))
@@ -154,42 +145,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.toolDtoId) }.toMutableList()
                     val sheet = rentalRequestSheet
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager!!.id, sharedViewModel.toolBoxId, toolFormList)
-
-                    try {
-                        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:
-                            BluetoothManager_Old.RequestCallback{
-                            override fun onSuccess(result: String, type: Type) {
-                                if (result == "good") {
-                                    hidePopup() // UI 블로킹
-                                    handler.post {
-                                        Toast.makeText(activity, "대여 승인 완료", Toast.LENGTH_SHORT).show()
-                                    }
-                                    requireActivity().supportFragmentManager.popBackStack()
-                                } else {
-                                    hidePopup() // UI 블로킹
-                                    handler.post {
-                                        Toast.makeText(activity, "대여 승인 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
-                                    }
-                                    requireActivity().supportFragmentManager.popBackStack()
-                                }
-
-                            }
-
-                            override fun onError(e: Exception) {
-                                hidePopup() // UI 블로킹
-                                if (!standbyAlreadySent) {
-                                    handler.post {
-                                        Toast.makeText(activity, "대여 승인 실패, 보류항목에 추가했습니다.", Toast.LENGTH_SHORT).show()
-                                    }
-                                    handleBluetoothError(rentalRequestSheetApproveForm)
-                                    e.printStackTrace()
-                                    requireActivity().supportFragmentManager.popBackStack()
-                                }
-                            }
-                        })
-                    } catch (e: IOException) {
-
-                    }
+                    //블루투스
                 } else {
                     handler.post {
                         Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
@@ -258,25 +214,4 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
         dbHelper.close()
     }
-    private fun showPopup() { // UI 블로킹 end
-        isPopupVisible = true
-        popupLayout.requestFocus()
-        popupLayout.setOnClickListener {
-
-        }
-        popupLayout.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-                return@setOnKeyListener true
-            }
-            false
-        }
-        popupLayout.visibility = View.VISIBLE
-    }
-    private fun hidePopup() {
-        handler.post {
-            isPopupVisible = false
-            popupLayout.visibility = View.GONE
-        }
-    } // UI 블로킹 end
 }
