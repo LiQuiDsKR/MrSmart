@@ -27,6 +27,7 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.RentalRequestSheetFormDto
 import com.mrsmart.standard.rental.RentalRequestToolFormDto
@@ -52,8 +53,8 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     private lateinit var recyclerView: RecyclerView
     private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
-    var worker: MembershipSQLite? = null
-    var leader: MembershipSQLite? = null
+    var worker: MembershipDto? = null
+    var leader: MembershipDto? = null
 
     var gson = Gson()
 
@@ -112,9 +113,9 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         sharedViewModel.rentalRequestToolIdList.clear()
 
         worker = sharedViewModel.loginWorker
-        workerName.text = sharedViewModel.loginWorker.name
+        workerName.text = sharedViewModel.loginWorker!!.name
         leader = sharedViewModel.leader
-        leaderName.text = sharedViewModel.leader.name
+        leaderName.text = sharedViewModel.leader!!.name
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -196,8 +197,8 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                                     handler.post {
                                         Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" )
-                                    sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" )
+                                    sharedViewModel.worker = null
+                                    sharedViewModel.leader = null
                                     sharedViewModel.rentalRequestToolIdList.clear()
                                     sharedViewModel.toolWithCountList.clear()
                                     requireActivity().supportFragmentManager.popBackStack()

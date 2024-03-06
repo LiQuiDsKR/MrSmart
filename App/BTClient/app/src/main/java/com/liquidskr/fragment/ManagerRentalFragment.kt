@@ -163,8 +163,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         recyclerView.layoutManager = layoutManager
 
         selfRentalBtn.setOnClickListener {
-            sharedViewModel.worker = MembershipSQLite(0,"","","","","","","", "" ) // 개선 요망
-            sharedViewModel.leader = MembershipSQLite(0,"","","","","","","", "" ) // 개선 요망
+            sharedViewModel.worker = null
+            sharedViewModel.leader = null
             sharedViewModel.rentalRequestToolIdList.clear()
             fragmentTransform(ManagerSelfRentalFragment(), null)
         }

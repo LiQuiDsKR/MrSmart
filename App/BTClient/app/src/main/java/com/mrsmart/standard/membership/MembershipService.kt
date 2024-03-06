@@ -38,6 +38,20 @@ class MembershipService private constructor() {
         }
     }
 
+    fun getMembershipPasswordByCode(code: String): String {
+        try {
+            val membershipEntity = dbHelper.getMembershipByCode(code)
+            Log.v(TAG,membershipEntity.toString())
+            return membershipEntity.password
+        } catch (e: UninitializedPropertyAccessException) {
+            Log.e(TAG, "Database not initialized for code: $code", e)
+            throw IllegalStateException("Database has not been initialized.", e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching membership by code: $code", e)
+            throw RuntimeException("Failed to fetch membership by code: $code due to an unexpected error.", e)
+        }
+    }
+
     fun resetTable() {
         dbHelper.clearMembershipTable()
     }

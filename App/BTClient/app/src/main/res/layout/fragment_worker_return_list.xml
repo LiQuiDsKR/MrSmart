@@ -9,10 +9,10 @@
 
     <FrameLayout
         android:id="@+id/fragmentContainer"
-        android:clickable="true"
-        android:focusable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="1dp">
 
@@ -211,37 +211,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:visibility="gone">
-
-        <!-- Progress Bar -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80000000"
-            android:orientation="horizontal"></LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/progressText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Loading (0/0)"
-                android:textColor="#FFFFFF" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:progressTint="#FFFFFF" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
+        android:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

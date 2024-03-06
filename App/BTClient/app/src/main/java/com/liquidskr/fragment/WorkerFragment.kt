@@ -4,6 +4,7 @@ import SharedViewModel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,23 +14,74 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.DialogUtils
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
+import com.mrsmart.standard.membership.MembershipService
+import com.mrsmart.standard.membership.Role
 
 class WorkerFragment : Fragment() {
     private lateinit var loginBtn: Button
     private lateinit var idTextField: EditText
 
+    private lateinit var popupLayout: View
+
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
+    // not using in this Fragment
+    private var bluetoothManager : BluetoothManager? = null
+
+    private val bluetoothManagerListener = object : BluetoothManager.Listener{
+        override fun onDisconnected() {
+            val reconnectFrag = ReconnectFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,reconnectFrag)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        override fun onRequestStarted() {
+            //TODO("Not yet implemented")
+            val progressBarFrag = ProgressBarFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,progressBarFrag)
+                .addToBackStack(null)
+                .commit()
+
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
+        }
+
+        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
+        }
+
+        override fun onRequestEnded() {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
+        }
+
+        override fun onRequestFailed(message: String) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
+        }
+
+        override fun onException(message: String) {
+            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
+        }
     }
     @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker, container, false)
-
-        // loginBtn을 레이아웃에서 찾아서 초기화
+        popupLayout = view.findViewById(R.id.popupLayout)
         loginBtn = view.findViewById(R.id.LoginBtn)
         idTextField = view.findViewById(R.id.IDtextField)
+        
+        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         idTextField.setOnFocusChangeListener { view, hasFocus ->
             if (hasFocus) {
@@ -42,32 +94,41 @@ class WorkerFragment : Fragment() {
         loginBtn.setOnClickListener {
             try {
                 var code = idTextField.text.toString()
-                var dbHelper = DatabaseHelper.getInstance()
-                var member = dbHelper.getMembershipByCode(code)
-                if (member.role == "USER") {
-                    val fragment = WorkerLobbyFragment(member.toMembershipDto())
+                val membershipService = MembershipService.getInstance()
+                var member = membershipService.getMembershipByCode(code)
+                if (member.role != Role.USER) {
+                    DialogUtils.showAlertDialog("로그인 실패","해당 직원은 작업자가 아닙니다.")
+                } else {
+                    val fragment = WorkerLobbyFragment(member)
                     sharedViewModel.loginWorker = member
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack("WorkerLogin")
                         .commit()
-                } else {
-                    Toast.makeText(requireContext(), "해당 직원은 작업자가 아닙니다.", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: UninitializedPropertyAccessException) {
-                Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
+            } catch (e: IllegalStateException) {
+                Log.d("login",e.toString())
+                DialogUtils.showAlertDialog("로그인 실패", "사용자 정보가 없습니다.")
+            } catch (e: Exception) {
+                Log.d("login",e.toString())
+                DialogUtils.showAlertDialog("로그인 실패", "알 수 없는 오류가 발생했습니다.")
             }
         }
         return view
+    }
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+    }
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
     companion object {
         fun newInstance(): WorkerFragment {
             return WorkerFragment()
         }
-    }
-    fun showSoftKeyboard(context: Context, view: View) {
-        val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
     fun popBackStack() {
         val fragmentManager = childFragmentManager

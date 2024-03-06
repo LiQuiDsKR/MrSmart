@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MembershipAdapter
 import com.liquidskr.btclient.R
+import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipSQLite
 
 
@@ -39,7 +40,7 @@ class MembershipFindFragment : Fragment(){
 
         // DatabaseHelper 인스턴스 생성
         val databaseHelper = DatabaseHelper.getInstance()
-        val memberships: List<MembershipSQLite> = databaseHelper.getAllMemberships()
+        val memberships: List<MembershipDto> = databaseHelper.getAllMemberships().map{membershipSQLite -> membershipSQLite.toMembershipDto()}
 
         searchBtn.setOnClickListener {
             filterByName(memberships, editTextName.text.toString())
@@ -65,8 +66,8 @@ class MembershipFindFragment : Fragment(){
         return view
     }
 
-    fun filterByName(memberships: List<MembershipSQLite>, keyword: String) {
-        val newList: MutableList<MembershipSQLite> = mutableListOf()
+    fun filterByName(memberships: List<MembershipDto>, keyword: String) {
+        val newList: MutableList<MembershipDto> = mutableListOf()
         for (membership in memberships) {
             if (keyword in membership.name) {
                 newList.add(membership)

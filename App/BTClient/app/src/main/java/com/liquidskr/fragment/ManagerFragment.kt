@@ -2,6 +2,7 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,26 +12,71 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.DialogUtils
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
+import com.mrsmart.standard.membership.MembershipService
+import com.mrsmart.standard.membership.Role
 
 class ManagerFragment : Fragment() {
     lateinit var loginBtn: Button
     lateinit var idTextField: EditText
     lateinit var pwTextField: EditText
 
-    lateinit var searchuserBtn: ImageButton
+    private lateinit var popupLayout: View
+
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+
+    // not using in this Fragment
+    private var bluetoothManager : BluetoothManager? = null
+
+    private val bluetoothManagerListener = object : BluetoothManager.Listener{
+        override fun onDisconnected() {
+            val reconnectFrag = ReconnectFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,reconnectFrag)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        override fun onRequestStarted() {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
+        }
+
+        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
+        }
+
+        override fun onRequestEnded() {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
+        }
+
+        override fun onRequestFailed(message: String) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
+        }
+
+        override fun onException(message: String) {
+            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager, container, false)
-
-        // loginBtn을 레이아웃에서 찾아서 초기화
+        popupLayout = view.findViewById(R.id.popupLayout)
         loginBtn = view.findViewById(R.id.LoginBtn)
         idTextField = view.findViewById(R.id.IDtextField)
         pwTextField = view.findViewById(R.id.PWtextField)
+
+        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         idTextField.setOnFocusChangeListener { view, hasFocus ->
             if (hasFocus) {
@@ -52,28 +98,39 @@ class ManagerFragment : Fragment() {
         loginBtn.setOnClickListener {
             try {
                 var code = idTextField.text.toString()
-                var dbHelper = DatabaseHelper.getInstance()
-                var password = dbHelper.getMembershipPasswordById(code)
-                var member = dbHelper.getMembershipByCode(code)
-                if (member.role == "MANAGER") {
-                    if (pwTextField.text.toString().equals(password)) {
-                        sharedViewModel.loginManager = member
-                        val fragment = ManagerLobbyFragment(member.toMembershipDto())
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainer, fragment)
-                            .addToBackStack("ManagerLogin")
-                            .commit()
-                    } else {
-                        Toast.makeText(requireContext(), "비밀번호가 틀렸습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                var membershipService = MembershipService.getInstance()
+                var member = membershipService.getMembershipByCode(code)
+                var password = member.password
+                if (member.role != Role.MANAGER) {
+                    DialogUtils.showAlertDialog("로그인 실패","해당 직원은 관리자가 아닙니다.")
+                }else if (pwTextField.text.toString() != password) {
+                    DialogUtils.showAlertDialog("로그인 실패", "비밀번호가 맞지 않습니다.")
                 } else {
-                    Toast.makeText(requireContext(), "해당 직원은 관리자가 아닙니다.", Toast.LENGTH_SHORT).show()
+                    sharedViewModel.loginManager = member
+                    val fragment = ManagerLobbyFragment(member)
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack("ManagerLogin")
+                        .commit()
                 }
-            } catch (e: UninitializedPropertyAccessException) {
-                Toast.makeText(requireContext(), "로그인할 수 없습니다.", Toast.LENGTH_SHORT).show()
+            } catch (e: IllegalStateException) {
+                Log.d("login",e.toString())
+                DialogUtils.showAlertDialog("로그인 실패", "사용자 정보가 없습니다.")
+            } catch (e: Exception) {
+                Log.d("login",e.toString())
+                DialogUtils.showAlertDialog("로그인 실패", "알 수 없는 오류가 발생했습니다.")
             }
         }
         return view
+    }
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+    }
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
     companion object {
         fun newInstance(): ManagerFragment {

@@ -2,6 +2,7 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,19 +25,13 @@ class LobbyFragment : Fragment() {
     lateinit var managerBtn: ImageButton
     lateinit var bluetoothBtn: ImageButton
     lateinit var settingBtn: ImageButton
-    lateinit var bluetoothManagerOld: BluetoothManager_Old
-    private var isPopupVisible = false
 
     private lateinit var popupLayout: View
-    private lateinit var progressBar: ProgressBar
-    private lateinit var progressText: TextView
 
-    var backPressedTime=0L
+    private var backPressedTime=0L
 
-
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(this).get(SharedViewModel::class.java)
-    }
+    // not using in this Fragment
+    private var bluetoothManager : BluetoothManager? = null
 
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
@@ -48,28 +43,27 @@ class LobbyFragment : Fragment() {
         }
 
         override fun onRequestStarted() {
-            //TODO("Not yet implemented")
-            val progressBarFrag = ProgressBarFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.bluetoothPopupLayout,progressBarFrag)
-                .addToBackStack(null)
-                .commit()
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            //TODO("Not yet implemented")
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
         }
 
         override fun onRequestEnded() {
-            //TODO("Not yet implemented")
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
         }
 
         override fun onRequestFailed(message: String) {
-            //TODO("Not yet implemented")
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
         }
 
         override fun onException(message: String) {
-            //TODO("Not yet implemented")
+            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
         }
     }
 
@@ -87,7 +81,6 @@ class LobbyFragment : Fragment() {
         (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         workerBtn.setOnClickListener {
-            showPopup()
             val fragment = WorkerFragment.newInstance()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -95,7 +88,6 @@ class LobbyFragment : Fragment() {
                 .commit()
         }
         managerBtn.setOnClickListener {
-            showPopup()
             val fragment = ManagerFragment.newInstance()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
@@ -133,14 +125,13 @@ class LobbyFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
 
-    private fun showPopup() {
-        isPopupVisible = true
-        // Show the popup layout
-        popupLayout.visibility = View.VISIBLE
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
     }
-    private fun hidePopup() {
-        isPopupVisible = false
-        // Hide the popup layout
-        popupLayout.visibility = View.GONE
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
 }

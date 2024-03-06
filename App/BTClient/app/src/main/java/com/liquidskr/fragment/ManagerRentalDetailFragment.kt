@@ -153,7 +153,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     }
                     toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.toolDtoId) }.toMutableList()
                     val sheet = rentalRequestSheet
-                    val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, toolFormList)
+                    val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager!!.id, sharedViewModel.toolBoxId, toolFormList)
 
                     try {
                         bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE, gson.toJson(rentalRequestSheetApproveForm), object:

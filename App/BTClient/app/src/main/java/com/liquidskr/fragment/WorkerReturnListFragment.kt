@@ -168,7 +168,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         showPopup() // UI블로킹
         var sheetCount = 0
         bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker.id}}",object:BluetoothManager_Old.RequestCallback{
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker!!.id}}",object:BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 try {
                     sheetCount = result.toInt()
@@ -193,7 +193,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         })
     }
     fun requestOutstandingRentalSheet(pageNum: Int) {
-        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager_Old.RequestCallback{
+        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker!!.id}}",object: BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
                 outstandingRentalSheetByMemberReq.process(page)

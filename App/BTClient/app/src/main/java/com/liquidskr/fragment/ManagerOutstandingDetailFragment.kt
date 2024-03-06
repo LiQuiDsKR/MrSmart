@@ -224,7 +224,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
                     showPopup() // UI 블로킹
                     val sheet = outstandingRentalSheet
                     returnToolFormList = returnToolFormList.filter { adapter.selectedToolsToReturn.contains(it.toolDtoId) }.toMutableList()
-                    val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager.id, sharedViewModel.toolBoxId, returnToolFormList)
+                    val returnSheetForm = ReturnSheetFormDto(sheet.rentalSheetDto.id, sheet.rentalSheetDto.workerDto.id, sharedViewModel.loginManager!!.id, sharedViewModel.toolBoxId, returnToolFormList)
                     bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RETURN_SHEET_FORM, gson.toJson(returnSheetForm), object:
                         BluetoothManager_Old.RequestCallback{
                         override fun onSuccess(result: String, type: Type) {
