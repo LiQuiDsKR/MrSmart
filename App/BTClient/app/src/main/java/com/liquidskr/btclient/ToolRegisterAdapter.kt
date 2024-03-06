@@ -5,9 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.tool.ToolDtoSQLite
+import com.mrsmart.standard.tool.ToolSQLite
 
-class ToolRegisterAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (ToolDtoSQLite) -> Unit) :
+class ToolRegisterAdapter(var tools: List<ToolSQLite>, val onItemClick: (ToolSQLite) -> Unit) :
     RecyclerView.Adapter<ToolRegisterAdapter.ToolViewHolder>() {
 
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,7 +35,7 @@ class ToolRegisterAdapter(var tools: List<ToolDtoSQLite>, val onItemClick: (Tool
     override fun getItemCount(): Int {
         return tools.size
     }
-    fun updateList(newList: List<ToolDtoSQLite>) {
+    fun updateList(newList: List<ToolSQLite>) {
         tools = newList
         notifyDataSetChanged()
     }

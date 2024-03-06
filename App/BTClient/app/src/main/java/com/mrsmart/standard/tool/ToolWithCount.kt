@@ -1,3 +1,3 @@
 package com.mrsmart.standard.tool
 
-data class ToolWithCount(val tool: ToolDtoSQLite, var count: Int)
+data class ToolWithCount(val tool: ToolSQLite, var count: Int)

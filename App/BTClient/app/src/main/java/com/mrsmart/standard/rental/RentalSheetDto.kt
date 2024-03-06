@@ -1,7 +1,7 @@
 package com.mrsmart.standard.rental
 
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.tool.ToolboxDto
+import com.mrsmart.standard.toolbox.ToolboxDto
 
 data class RentalSheetDto(
     var id: Long,

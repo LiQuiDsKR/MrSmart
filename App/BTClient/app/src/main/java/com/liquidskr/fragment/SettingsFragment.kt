@@ -98,7 +98,9 @@
             }
 
             toolboxSetBtn.setOnClickListener {
-                DialogUtils.showAlertDialog("ㅑ","호")
+                val type = Constants.BluetoothMessageType.TOOLBOX_ALL
+                val data = ""
+                bluetoothManager?.send(type,data)
             }
 
             toolImportBtn.setOnClickListener {

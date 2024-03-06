@@ -24,19 +24,6 @@ class ToolService private constructor() {
             throw RuntimeException("Failed to fetch membership by ID: $id due to an unexpected error.", e)
         }
     }
-    fun getToolByCode(code: String): ToolDto {
-        try {
-            val toolEntity = dbHelper.getToolByCode(code)
-            return toolEntity.toToolDto()
-        } catch (e: UninitializedPropertyAccessException) {
-            // Log.e(TAG, "Database not initialized for ID: $id", e)
-            throw IllegalStateException("Database has not been initialized.", e)
-        } catch (e: Exception) {
-            // Log.e(TAG, "Error fetching membership by ID: $id", e)
-            throw RuntimeException("Failed to fetch membership by ID: $code due to an unexpected error.", e)
-        }
-    }
-
     fun resetTable() {
         dbHelper.clearToolTable()
     }

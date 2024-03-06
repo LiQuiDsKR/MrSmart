@@ -57,8 +57,7 @@ class MainActivity : AppCompatActivity() {
         checkPermission()
         requestPermission()
 
-
-        sharedViewModel.toolBoxId = dbHelper.getToolboxName()
+        //sharedViewModel.toolBoxId = dbHelper.getToolboxId()
 
         bluetoothManagerOld = BluetoothManager_Old(this, this)
 

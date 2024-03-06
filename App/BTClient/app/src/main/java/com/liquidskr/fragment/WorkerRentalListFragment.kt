@@ -28,9 +28,7 @@ import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.liquidskr.listener.RentalRequestSheetReadyByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.SheetState
@@ -59,26 +57,6 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
-    private lateinit var rentalRequestSheetReadyByMemberReq: RentalRequestSheetReadyByMemberReq
-    private val rentalRequestSheetRequestListener = object: RentalRequestSheetReadyByMemberReq.Listener {
-        override fun onNextPage(pageNum: Int) {
-            requestRentalRequestSheetReady(pageNum)
-        }
-
-        override fun onLastPageArrived() {
-            hidePopup() // UI블로킹
-        }
-
-        override fun onError(e: Exception) {
-
-        }
-        override fun onRentalRequestSheetListUpdated(sheetList: List<RentalRequestSheetDto>) {
-            rentalRequestSheetList.addAll(sheetList)
-            requireActivity().runOnUiThread {
-                (recyclerView.adapter as RentalRequestSheetAdapter).updateList(rentalRequestSheetList)
-            }
-        }
     }
 
     @SuppressLint("MissingInflatedId")
@@ -193,7 +171,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
                 try {
                     sheetCount = result.toInt()
                     val totalPage = Math.ceil(sheetCount / 10.0).toInt()
-                    rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
+                    //rentalRequestSheetReadyByMemberReq = RentalRequestSheetReadyByMemberReq(totalPage, sheetCount, rentalRequestSheetRequestListener)
                     handler.post {
                         if (sheetCount > 0) { // UI블로킹 start
                             requestRentalRequestSheetReady(0) // 알잘딱 넣으세요
@@ -216,7 +194,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP,"{\"size\":${REQUEST_PAGE_SIZE},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker!!.id}}",object: BluetoothManager_Old.RequestCallback{
             override fun onSuccess(result: String, type: Type) {
                 var page: Page = gson.fromJson(result, type)
-                rentalRequestSheetReadyByMemberReq.process(page)
+                //rentalRequestSheetReadyByMemberReq.process(page)
                 handler.post { // UI블로킹 start
                     progressBar.progress = page.pageable.page
                     if ((page.total/REQUEST_PAGE_SIZE) > 0) {

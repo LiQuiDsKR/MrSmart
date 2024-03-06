@@ -1,15 +1,9 @@
 package com.liquidskr.btclient
 
-import PermissionManager
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.database.sqlite.SQLiteException
-import android.opengl.ETC1.isValid
 import android.util.Log
-import androidx.core.app.PendingIntentCompat.send
 import com.liquidskr.btclient.Constants.BLUETOOTH_MAX_RECONNECT_ATTEMPT
-import com.liquidskr.btclient.Constants.BLUETOOTH_RECONNECT_INTERVAL
 import com.liquidskr.btclient.Constants.HEARTBEAT_INTERVAL
 import com.liquidskr.btclient.Constants.INITIAL_MESSAGE_DELAY
 import com.liquidskr.btclient.Constants.VALIDCHECK_INTERVAL
@@ -18,11 +12,9 @@ import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.sql.Connection
 import java.util.Calendar
 import java.util.Timer
 import java.util.TimerTask
-import java.util.UUID
 
 /**
  * 1-1. BluetoothDevice 정보 초기화
@@ -33,7 +25,6 @@ import java.util.UUID
  * 2-2. BluetoothMessageParser의 이벤트 리스너 보유
  *
  */
-@SuppressLint("MissingPermission")//아니 분명히 권한 체크를 했는데도 지혼자 막 안했다고 뭐라해요 자꾸
 class BluetoothCommunicationHandler (
     private val listener : Listener,
 ){
@@ -65,6 +56,7 @@ class BluetoothCommunicationHandler (
             connectionState=ConnectionState.CONNECTED
             Log.d("bluetooth", "블루투스 연결에 성공했습니다")
             reconnectAttempt=0
+            //commTimeInMillis=0
             listener.onConnected()
         }
 
@@ -102,14 +94,20 @@ class BluetoothCommunicationHandler (
     private val heartBeatTimer = Timer()
     private val validCheckTimerTask = object : TimerTask() {
         override fun run() {
-            val isValid = isValid()
-            Log.d("bluetooth", "connection : $connectionState, isValid : $isValid")
+            val diff: Long = Calendar.getInstance().timeInMillis - commTimeInMillis
+            val timeoutFlag =
+                commTimeInMillis != 0L && diff >= Constants.COMMUNICATION_TIMEOUT // true : timeout / false : normal
 
-            if (reconnectAttempt > BLUETOOTH_MAX_RECONNECT_ATTEMPT){
-                listener.onReconnectFailed()
-            }
-            if ( connectionState == ConnectionState.DISCONNECTED && !isValid) {
+            Log.d(
+                "bluetooth",
+                "reAtmp:$reconnectAttempt isNull:$isBluetoothConnectionHandlerNull, connection : $connectionState, cmTime:$commTimeInMillis"
+            )
+            if(connectionState==ConnectionState.CONNECTING){
+                return
+            }else if ( connectionState == ConnectionState.DISCONNECTED) {
                 reconnect()
+            }else if ( timeoutFlag ){
+                disconnect()
             }
         }
     }
@@ -187,20 +185,6 @@ class BluetoothCommunicationHandler (
 
     fun resetReconnectAttempt(){
         reconnectAttempt=0
-    }
-
-    fun isValid():Boolean{
-        Log.d("bluetooth","reAtmp:$reconnectAttempt isNull:$isBluetoothConnectionHandlerNull,cmTime:$commTimeInMillis")
-        if (!isBluetoothConnectionHandlerNull){
-            if (commTimeInMillis==0L){
-                return true
-            }
-            val diff : Long = Calendar.getInstance().timeInMillis -commTimeInMillis
-            if(diff<Constants.COMMUNICATION_TIMEOUT){
-                return true
-            }
-        }
-        return false
     }
 
     fun setDevice(device : BluetoothDevice){

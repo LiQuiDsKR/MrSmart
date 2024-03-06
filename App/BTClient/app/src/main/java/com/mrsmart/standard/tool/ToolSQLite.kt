@@ -1,6 +1,6 @@
 package com.mrsmart.standard.tool
 
-data class ToolDtoSQLite(
+data class ToolSQLite(
     val id: Long,
     val subGroupDto: String,
     val mainGroupDto: String,

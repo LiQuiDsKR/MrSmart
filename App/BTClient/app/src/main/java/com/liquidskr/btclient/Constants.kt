@@ -27,10 +27,11 @@ object Constants {
         MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중..."),
         TOOL_ALL("공기구 기준정보 불러오는 중..."),
         TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중..."),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중..."),
 
         //TODO("이 아래로 메시지 변경 해야함")
 
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("사원 정보 불러오는 중..."),
         RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("사원 정보 불러오는 중..."),
         RENTAL_SHEET_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
         RETURN_SHEET_PAGE_BY_MEMBERSHIP("사원 정보 불러오는 중..."),
@@ -59,7 +60,6 @@ object Constants {
         OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("사원 정보 불러오는 중..."),
         RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("사원 정보 불러오는 중..."),
         OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("사원 정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("사원 정보 불러오는 중..."),
         RENTAL_REQUEST_SHEET_APPLY("사원 정보 불러오는 중..."),
         TAG_AND_TOOLBOX_TOOL_LABEL_FORM("사원 정보 불러오는 중..."),
         TAG_AND_TOOLBOX_TOOL_LABEL("사원 정보 불러오는 중..."),
@@ -259,7 +259,8 @@ object Constants {
     const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000 //2초 안에 백버튼 두번 누르면 앱 종료
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
     const val TOOL_PAGE_SIZE = 10 // 한 페이지당 처리할 공기구 수
-    const val COMMUNICATION_TIMEOUT = 3000 //3초
+    const val SHEET_PAGE_SIZE = 1 // 한 페이지당 처리할 시트(전표) 수
+    const val COMMUNICATION_TIMEOUT = 3000 //03초
     const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
     const val VALIDCHECK_INTERVAL = 500L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
     const val HEARTBEAT_INTERVAL = 60000L //  1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )

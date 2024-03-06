@@ -2,7 +2,7 @@ package com.mrsmart.standard.returns
 
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.rental.RentalSheetDto
-import com.mrsmart.standard.tool.ToolboxDto
+import com.mrsmart.standard.toolbox.ToolboxDto
 import java.time.LocalDateTime
 
 data class ReturnSheetDto(

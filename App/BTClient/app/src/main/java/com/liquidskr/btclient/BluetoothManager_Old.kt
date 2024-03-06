@@ -17,7 +17,7 @@ import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
 import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolboxCompressDto
+import com.mrsmart.standard.toolbox.ToolboxSQLite
 import com.mrsmart.standard.tool.ToolboxToolLabelDto
 import com.liquidskr.btclient.Constants.BluetoothMessageType.*
 import java.io.ByteArrayOutputStream
@@ -449,7 +449,7 @@ class BluetoothManager_Old (private val context: Context, private val activity: 
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
             TOOLBOX_ALL.name -> {
-                val type: Type = object : TypeToken<List<ToolboxCompressDto>>() {}.type
+                val type: Type = object : TypeToken<List<ToolboxSQLite>>() {}.type
                 bluetoothDataListener?.onSuccess(jsonString, type)
             }
 

@@ -18,7 +18,7 @@ import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolAdapter
-import com.mrsmart.standard.tool.ToolDtoSQLite
+import com.mrsmart.standard.tool.ToolSQLite
 
 
 class ToolFindFragment() : Fragment() {
@@ -48,14 +48,14 @@ class ToolFindFragment() : Fragment() {
 
 
         val databaseHelper = DatabaseHelper.getInstance()
-        val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
+        val tools: List<ToolSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
         val adapter = ToolAdapter(tools) {
 
         }
         confirmBtn.setOnClickListener {
             printFragmentStack()
             val toolIdList: MutableList<Long> = mutableListOf()
-            for (tool: ToolDtoSQLite in adapter.getSelectedTools()) {
+            for (tool: ToolSQLite in adapter.getSelectedTools()) {
                 toolIdList.add(tool.id) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
             }
             sharedViewModel.rentalRequestToolIdList.clear()
@@ -70,8 +70,8 @@ class ToolFindFragment() : Fragment() {
 
         return view
     }
-    fun filterByName(adapter: ToolAdapter, tools: List<ToolDtoSQLite>, keyword: String) {
-        val newList: MutableList<ToolDtoSQLite> = mutableListOf()
+    fun filterByName(adapter: ToolAdapter, tools: List<ToolSQLite>, keyword: String) {
+        val newList: MutableList<ToolSQLite> = mutableListOf()
         for (tool in tools) {
             if (keyword in tool.name) {
                 newList.add(tool)

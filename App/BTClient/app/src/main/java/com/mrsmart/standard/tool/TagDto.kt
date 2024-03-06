@@ -1,6 +1,7 @@
 package com.mrsmart.standard.tool
 
 import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.toolbox.ToolboxDto
 
 data class TagDto(
     val id: Long,

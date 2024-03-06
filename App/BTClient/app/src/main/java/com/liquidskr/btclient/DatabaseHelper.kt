@@ -73,7 +73,10 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.standby.StandbyDto
 import com.mrsmart.standard.returns.ReturnToolFormDto
-import com.mrsmart.standard.tool.ToolDtoSQLite
+import com.mrsmart.standard.tool.ToolSQLite
+import com.mrsmart.standard.toolbox.ToolboxDto
+import com.mrsmart.standard.toolbox.ToolboxSQLite
+import com.mrsmart.standard.toolbox.ToolboxService
 import java.lang.reflect.Type
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -215,40 +218,37 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
-    fun refreshToolboxData(
+    fun updateToolboxData(
         toolboxId: Long,
         toolboxName: String
     ): Long {
 
         val values = ContentValues()
         values.put(COLUMN_TOOLBOX_ID, 1)
-        values.put(COLUMN_TOOLBOX_TOOLBOX_ID, toolboxId)
+        values.put(COLUMN_TOOLBOX_TOOLBOX_ID, toolboxId) // ID 자동으로 올리느라 그랬나 봅니다. LQD씨가...;;;;
         values.put(COLUMN_TOOLBOX_NAME, toolboxName)
 
         val db = this.writableDatabase
-        try {
-            db.execSQL("DELETE FROM $TABLE_TOOLBOX_NAME")
-        } catch (e: Exception) {
-
-        }
         val id = db.insert(TABLE_TOOLBOX_NAME, null, values)
 
         db.close()
         return id
     }
     @SuppressLint("Range")
-    fun getToolboxName(): Long {
+    fun getToolbox(): ToolboxSQLite {
         val db = this.readableDatabase
-        val query = "SELECT $COLUMN_TOOLBOX_TOOLBOX_ID FROM $TABLE_TOOLBOX_NAME WHERE $COLUMN_TOOLBOX_ID = ?"
-        var toolboxId: Long = 0
+        val query = "SELECT $COLUMN_TOOLBOX_TOOLBOX_ID, $COLUMN_TOOLBOX_NAME FROM $TABLE_TOOLBOX_NAME WHERE $COLUMN_TOOLBOX_ID = ?"
         val selectionArgs = arrayOf("1")
         val cursor = db.rawQuery(query, selectionArgs)
+        lateinit var toolbox : ToolboxSQLite
         if (cursor.moveToFirst()) {
-            toolboxId = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOLBOX_TOOLBOX_ID))
+            val toolboxId = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOLBOX_TOOLBOX_ID))
+            val toolboxName = cursor.getString(cursor.getColumnIndex(COLUMN_TOOLBOX_NAME))
+            toolbox = ToolboxSQLite(toolboxId,toolboxName)
         }
         cursor.close()
         db.close()
-        return toolboxId
+        return toolbox
     }
 
     fun insertMembershipData(
@@ -606,11 +606,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return membershipList
     }
     @SuppressLint("Range")
-    fun getToolById(id: Long): ToolDtoSQLite {
+    fun getToolById(id: Long): ToolSQLite {
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_ID = ?"
         val selectionArgs = arrayOf(id.toString())
-        lateinit var toolDtoSQLite: ToolDtoSQLite
+        lateinit var toolSQLite: ToolSQLite
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
             val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
@@ -625,20 +625,20 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            toolDtoSQLite = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            toolSQLite = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
         }
 
         cursor.close()
         db.close()
-        return toolDtoSQLite
+        return toolSQLite
     }
 
     @SuppressLint("Range")
-    fun getToolByCode(code: String): ToolDtoSQLite {
+    fun getToolByCode(code: String): ToolSQLite {
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TOOL_ID, $COLUMN_TOOL_SUBGROUP, $COLUMN_TOOL_MAINGROUP, $COLUMN_TOOL_CODE, $COLUMN_TOOL_KRNAME, $COLUMN_TOOL_ENGNAME, $COLUMN_TOOL_SPEC, $COLUMN_TOOL_UNIT, $COLUMN_TOOL_PRICE, $COLUMN_TOOL_REPLACEMENTCYCLE, $COLUMN_TOOL_BUYCODE FROM $TABLE_TOOL_NAME WHERE $COLUMN_TOOL_CODE = ?"
         val selectionArgs = arrayOf(code.toString())
-        lateinit var toolDtoSQLite: ToolDtoSQLite
+        lateinit var toolSQLite: ToolSQLite
         val cursor = db.rawQuery(query, selectionArgs)
         if (cursor.moveToFirst()) {
             val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOL_ID))
@@ -653,17 +653,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            toolDtoSQLite = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            toolSQLite = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
         }
 
         cursor.close()
         db.close()
-        return toolDtoSQLite
+        return toolSQLite
     }
 
     @SuppressLint("Range")
-    fun getAllTools(): List<ToolDtoSQLite> {
-        val toolList = mutableListOf<ToolDtoSQLite>()
+    fun getAllTools(): List<ToolSQLite> {
+        val toolList = mutableListOf<ToolSQLite>()
         val query = "SELECT * FROM $TABLE_TOOL_NAME"
         val db = this.readableDatabase
         val cursor = db.rawQuery(query, null)
@@ -681,7 +681,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            val tool = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
             toolList.add(tool)
         }
 
@@ -691,8 +691,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
-    fun getToolsByQueryByKrName(searchQuery: String): List<ToolDtoSQLite> {
-        val toolList = mutableListOf<ToolDtoSQLite>()
+    fun getToolsByQueryByKrName(searchQuery: String): List<ToolSQLite> {
+        val toolList = mutableListOf<ToolSQLite>()
         val db = this.readableDatabase
         val keywords = searchQuery.split(" ") // 검색어를 공백을 기준으로 분리
 
@@ -717,7 +717,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            val tool = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
             toolList.add(tool)
         }
         cursor.close()
@@ -725,8 +725,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return toolList
     }
     @SuppressLint("Range")
-    fun getToolsByQueryByEngName(searchQuery: String): List<ToolDtoSQLite> {
-        val toolList = mutableListOf<ToolDtoSQLite>()
+    fun getToolsByQueryByEngName(searchQuery: String): List<ToolSQLite> {
+        val toolList = mutableListOf<ToolSQLite>()
         val db = this.readableDatabase
         val keywords = searchQuery.split(" ") // 검색어를 공백을 기준으로 분리
 
@@ -751,7 +751,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            val tool = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
             toolList.add(tool)
         }
         cursor.close()
@@ -759,8 +759,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return toolList
     }
     @SuppressLint("Range")
-    fun getToolsByQueryBySpec(searchQuery: String): List<ToolDtoSQLite> {
-        val toolList = mutableListOf<ToolDtoSQLite>()
+    fun getToolsByQueryBySpec(searchQuery: String): List<ToolSQLite> {
+        val toolList = mutableListOf<ToolSQLite>()
         val db = this.readableDatabase
         val keywords = searchQuery.split(" ") // 검색어를 공백을 기준으로 분리
 
@@ -785,7 +785,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             val replacementCycle = cursor.getInt(cursor.getColumnIndex(COLUMN_TOOL_REPLACEMENTCYCLE))
             val buyCode = cursor.getString(cursor.getColumnIndex(COLUMN_TOOL_BUYCODE))
 
-            val tool = ToolDtoSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
+            val tool = ToolSQLite(id, subGroup, mainGroup, code, name, engName, spec, unit, price, replacementCycle, buyCode)
             toolList.add(tool)
         }
         cursor.close()
@@ -793,8 +793,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return toolList
     }
     @SuppressLint("Range")
-    fun getToolsByQuery(searchQuery: String): List<ToolDtoSQLite> {
-        var toolList = mutableListOf<ToolDtoSQLite>()
+    fun getToolsByQuery(searchQuery: String): List<ToolSQLite> {
+        var toolList = mutableListOf<ToolSQLite>()
         var krNameList = getToolsByQueryByKrName(searchQuery)
         var engNameList = getToolsByQueryByEngName(searchQuery)
         var specList = getToolsByQueryBySpec(searchQuery)
@@ -969,7 +969,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
 
     @SuppressLint("Range")
-    fun getToolByTBT(tbt: String): ToolDtoSQLite {
+    fun getToolByTBT(tbt: String): ToolSQLite {
         var toolId: Long = 0
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TBT_TOOL_ID FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_QRCODE = ?"
@@ -979,17 +979,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         while (cursor.moveToNext()) {
             toolId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOL_ID))
         }
-        var toolDtoSQLite: ToolDtoSQLite = getToolById(toolId)
+        var toolSQLite: ToolSQLite = getToolById(toolId)
 
         cursor.close()
         db.close()
-        return toolDtoSQLite
+        return toolSQLite
     }
 
     @SuppressLint("Range")
     fun getTBTByToolId(id: Long): String {
         var tbt = ""
-        lateinit var toolDtoSQLite: ToolDtoSQLite
+        lateinit var toolSQLite: ToolSQLite
         val db = this.readableDatabase
         val query = "SELECT $COLUMN_TBT_QRCODE FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_TOOL_ID = ?"
         val selectionArgs = arrayOf(id.toString())
@@ -1059,9 +1059,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     @SuppressLint("Range")
-    fun getToolByTag(tag: String): ToolDtoSQLite {
+    fun getToolByTag(tag: String): ToolSQLite {
         var toolId = 0
-        lateinit var tool: ToolDtoSQLite
+        lateinit var tool: ToolSQLite
         try {
             val db = this.readableDatabase
             val query = "SELECT $COLUMN_TAG_TOOL_ID FROM $TABLE_TAG_NAME WHERE $COLUMN_TAG_MACADDRESS = ?"
@@ -1212,6 +1212,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun clearOutstandingTable() {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_OUTSTANDING_NAME")
+        db.close()
+    }
+    fun clearToolboxTable() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM $TABLE_TOOLBOX_NAME")
         db.close()
     }
 

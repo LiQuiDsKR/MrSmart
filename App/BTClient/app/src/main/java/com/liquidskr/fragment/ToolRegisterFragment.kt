@@ -31,7 +31,7 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
-import com.mrsmart.standard.tool.ToolDtoSQLite
+import com.mrsmart.standard.tool.ToolSQLite
 import java.lang.reflect.Type
 
 
@@ -135,7 +135,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             }
         })
         val databaseHelper = DatabaseHelper.getInstance()
-        val tools: List<ToolDtoSQLite> = databaseHelper.getAllTools()
+        val tools: List<ToolSQLite> = databaseHelper.getAllTools()
 
         val adapter = ToolRegisterAdapter(tools) { tool ->
             showPopup()
