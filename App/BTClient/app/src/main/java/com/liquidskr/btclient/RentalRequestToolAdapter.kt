@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.tool.RentalRequestToolWithCount
 import com.mrsmart.standard.tool.ToolWithCount
+import com.mrsmart.standard.toolbox.ToolboxService
 
 class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<RentalRequestToolWithCount>) :
     RecyclerView.Adapter<RentalRequestToolAdapter.RentalRequestToolViewHolder>() {
@@ -104,5 +105,4 @@ class RentalRequestToolAdapter(var rentalRequestToolWithCounts: MutableList<Rent
     private fun removeFromSelection(toolId: Long) {
         selectedToolsToRental.remove(toolId)
     }
-
 }

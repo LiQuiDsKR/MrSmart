@@ -2,8 +2,6 @@ package com.liquidskr.fragment
 
 import SharedViewModel
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -14,30 +12,20 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager_Old
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
-import com.mrsmart.standard.standby.RentalRequestSheetApproveStandbySheet
-import com.mrsmart.standard.standby.StandbyParam
 import com.mrsmart.standard.tool.RentalRequestToolWithCount
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolDto
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import java.io.IOException
-import java.lang.reflect.Type
 
 class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
     private lateinit var recyclerView: RecyclerView
@@ -53,14 +41,56 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
 
+    private lateinit var popupLayout : View
+
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
+
+    private var bluetoothManager : BluetoothManager? = null
+
+    private val bluetoothManagerListener = object : BluetoothManager.Listener{
+        override fun onDisconnected() {
+            val reconnectFrag = ReconnectFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.popupLayout,reconnectFrag)
+                    .addToBackStack(null)
+                    .commit()
+        }
+
+        override fun onRequestStarted() {
+            val progressBarFrag = ProgressBarFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.popupLayout,progressBarFrag)
+                    .addToBackStack(null)
+                    .commit()
+        }
+
+        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
+        }
+
+        override fun onRequestEnded() {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
+        }
+
+        override fun onRequestFailed(message: String) {
+            // 접근 불가.
+            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
+        }
+
+        override fun onException(message: String) {
+            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
+        popupLayout = view.findViewById(R.id.popupLayout)
 
-        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
         timeStamp = view.findViewById(R.id.timestamp)
@@ -76,6 +106,8 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         leaderName.text = rentalRequestSheet.leaderDto.name
         timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
+        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
+
         for (rentalRequestTool in rentalRequestSheet.toolList) {
             toolList.add(RentalRequestToolWithCount(rentalRequestTool, rentalRequestTool.count))
         }
@@ -87,34 +119,10 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             requireActivity().supportFragmentManager.popBackStack()
         }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
                 val tag = qrEditText.text.toString().replace("\n", "")
-                try {
-                    lateinit var taggedTool: ToolDto
-                    bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG, "{tag:\"${tag}\"}", object:BluetoothManager_Old.RequestCallback{ // TagDto 받기
-                        override fun onSuccess(result: String, type: Type) {
-                            if (result != null) {
-                                val tag: TagDto = gson.fromJson(result, type)
-                                taggedTool = tag.toolDto
-                                for (rrtwc in adapter.rentalRequestToolWithCounts) { // rrtwc means, RentalRequestToolWithCount
-                                    if (rrtwc.rentalRequestTool.toolDto.id == taggedTool.id) {
-                                        rrtwc.rentalRequestTool.Tags = tag.macaddress
-                                        handler.post {
-                                            adapter.updateList(adapter.rentalRequestToolWithCounts)
-                                            adapter.tagAdded(taggedTool.id)
-                                            Toast.makeText(requireContext(), "${taggedTool.name} 에 ${tag.macaddress} 가 확인되었습니다.", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        override fun onError(e: Exception) {
 
-                        }
-                    })
-                } catch (e: UninitializedPropertyAccessException) {
-                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                }
                 qrEditText.text.clear()
                 qrEditText.requestFocus()
 
@@ -135,10 +143,9 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
             var standbyAlreadySent = false
             if (adapter is RentalRequestToolAdapter) {
                 if (adapter.selectedToolsToRental.isNotEmpty()) {
-                    showPopup() // UI 블로킹
                     var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
                     for (rrtwc in adapter.rentalRequestToolWithCounts) { // rrtwc = rentalRequestToolWithCount
-                        val tags = rrtwc.rentalRequestTool.Tags ?: ""
+                        val tags = rrtwc.rentalRequestTool.tags ?: ""
                         val toolForm = RentalRequestToolApproveFormDto(rrtwc.rentalRequestTool.id, rrtwc.rentalRequestTool.toolDto.id, rrtwc.count, tags)
                         toolFormList.add(toolForm)
                     }
@@ -147,71 +154,72 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                     val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager!!.id, sharedViewModel.toolBoxId, toolFormList)
                     //블루투스
                 } else {
-                    handler.post {
-                        Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
-                    }
                 }
             }
             standbyAlreadySent = true
         }
         cancelBtn.setOnClickListener {
-            sheetCancel()
+            cancel()
         }
 
         qrEditText.requestFocus()
         return view
     }
 
-    fun sheetCancel() {
-        try {
-            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL, "{rentalRequestSheetId:${rentalRequestSheet.id}}", object:
-                BluetoothManager_Old.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    if (result == "good") {
-                        handler.post {
-                            Toast.makeText(activity, "대여 삭제 완료", Toast.LENGTH_SHORT).show()
-                        }
-                        requireActivity().supportFragmentManager.popBackStack()
-                    } else {
-                        handler.post {
-                            Toast.makeText(activity, "대여 삭제 실패, 서버가 거부했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                        requireActivity().supportFragmentManager.popBackStack()
-                    }
-
-                }
-
-                override fun onError(e: Exception) {
-                    handler.post {
-                        Toast.makeText(activity, "대여 삭제 실패. 재연결 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
-                    }
-                    e.printStackTrace()
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-            })
-        } catch(e:Exception) {
-            e.printStackTrace()
-        }
+    fun cancel() {
+        val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL
+        val data = "{rentalRequestSheetId:${rentalRequestSheet.id}}"
+        bluetoothManager?.send(type,data)
     }
-    private fun handleBluetoothError(sheet: RentalRequestSheetApproveFormDto) {
-        Log.d("STANDBY","STANDBY ACCESS")
-        val toolList = sheet.toolList
-        var dbHelper = DatabaseHelper.getInstance()
-        val names: Pair<String, String> = Pair(dbHelper.getMembershipById(sheet.workerDtoId).name, dbHelper.getMembershipById(sheet.leaderDtoId).name)
-        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    fun confirm(){
+        val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE
+        val data = RentalRequestSheetApproveFormDto(
+                rentalRequestSheet.id,
+                rentalRequestSheet.workerDto,
+                rentalRequestSheet.leaderDto,
+                sharedViewModel.loginManager,
+                rentalRequestSheet.toolboxDto.id,
+                toolList
+        )
+    }
 
-        var pairToolList = listOf<Pair<String,Int>>()
-        for (tool in toolList) {
-            val name = dbHelper.getToolById(tool.toolDtoId).name
-            val count = tool.count
-            val pair = Pair(name, count)
-            pairToolList = pairToolList.plus(pair)
-        }
 
-        val detail = gson.toJson(StandbyParam(sheet.id, names.first, names.second, timestamp, pairToolList))
-        val standbySheet = RentalRequestSheetApproveStandbySheet(sheet,timestamp)
-        var final = gson.toJson(standbySheet)
-        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
-        dbHelper.close()
+    private fun onTagInput(tag : String){
+        val type = Constants.BluetoothMessageType.TAG
+        val data = "{tag:${tag}}"
+        bluetoothManager?.send(type,data)
+    }
+
+
+
+//    private fun handleBluetoothError(sheet: RentalRequestSheetApproveFormDto) {
+//        Log.d("STANDBY","STANDBY ACCESS")
+//        val toolList = sheet.toolList
+//        var dbHelper = DatabaseHelper.getInstance()
+//        val names: Pair<String, String> = Pair(dbHelper.getMembershipById(sheet.workerDtoId).name, dbHelper.getMembershipById(sheet.leaderDtoId).name)
+//        val timestamp = LocalDateTime.now().toString().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+//
+//        var pairToolList = listOf<Pair<String,Int>>()
+//        for (tool in toolList) {
+//            val name = dbHelper.getToolById(tool.toolDtoId).name
+//            val count = tool.count
+//            val pair = Pair(name, count)
+//            pairToolList = pairToolList.plus(pair)
+//        }
+//
+//        val detail = gson.toJson(StandbyParam(sheet.id, names.first, names.second, timestamp, pairToolList))
+//        val standbySheet = RentalRequestSheetApproveStandbySheet(sheet,timestamp)
+//        var final = gson.toJson(standbySheet)
+//        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
+//        dbHelper.close()
+//    }
+
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+    }
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager=null
     }
 }

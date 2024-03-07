@@ -436,8 +436,18 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             TAG.name -> {
-                val type: Type = object : TypeToken<TagDto>() {}.type
-                TODO("not implemented yet")
+                //response
+                val total = gson.fromJson(jsonStr,TagDto::class.java)
+
+                //service update
+                //
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                }
+
+                loadingPageIndex=0
             }
             RENTAL_REQUEST_SHEET_FORM_STANDBY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
