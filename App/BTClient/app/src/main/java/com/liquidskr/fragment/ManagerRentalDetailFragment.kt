@@ -3,11 +3,9 @@ package com.liquidskr.fragment
 import SharedViewModel
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -19,17 +17,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.InputProcessor
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
-import com.mrsmart.standard.tool.RentalRequestToolWithCount
 
-class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestSheetDto) : Fragment() {
+class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputProcessor {
     private lateinit var recyclerView: RecyclerView
-    private var toolList: MutableList<RentalRequestToolWithCount> = mutableListOf()
+    private var toolList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
 
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -102,14 +100,14 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         qrEditText = view.findViewById((R.id.QR_EditText))
         backButton = view.findViewById(R.id.backButton)
 
-        workerName.text = rentalRequestSheet.workerDto.name
-        leaderName.text = rentalRequestSheet.leaderDto.name
-        timeStamp.text = rentalRequestSheet.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        workerName.text = rentalRequestSheetDto.workerDto.name
+        leaderName.text = rentalRequestSheetDto.leaderDto.name
+        timeStamp.text = rentalRequestSheetDto.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
         (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
-        for (rentalRequestTool in rentalRequestSheet.toolList) {
-            toolList.add(RentalRequestToolWithCount(rentalRequestTool, rentalRequestTool.count))
+        for (rentalRequestToolDto in rentalRequestSheetDto.toolList) {
+            toolList.add(RentalRequestToolApproveFormDto(rentalRequestToolDto.id,rentalRequestToolDto.toolDto.id, rentalRequestToolDto.count,rentalRequestToolDto.tags)
         }
 
         var adapter = RentalRequestToolAdapter(toolList)
@@ -118,27 +116,9 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        qrEditText.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE ||
-                    (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val tag = qrEditText.text.toString().replace("\n", "")
-
-                qrEditText.text.clear()
-                qrEditText.requestFocus()
-
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-        qrEditText.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) {
-                qrEditText.requestFocus()
-            }
-        }
-
         confirmBtn.setOnClickListener {
-            confirmBtn.isFocusable = false
-            confirmBtn.isClickable = false
+            //confirm()
+            /* 이거 standby
 
             var standbyAlreadySent = false
             if (adapter is RentalRequestToolAdapter) {
@@ -157,33 +137,33 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
                 }
             }
             standbyAlreadySent = true
+             */
         }
         cancelBtn.setOnClickListener {
             cancel()
         }
 
-        qrEditText.requestFocus()
         return view
     }
 
     fun cancel() {
         val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL
-        val data = "{rentalRequestSheetId:${rentalRequestSheet.id}}"
+        val data = "{rentalRequestSheetId:${rentalRequestSheetDto.id}}"
         bluetoothManager?.send(type,data)
     }
+
+
     fun confirm(){
         val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE
         val data = RentalRequestSheetApproveFormDto(
-                rentalRequestSheet.id,
-                rentalRequestSheet.workerDto,
-                rentalRequestSheet.leaderDto,
-                sharedViewModel.loginManager,
-                rentalRequestSheet.toolboxDto.id,
+                rentalRequestSheetDto.id,
+                rentalRequestSheetDto.workerDto.id,
+                rentalRequestSheetDto.leaderDto.id,
+                sharedViewModel.loginManager.id,
+                rentalRequestSheetDto.toolboxDto.id,
                 toolList
         )
     }
-
-
     private fun onTagInput(tag : String){
         val type = Constants.BluetoothMessageType.TAG
         val data = "{tag:${tag}}"
@@ -221,5 +201,9 @@ class ManagerRentalDetailFragment(private var rentalRequestSheet: RentalRequestS
     override fun onPause() {
         super.onPause()
         bluetoothManager=null
+    }
+
+    override fun processInput(input: String) {
+        onTagInput(input)
     }
 }

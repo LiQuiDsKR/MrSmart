@@ -326,9 +326,16 @@ class BluetoothManager (private val handler : Handler){
                 //service update
                 rentalRequestSheetService.clear()
 
+
                 //event
                 handler.post{
                     listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                }
+                if (total<1) {
+                    handler.post{
+                        listener?.onRequestEnded()
+                    }
+                    return
                 }
 
                 //postprocess - logic
@@ -437,7 +444,7 @@ class BluetoothManager (private val handler : Handler){
             }
             TAG.name -> {
                 //response
-                val total = gson.fromJson(jsonStr,TagDto::class.java)
+                val tagDto = gson.fromJson(jsonStr,TagDto::class.java)
 
                 //service update
                 //

@@ -10,7 +10,7 @@ import com.mrsmart.standard.rental.RentalRequestToolDto
 import com.mrsmart.standard.rental.SheetState
 
 
-class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
+class RentalRequestSheetAdapter(private var sheetList: MutableList<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
 
     class RentalRequestSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,7 +28,7 @@ class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheet
     }
 
     override fun onBindViewHolder(holder: RentalRequestSheetViewHolder, position: Int) {
-        val currentRentalRequestSheet = rentalRequestSheets[position]
+        val currentRentalRequestSheet = sheetList[position]
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
         holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp
@@ -47,12 +47,21 @@ class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheet
     }
 
     override fun getItemCount(): Int {
-        return rentalRequestSheets.size
+        return sheetList.size
     }
     fun updateList(newList: List<RentalRequestSheetDto>) {
-        rentalRequestSheets = newList
+        sheetList = newList.toMutableList()
         notifyDataSetChanged()
     }
-
+    fun insertList(newItems:List<RentalRequestSheetDto>){
+        val positionStart = sheetList.size
+        sheetList.addAll(positionStart,newItems)
+        notifyItemRangeInserted(positionStart, newItems.size)
+    }
+    /*
+    fun insertItem
+    fun removeList
+    fun removeItem
+     */
 
 }

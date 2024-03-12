@@ -103,7 +103,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         val layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
+        val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
             if (rentalRequestSheet.status != SheetState.REQUEST) {
                 val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
                 requireActivity().supportFragmentManager.beginTransaction()

@@ -14,13 +14,16 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.fragment.LobbyFragment
 import com.liquidskr.fragment.ReconnectFragment
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private var isBluetoothEnabled : Boolean = false
     private val androidBluetoothManager: android.bluetooth.BluetoothManager by lazy {getSystemService(android.bluetooth.BluetoothManager::class.java)}
     private val bluetoothAdapter: BluetoothAdapter by lazy {androidBluetoothManager.adapter}
+
+    private var accumulatedInput = StringBuilder()
 
     interface BluetoothModalListener {
         fun onConfirmButtonClicked()
@@ -77,6 +82,32 @@ class MainActivity : AppCompatActivity() {
         bluetoothManager.stopTimer()
         bluetoothManager.disconnect()
     }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        Log.v("key","action:[${event.action}],keycode:[${event.keyCode}],unicode:[${event.unicodeChar}]")
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_ENTER -> {
+                    supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let { fragment ->
+                        if (fragment is InputProcessor) {
+                            fragment.processInput(accumulatedInput.toString())
+                            accumulatedInput.clear()
+                            return true;
+                        }
+                    }
+                }
+                else -> {
+                    val char = event.unicodeChar.toChar()
+                    if (char.isLetterOrDigit() || char.isWhitespace()) {
+                        Log.d("key","[${accumulatedInput}] detected")
+                        accumulatedInput.append(char)
+                    }
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
 
     // 1. 필요한 권한이 허용되어 있는지 체크 -> 허용되지 않은 권한은 missingPermissions에 저장.
     private fun checkPermission(){

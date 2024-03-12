@@ -15,12 +15,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
+import com.liquidskr.btclient.InputProcessor
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.membership.Role
 
-class ManagerFragment : Fragment() {
+class ManagerFragment : Fragment(){
     lateinit var loginBtn: Button
     lateinit var idTextField: EditText
     lateinit var pwTextField: EditText

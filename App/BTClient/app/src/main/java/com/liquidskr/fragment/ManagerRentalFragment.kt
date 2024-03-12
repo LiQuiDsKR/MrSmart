@@ -22,6 +22,7 @@ import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetService
 import com.mrsmart.standard.toolbox.ToolboxService
 
@@ -101,7 +102,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         val layoutManager = LinearLayoutManager(requireContext())
-        val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
+        val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
             fragmentTransform(ManagerRentalDetailFragment(rentalRequestSheet), null)
         }
 

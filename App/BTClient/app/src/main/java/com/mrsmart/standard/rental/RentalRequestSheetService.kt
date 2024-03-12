@@ -46,13 +46,12 @@ class RentalRequestSheetService private constructor() {
 
                 viewList.add(sheet)
             }
+            handler.post{
+                adapter.insertList(sheetList)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to encode rentalRequestSheet data", e)
             throw Exception("Failed to encode rentalRequestSheet data. Error: ${e.message}", e)
-        }
-
-        handler.post{
-            adapter.updateList(viewList)
         }
     }
     fun clear(){

@@ -222,14 +222,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         toolboxId: Long,
         toolboxName: String
     ): Long {
-
         val values = ContentValues()
         values.put(COLUMN_TOOLBOX_ID, 1)
         values.put(COLUMN_TOOLBOX_TOOLBOX_ID, toolboxId) // ID 자동으로 올리느라 그랬나 봅니다. LQD씨가...;;;;
         values.put(COLUMN_TOOLBOX_NAME, toolboxName)
 
         val db = this.writableDatabase
-        val id = db.insert(TABLE_TOOLBOX_NAME, null, values)
+
+        val numberOfRowsUpdated = db.update(TABLE_TOOLBOX_NAME, values, "$COLUMN_TOOLBOX_ID = ?",
+            arrayOf("1")
+        )
+
+        val id :Long
+        if (numberOfRowsUpdated == 0) {
+            id = db.insert(TABLE_TOOLBOX_NAME, null, values)
+        } else {
+            id = toolboxId
+        }
 
         db.close()
         return id
