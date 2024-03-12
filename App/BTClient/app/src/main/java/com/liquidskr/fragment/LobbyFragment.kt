@@ -37,7 +37,7 @@ class LobbyFragment : Fragment() {
         override fun onDisconnected() {
             val reconnectFrag = ReconnectFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.bluetoothPopupLayout,reconnectFrag)
+                .replace(R.id.popupLayout,reconnectFrag)
                 .addToBackStack(null)
                 .commit()
         }
@@ -70,7 +70,7 @@ class LobbyFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby, container, false)
 
-        popupLayout = view.findViewById(R.id.bluetoothPopupLayout)
+        popupLayout = view.findViewById(R.id.popupLayout)
 
         workerBtn = view.findViewById(R.id.workerBtn)
         managerBtn = view.findViewById(R.id.managerBtn)
