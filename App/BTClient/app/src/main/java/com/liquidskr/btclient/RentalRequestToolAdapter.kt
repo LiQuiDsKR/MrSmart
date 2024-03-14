@@ -4,9 +4,12 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets.Side.all
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
+import com.mrsmart.standard.tool.TagDto
 import com.mrsmart.standard.tool.ToolService
 
 class RentalRequestToolAdapter(
@@ -83,10 +86,25 @@ class RentalRequestToolAdapter(
 //
 //        builder.show()
     }
-    fun tagAdded(toolId: Long) {
-        if (toolId in selection && selection[toolId]!=true){
-            selection[toolId]=true
+    fun tagAdded(tag: TagDto) {
+        if (tag.toolDto.id in selection && selection[tag.toolDto.id]!=true){
+            selection[tag.toolDto.id]=true
+            val item = items.find{it.toolDtoId==tag.toolDto.id}!!
+            if (item.tags.length>1){
+                item.tags=item.tags+","+tag.macaddress
+            }else{
+                item.tags=tag.macaddress
+            }
             notifyDataSetChanged()
         }
+    }
+    fun areAllSelected() : Boolean{
+        return selection.values.all{it}
+    }
+    fun isNothingSelected():Boolean{
+        return selection.values.all{!it}
+    }
+    fun getResult():List<RentalRequestToolApproveFormDto>{
+        return items.filter{ selection[it.toolDtoId]?:false }
     }
 }

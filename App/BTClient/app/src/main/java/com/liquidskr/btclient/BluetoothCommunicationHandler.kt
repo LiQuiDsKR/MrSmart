@@ -113,7 +113,7 @@ class BluetoothCommunicationHandler (
     }
     private val heartBeatTimerTask = object : TimerTask() {
         override fun run() {
-            if (isBluetoothConnectionHandlerNull) return
+            if (isBluetoothConnectionHandlerNull || commTimeInMillis>0) return
             val now = Calendar.getInstance().timeInMillis
             Log.d("bluetooth", "HeartBeat set : $now")
             send(Constants.BluetoothMessageType.HI.name + ",${Calendar.getInstance().timeInMillis}")

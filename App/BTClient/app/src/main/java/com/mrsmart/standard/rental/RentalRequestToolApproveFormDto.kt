@@ -4,5 +4,5 @@ data class RentalRequestToolApproveFormDto(
     val id: Long,
     val toolDtoId: Long,
     val count: Int,
-    val tags: String
+    var tags: String
 )

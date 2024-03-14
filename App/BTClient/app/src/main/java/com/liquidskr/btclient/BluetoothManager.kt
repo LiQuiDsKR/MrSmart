@@ -96,18 +96,16 @@ class BluetoothManager (private val handler : Handler){
 
     fun send(type:Constants.BluetoothMessageType,data:String){
 
-        if (type == TOOLBOX_ALL){
-            Log.d("bluetooth","Toolbox-all 넘어감")
-        } else {
             handler.post {
                 listener?.onRequestStarted()
             }
-        }
 
         //cache
         lastSendedMessageType = type
         lastSendedMessageData = data
 
+        bluetoothCommunicationHandler.send("$type,$data")
+        /*
         when(type){
             NULL -> {
                 Log.d("bluetooth","NULL")
@@ -138,6 +136,8 @@ class BluetoothManager (private val handler : Handler){
             }
             else -> {Log.d("bluetooth","존재하지 않는 데이터 타입입니다")}
         }
+
+         */
     }
     
     fun processData(data:String) {
@@ -517,8 +517,10 @@ class BluetoothManager (private val handler : Handler){
                 val toolboxList: List<ToolboxDto> = gson.fromJson(jsonStr, listType)
 
                 handler.post{
+                    listener?.onRequestProcessed(TOOLBOX_ALL.processMessage,1,1)
                     DialogUtils.showSingleChoiceDialog("정비실을 선택해주세요.",toolboxList.map{toolboxDto->toolboxDto.name}.toTypedArray()){
                         ToolboxService.getInstance().updateToolbox(toolboxList[it])
+                        listener?.onRequestEnded()
                     }
                 }
             }

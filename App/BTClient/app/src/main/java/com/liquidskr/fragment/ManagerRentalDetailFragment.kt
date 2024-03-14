@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputProcessor
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
@@ -28,7 +29,6 @@ import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
 
 class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputProcessor {
     private lateinit var recyclerView: RecyclerView
-    private var toolList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
 
     private lateinit var workerName: TextView
     private lateinit var leaderName: TextView
@@ -40,8 +40,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
 
-    private lateinit var popupLayout : View
-
     val gson = Gson()
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -49,7 +47,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
-        popupLayout = view.findViewById(R.id.popupLayout)
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -66,18 +63,27 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         leaderName.text = rentalRequestSheetDto.leaderDto.name
         timeStamp.text = rentalRequestSheetDto.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
-        for (rentalRequestToolDto in rentalRequestSheetDto.toolList) {
-            toolList.add(RentalRequestToolApproveFormDto(rentalRequestToolDto.id,rentalRequestToolDto.toolDto.id, rentalRequestToolDto.count,rentalRequestToolDto.tags?:""))
-        }
-
-        var adapter = RentalRequestToolAdapter(toolList)
+        var adapter = RentalRequestToolAdapter(
+            rentalRequestSheetDto.toolList.map{
+                RentalRequestToolApproveFormDto(it.id,it.toolDto.id, it.count,it.tags?:"")
+            }.toMutableList()
+        )
         recyclerView.adapter = adapter
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
         confirmBtn.setOnClickListener {
-            //confirm()
+            if (adapter.isNothingSelected()){
+                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 승인해주세요.")
+            }else if (!adapter.areAllSelected()){
+                DialogUtils.showAlertDialog("대여 승인","신청된 공기구 중 일부만 선택하셨습니다. 정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+
+            }else{
+                DialogUtils.showAlertDialog("대여 승인", "정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }
             /* 이거 standby
 
             var standbyAlreadySent = false
@@ -100,29 +106,31 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
              */
         }
         cancelBtn.setOnClickListener {
-            cancel()
+            DialogUtils.showAlertDialog("대여 목록 삭제","현재 페이지의 대여 신청 목록이 삭제됩니다.\n정말로 삭제하시겠습니까?",
+                { _, _ -> cancel() }, { _,_-> })
         }
 
         return view
     }
 
-    fun cancel() {
+    private fun cancel() {
         val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL
         val data = "{rentalRequestSheetId:${rentalRequestSheetDto.id}}"
         (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
 
 
-    fun confirm(){
+    private fun confirm(){
         val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_APPROVE
-        val data = RentalRequestSheetApproveFormDto(
+        val data = gson.toJson(RentalRequestSheetApproveFormDto(
                 rentalRequestSheetDto.id,
                 rentalRequestSheetDto.workerDto.id,
                 rentalRequestSheetDto.leaderDto.id,
                 sharedViewModel.loginManager!!.id,
                 rentalRequestSheetDto.toolboxDto.id,
-                toolList
-        )
+                (recyclerView.adapter as RentalRequestToolAdapter).getResult()
+        ))
+        (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
     private fun onTagInput(tag : String){
         val type = Constants.BluetoothMessageType.TAG

@@ -65,11 +65,6 @@ class MainActivity : AppCompatActivity() {
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
             Log.e("bluetooth","Inaccessible point! : onRequestProcessed")
-            val fragment = ProgressBarFragment()
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout, fragment)
-                .addToBackStack(null)
-                .commit()
         }
         override fun onRequestEnded() {
             Log.e("bluetooth","Inaccessible point! : onRequestEnded")
