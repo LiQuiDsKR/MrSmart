@@ -12,7 +12,7 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:id="@+id/fragmentContainer"
+            android:id="@+id/lobbyContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/background"

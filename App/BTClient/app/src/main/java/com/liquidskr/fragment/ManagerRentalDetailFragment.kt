@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.PendingIntentCompat.send
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,45 +47,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
-    private var bluetoothManager : BluetoothManager? = null
-
-    private val bluetoothManagerListener = object : BluetoothManager.Listener{
-        override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.popupLayout,reconnectFrag)
-                    .addToBackStack(null)
-                    .commit()
-        }
-
-        override fun onRequestStarted() {
-            val progressBarFrag = ProgressBarFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.popupLayout,progressBarFrag)
-                    .addToBackStack(null)
-                    .commit()
-        }
-
-        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
-        }
-
-        override fun onRequestEnded() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
-        }
-
-        override fun onRequestFailed(message: String) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
-        }
-
-        override fun onException(message: String) {
-            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
         popupLayout = view.findViewById(R.id.popupLayout)
@@ -104,10 +66,8 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         leaderName.text = rentalRequestSheetDto.leaderDto.name
         timeStamp.text = rentalRequestSheetDto.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
-
         for (rentalRequestToolDto in rentalRequestSheetDto.toolList) {
-            toolList.add(RentalRequestToolApproveFormDto(rentalRequestToolDto.id,rentalRequestToolDto.toolDto.id, rentalRequestToolDto.count,rentalRequestToolDto.tags)
+            toolList.add(RentalRequestToolApproveFormDto(rentalRequestToolDto.id,rentalRequestToolDto.toolDto.id, rentalRequestToolDto.count,rentalRequestToolDto.tags?:""))
         }
 
         var adapter = RentalRequestToolAdapter(toolList)
@@ -149,7 +109,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
     fun cancel() {
         val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_CANCEL
         val data = "{rentalRequestSheetId:${rentalRequestSheetDto.id}}"
-        bluetoothManager?.send(type,data)
+        (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
 
 
@@ -159,15 +119,15 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
                 rentalRequestSheetDto.id,
                 rentalRequestSheetDto.workerDto.id,
                 rentalRequestSheetDto.leaderDto.id,
-                sharedViewModel.loginManager.id,
+                sharedViewModel.loginManager!!.id,
                 rentalRequestSheetDto.toolboxDto.id,
                 toolList
         )
     }
     private fun onTagInput(tag : String){
         val type = Constants.BluetoothMessageType.TAG
-        val data = "{tag:${tag}}"
-        bluetoothManager?.send(type,data)
+        val data = "{\"tag\":\"${tag}\"}"
+        (requireActivity() as MainActivity).bluetoothManager.send(type,data)
     }
 
 
@@ -193,15 +153,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 //        dbHelper.insertStandbyData(final, "RENTAL","STANDBY", detail)
 //        dbHelper.close()
 //    }
-
-    override fun onResume() {
-        super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
-    }
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
-    }
 
     override fun processInput(input: String) {
         onTagInput(input)

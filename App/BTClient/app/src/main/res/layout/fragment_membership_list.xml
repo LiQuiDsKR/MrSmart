@@ -7,76 +7,59 @@
     android:background="#FFFFFF"
     android:clickable="true">
 
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
-        android:clickable="true"
-        android:focusable="true"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_margin="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp">
+
+                <EditText
+                    android:id="@+id/editTextName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00FFFFFF"
+                    android:hint="이름 입력"
+                    android:textSize="16sp" />
+
+                <ImageButton
+                    android:id="@+id/SearchBtn"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:backgroundTint="#00FFFFFF"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 부서 검색 -->
+
+        <!-- RecycleView를 담을 FrameLayout -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:layout_margin="4dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingLeft="8dp">
-
-                    <EditText
-                        android:id="@+id/editTextName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:backgroundTint="#00FFFFFF"
-                        android:hint="이름 입력"
-                        android:textSize="16sp" />
-
-                    <ImageButton
-                        android:id="@+id/SearchBtn"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:backgroundTint="#00FFFFFF"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
-                </LinearLayout>
-            </FrameLayout>
-
-            <!-- 부서 검색 -->
-
-            <!-- RecycleView를 담을 FrameLayout -->
-            <FrameLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/fragment_membership" />
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/fragment_membership" />
 
 
-            </FrameLayout>
-        </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
 
-    </FrameLayout>
-
-    <RelativeLayout
-        android:id="@+id/popupLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

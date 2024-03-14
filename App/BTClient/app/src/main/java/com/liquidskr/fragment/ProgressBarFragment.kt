@@ -60,7 +60,7 @@ class ProgressBarFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
 
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
+        (requireActivity() as MainActivity).registerBluetoothManagerListener(bluetoothManagerListener)
 
         // Set up a touch listener that consumes all touch events
         view.setOnTouchListener { _, _ ->true}
@@ -85,6 +85,10 @@ class ProgressBarFragment : Fragment() {
         progressText.text = finalStr
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        (requireActivity() as MainActivity).unregisterBluetoothManagerListener()
+    }
     fun close(){
         requireActivity().supportFragmentManager.popBackStack()
     }

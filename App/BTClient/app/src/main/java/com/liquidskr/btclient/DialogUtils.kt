@@ -2,6 +2,7 @@ package com.liquidskr.btclient
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.text.InputType
 import android.widget.EditText
 
 object DialogUtils {
@@ -59,6 +60,20 @@ object DialogUtils {
     fun showTextDialog(title: String, defaultText: String, callback: (String)->Unit){
         val editText = EditText(activity)
         editText.setText(defaultText)
+
+        val builder = AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setView(editText)
+            .setPositiveButton("확인"){_,_->
+                callback(editText.text.toString())
+            }
+            .setNegativeButton("취소", null)
+            .create().show()
+    }
+    fun showTextDialog(title: String, defaultText: String, inputType:Int , callback: (String)->Unit){
+        val editText = EditText(activity)
+        editText.setText(defaultText)
+        editText.inputType = inputType
 
         val builder = AlertDialog.Builder(activity)
             .setTitle(title)

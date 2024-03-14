@@ -30,43 +30,6 @@ class LobbyFragment : Fragment() {
 
     private var backPressedTime=0L
 
-    // not using in this Fragment
-    private var bluetoothManager : BluetoothManager? = null
-
-    private val bluetoothManagerListener = object : BluetoothManager.Listener{
-        override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,reconnectFrag)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        override fun onRequestStarted() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
-        }
-
-        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
-        }
-
-        override fun onRequestEnded() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
-        }
-
-        override fun onRequestFailed(message: String) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
-        }
-
-        override fun onException(message: String) {
-            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby, container, false)
 
@@ -76,9 +39,6 @@ class LobbyFragment : Fragment() {
         managerBtn = view.findViewById(R.id.managerBtn)
         bluetoothBtn = view.findViewById(R.id.bluetoothBtn)
         settingBtn = view.findViewById(R.id.SettingBtn)
-
-
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         workerBtn.setOnClickListener {
             val fragment = WorkerFragment.newInstance()
@@ -125,13 +85,4 @@ class LobbyFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
 
-    override fun onResume() {
-        super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
-    }
-
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
-    }
 }

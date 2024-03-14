@@ -56,7 +56,7 @@ class BluetoothCommunicationHandler (
             connectionState=ConnectionState.CONNECTED
             Log.d("bluetooth", "블루투스 연결에 성공했습니다")
             reconnectAttempt=0
-            //commTimeInMillis=0
+            commTimeInMillis=0
             listener.onConnected()
         }
 

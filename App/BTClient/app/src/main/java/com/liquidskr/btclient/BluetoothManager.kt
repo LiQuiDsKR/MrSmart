@@ -133,6 +133,9 @@ class BluetoothManager (private val handler : Handler){
             TOOLBOX_ALL->{
                 bluetoothCommunicationHandler.send(type.toString())
             }
+            TAG->{
+                bluetoothCommunicationHandler.send("$type,$data")
+            }
             else -> {Log.d("bluetooth","존재하지 않는 데이터 타입입니다")}
         }
     }
@@ -451,7 +454,7 @@ class BluetoothManager (private val handler : Handler){
 
                 //event
                 handler.post{
-                    listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                    listener?.onRequestProcessed(TAG.processMessage,1,1)
                 }
 
                 loadingPageIndex=0

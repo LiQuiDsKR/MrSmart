@@ -67,7 +67,7 @@ class ReconnectFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
 
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
+        (requireActivity() as MainActivity).registerBluetoothManagerListener(bluetoothManagerListener)
 
         // Set up a touch listener that consumes all touch events
         view.setOnTouchListener { _, _ ->true}
@@ -94,13 +94,14 @@ class ReconnectFragment : Fragment() {
         }
     }
 
-
     override fun onResume() {
         super.onResume()
         bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
     }
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
+
+    override fun onDetach() {
+        super.onDetach()
+        bluetoothManager = null
+        (requireActivity() as MainActivity).unregisterBluetoothManagerListener()
     }
 }

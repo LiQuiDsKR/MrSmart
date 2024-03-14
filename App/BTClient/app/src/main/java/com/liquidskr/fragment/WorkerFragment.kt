@@ -31,57 +31,12 @@ class WorkerFragment : Fragment() {
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
-    // not using in this Fragment
-    private var bluetoothManager : BluetoothManager? = null
-
-    private val bluetoothManagerListener = object : BluetoothManager.Listener{
-        override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,reconnectFrag)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        override fun onRequestStarted() {
-            //TODO("Not yet implemented")
-            val progressBarFrag = ProgressBarFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,progressBarFrag)
-                .addToBackStack(null)
-                .commit()
-
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
-        }
-
-        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
-        }
-
-        override fun onRequestEnded() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
-        }
-
-        override fun onRequestFailed(message: String) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
-        }
-
-        override fun onException(message: String) {
-            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
-        }
-    }
     @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker, container, false)
         popupLayout = view.findViewById(R.id.popupLayout)
         loginBtn = view.findViewById(R.id.LoginBtn)
         idTextField = view.findViewById(R.id.IDtextField)
-        
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         idTextField.setOnFocusChangeListener { view, hasFocus ->
             if (hasFocus) {
@@ -115,15 +70,6 @@ class WorkerFragment : Fragment() {
             }
         }
         return view
-    }
-    override fun onResume() {
-        super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
-    }
-
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
     }
     companion object {
         fun newInstance(): WorkerFragment {
