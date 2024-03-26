@@ -29,45 +29,45 @@ object Constants {
         TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중...",""),
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...",""),
+        RENTAL_REQUEST_SHEET_CANCEL("승인 취소 중...","대여 신청 목록이 삭제되었습니다."),
+        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 처리되었습니다."),
+        TAG("QR 확인 중...",""),
+        TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
 
         //TODO("이 아래로 메시지 변경 해야함")
 
-        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
-        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""),
-        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...",""),
-        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 처리되었습니다."),
-        RETURN_SHEET_FORM("반납 승인 처리 중...",""),
-        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),
-        RETURN_SHEET_REQUEST("반납 신청 처리 중...",""),
-        TAG_FORM("개별 QR코드 등록 중...",""),
-        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),
-        TAG_LIST("개별 QR코드 정보 불러오는 중...",""),
-        TAG_ALL("개별 QR코드 정보 불러오는 중...",""),
-        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...",""),
-        TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),
-        TAG_ALL_COUNT("사원 정보 불러오는 중...",""),
-        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중...",""),
-        TAG("QR 확인 중...",""),
-        RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),
-        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_CANCEL("정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),
-        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중...",""),
-        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),
-        TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""), //NOT USING
+        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""), //TODO : NEXT UPDATE
+        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""), //TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//NOT USING
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 불러오는 중...",""),//TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 불러오는 중...",""),//NOT USING
+        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...",""),//TODO
+        RETURN_SHEET_FORM("반납 승인 처리 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),//TODO
+        RETURN_SHEET_REQUEST("반납 신청 처리 중...",""),//TODO
+        TAG_FORM("개별 QR코드 등록 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_LIST("개별 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_ALL("개별 QR코드 정보 불러오는 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),//TODO
+        TAG_ALL_COUNT("사원 정보 불러오는 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중...",""),//TODO
+        RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("정보 불러오는 중...",""),//TODO
+        RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),//TODO
+        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중...",""),//TODO
+        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),//TODO
 
         TEST("사원 정보 불러오는 중...",""),
 

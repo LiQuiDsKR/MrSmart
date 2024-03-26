@@ -455,8 +455,21 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             RENTAL_REQUEST_SHEET_CANCEL.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //TODO:일관성
+                        DialogUtils.showAlertDialog("성공",RENTAL_REQUEST_SHEET_CANCEL.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //TODO:이거 어떻게 쌈빡한 방법이 없나?
+                    }
+                }else{
+                    handler.post{
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_APPROVE")
+                    }
+                }
             }
             OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
