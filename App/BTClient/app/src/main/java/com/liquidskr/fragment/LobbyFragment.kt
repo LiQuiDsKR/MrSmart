@@ -1,22 +1,14 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 
 

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.microedition.io.StreamConnection;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ import com.care4u.communication.bluetooth.BluetoothCommunicationHandler;
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.RequestType;
 import com.care4u.constant.SheetState;
+import com.care4u.exception.NoSuchElementFoundException;
+import com.care4u.exception.OutOfStockException;
 import com.care4u.hr.main_part.MainPartService;
 import com.care4u.hr.membership.MembershipService;
 import com.care4u.hr.part.PartService;
@@ -402,21 +405,27 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//RentalRequestSheetApproveFormDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경, RentalSheet를 생성.
 		//관리자 - 대여 승인 페이지 - 확인 버튼 터치 시 신청.
 		case RENTAL_REQUEST_SHEET_APPROVE:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetApproveFormDto mainDto;
-		    	try {
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					RentalRequestSheetApproveFormDto mainDto;
 					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormDto.class);
 					
-		            RentalSheetDto result = rentalSheetService.create(mainDto);
-		            
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+					RentalSheetDto result = rentalSheetService.create(mainDto);
+					
+					handler.sendData(keyword + "good");
+				}else {
+					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+"빈 데이터입니다.");
+				}
+			}catch(JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}catch(Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
 			}
 			break;
 		//RentalRequestSheet의 Id를 통해 해당 시트의 status를 CANCEL로 변경.
@@ -724,10 +733,22 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		case TAG:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				String tagString = jsonObj.getString("tag");
-				handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tagString = jsonObj.getString("tag");
+					handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
+				}else {
+					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+",빈 데이터입니다.");
+				}
+			}catch (JSONException e){
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+keyword+","+e.getMessage()+","+paramJson);
 			}
 			break;
 		case TAG_AND_TOOLBOX_TOOL_LABEL_FORM:

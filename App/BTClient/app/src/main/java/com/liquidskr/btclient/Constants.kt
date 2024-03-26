@@ -20,57 +20,63 @@ object Constants {
         DATABASE_INSERT_EXCEPTION,
         BLUETOOTH_CONNECTION_RETRY_FAILED,
     }
-    enum class BluetoothMessageType(val processMessage:String){
-        NULL("불러올 수 없는 타입입니다...",),
+    enum class BluetoothMessageType(val processMessage:String,val processEndMessage:String){
+        NULL("불러올 수 없는 타입입니다...","NULL"),
 
-        MEMBERSHIP_ALL("사원 기준정보 불러오는 중...",),
-        MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중..."),
-        TOOL_ALL("공기구 기준정보 불러오는 중..."),
-        TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중..."),
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중..."),
+        MEMBERSHIP_ALL("사원 기준정보 불러오는 중...",""),
+        MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중...",""),
+        TOOL_ALL("공기구 기준정보 불러오는 중...","기준정보를 전부 불러왔습니다."),//TODO 기준정보 끝이 여기가 맞아?
+        TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중...",""),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...",""),
 
         //TODO("이 아래로 메시지 변경 해야함")
 
-        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중..."),
-        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중..."),
-        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없"),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중..."),
-        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중..."),
-        RETURN_SHEET_FORM("반납 승인 처리 중..."),
-        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중..."),
-        RETURN_SHEET_REQUEST("반납 신청 처리 중..."),
-        TAG_FORM("개별 QR코드 등록 중..."),
-        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중..."),
-        TAG_LIST("개별 QR코드 정보 불러오는 중..."),
-        TAG_ALL("개별 QR코드 정보 불러오는 중..."),
-        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중..."),
-        TAG_GROUP("개별 QR코드 목록 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중..."), TAG_ALL_COUNT("사원 정보 불러오는 중..."),
-        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중..."),
-        TAG("QR 확인 중..."), RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중..."),
-        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_CANCEL("정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("정보 불러오는 중..."),
-        RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중..."),
-        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중..."),
-        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중..."),
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중..."),
-        TOOLBOX_ALL("정비실 정보 불러오는 중..."),
+        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
+        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""),
+        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...",""),
+        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 처리되었습니다."),
+        RETURN_SHEET_FORM("반납 승인 처리 중...",""),
+        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),
+        RETURN_SHEET_REQUEST("반납 신청 처리 중...",""),
+        TAG_FORM("개별 QR코드 등록 중...",""),
+        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),
+        TAG_LIST("개별 QR코드 정보 불러오는 중...",""),
+        TAG_ALL("개별 QR코드 정보 불러오는 중...",""),
+        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...",""),
+        TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),
+        TAG_ALL_COUNT("사원 정보 불러오는 중...",""),
+        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중...",""),
+        TAG("QR 확인 중...",""),
+        RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),
+        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_CANCEL("정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),
+        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중...",""),
+        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),
+        TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
 
-        TEST("사원 정보 불러오는 중..."),
+        TEST("사원 정보 불러오는 중...",""),
+
+        DATA_TYPE_EXCEPTION("오류",""),
+        DATA_SEMANTIC_EXCEPTION("잘못된 입력",""),
+        UNKNOWN_EXCEPTION("오류",""),
 
         // 연결 상태 확인용. CommunicationHandler에서 사용.
-        HI("heartBeat set")
+        HI("heartBeat set","")
 
 /*
         // 각 함수들도 정의해줍니다.
@@ -260,15 +266,14 @@ object Constants {
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
     const val TOOL_PAGE_SIZE = 10 // 한 페이지당 처리할 공기구 수
     const val SHEET_PAGE_SIZE = 1 // 한 페이지당 처리할 시트(전표) 수
-    const val COMMUNICATION_TIMEOUT = 3000 //03초
+    const val COMMUNICATION_TIMEOUT = 3000 //송신 3초 후 타임아웃
     const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.
-    const val VALIDCHECK_INTERVAL = 500L // 3초 간격으로 연결상태 확인 ( 메시지 통신 중 타임아웃 체크용 )
+    const val VALIDCHECK_INTERVAL = 500L //0.5초 간격 연결상태 확인, 재접속 시도.
     const val HEARTBEAT_INTERVAL = 60000L //  1분 간격으로 연결상태 확인 ( 서버 리소스 체크용 )
     const val BLUETOOTH_MAX_CHUNK_LENGTH = 1024 // 블루투스 데이터 통신 간 1회 처리 바이트 수
     const val INTEGER_BYTE_SIZE = 4
     const val REQUEST_CODE = 123 // permissionManager에서 사용.
     const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 10 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
-    const val BLUETOOTH_RECONNECT_INTERVAL = 500L // 500밀리초 간격으로 재접속 시도.
 
 
     // database 테이블,컬럼명

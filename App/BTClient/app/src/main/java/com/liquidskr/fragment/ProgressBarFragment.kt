@@ -37,10 +37,14 @@ class ProgressBarFragment : Fragment() {
             setProgressBar(processedAmount,totalAmount,context)
         }
 
-        override fun onRequestEnded() {
+        override fun onRequestEnded(message: String) {
             Log.d("progressbar","Request Ended Successfully")
-            DialogUtils.showAlertDialog("성공","처리가 정상적으로 완료되었습니다."){
-                _,_-> close()
+            if (message.isNotEmpty()){
+                DialogUtils.showAlertDialog("성공",message){
+                        _,_-> close()
+                }
+            }else{
+                close()
             }
         }
 
@@ -49,7 +53,7 @@ class ProgressBarFragment : Fragment() {
         }
 
         override fun onException(message: String) {
-            DialogUtils.showAlertDialog("통신 실패", message){_,_->close()}
+            DialogUtils.showAlertDialog("오류",message){_,_->close()}
         }
     }
 

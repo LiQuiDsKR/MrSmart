@@ -1,8 +1,8 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
+import android.nfc.Tag
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,24 +10,25 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.app.PendingIntentCompat.send
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DialogUtils
-import com.liquidskr.btclient.InputProcessor
+import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
+import com.mrsmart.standard.rental.RentalRequestToolApproveFormSelectedDto
+import com.mrsmart.standard.tool.TagDto
+import com.mrsmart.standard.tool.TagService
 
-class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputProcessor {
+class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var workerName: TextView
@@ -65,7 +66,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 
         var adapter = RentalRequestToolAdapter(
             rentalRequestSheetDto.toolList.map{
-                RentalRequestToolApproveFormDto(it.id,it.toolDto.id, it.count,it.tags?:"")
+                RentalRequestToolApproveFormSelectedDto(it.id,it.toolDto.id, it.count,it.tags?:"",false)
             }.toMutableList()
         )
         recyclerView.adapter = adapter
@@ -128,17 +129,12 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
                 rentalRequestSheetDto.leaderDto.id,
                 sharedViewModel.loginManager!!.id,
                 rentalRequestSheetDto.toolboxDto.id,
-                (recyclerView.adapter as RentalRequestToolAdapter).getResult()
+                (recyclerView.adapter as RentalRequestToolAdapter).getResult().map{
+                    RentalRequestToolApproveFormDto(it.id,it.toolDtoId,it.count,it.tags)
+                }
         ))
         (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
-    private fun onTagInput(tag : String){
-        val type = Constants.BluetoothMessageType.TAG
-        val data = "{\"tag\":\"${tag}\"}"
-        (requireActivity() as MainActivity).bluetoothManager.send(type,data)
-    }
-
-
 
 //    private fun handleBluetoothError(sheet: RentalRequestSheetApproveFormDto) {
 //        Log.d("STANDBY","STANDBY ACCESS")
@@ -162,7 +158,23 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 //        dbHelper.close()
 //    }
 
-    override fun processInput(input: String) {
-        onTagInput(input)
+    override fun handleInput(input: String) {
+        val type = Constants.BluetoothMessageType.TAG
+        val data = "{\"tag\":\"${input}\"}"
+        (requireActivity() as MainActivity).bluetoothManager.send(type,data)
+    }
+
+    override fun handleResponse(response: TagDto) {
+        (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        TagService.getInstance().inputHandler=this
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        TagService.getInstance().inputHandler=null
     }
 }

@@ -36,8 +36,8 @@ class ReconnectFragment : Fragment() {
             Log.d("reconnecting", "$context : $processedAmount/$totalAmount")
         }
 
-        override fun onRequestEnded() {
-            DialogUtils.showAlertDialog("연결됨", "블루투스 연결 성공"){_,_->close()}
+        override fun onRequestEnded(message:String) {
+            DialogUtils.showAlertDialog("연결됨", message){_,_->close()}
         }
 
         override fun onRequestFailed(message: String) {
@@ -56,7 +56,7 @@ class ReconnectFragment : Fragment() {
         }
 
         override fun onException(message: String) {
-            DialogUtils.showAlertDialog("재접속 실패", message){_,_->activity?.finish()}
+            DialogUtils.showAlertDialog("오류",message){_,_->close()}
         }
     }
 
@@ -99,7 +99,7 @@ class ReconnectFragment : Fragment() {
         bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
     }
 
-    override fun onDetach() {
+    override fun onDetach() { //왜 onpause아니고 onDetach? : dialog가 pause를 실행하더라
         super.onDetach()
         bluetoothManager = null
         (requireActivity() as MainActivity).unregisterBluetoothManagerListener()

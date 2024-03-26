@@ -8,15 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
-import com.liquidskr.btclient.InputProcessor
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.membership.Role

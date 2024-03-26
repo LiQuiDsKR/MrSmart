@@ -1,9 +1,7 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -107,7 +105,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
+        bluetoothManager = BluetoothManager.getInstance()
 
         val toolboxService = ToolboxService.getInstance()
         val toolbox = toolboxService.getToolbox()

@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("old")
     lateinit var bluetoothManagerOld: BluetoothManager_Old
 
-    val bluetoothManager : BluetoothManager by lazy { BluetoothManager(
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance(
         Handler(Looper.getMainLooper())
     ) }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
             Log.e("bluetooth","Inaccessible point! : onRequestProcessed")
         }
-        override fun onRequestEnded() {
+        override fun onRequestEnded(message:String) {
             Log.e("bluetooth","Inaccessible point! : onRequestEnded")
         }
         override fun onRequestFailed(message: String) {
@@ -122,8 +122,8 @@ class MainActivity : AppCompatActivity() {
             when (event.keyCode) {
                 KeyEvent.KEYCODE_ENTER -> {
                     supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let { fragment ->
-                        if (fragment is InputProcessor) {
-                            fragment.processInput(accumulatedInput.toString())
+                        if (fragment is InputHandler) {
+                            fragment.handleInput(accumulatedInput.toString())
                             accumulatedInput.clear()
                             return true;
                         }else{

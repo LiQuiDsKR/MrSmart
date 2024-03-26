@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.exception.NoSuchElementFoundException;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
 import com.care4u.toolbox.sheet.rental.rental_sheet.RentalSheet;
@@ -46,7 +47,7 @@ public class TagService {
 		Optional<Tag> item = repository.findById(id);
 		if (item == null) {
 			logger.error("Invalid id : " + id);
-			return null;
+			throw new NoSuchElementFoundException("ID : "+id+"와 일치하는 Qrcode 데이터가 없습니다.");
 		}
 		
 		return new TagDto(item.get());
@@ -57,7 +58,7 @@ public class TagService {
 		Tag item = repository.findByMacaddress(macaddress);
 		if (item == null) {
 			logger.error("Invalid macaddress : " + macaddress);
-			return null;
+			throw new NoSuchElementFoundException("Qr코드 : "+macaddress+"는 등록되지 않은 코드입니다.");
 		}
 		
 		return new TagDto(item);
