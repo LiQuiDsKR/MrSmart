@@ -28,9 +28,9 @@ object Constants {
         TOOL_ALL("공기구 기준정보 불러오는 중...","기준정보를 전부 불러왔습니다."),//TODO 기준정보 끝이 여기가 맞아?
         TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중...",""),
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
-        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...",""),
+        RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...","대여 신청 정보가 없습니다."),
         RENTAL_REQUEST_SHEET_CANCEL("승인 취소 중...","대여 신청 목록이 삭제되었습니다."),
-        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 처리되었습니다."),
+        RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 승인 처리되었습니다."),
         TAG("QR 확인 중...",""),
         TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
 
@@ -40,9 +40,11 @@ object Constants {
         RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""), //TODO : NEXT UPDATE
         RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""), //TODO : NEXT UPDATE
         OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...","미반납 정보가 없습니다."),//TODO : NEXT UPDATE
         OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//NOT USING
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 불러오는 중...",""),//TODO : NEXT UPDATE
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 불러오는 중...",""),//NOT USING
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("미반납 정보 크기 확인 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//NOT USING
         RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...",""),//TODO
         RETURN_SHEET_FORM("반납 승인 처리 중...",""),//TODO
         TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),//TODO
@@ -60,9 +62,7 @@ object Constants {
         RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
         RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
         RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
         RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("정보 불러오는 중...",""),//TODO
         RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),//TODO
         TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중...",""),//TODO
         TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),//TODO
@@ -274,7 +274,7 @@ object Constants {
     const val INTEGER_BYTE_SIZE = 4
     const val REQUEST_CODE = 123 // permissionManager에서 사용.
     const val BLUETOOTH_MAX_RECONNECT_ATTEMPT = 10 // 블루투스 연결 실패 시 자동 재접속 시도 횟수. communicationHandler에서 사용.
-
+    const val BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY = 500L // 블루투스 연속 송신 시 딜레이
 
     // database 테이블,컬럼명
     // DatabaseHelper가 사용함.

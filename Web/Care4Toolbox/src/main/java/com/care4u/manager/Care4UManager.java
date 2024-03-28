@@ -559,14 +559,24 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 //			}
 //			break;
 		case OUTSTANDING_RENTAL_SHEET_BY_TAG:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				String tag = jsonObj.getString("tag");
-				
-				OutstandingRentalSheetDto sheet = outstandingRentalSheetService.get(tag);
-				handler.sendData(keyword + GsonUtils.toJson(sheet));
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tag = jsonObj.getString("tag");
+					
+					OutstandingRentalSheetDto sheet = outstandingRentalSheetService.get(tag);
+					handler.sendData(keyword + GsonUtils.toJson(sheet));
+				}
+			}catch(JSONException e) {
+                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
-			break;
+			break;				
 		case RETURN_SHEET_REQUEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -584,16 +594,23 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		case RETURN_SHEET_FORM:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-		    	ReturnSheetFormDto formDto;
-		    	try {
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					ReturnSheetFormDto formDto;
 					formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
 		    		returnSheetService.addNew(formDto);
 		    		handler.sendData(keyword + "good");
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+				}
+	    	}catch(JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}catch(Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
 			}
 			break;
 		case RETURN_SHEET_FORM_STANDBY:

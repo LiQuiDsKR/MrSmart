@@ -5,7 +5,7 @@ import com.mrsmart.standard.tool.ToolState
 data class ReturnToolFormDto(
     val rentalToolDtoId: Long,
     val toolDtoId: Long,
-    val Tags: String,
+    val tags: String,
     val goodCount: Int,
     val faultCount: Int,
     val damageCount: Int,

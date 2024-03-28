@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.mrsmart.standard.membership.MembershipDto
@@ -41,7 +40,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     private val rentalRequestSheetService = RentalRequestSheetService.getInstance()
 
-    // not using in this Fragment
     private var bluetoothManager : BluetoothManager? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

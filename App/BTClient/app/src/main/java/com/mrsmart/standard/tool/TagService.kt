@@ -1,15 +1,9 @@
 package com.mrsmart.standard.tool
 
-import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
-import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.page.Page
 
 class TagService private constructor() {
     val gson = Gson()
@@ -18,12 +12,14 @@ class TagService private constructor() {
 
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 
-    fun handleTagInfo(tagDto : TagDto){
-        if (inputHandler==null) DialogUtils.showAlertDialog("asdf","asdf")
-        inputHandler!!.handleResponse(tagDto)
+    fun handleResponse(response : Any){
+        if (inputHandler==null) {
+            DialogUtils.showAlertDialog("오류","데이터 전송 후 받는 객체가 없습니다. : Tagservice")
+            return
+        }
+        inputHandler!!.handleResponse(response)
         bluetoothManager.endRequest("")
     }
-
     companion object {
         private var instance: TagService? = null
         private const val TAG = "TagService"

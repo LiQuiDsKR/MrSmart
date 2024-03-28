@@ -74,6 +74,8 @@ class ProgressBarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        Log.d("progressbar","Progress Bar Fragment Created")
+
         // Set up a Back Button listener that consumes all Back Button events
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {}
@@ -92,6 +94,7 @@ class ProgressBarFragment : Fragment() {
     override fun onDetach() {
         super.onDetach()
         (requireActivity() as MainActivity).unregisterBluetoothManagerListener()
+        Log.d("progressbar","Progress Bar Fragment Detached")
     }
     fun close(){
         requireActivity().supportFragmentManager.popBackStack()

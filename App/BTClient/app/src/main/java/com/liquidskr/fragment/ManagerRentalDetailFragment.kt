@@ -21,6 +21,7 @@ import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
+import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.rental.RentalRequestSheetDto
 import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
@@ -35,7 +36,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
     private lateinit var leaderName: TextView
     private lateinit var timeStamp: TextView
 
-    private lateinit var qrEditText: EditText
     private lateinit var backButton: ImageButton
 
     private lateinit var confirmBtn: LinearLayout
@@ -57,7 +57,6 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        qrEditText = view.findViewById((R.id.QR_EditText))
         backButton = view.findViewById(R.id.backButton)
 
         workerName.text = rentalRequestSheetDto.workerDto.name
@@ -66,7 +65,13 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 
         var adapter = RentalRequestToolAdapter(
             rentalRequestSheetDto.toolList.map{
-                RentalRequestToolApproveFormSelectedDto(it.id,it.toolDto.id, it.count,it.tags?:"",false)
+                RentalRequestToolApproveFormSelectedDto(
+                    id = it.id,
+                    toolDtoId = it.toolDto.id,
+                    count = it.count,
+                    tags = it.tags?:"",
+                    isSelected = false
+                )
             }.toMutableList()
         )
         recyclerView.adapter = adapter
@@ -80,31 +85,10 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
             }else if (!adapter.areAllSelected()){
                 DialogUtils.showAlertDialog("대여 승인","신청된 공기구 중 일부만 선택하셨습니다. 정말로 승인하시겠습니까?",
                     { _,_->confirm() }, { _,_-> })
-
             }else{
                 DialogUtils.showAlertDialog("대여 승인", "정말로 승인하시겠습니까?",
                     { _,_->confirm() }, { _,_-> })
             }
-            /* 이거 standby
-
-            var standbyAlreadySent = false
-            if (adapter is RentalRequestToolAdapter) {
-                if (adapter.selectedToolsToRental.isNotEmpty()) {
-                    var toolFormList: MutableList<RentalRequestToolApproveFormDto> = mutableListOf()
-                    for (rrtwc in adapter.rentalRequestToolWithCounts) { // rrtwc = rentalRequestToolWithCount
-                        val tags = rrtwc.rentalRequestTool.tags ?: ""
-                        val toolForm = RentalRequestToolApproveFormDto(rrtwc.rentalRequestTool.id, rrtwc.rentalRequestTool.toolDto.id, rrtwc.count, tags)
-                        toolFormList.add(toolForm)
-                    }
-                    toolFormList = toolFormList.filter { adapter.selectedToolsToRental.contains(it.toolDtoId) }.toMutableList()
-                    val sheet = rentalRequestSheet
-                    val rentalRequestSheetApproveForm = RentalRequestSheetApproveFormDto(sheet.id, sheet.workerDto.id, sheet.leaderDto.id, sharedViewModel.loginManager!!.id, sharedViewModel.toolBoxId, toolFormList)
-                    //블루투스
-                } else {
-                }
-            }
-            standbyAlreadySent = true
-             */
         }
         cancelBtn.setOnClickListener {
             DialogUtils.showAlertDialog("대여 목록 삭제","현재 페이지의 대여 신청 목록이 삭제됩니다.\n정말로 삭제하시겠습니까?",
@@ -164,8 +148,9 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         (requireActivity() as MainActivity).bluetoothManager.send(type,data)
     }
 
-    override fun handleResponse(response: TagDto) {
-        (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
+    override fun handleResponse(response: Any) {
+        if (response is TagDto)
+                (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
     }
 
     override fun onResume() {

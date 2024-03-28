@@ -1,5 +1,6 @@
 package com.liquidskr.btclient
 
+import com.mrsmart.standard.rental.OutstandingRentalSheetDto
 import com.mrsmart.standard.tool.TagDto
 
 /**
@@ -16,5 +17,7 @@ interface InputHandler {
      * handlerInput에서 송신한 정보의 Response를 처리하는 곳.
      * 대체로 TagService가 handler.post로 호출한다.
      */
-    fun handleResponse(response: TagDto)
+    fun handleResponse(response: Any)
+
+    //fun handleResponse(response: OutstandingRentalSheetDto)
 }

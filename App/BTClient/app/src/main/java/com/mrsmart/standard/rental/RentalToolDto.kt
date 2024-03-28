@@ -7,5 +7,5 @@ data class RentalToolDto(
     var toolDto: ToolDto,
     var count: Int,
     var outstandingCount: Int,
-    var Tags: String // macaddress ','로 구분
+    var tags: String // macaddress ','로 구분
 )

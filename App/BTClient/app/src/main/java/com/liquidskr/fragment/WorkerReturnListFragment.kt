@@ -124,7 +124,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         qrEditText = view.findViewById(R.id.QREditText)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
+        val adapter = OutstandingRentalSheetAdapter(emptyList<OutstandingRentalSheetDto>().toMutableList()) { outstandingRentalSheet ->
             if (outstandingRentalSheet.outstandingStatus != OutstandingState.REQUEST) {
                 val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
                 requireActivity().supportFragmentManager.beginTransaction()

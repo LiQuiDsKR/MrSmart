@@ -54,7 +54,7 @@ class BluetoothCommunicationHandler (
     private val bluetoothConnectionHandlerListener :BluetoothConnectionHandler.Listener = object :BluetoothConnectionHandler.Listener{
         override fun onConnected() {
             connectionState=ConnectionState.CONNECTED
-            Log.d("bluetooth", "블루투스 연결에 성공했습니다")
+            Log.i("bluetooth", "블루투스 연결에 성공했습니다")
             reconnectAttempt=0
             commTimeInMillis=0
             listener.onConnected()
@@ -98,7 +98,7 @@ class BluetoothCommunicationHandler (
             val timeoutFlag =
                 commTimeInMillis != 0L && diff >= Constants.COMMUNICATION_TIMEOUT // true : timeout / false : normal
 
-            Log.d(
+            Log.v(
                 "bluetooth",
                 "reAtmp:$reconnectAttempt isNull:$isBluetoothConnectionHandlerNull, connection : $connectionState, cmTime:$commTimeInMillis"
             )
@@ -115,7 +115,7 @@ class BluetoothCommunicationHandler (
         override fun run() {
             if (isBluetoothConnectionHandlerNull || commTimeInMillis>0) return
             val now = Calendar.getInstance().timeInMillis
-            Log.d("bluetooth", "HeartBeat set : $now")
+            Log.v("bluetooth", "HeartBeat set : $now")
             send(Constants.BluetoothMessageType.HI.name + ",${Calendar.getInstance().timeInMillis}")
         }
     }

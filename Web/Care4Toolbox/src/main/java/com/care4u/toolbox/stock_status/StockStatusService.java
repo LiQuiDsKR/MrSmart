@@ -193,7 +193,7 @@ public class StockStatusService {
 	}
 
 
-	@Scheduled(cron = "00 11 09 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "00 31 05 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		
 		LocalDate latestDate = repository.getLatestCurrentDay();
