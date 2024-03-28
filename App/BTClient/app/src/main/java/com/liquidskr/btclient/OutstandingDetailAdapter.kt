@@ -1,7 +1,5 @@
 package com.liquidskr.btclient
 
-import android.app.Dialog
-import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +7,8 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.RentalRequestToolApproveFormSelectedDto
-import com.mrsmart.standard.returns.ReturnToolFormSelectedDto
-import com.mrsmart.standard.tool.TagDto
+import com.mrsmart.standard.sheet.`return`.ReturnToolFormSelectedDto
+import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tool.ToolService
 
 class OutstandingDetailAdapter(

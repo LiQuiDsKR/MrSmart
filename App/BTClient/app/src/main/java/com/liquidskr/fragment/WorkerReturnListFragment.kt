@@ -31,8 +31,8 @@ import com.liquidskr.btclient.R
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.OutstandingState
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingState
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {

@@ -29,7 +29,7 @@ class ProgressBarFragment : Fragment() {
         }
 
         override fun onRequestStarted() {
-            Log.d("progressbar","Progress started 사실 이게 계속 뜨는게 의도된게 아니긴 한데 분기 나누기 귀찮고 문제 없어서 그냥 냅둠")
+            Log.d("progressbar","Progress started")
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {

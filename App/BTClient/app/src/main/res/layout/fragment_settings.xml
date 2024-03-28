@@ -224,7 +224,8 @@
                 android:gravity="left|center_vertical"
                 android:orientation="horizontal"
                 android:padding="15dp"
-                android:stateListAnimator="@animator/background_state_list_animator">
+                android:stateListAnimator="@animator/background_state_list_animator"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/imageView12"

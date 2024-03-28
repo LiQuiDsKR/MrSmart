@@ -5,9 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.rental.SheetState
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolDto
+import com.mrsmart.standard.sheet.rental.SheetState
 
 
 class RentalRequestSheetAdapter(private var sheetList: MutableList<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
@@ -35,7 +35,7 @@ class RentalRequestSheetAdapter(private var sheetList: MutableList<RentalRequest
         if (currentRentalRequestSheet.status == SheetState.READY) holder.sheetState.text = "미신청 (신청 대기)"
         if (currentRentalRequestSheet.status == SheetState.REQUEST) holder.sheetState.text = "신청 완료 (승인 대기)"
         var toolListString = ""
-        for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
+        for (tool: RentalRequestToolDto in currentRentalRequestSheet.toolList) {
             val toolName: String = tool.toolDto.name
             val toolCount: String = tool.count.toString()
             toolListString = toolListString.plus("$toolName($toolCount)  ")

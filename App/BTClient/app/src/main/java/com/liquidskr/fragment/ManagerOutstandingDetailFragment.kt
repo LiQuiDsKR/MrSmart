@@ -19,12 +19,12 @@ import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.returns.ReturnSheetFormDto
-import com.mrsmart.standard.returns.ReturnToolFormDto
-import com.mrsmart.standard.returns.ReturnToolFormSelectedDto
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.TagService
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.`return`.ReturnSheetFormDto
+import com.mrsmart.standard.sheet.`return`.ReturnToolFormDto
+import com.mrsmart.standard.sheet.`return`.ReturnToolFormSelectedDto
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.TagService
 
 class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: OutstandingRentalSheetDto) : Fragment(),
     InputHandler {

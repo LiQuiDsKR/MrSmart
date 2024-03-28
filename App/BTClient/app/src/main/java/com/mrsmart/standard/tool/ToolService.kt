@@ -81,6 +81,26 @@ class ToolService private constructor() {
         }
     }
 
+    fun searchToolByName(name:String): List<ToolDto> {
+        try {
+            val toolList = dbHelper.getToolsByQuery(name)
+            return toolList.map { it.toToolDto() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to search tool by name: $name", e)
+            return emptyList()
+        }
+    }
+
+    fun getAllTools(): List<ToolDto> {
+        try {
+            val toolList = dbHelper.getAllTools()
+            return toolList.map { it.toToolDto() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch all tools", e)
+            throw RuntimeException("Failed to fetch all tools due to an unexpected error.", e)
+        }
+    }
+
     companion object {
         private var instance: ToolService? = null
         private const val TAG = "ToolService"

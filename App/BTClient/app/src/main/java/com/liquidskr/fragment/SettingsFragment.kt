@@ -65,7 +65,7 @@
             toolImportBtn.setOnClickListener {
                 DialogUtils.showAlertDialog(
                     "안내",
-                    "기준정보를 새로 불러오시겠습니까?\n기준정보를 모두 받는 데 5~6 분 정도가 소요됩니다."
+                    "기준정보를 새로 불러오시겠습니까?\n기준정보를 모두 받는 데 2~5분 정도가 소요됩니다."
                     ,{ _,_->
                         //기준정보는 뭐 별 거 없지만 rentalRequestSheetForm같은 것들은 검수과정 필요
                         val type =Constants.BluetoothMessageType.MEMBERSHIP_ALL_COUNT
@@ -74,8 +74,14 @@
                     }, { _,_->} )
             }
             labelImportBtn.setOnClickListener{
-            }
-            outstandingImportBtn.setOnClickListener{
+                DialogUtils.showAlertDialog(
+                    "안내",
+                    "선반 QR 코드 정보를 새로 불러오시겠습니까?\n정보를 모두 받는 데 2~5분 정도가 소요됩니다."
+                    ,{ _,_->
+                        val type = Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL_COUNT
+                        val data = ""
+                        (requireActivity() as MainActivity).bluetoothManager.send(type,data)
+                    }, { _,_->} )
             }
 
             return view

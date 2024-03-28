@@ -1,12 +1,10 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
-import android.nfc.Tag
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,13 +19,12 @@ import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestToolApproveFormDto
-import com.mrsmart.standard.rental.RentalRequestToolApproveFormSelectedDto
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.TagService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormSelectedDto
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.TagService
 
 class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView

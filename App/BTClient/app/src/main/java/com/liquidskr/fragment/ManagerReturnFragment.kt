@@ -13,7 +13,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.InputHandler
@@ -21,9 +20,8 @@ import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.OutstandingRentalSheetService
-import com.mrsmart.standard.rental.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetService
 import com.mrsmart.standard.toolbox.ToolboxService
 
 class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandler {

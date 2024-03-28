@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.RentalRequestToolApproveFormSelectedDto
-import com.mrsmart.standard.tool.TagDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormSelectedDto
+import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tool.ToolService
 
 class RentalRequestToolAdapter(

@@ -7,15 +7,15 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolboxToolLabelDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.tag.TagAndToolboxToolLabelDto
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.ToolboxToolLabelDto
 import com.liquidskr.btclient.Constants.BluetoothMessageType.*
-import com.mrsmart.standard.rental.OutstandingRentalSheetService
-import com.mrsmart.standard.rental.RentalRequestSheetService
-import com.mrsmart.standard.tool.TagService
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetService
+import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.toolbox.ToolboxDto
 import com.mrsmart.standard.toolbox.ToolboxService
@@ -519,7 +519,7 @@ class BluetoothManager (private val handler : Handler){
             }
             OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
                 //response
-                val outstandingRentalSheet = gson.fromJson(jsonStr,OutstandingRentalSheetDto::class.java)
+                val outstandingRentalSheet = gson.fromJson(jsonStr, OutstandingRentalSheetDto::class.java)
 
                 //service update
                 handler.post{
@@ -530,7 +530,7 @@ class BluetoothManager (private val handler : Handler){
             }
             TAG.name -> {
                 //response
-                val tagDto = gson.fromJson(jsonStr,TagDto::class.java)
+                val tagDto = gson.fromJson(jsonStr, TagDto::class.java)
 
                 //service update
                 handler.post {

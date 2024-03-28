@@ -1,8 +1,5 @@
 package com.liquidskr.btclient
 
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.tool.TagDto
-
 /**
  * tag, toolboxToolLabel 등 qrcode 입력을 감지해야 하는 Fragment들이 구현해야 함.
  */

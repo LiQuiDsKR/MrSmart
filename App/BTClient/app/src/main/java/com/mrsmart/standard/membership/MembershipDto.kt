@@ -1,5 +1,7 @@
 package com.mrsmart.standard.membership
 
+import com.mrsmart.standard.membership.part.PartDto
+
 data class MembershipDto(
     val id: Long,
     val name: String,

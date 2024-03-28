@@ -1,5 +1,8 @@
 package com.mrsmart.standard.tool
 
+import com.mrsmart.standard.tool.group.MainGroupDto
+import com.mrsmart.standard.tool.group.SubGroupDto
+
 data class ToolSQLite(
     val id: Long,
     val subGroupDto: String,

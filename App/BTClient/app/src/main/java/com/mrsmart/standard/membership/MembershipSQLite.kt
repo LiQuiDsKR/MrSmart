@@ -1,4 +1,9 @@
 package com.mrsmart.standard.membership
+
+import com.mrsmart.standard.membership.part.MainPartDto
+import com.mrsmart.standard.membership.part.PartDto
+import com.mrsmart.standard.membership.part.SubPartDto
+
 data class MembershipSQLite(
     val id: Long,
     val name: String,

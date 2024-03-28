@@ -5,9 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.OutstandingState
-import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingState
+import com.mrsmart.standard.sheet.rental.RentalToolDto
 
 
 class OutstandingRentalSheetAdapter(private var sheetList: MutableList<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
