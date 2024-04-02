@@ -19,6 +19,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.care4u.exception.NoSuchElementFoundException;
+import com.care4u.exception.OutOfStockException;
+import com.care4u.exception.OutOfStockException;
 import com.care4u.hr.main_part.MainPart;
 import com.care4u.hr.main_part.MainPartRepository;
 import com.care4u.hr.membership.Membership;
@@ -133,12 +136,12 @@ public class StockStatusService {
 		Optional<StockStatus> stockOptional=repository.findById(id);
 		if (stockOptional.isEmpty()) {
 			logger.error("Invalid StockStatus id : "+id);
-			return null;
+			throw new NoSuchElementFoundException(id+" 재고를 찾을 수 없습니다.");
 		}
 		stock=stockOptional.get();
 		if (count>stock.getGoodCount()) {
 			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
-			return null;
+			throw new OutOfStockException(id+" 재고가 부족합니다.");
 		}
 		logger.info("stock updated from (rent) : "+stock.toString());
 		stock.rentUpdate(count);
@@ -190,7 +193,7 @@ public class StockStatusService {
 	}
 
 
-	@Scheduled(cron = "00 00 00 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "00 06 09 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		
 		LocalDate latestDate = repository.getLatestCurrentDay();

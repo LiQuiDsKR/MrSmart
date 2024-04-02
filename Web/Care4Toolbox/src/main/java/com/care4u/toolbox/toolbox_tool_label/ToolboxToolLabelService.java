@@ -166,7 +166,7 @@ public class ToolboxToolLabelService {
 				return update(toolboxToolLabel,qrcode);	
 			}else {
 				logger.error(qrcode +" already exists!");
-				throw new IllegalArgumentException(qrcode +" already exists!");
+				throw new IllegalArgumentException("QR: "+qrcode +" 는 이미 등록된 QR코드입니다.");
 			}
 		}
 		if (tempObject == null) {
@@ -182,13 +182,13 @@ public class ToolboxToolLabelService {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxId);
-			return null;
+			throw new IllegalArgumentException(toolboxId+" 와 일치하는 공구실이 없습니다.");
 		}
 		
 		Optional<Tool> tool = toolRepository.findById(toolId);
 		if (tool.isEmpty()) {
 			logger.error("Invalid toolId : " + toolId);
-			return null;
+			throw new IllegalArgumentException(toolId+" 와 일치하는 공구가 없습니다.");
 		}
 		
 		ToolboxToolLabel label = ToolboxToolLabel.builder()
@@ -221,7 +221,7 @@ public class ToolboxToolLabelService {
 		List<ToolboxDto> toolboxList = toolboxService.list();
 		Random random = new Random();
 		int randomIndex = random.nextInt(toolboxList.size());
-		ToolboxDto toolboxDto = toolboxList.get(randomIndex);	
+		ToolboxDto toolboxDto = toolboxList.get(randomIndex);
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxDto.getId());
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxDto.getId());
@@ -254,6 +254,11 @@ public class ToolboxToolLabelService {
 	public Page<ToolboxToolLabelDto> getPage(long toolboxId, Pageable pageable) {
 		Page<ToolboxToolLabel> page = repository.findAllByToolboxId(toolboxId,pageable);
 		return page.map(e->new ToolboxToolLabelDto(e));
+	}
+
+	@Transactional(readOnly = true)
+	public Boolean isAvailable(String toolboxToolLabel) {
+		return repository.findByQrcode(toolboxToolLabel)==null;
 	}
 
 }

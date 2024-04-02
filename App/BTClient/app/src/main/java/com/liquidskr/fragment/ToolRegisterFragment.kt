@@ -1,112 +1,79 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
+import android.content.Context
+import android.nfc.Tag
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager_Old
+import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.DatabaseHelper
-import com.liquidskr.btclient.MainActivity
+import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
-import com.mrsmart.standard.tool.ToolSQLite
-import java.lang.reflect.Type
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.TagService
+import com.mrsmart.standard.tag.ToolboxToolLabelService
+import com.mrsmart.standard.tool.ToolDto
+import com.mrsmart.standard.tool.ToolService
+import com.mrsmart.standard.toolbox.ToolboxService
+import kotlinx.coroutines.selects.select
 
 
-class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
+class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var confirmBtn: ImageButton
-    private lateinit var bluetoothManagerOld: BluetoothManager_Old
-    private lateinit var connectBtn: ImageButton
 
     lateinit var rentalBtnField: LinearLayout
     lateinit var returnBtnField: LinearLayout
-    lateinit var standbyBtnField: LinearLayout
+    //lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
 
-    private lateinit var QREditText: EditText
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
-    private var runnable: Runnable? = null
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
-    private lateinit var popupLayout: View
-    private lateinit var progressBar: ProgressBar
-    private lateinit var progressText: TextView
-    private var isPopupVisible = false // // UI블로킹 end
     private lateinit var welcomeMessage: TextView
+
+    private var selectedTag : String? = null
+    private var selectedToolId : Long = 0
+
+    private val toolService = ToolService.getInstance()
+    private val toolboxService = ToolboxService.getInstance()
+    private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
+    private val tagService = TagService.getInstance()
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
     }
 
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
-        val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
+        view.requestFocus()
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
 
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
-
-        connectBtn = view.findViewById(R.id.ConnectBtn)
-        connectBtn.setOnClickListener{
-            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-            try {
-                bluetoothManagerOld.bluetoothOpen()
-                connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-            } catch (e: Exception) {
-                Toast.makeText(context, "연결에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
-            override fun onBluetoothDisconnected() {
-                handler.post {
-                    hidePopup()
-                    connectBtn.setImageResource(R.drawable.group_11_copy)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
-            }
-
-            override fun onBluetoothConnected() {
-                handler.post {
-                    hidePopup()
-                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
-            }
-        })
-
-        QREditText = view.findViewById(R.id.QR_EditText)
         editTextName = view.findViewById(R.id.editTextName)
         searchBtn = view.findViewById(R.id.SearchBtn)
         recyclerView = view.findViewById(R.id.recyclerView)
@@ -114,54 +81,17 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
 
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
-        standbyBtnField = view.findViewById(R.id.StandbyBtnField)
+        //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
 
-        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
-            override fun onBluetoothDisconnected() {
-                handler.post {
-                    hidePopup()
-                    connectBtn.setImageResource(R.drawable.group_11_copy)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
-            }
+        val tools: List<ToolDto> = toolService.getAllTools()
 
-            override fun onBluetoothConnected() {
-                handler.post {
-                    hidePopup()
-                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
-            }
-        })
-        val databaseHelper = DatabaseHelper.getInstance()
-        val tools: List<ToolSQLite> = databaseHelper.getAllTools()
-
-        val adapter = ToolRegisterAdapter(tools) { tool ->
-            showPopup()
-            recyclerView.requestFocus()
-
-            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager_Old.RequestCallback{
-                override fun onSuccess(result: String, type: Type) {
-                    val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
-
-                    val tagQRList: MutableList<String> = mutableListOf()
-                    for (tagDto in tagAndTBT.tagDtoList) {
-                        if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
-                    }
-                    val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, fragment)
-                        .addToBackStack(null)
-                        .commit()
-                }
-                override fun onError(e: Exception) {
-                    handler.post{
-                        Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
-                    }
-                }
-            })
+        val adapter = ToolRegisterAdapter(tools){
+            selectedTag=null
+            selectedToolId = it.id
+            val type = Constants.BluetoothMessageType.TAG_LIST_BY_TOOL_AND_TOOLBOX_ID
+            val data = "{\"toolId\":${it.id},\"toolboxId\":${toolboxService.getToolbox().id}}"
+            bluetoothManager?.send(type,data)
         }
 
         rentalBtnField.setOnClickListener {
@@ -170,6 +100,12 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ToolRegisterFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -180,6 +116,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 .commit()
         }
 
+        /*
         standbyBtnField.setOnClickListener {
             val fragment = ManagerStandByFragment(manager)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -187,6 +124,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
                 .addToBackStack("ToolRegisterFragment")
                 .commit()
         }
+        */
 
         registerBtnField.setOnClickListener {
             val fragment = ToolRegisterFragment(manager)
@@ -199,115 +137,76 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment() {
             requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
-        QREditText.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val label = QREditText.text.toString().replace("\n", "")
-                QREditText.text.clear()
-                if (label != "") {
-                    try {
-                        showPopup()
-                        QREditText.clearFocus()
-                        recyclerView.requestFocus()
-
-                        val dbHelper = DatabaseHelper.getInstance()
-                        val tool = dbHelper.getToolByTBT(label)
-                        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-                        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TAG_AND_TOOLBOX_TOOL_LABEL,"{\"toolId\":${tool.id},\"toolboxId\":${sharedViewModel.toolBoxId}}",object:BluetoothManager_Old.RequestCallback{
-                            override fun onSuccess(result: String, type: Type) {
-                                val tagAndTBT: TagAndToolboxToolLabelDto = gson.fromJson(result, type)
-
-                                val tagQRList: MutableList<String> = mutableListOf()
-                                for (tagDto in tagAndTBT.tagDtoList) {
-                                    if (tagDto.macaddress != null) tagQRList.add(tagDto.macaddress)
-                                }
-                                val fragment = ToolRegisterDetailFragment(tool.toToolDto(), tagQRList)
-                                requireActivity().supportFragmentManager.beginTransaction()
-                                    .replace(R.id.fragmentContainer, fragment)
-                                    .addToBackStack(null)
-                                    .commit()
-                            }
-                            override fun onError(e: Exception) {
-                                hidePopup()
-                                handler.post{
-                                    Toast.makeText(activity, "공기구에 따른 선반 코드와 태그 코드를 불러오지 못했습니다.",Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        })
-                    } catch (e:Exception) {
-                        Toast.makeText(activity, "해당 선반코드로 공기구를 검색하지 못했습니다.",Toast.LENGTH_SHORT).show()
-                        hidePopup()
-                    }
-                } else {
-                    handler.post{
-                        Toast.makeText(activity, "QR을 읽는 중에 문제가 발생했습니다. 다시 입력해주세요.",Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                QREditText.requestFocus()
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-
-        editTextName.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) {
-                QREditText.requestFocus()
-            }
-        }
-
         searchBtn.setOnClickListener {
-            filterByName(adapter, editTextName.text.toString())
-            editTextName.clearFocus()
-            QREditText.requestFocus()
+            val name = editTextName.text.toString()
+            val list = toolService.searchToolByName(name)
+            adapter.updateList(list)
+        }
+        editTextName.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                // 키보드 숨기기
+                val imm =
+                    context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                searchBtn.performClick()
+                editTextName.clearFocus()
+                true
+            }else{
+                false
+            }
         }
 
-        bluetoothManagerOld
-        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.TEST,"{string:\"check\"}",object:BluetoothManager_Old.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-
-            }
-
-            override fun onError(e: Exception) {
-
-            }
-        })
-
-        QREditText.requestFocus()
         recyclerView.adapter = adapter
 
         return view
     }
 
-    fun filterByName(adapter: ToolRegisterAdapter, keyword: String) {
-        val dbHelper = DatabaseHelper.getInstance()
-        try {
-            val newList = dbHelper.getToolsByQuery(keyword)
-            adapter.updateList(newList)
-        } catch(e: Exception) {
-            handler.post {
-                Toast.makeText(activity, "해당 검색어를 통해 공기구를 조회할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
+    override fun handleInput(input: String) {
+        if (toolboxToolLabelService.isToolboxToolLabelExist(input)) {
+            selectedTag=null
+            selectedToolId= toolService.getToolByTBT(input).id
+            val type = Constants.BluetoothMessageType.TAG_LIST_BY_TOOLBOX_TOOL_LABEL_QRCODE
+            val data = "{\"toolboxToolLabel\":\"$input\"}"
+            bluetoothManager?.send(type,data)
+        }else{
+            selectedTag=input
+            val type = Constants.BluetoothMessageType.TAG_LIST_BY_TAG_MACADDRESS
+            val data = "{\"tag\":\"$input\"}"
+            bluetoothManager?.send(type,data)
         }
     }
-    private fun showPopup() {
-        isPopupVisible = true
-        popupLayout.requestFocus()
-        popupLayout.setOnClickListener {
 
+    override fun handleTagResponse(response: Any) {
+        if (response is List<*> && response.isNotEmpty() && response[0] is TagDto) {
+            val tags = response as List<TagDto>
+            val tag = tags[0]
+            val tool = toolService.getToolById(tag.toolDto.id)
+            val fragment = ToolRegisterDetailFragment(tool, tags.map{it.macaddress},selectedTag)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
+        }else if (response is List<*> && response.isEmpty()){
+            val tool = toolService.getToolById(selectedToolId)
+            val fragment = ToolRegisterDetailFragment(tool, emptyList(),selectedTag)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
         }
-        popupLayout.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-                return@setOnKeyListener true
-            }
-            false
-        }
-        popupLayout.visibility = View.VISIBLE
     }
-    private fun hidePopup() {
-        handler.post {
-            isPopupVisible = false
-            popupLayout.visibility = View.GONE
-        }
+
+    override fun handleToolboxToolLabelResponse(response: Any) {}
+
+    override fun onResume() {
+        super.onResume()
+        tagService.inputHandler=this
+        toolboxToolLabelService.inputHandler=this
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        tagService.inputHandler=null
+        toolboxToolLabelService.inputHandler=null
     }
 }

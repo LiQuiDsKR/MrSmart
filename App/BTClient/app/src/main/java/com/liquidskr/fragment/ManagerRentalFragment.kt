@@ -1,9 +1,7 @@
 package com.liquidskr.fragment
 
 import SharedViewModel
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,11 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.rental.RentalRequestSheetService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetService
 import com.mrsmart.standard.toolbox.ToolboxService
 
 class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
@@ -35,7 +33,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     private lateinit var registerBtnField: LinearLayout
 
     private lateinit var welcomeMessage: TextView
-    private lateinit var popupLayout: View
 
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
         ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -43,49 +40,10 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     private val rentalRequestSheetService = RentalRequestSheetService.getInstance()
 
-    // not using in this Fragment
     private var bluetoothManager : BluetoothManager? = null
-
-    private val bluetoothManagerListener = object : BluetoothManager.Listener{
-        override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,reconnectFrag)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        override fun onRequestStarted() {
-            val progressBarFrag = ProgressBarFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.popupLayout,progressBarFrag)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
-        }
-
-        override fun onRequestEnded() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
-        }
-
-        override fun onRequestFailed(message: String) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
-        }
-
-        override fun onException(message: String) {
-            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_rental, container, false)
-        popupLayout = view.findViewById(R.id.popupLayout)
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
         selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
@@ -98,15 +56,24 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
 
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
-
         val layoutManager = LinearLayoutManager(requireContext())
-        val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
-            fragmentTransform(ManagerRentalDetailFragment(rentalRequestSheet), null)
+        val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
+            rentalRequestSheetService.currentSheetId= rentalRequestSheet.id
+            val frag = ManagerRentalDetailFragment(rentalRequestSheet)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, frag)
+                .addToBackStack(null)
+                .commit()
         }
 
         rentalBtnField.setOnClickListener {
             fragmentTransform(ManagerRentalFragment(manager), "ManagerRentalFragment")
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -126,7 +93,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
 
         recyclerView.adapter = adapter
-        rentalRequestSheetService.setAdapter(adapter)
+        rentalRequestSheetService.
+        setAdapter(adapter)
         recyclerView.layoutManager = layoutManager
 
         selfRentalBtn.setOnClickListener {
@@ -147,14 +115,7 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
-
-        val toolboxService = ToolboxService.getInstance()
-        val toolbox = toolboxService.getToolbox()
-
-        val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-        val data ="{toolboxId:${toolbox.id}}"
-        bluetoothManager?.send(type,data)
+        bluetoothManager = BluetoothManager.getInstance()
     }
 
     override fun onPause() {

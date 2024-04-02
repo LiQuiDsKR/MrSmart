@@ -5,12 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.RentalRequestToolDto
-import com.mrsmart.standard.rental.SheetState
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolDto
+import com.mrsmart.standard.sheet.rental.SheetState
 
 
-class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
+class RentalRequestSheetAdapter(private var sheetList: MutableList<RentalRequestSheetDto>, private val onItemClick: (RentalRequestSheetDto) -> Unit) :
     RecyclerView.Adapter<RentalRequestSheetAdapter.RentalRequestSheetViewHolder>() {
 
     class RentalRequestSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,14 +28,14 @@ class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheet
     }
 
     override fun onBindViewHolder(holder: RentalRequestSheetViewHolder, position: Int) {
-        val currentRentalRequestSheet = rentalRequestSheets[position]
+        val currentRentalRequestSheet = sheetList[position]
         holder.workerName.text = currentRentalRequestSheet.workerDto.name
         holder.leaderName.text = currentRentalRequestSheet.leaderDto.name
         holder.timeStamp.text = currentRentalRequestSheet.eventTimestamp
         if (currentRentalRequestSheet.status == SheetState.READY) holder.sheetState.text = "미신청 (신청 대기)"
         if (currentRentalRequestSheet.status == SheetState.REQUEST) holder.sheetState.text = "신청 완료 (승인 대기)"
         var toolListString = ""
-        for (tool:RentalRequestToolDto in currentRentalRequestSheet.toolList) {
+        for (tool: RentalRequestToolDto in currentRentalRequestSheet.toolList) {
             val toolName: String = tool.toolDto.name
             val toolCount: String = tool.count.toString()
             toolListString = toolListString.plus("$toolName($toolCount)  ")
@@ -47,12 +47,21 @@ class RentalRequestSheetAdapter(var rentalRequestSheets: List<RentalRequestSheet
     }
 
     override fun getItemCount(): Int {
-        return rentalRequestSheets.size
+        return sheetList.size
     }
     fun updateList(newList: List<RentalRequestSheetDto>) {
-        rentalRequestSheets = newList
+        sheetList = newList.toMutableList()
         notifyDataSetChanged()
     }
-
+    fun insertList(newItems:List<RentalRequestSheetDto>){
+        val positionStart = sheetList.size
+        sheetList.addAll(positionStart,newItems)
+        notifyItemRangeInserted(positionStart, newItems.size)
+    }
+    /*
+    fun insertItem
+    fun removeList
+    fun removeItem
+     */
 
 }

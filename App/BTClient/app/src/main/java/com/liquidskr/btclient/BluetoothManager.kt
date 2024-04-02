@@ -7,13 +7,16 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.tool.TagAndToolboxToolLabelDto
-import com.mrsmart.standard.tool.TagDto
-import com.mrsmart.standard.tool.ToolboxToolLabelDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.tag.TagAndToolboxToolLabelDto
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.ToolboxToolLabelDto
 import com.liquidskr.btclient.Constants.BluetoothMessageType.*
-import com.mrsmart.standard.rental.RentalRequestSheetService
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetService
+import com.mrsmart.standard.tag.TagService
+import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.toolbox.ToolboxDto
 import com.mrsmart.standard.toolbox.ToolboxService
@@ -23,12 +26,13 @@ class BluetoothManager (private val handler : Handler){
 
     private val gson = Gson()
 
+    var sendingFlag = false
 
     interface Listener {
         fun onDisconnected()
         fun onRequestStarted()
         fun onRequestProcessed(context : String, processedAmount : Int , totalAmount : Int)
-        fun onRequestEnded()
+        fun onRequestEnded(message: String)
         fun onRequestFailed(message : String)
         fun onException(message : String)
     }
@@ -38,9 +42,9 @@ class BluetoothManager (private val handler : Handler){
     private lateinit var bluetoothDevice : BluetoothDevice
     private val bluetoothCommunicationHandlerListener = object:BluetoothCommunicationHandler.Listener{
         override fun onConnected() {
-            Log.d("bluetooth","Connected")
+            Log.i("bluetooth","Connected")
             handler.post{
-                listener?.onRequestEnded()
+                listener?.onRequestEnded("블루투스 연결 성공")
             }
         }
 
@@ -66,11 +70,11 @@ class BluetoothManager (private val handler : Handler){
         }
 
         override fun onDataSent(data: String) {
-            Log.d("bluetooth","good send")
+            Log.d("bluetooth","send complete")
         }
 
         override fun onException(type: Constants.ExceptionType, description: String) {
-            Log.d("bluetooth","exception final : [${type.name}] : [${description}]")
+            Log.e("bluetooth","exception final : [${type.name}] : [${description}]")
             when (type){
                 Constants.ExceptionType.BLUETOOTH_NO_PAIRED_DEVICE ->{
                     handler.post {
@@ -87,6 +91,10 @@ class BluetoothManager (private val handler : Handler){
     private val membershipService = MembershipService.getInstance()
     private val toolService = ToolService.getInstance()
     private val rentalRequestSheetService = RentalRequestSheetService.getInstance()
+    private val outstandingRentalSheetService = OutstandingRentalSheetService.getInstance()
+    private val toolboxService = ToolboxService.getInstance()
+    private val tagService = TagService.getInstance()
+    private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
 
     private var loadingPageIndex : Int = -1 // -1 : not loading , 0~ : loading index
     private var reloadFlag : Boolean = false // false : 안끊김 (insert) , true : 끊겼었음. 재송신중 (upsert)
@@ -95,48 +103,26 @@ class BluetoothManager (private val handler : Handler){
 
 
     fun send(type:Constants.BluetoothMessageType,data:String){
-
-        if (type == TOOLBOX_ALL){
-            Log.d("bluetooth","Toolbox-all 넘어감")
-        } else {
-            handler.post {
-                listener?.onRequestStarted()
-            }
+        if (sendingFlag) {
+            Log.e("bluetooth","already sending")
+            handler.postDelayed({
+                send(type,data)
+            },Constants.BLUETOOTH_RESEND_INTERVAL)
+            return
+        }
+        sendingFlag = true
+        handler.post {
+            Log.d("bluetooth","listener : $listener")
+            listener?.onRequestStarted()
         }
 
         //cache
         lastSendedMessageType = type
         lastSendedMessageData = data
 
-        when(type){
-            NULL -> {
-                Log.d("bluetooth","NULL")
-            }
-            MEMBERSHIP_ALL ->{
-                bluetoothCommunicationHandler.send("$type,$data")
-            }
-            MEMBERSHIP_ALL_COUNT ->{
-                bluetoothCommunicationHandler.send(type.toString())
-            }
-            TOOL_ALL ->{
-                bluetoothCommunicationHandler.send("$type,$data")
-            }
-            TOOL_ALL_COUNT ->{
-                bluetoothCommunicationHandler.send(type.toString())
-            }
-            RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX ->{
-                bluetoothCommunicationHandler.send("$type,$data")
-            }
-            RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT ->{
-                bluetoothCommunicationHandler.send("$type,$data")
-            }
-            TOOLBOX_ALL->{
-                bluetoothCommunicationHandler.send(type.toString())
-            }
-            else -> {Log.d("bluetooth","존재하지 않는 데이터 타입입니다")}
-        }
+        bluetoothCommunicationHandler.send("$type,$data")
     }
-    
+
     fun processData(data:String) {
         val (typeStr, jsonStr) = data.split(',', limit = 2)
         when(typeStr){
@@ -159,7 +145,7 @@ class BluetoothManager (private val handler : Handler){
 
                 //preprocess - logic
                 val pageSize = Constants.MEMBERSHIP_PAGE_SIZE.coerceAtMost(total)
-                Log.d("membership","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                Log.i("membership","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
                 loadingPageIndex+=1
 
 
@@ -172,7 +158,7 @@ class BluetoothManager (private val handler : Handler){
                 if (loadingPageIndex>total/pageSize) {
 
                     //send 1 - membership load finished
-                    Log.d("membership", "membership insert complete (size : ${total})")
+                    Log.i("membership", "membership insert complete (size : ${total})")
                     val type = TOOL_ALL_COUNT
                     val data = ""
                     send(type, data)
@@ -207,7 +193,10 @@ class BluetoothManager (private val handler : Handler){
                 //send
                 val type = MEMBERSHIP_ALL
                 val data = "{\"size\":${size},\"page\":${loadingPageIndex}}"
-                send(type,data)
+
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
 
             TOOL_ALL.name -> {
@@ -229,7 +218,7 @@ class BluetoothManager (private val handler : Handler){
 
                 //preprocess - logic
                 val pageSize = Constants.TOOL_PAGE_SIZE.coerceAtMost(total)
-                Log.d("tool","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                Log.i("tool","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
                 loadingPageIndex+=1
 
                 //event
@@ -241,9 +230,9 @@ class BluetoothManager (private val handler : Handler){
                 if (loadingPageIndex>total/pageSize) {
 
                     //send 1 - tool load finished
-                    Log.d("tool", "tool insert complete (size : ${total})")
+                    Log.i("tool", "tool insert complete (size : ${total})")
                     handler.post{
-                        listener?.onRequestEnded()
+                        listener?.onRequestEnded(TOOL_ALL.processEndMessage)
                     }
                 } else{
 
@@ -274,7 +263,9 @@ class BluetoothManager (private val handler : Handler){
                 //send
                 val type = TOOL_ALL
                 val data = "{\"size\":${size},\"page\":${loadingPageIndex}}"
-                send(type,data)
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
 
             RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.name -> {
@@ -291,7 +282,7 @@ class BluetoothManager (private val handler : Handler){
 
                 //preprocess - logic
                 val pageSize = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
-                Log.d("rentalRequestSheet","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                Log.i("rentalRequestSheet","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
                 loadingPageIndex+=1
 
 
@@ -304,14 +295,13 @@ class BluetoothManager (private val handler : Handler){
                 if (loadingPageIndex>total/pageSize) {
 
                     //send 1 - sheet load finished
-                    Log.d("rentalRequestSheet", "rentalRequestSheet insert complete (size : ${total})")
+                    Log.i("outstandingRentalSheet", "outstandingRentalSheet insert complete (size : ${total})")
                     handler.post{
-                        listener?.onRequestEnded()
+                        listener?.onRequestEnded(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX.processEndMessage)
                     }
 
                 } else{
                     //send 2 - sheet load not finished
-                    val toolboxService = ToolboxService.getInstance()
                     val toolbox = toolboxService.getToolbox()
 
                     val type = RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX
@@ -326,9 +316,16 @@ class BluetoothManager (private val handler : Handler){
                 //service update
                 rentalRequestSheetService.clear()
 
+
                 //event
                 handler.post{
                     listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                }
+                if (total<1) {
+                    handler.post{
+                        listener?.onRequestEnded(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processEndMessage)
+                    }
+                    return
                 }
 
                 //postprocess - logic
@@ -336,12 +333,13 @@ class BluetoothManager (private val handler : Handler){
                 loadingPageIndex=0
 
                 //send
-                val toolboxService = ToolboxService.getInstance()
                 val toolbox = toolboxService.getToolbox()
 
                 val type = RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX
                 val data = "{\"size\":${size},\"page\":${loadingPageIndex},\"toolboxId\":${toolbox.id}}"
-                send(type,data)
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
 
             RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
@@ -354,13 +352,95 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
 
+
+            OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
+                //response
+                val outstandingRentalSheetPage = gson.fromJson(jsonStr, Page::class.java)
+
+                //service update
+                outstandingRentalSheetService.add(outstandingRentalSheetPage)
+
+                //preprocess - parse
+                //val size = outstandingRentalSheetPage.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
+                val index = outstandingRentalSheetPage.pageable.page
+                val total = outstandingRentalSheetPage.total
+
+                //preprocess - logic
+                val pageSize = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                Log.i("outstandingRentalSheet","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                loadingPageIndex+=1
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.processMessage,index,total/pageSize)
+                }
+
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
+
+                    //send 1 - sheet load finished
+                    Log.i("outstandingRentalSheet", "outstandingRentalSheet insert complete (size : ${total})")
+                    handler.post{
+                        listener?.onRequestEnded(OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.processEndMessage)
+                    }
+
+                } else{
+                    //send 2 - sheet load not finished
+                    val toolbox = toolboxService.getToolbox()
+
+                    val type = OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX
+                    val data = "{\"size\":${pageSize},\"page\":${loadingPageIndex},\"toolboxId\":${toolbox.id}}"
+                    send(type, data)
+                }
+            }
+            OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
+
+                //service update
+                outstandingRentalSheetService.clear()
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                }
+                if (total<1) {
+                    handler.post{
+                        listener?.onRequestEnded(OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.processEndMessage)
+                    }
+                    return
+                }
+
+                //postprocess - logic
+                val size = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                loadingPageIndex=0
+
+                //send
+                val toolbox = toolboxService.getToolbox()
+
+                val type = OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX
+                val data = "{\"size\":${size},\"page\":${loadingPageIndex},\"toolboxId\":${toolbox.id}}"
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
+            }
+            OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
+                val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
+                TODO("not implemented yet")
+            }
             OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
                 val pageType: Type = object : TypeToken<Page>() {}.type
                 TODO("not implemented yet")
             }
+            OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
 
-            OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX.name -> {
-                val pageType: Type = object : TypeToken<Page>() {}.type
+                //service update
+                TODO("not implemented yet")
+            }
+            OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
+                val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
                 TODO("not implemented yet")
             }
             RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX.name -> {
@@ -371,32 +451,50 @@ class BluetoothManager (private val handler : Handler){
                 val type: Type = object : TypeToken<String>() {}.type
                 TODO("not implemented yet")
             }
-            OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
-                val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
-                TODO("not implemented yet")
-            }
             RENTAL_REQUEST_SHEET_APPROVE.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                //event
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //일관성 대단함
+                        rentalRequestSheetService.deleteItem()
+                        DialogUtils.showAlertDialog("성공",RENTAL_REQUEST_SHEET_APPROVE.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
+                    }
+                }else{
+                    handler.post{
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_APPROVE")
+                    }
+                }
             }
             RETURN_SHEET_FORM.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                //event
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //일관성 대단함
+                        outstandingRentalSheetService.deleteItem()
+                        DialogUtils.showAlertDialog("성공",RETURN_SHEET_FORM.processEndMessage){
+                            _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
+                    }
+                }else{
+                    handler.post {
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RETURN_SHEET_FORM")
+                    }
+                }
             }
-            RENTAL_REQUEST_SHEET_APPROVE.name -> {
-                val pageType: Type = object : TypeToken<String>() {}.type
+            RETURN_SHEET_REQUEST.name -> {
+                val type: Type = object : TypeToken<String>() {}.type
                 TODO("not implemented yet")
             }
             TOOLBOX_TOOL_LABEL_FORM.name -> {
                 val pageType: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
-            }
-            OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX.name -> {
-                val listType: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
-                TODO("not implemented yet")
-            }
-            RETURN_SHEET_REQUEST.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
                 TODO("not implemented yet")
             }
             TAG_FORM.name -> {
@@ -420,31 +518,93 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             TOOLBOX_TOOL_LABEL_ALL.name -> {
-                val type: Type = object : TypeToken<Page>() {}.type
-                TODO("not implemented yet")
+                //response
+                val labelPage = gson.fromJson(jsonStr, Page::class.java)
+
+                //database update
+                if (reloadFlag){
+                    toolboxToolLabelService.upsertToolboxToolLabelByPage(labelPage)
+                    reloadFlag=false
+                } else {
+                    toolboxToolLabelService.insertToolboxToolLabelByPage(labelPage)
+                }
+
+                //preprocess - parse
+                //val size = toolboxToolLabel.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
+                val index = labelPage.pageable.page
+                val total = labelPage.total
+
+                //preprocess - logic
+                val pageSize = Constants.TOOLBOX_TOOL_LABEL_PAGE_SIZE.coerceAtMost(total)
+                Log.i("toolboxToolLabel","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                loadingPageIndex+=1
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(TOOLBOX_TOOL_LABEL_ALL.processMessage,index,total/pageSize)
+                }
+
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
+
+                    //send 1 - label load finished
+                    Log.i("toolboxToolLabel", "toolboxToolLabel insert complete (size : ${total})")
+                    handler.post{
+                        listener?.onRequestEnded(TOOLBOX_TOOL_LABEL_ALL.processEndMessage)
+                    }
+
+                } else{
+                    //send 2 - label load not finished
+                    val type = TOOLBOX_TOOL_LABEL_ALL
+                    val data = "{\"toolboxId\":${toolboxService.getToolbox().id},\"size\":${pageSize},\"page\":${loadingPageIndex}}"
+                    send(type, data)
+                }
             }
             TOOLBOX_TOOL_LABEL_ALL_COUNT.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
+
+                //database update
+                toolboxToolLabelService.resetTable()
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(TOOLBOX_TOOL_LABEL_ALL_COUNT.processMessage,1,1)
+                }
+
+                //postprocess - logic
+                val size = Constants.TOOLBOX_TOOL_LABEL_PAGE_SIZE.coerceAtMost(total)
+                loadingPageIndex=0
+
+                //send
+                val type = TOOLBOX_TOOL_LABEL_ALL
+                val data = "{\"toolboxId\":${toolboxService.getToolbox().id},\"size\":${size},\"page\":${loadingPageIndex}}"
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
             TAG_GROUP.name -> {
                 val type: Type = object : TypeToken<TagDto>() {}.type
                 TODO("not implemented yet")
             }
             OUTSTANDING_RENTAL_SHEET_BY_TAG.name -> {
-                val type: Type = object : TypeToken<OutstandingRentalSheetDto>() {}.type
-                TODO("not implemented yet")
+                //response
+                val outstandingRentalSheet = gson.fromJson(jsonStr, OutstandingRentalSheetDto::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(outstandingRentalSheet)
+                }
+
+                loadingPageIndex=0
             }
             TAG.name -> {
                 //response
-                val total = gson.fromJson(jsonStr,TagDto::class.java)
+                val tagDto = gson.fromJson(jsonStr, TagDto::class.java)
 
                 //service update
-                //
-
-                //event
-                handler.post{
-                    listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT.processMessage,1,1)
+                handler.post {
+                    tagService.handleResponse(tagDto)
                 }
 
                 loadingPageIndex=0
@@ -470,24 +630,42 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             RENTAL_REQUEST_SHEET_CANCEL.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
-            }
-            OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
-            }
-            OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //TODO:일관성
+                        rentalRequestSheetService.deleteItem()
+                        DialogUtils.showAlertDialog("성공",RENTAL_REQUEST_SHEET_CANCEL.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //TODO:이거 어떻게 쌈빡한 방법이 없나?
+                    }
+                }else{
+                    handler.post{
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_APPROVE")
+                    }
+                }
             }
             RENTAL_REQUEST_SHEET_APPLY.name -> {
                 val type: Type = object : TypeToken<String>() {}.type
                 TODO("not implemented yet")
             }
             TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                //event
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //일관성 대단함
+                        DialogUtils.showAlertDialog("성공",TAG_AND_TOOLBOX_TOOL_LABEL_FORM.processEndMessage){
+                            _,_->
+                            toolboxToolLabelService.getToolboxToolLabelTextByToolId()
+                            DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
+                    }
+                }
             }
             TAG_AND_TOOLBOX_TOOL_LABEL.name -> {
                 val type: Type = object : TypeToken<TagAndToolboxToolLabelDto>() {}.type
@@ -507,9 +685,84 @@ class BluetoothManager (private val handler : Handler){
                 val toolboxList: List<ToolboxDto> = gson.fromJson(jsonStr, listType)
 
                 handler.post{
+                    listener?.onRequestProcessed(TOOLBOX_ALL.processMessage,1,1)
                     DialogUtils.showSingleChoiceDialog("정비실을 선택해주세요.",toolboxList.map{toolboxDto->toolboxDto.name}.toTypedArray()){
-                        ToolboxService.getInstance().updateToolbox(toolboxList[it])
+                        toolboxService.updateToolbox(toolboxList[it])
+                        listener?.onRequestEnded(TOOLBOX_ALL.processEndMessage)
                     }
+                }
+            }
+            TAG_LIST_BY_TOOL_AND_TOOLBOX_ID.name -> {
+                //response
+                val tagList = gson.fromJson(jsonStr, List::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(tagList)
+                }
+
+                loadingPageIndex=0
+            }
+            TAG_LIST_BY_TOOLBOX_TOOL_LABEL_QRCODE.name -> {
+                //response
+                val tagList = gson.fromJson(jsonStr, List::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(tagList)
+                }
+
+                loadingPageIndex=0
+            }
+            TAG_LIST_BY_TAG_MACADDRESS.name -> {
+                //response
+                val tagList = gson.fromJson(jsonStr, List::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(tagList)
+                }
+
+                loadingPageIndex=0
+            }
+            TOOLBOX_TOOL_LABEL_AVAILABLE.name -> {
+                //response
+                val toolboxToolLabel = gson.fromJson(jsonStr, String::class.java)
+
+                //service update
+                handler.post{
+                    toolboxToolLabelService.handleResponse(toolboxToolLabel)
+                }
+
+                loadingPageIndex=0
+            }
+            TAG_AVAILABLE.name -> {
+                //response
+                val tag = gson.fromJson(jsonStr, String::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(tag)
+                }
+
+                loadingPageIndex=0
+            }
+
+            // ###################
+
+            DATA_TYPE_EXCEPTION.name->{
+                handler.post{
+                    listener?.onException(jsonStr);
+                }
+            }
+            DATA_SEMANTIC_EXCEPTION.name->{
+                handler.post{
+                    listener?.onException(jsonStr);
+                }
+            }
+            UNKNOWN_EXCEPTION.name->{
+                handler.post{
+                    listener?.onException(jsonStr);
                 }
             }
 
@@ -520,6 +773,10 @@ class BluetoothManager (private val handler : Handler){
             }
             HI.name -> {
                 Log.d("bluetooth",jsonStr)
+            }
+
+            else -> {
+                Log.e("bluetooth","unknown type : $typeStr")
             }
         }
     }
@@ -551,6 +808,34 @@ class BluetoothManager (private val handler : Handler){
         if (lastSendedMessageType != NULL) {
             reloadFlag = true
             send(lastSendedMessageType, lastSendedMessageData)
+        }
+    }
+
+    fun endRequest(message:String) {
+        listener?.onRequestEnded(message)
+    }
+
+    companion object {
+        private var instance: BluetoothManager? = null
+
+        /**
+         * only activity can call this method
+         */
+        fun getInstance(handler: Handler): BluetoothManager {
+            if (instance == null) {
+                instance = BluetoothManager(handler)
+            }
+            return instance!!
+        }
+
+        /**
+         * for non-activity class
+         */
+        fun getInstance(): BluetoothManager {
+            if (instance == null) {
+                throw Exception("BluetoothManager instance is not initialized")
+            }
+            return instance!!
         }
     }
 }

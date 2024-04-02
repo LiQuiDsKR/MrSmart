@@ -30,8 +30,8 @@ import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestSheetAdapter
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.RentalRequestSheetDto
-import com.mrsmart.standard.rental.SheetState
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
+import com.mrsmart.standard.sheet.rental.SheetState
 import java.lang.reflect.Type
 
 class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
@@ -103,7 +103,7 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
         sheetSearchBtn = view.findViewById(R.id.sheetSearchBtn)
         val layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = RentalRequestSheetAdapter(emptyList()) { rentalRequestSheet ->
+        val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
             if (rentalRequestSheet.status != SheetState.REQUEST) {
                 val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
                 requireActivity().supportFragmentManager.beginTransaction()

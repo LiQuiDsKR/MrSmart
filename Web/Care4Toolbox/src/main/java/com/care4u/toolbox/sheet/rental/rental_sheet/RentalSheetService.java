@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
+import com.care4u.exception.NoSuchElementFoundException;
+import com.care4u.exception.OutOfStockException;
 import com.care4u.hr.main_part.MainPart;
 import com.care4u.hr.main_part.MainPartRepository;
 import com.care4u.hr.membership.Membership;
@@ -334,7 +336,7 @@ public class RentalSheetService {
 		Optional<RentalRequestSheet> rentalRequestSheetOptional = rentalRequestSheetRepository.findById(formDto.getId());
 		if (rentalRequestSheetOptional.isEmpty()) {
 			logger.error("Sheet not found");
-			throw new IllegalArgumentException("Sheet not found");
+			throw new IllegalArgumentException("대여 승인이 되지 않았거나, 이미 반납된 시트입니다.");
 		}
 		if (rentalRequestSheetOptional.get().getStatus().equals(status)) {
 			logger.debug("Sheet is already " + status);
@@ -356,11 +358,11 @@ public class RentalSheetService {
 			Optional<Tool> optionalTool = toolRepository.findById(tool.getToolDtoId());
 			if (optionalRequestTool.isEmpty()) {
 				logger.error("rental request tool not found");
-				throw new IllegalArgumentException("rental request tool not found");
+				throw new IllegalArgumentException("ID : "+tool.getId()+"의 공기구 대여 신청 정보를 찾을 수 없습니다.");
 			}
 			if (optionalTool.isEmpty()) {
 				logger.error("tool not found");
-				throw new IllegalArgumentException("tool not found");
+				throw new IllegalArgumentException("ID : "+tool.getToolDtoId()+"의 공기구 정보를 찾을 수 없습니다.");
 			}
 			logger.debug("RentalRequestSheet [Add] : tool found");
 			RentalRequestToolDto newDto = RentalRequestToolDto.builder().id(tool.getId()).count(tool.getCount())
@@ -387,8 +389,11 @@ public class RentalSheetService {
 		// tool create
 		List<RentalTool> toolList = new ArrayList<RentalTool>();
 		List<RentalRequestToolDto> supplyRequestToolList = new ArrayList<RentalRequestToolDto>();
+		List<String> toolOutOfStockExceptionList = new ArrayList<String>();
+		List<String> toolNotFoundExceptionList = new ArrayList<String>();
 		
 		logger.debug("RentalSheet [Add] : RentalToolList Add Start");
+		
 		for (RentalRequestToolDto tool : requestSheetDto.getToolList()) {
 			// supplyTool
 			if (tool.getToolDto().getSubGroupDto().getMainGroupDto().getName().equals("소모자재")) {
@@ -397,9 +402,25 @@ public class RentalSheetService {
 				continue;
 			}
 			// rentalTool
+			try {
 			RentalTool newTool = addNewRentalTool(tool, savedRentalSheet, requestSheetDto);
 			toolList.add(newTool);
 			logger.info(newTool.getTool().getName() + " added to RentalSheet:" + savedRentalSheet.getId());
+			} catch (IllegalArgumentException e) {
+                toolNotFoundExceptionList.add(e.getMessage()+" ");
+            } catch (NoSuchElementFoundException e) {
+                toolNotFoundExceptionList.add(e.getMessage()+" ");
+            } catch (OutOfStockException e) {
+				toolOutOfStockExceptionList.add(e.getMessage()+" ");
+			}
+		}
+		if (!toolOutOfStockExceptionList.isEmpty()) {
+			logger.error("Stock out of stock : " + toolOutOfStockExceptionList.toString());
+			throw new OutOfStockException(toolOutOfStockExceptionList.toString()+ "재고가 부족합니다.");
+		}
+		if (!toolNotFoundExceptionList.isEmpty()) {
+			logger.error("Tool not found : " + toolNotFoundExceptionList.toString());
+			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "공기구 정보를 찾을 수 없습니다.");
 		}
 		logger.debug("RentalSheet [Add] : RentalToolList Add Completed");
 
@@ -411,9 +432,10 @@ public class RentalSheetService {
 		logger.debug("RentalSheet [Add] : Outstanding Add Start");
 		// outstandingSheet
 		if (toolList.isEmpty()) {
+			// supply만 있는 경우.
 			logger.debug("RentalSheet [Add] : toolList Empty -> rentalSheet add canceled");
 			repository.delete(savedRentalSheet);
-			return null;
+            return null;
 		} else {
 			logger.debug("RentalSheet [Add] : Dto converting start");
 			RentalSheetDto result = convertToDto(savedRentalSheet);
@@ -429,12 +451,12 @@ public class RentalSheetService {
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
-			return null;
+			throw new IllegalArgumentException("ID : "+requestDto.getToolDto().getId()+","+requestDto.getToolDto().getName()+","+requestDto.getToolDto().getSpec()+" 공기구 정보를 찾을 수 없습니다.");
 		}
 		Optional<RentalRequestSheet> requestSheet = rentalRequestSheetRepository.findById(requestSheetDto.getId());
 		if (requestSheet.isEmpty()){
 			logger.error("requestSheet not found");
-			return null;
+			throw new NoSuchElementFoundException("ID : "+requestSheetDto.getId()+"의 대여 신청 정보를 찾을 수 없습니다.");
 		}
 		logger.debug("RentalTool [Add] : tool & sheet Null check completed.");
 		
@@ -457,7 +479,7 @@ public class RentalSheetService {
 				Tag tag = tagRepository.findByMacaddress(tagString);
 				if (tag==null) {
 					logger.error("Tag : "+tagString+" not found");
-					return null;
+					throw new NoSuchElementFoundException("Qr코드 : "+tagString+"는 등록되지 않은 코드입니다.");
 				}
 					tag.updateRentalTool(savedRentalTool);
 					logger.info(tag.getMacaddress()+" added to "+savedRentalTool.getId()+":"+savedRentalTool.getTool().getName());
@@ -467,8 +489,20 @@ public class RentalSheetService {
 		}
 		
 		//StockStatusDto stockDto = stockStatusService.get(savedRentalTool.getTool().getId(),sheet.getToolbox().getId());
-		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(savedRentalTool.getTool().getId(), sheet.getToolbox().getId(), LocalDate.now());
-		stockStatusService.rentItems(stock.getId(), savedRentalTool.getCount());
+		try {
+			StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(
+					savedRentalTool.getTool().getId(), sheet.getToolbox().getId(), LocalDate.now());
+			stockStatusService.rentItems(stock.getId(), savedRentalTool.getCount());
+		} catch (IllegalArgumentException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName()+","+tool.get().getSpec());
+		} catch (NoSuchElementFoundException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName() + "," + tool.get().getSpec());
+		} catch (OutOfStockException e) {
+			logger.error("Stock out of stock");
+			throw new OutOfStockException(tool.get().getName() + "," + tool.get().getSpec());
+		}
 		
 		logger.debug("RentalTool [Add] : Completed");
 		return savedRentalTool;
@@ -490,11 +524,31 @@ public class RentalSheetService {
 		
 		logger.debug("SupplySheet [Add] : SupplySheet("+savedSupplySheet.getId()+") saved");
 		
+		List<String> toolOutOfStockExceptionList = new ArrayList<String>();
+		List<String> toolNotFoundExceptionList = new ArrayList<String>();
+		
 		logger.debug("SupplySheet [Add] : SupplyToolList Add Start");
 		for (RentalRequestToolDto tool : supplyRequestToolList) {
-			SupplyTool newTool = addNewSupplyTool(tool, savedSupplySheet);
-			logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
+			try {
+				SupplyTool newTool = addNewSupplyTool(tool, savedSupplySheet);
+				logger.info(newTool.getTool().getName()+" added to SupplySheet:"+savedSupplySheet.getId());
+			} catch (IllegalArgumentException e) {
+				toolNotFoundExceptionList.add(e.getMessage() + " ");
+			} catch (NoSuchElementFoundException e) {
+				toolNotFoundExceptionList.add(e.getMessage() + " ");
+			} catch (OutOfStockException e) {
+				toolOutOfStockExceptionList.add(e.getMessage() + " ");
+			}
 		}
+		if (!toolOutOfStockExceptionList.isEmpty()) {
+			logger.error("Stock out of stock : " + toolOutOfStockExceptionList.toString());
+			throw new OutOfStockException(toolOutOfStockExceptionList.toString() + "재고가 부족합니다.");
+		}
+		if (!toolNotFoundExceptionList.isEmpty()) {
+			logger.error("Tool not found : " + toolNotFoundExceptionList.toString());
+			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "공기구 정보를 찾을 수 없습니다.");
+		}
+		
 		logger.debug("SupplySheet [Add] : SupplyToolList Add Completed");
 
 		logger.debug("SupplySheet [Add] : Completed");
@@ -505,7 +559,7 @@ public class RentalSheetService {
 		Optional<Tool> tool = toolRepository.findById(requestDto.getToolDto().getId());
 		if (tool.isEmpty()){
 			logger.error("tool not found");
-			return null;
+			throw new NoSuchElementFoundException(requestDto.getToolDto().getName()+","+requestDto.getToolDto().getId()+"의 공기구 정보를 찾을 수 없습니다.");
 		}
 		logger.debug("SupplyTool [Add] : tool Null check completed");
 		SupplyTool supplyTool = SupplyTool.builder()
@@ -515,8 +569,22 @@ public class RentalSheetService {
 				.replacementDate(LocalDate.now().plusMonths(tool.get().getReplacementCycle()))
 				.build();
 		
-		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(requestDto.getToolDto().getId(), sheet.getToolbox().getId(), LocalDate.now());
-		stockStatusService.supplyItems(stock.getId(), supplyTool.getCount());
+		try {
+			StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(requestDto.getToolDto().getId(), sheet.getToolbox().getId(), LocalDate.now());
+			stockStatusService.supplyItems(stock.getId(), supplyTool.getCount());
+		} catch (IllegalArgumentException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName() + "," + tool.get().getSpec());
+		} catch (NoSuchElementFoundException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName() + "," + tool.get().getSpec());
+		} catch (OutOfStockException e) {
+			logger.error("Stock out of stock");
+			throw new OutOfStockException(tool.get().getName() + "," + tool.get().getSpec());
+		} catch (NullPointerException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName() + "," + tool.get().getSpec());
+		}
 		
 		logger.debug("SupplyTool [Add] : completed");
 		return supplyToolRepository.save(supplyTool);

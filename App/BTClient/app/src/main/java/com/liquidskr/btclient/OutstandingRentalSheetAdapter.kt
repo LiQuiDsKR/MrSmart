@@ -5,12 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.OutstandingState
-import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingState
+import com.mrsmart.standard.sheet.rental.RentalToolDto
 
 
-class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
+class OutstandingRentalSheetAdapter(private var sheetList: MutableList<OutstandingRentalSheetDto>, private val onItemClick: (OutstandingRentalSheetDto) -> Unit) :
     RecyclerView.Adapter<OutstandingRentalSheetAdapter.OutstandingRentalSheetViewHolder>() {
 
     class OutstandingRentalSheetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,7 +28,7 @@ class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<Ou
     }
 
     override fun onBindViewHolder(holder: OutstandingRentalSheetViewHolder, position: Int) {
-        val currentOutstandingRentalSheet = outstandingRentalSheets[position]
+        val currentOutstandingRentalSheet = sheetList[position]
         holder.workerName.text = currentOutstandingRentalSheet.rentalSheetDto.workerDto.name
         holder.leaderName.text = currentOutstandingRentalSheet.rentalSheetDto.leaderDto.name
         holder.timeStamp.text = currentOutstandingRentalSheet.rentalSheetDto.eventTimestamp
@@ -48,12 +48,20 @@ class OutstandingRentalSheetAdapter(private var outstandingRentalSheets: List<Ou
         }
     }
     override fun getItemCount(): Int {
-        return outstandingRentalSheets.size
+        return sheetList.size
     }
     fun updateList(newList: List<OutstandingRentalSheetDto>) {
-        outstandingRentalSheets = newList
+        sheetList = newList.toMutableList()
         notifyDataSetChanged()
     }
-
-
+    fun insertList(newItems:List<OutstandingRentalSheetDto>){
+        val positionStart = sheetList.size
+        sheetList.addAll(positionStart,newItems)
+        notifyItemRangeInserted(positionStart, newItems.size)
+    }
+    /*
+    fun insertItem
+    fun removeList
+    fun removeItem
+     */
 }

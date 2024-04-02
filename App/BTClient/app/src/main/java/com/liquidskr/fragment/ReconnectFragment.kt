@@ -12,10 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DialogUtils
+import com.liquidskr.btclient.DialogUtils.activity
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 
-class ReconnectFragment : Fragment() {
+class ReconnectFragment( val prevListener: BluetoothManager.Listener) : Fragment() {
     private lateinit var popupLayout: View
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
@@ -28,7 +29,7 @@ class ReconnectFragment : Fragment() {
         }
 
         override fun onRequestStarted() {
-            Log.d("progressbar","엥 여긴 왜 실행됩니까 여기는 실행될 리가 없어야 합니다")
+            Log.d("progressbar","inaccessible point : reconnectFragment")
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
@@ -36,8 +37,8 @@ class ReconnectFragment : Fragment() {
             Log.d("reconnecting", "$context : $processedAmount/$totalAmount")
         }
 
-        override fun onRequestEnded() {
-            DialogUtils.showAlertDialog("연결됨", "블루투스 연결 성공"){_,_->close()}
+        override fun onRequestEnded(message:String) {
+            DialogUtils.showAlertDialog("연결됨", message){_,_->close()}
         }
 
         override fun onRequestFailed(message: String) {
@@ -56,18 +57,21 @@ class ReconnectFragment : Fragment() {
         }
 
         override fun onException(message: String) {
-            DialogUtils.showAlertDialog("재접속 실패", message){_,_->activity?.finish()}
+            DialogUtils.showAlertDialog("오류",message){_,_->close()}
         }
     }
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_reconnect, container, false)
+
+        Log.d("reconnecting","reconnectFragment created")
+
         popupLayout = view.findViewById(R.id.popupLayout)
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
 
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
+        (requireActivity() as MainActivity).registerBluetoothManagerListener(bluetoothManagerListener)
 
         // Set up a touch listener that consumes all touch events
         view.setOnTouchListener { _, _ ->true}
@@ -94,13 +98,16 @@ class ReconnectFragment : Fragment() {
         }
     }
 
-
     override fun onResume() {
         super.onResume()
         bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
     }
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
+
+    override fun onDetach() { //왜 onpause아니고 onDetach? : dialog가 pause를 실행하더라
+        super.onDetach()
+        Log.d("reconnecting","reconnectFragment detached")
+
+        bluetoothManager = null
+        (requireActivity() as MainActivity).registerBluetoothManagerListener(prevListener)
     }
 }

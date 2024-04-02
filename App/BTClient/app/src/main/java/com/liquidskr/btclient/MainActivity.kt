@@ -4,7 +4,6 @@ import SharedViewModel
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,15 +11,21 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract.Data
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
+import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.fragment.LobbyFragment
+import com.liquidskr.fragment.ProgressBarFragment
 import com.liquidskr.fragment.ReconnectFragment
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("old")
     lateinit var bluetoothManagerOld: BluetoothManager_Old
 
-    val bluetoothManager : BluetoothManager by lazy { BluetoothManager(
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance(
         Handler(Looper.getMainLooper())
     ) }
     private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
@@ -42,6 +47,42 @@ class MainActivity : AppCompatActivity() {
     private val androidBluetoothManager: android.bluetooth.BluetoothManager by lazy {getSystemService(android.bluetooth.BluetoothManager::class.java)}
     private val bluetoothAdapter: BluetoothAdapter by lazy {androidBluetoothManager.adapter}
 
+    private var accumulatedInput = StringBuilder()
+
+    private val bluetoothManagerListener = object : BluetoothManager.Listener{
+        override fun onDisconnected() {
+            val reconnectFrag = ReconnectFragment(this)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout,reconnectFrag)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        override fun onRequestStarted() {
+            val fragment = ProgressBarFragment()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.popupLayout, fragment)
+                .addToBackStack(null)
+                .commit()
+            bluetoothManager.sendingFlag = false
+        }
+
+        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
+            Log.e("bluetooth","Inaccessible point! : onRequestProcessed")
+        }
+        override fun onRequestEnded(message:String) {
+            Log.e("bluetooth","Inaccessible point! : onRequestEnded")
+        }
+        override fun onRequestFailed(message: String) {
+            Log.e("bluetooth","Inaccessible point! : onRequestFailed")
+        }
+        override fun onException(message: String) {
+            Log.e("bluetooth","Exception : ${message}")
+            DialogUtils.showAlertDialog("오류!","${message}")
+        }
+    }
+
+
     interface BluetoothModalListener {
         fun onConfirmButtonClicked()
         fun onCancelButtonClicked()
@@ -51,18 +92,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity)
 
-        val dbHelper = DatabaseHelper.initInstance(this)
+        Log.d("activity","activity Created")
+
+        DatabaseHelper.initInstance(this)
         DialogUtils.initialize(this)
 
         checkPermission()
         requestPermission()
 
-        //sharedViewModel.toolBoxId = dbHelper.getToolboxId()
-
+        bluetoothManager.listener=bluetoothManagerListener
         bluetoothManagerOld = BluetoothManager_Old(this, this)
 
         val mainFragment = LobbyFragment()
-        val connectFragment = ReconnectFragment()
+        val connectFragment = ReconnectFragment(this.bluetoothManagerListener)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, mainFragment)
             .addToBackStack(null)
@@ -72,11 +114,43 @@ class MainActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
     }
+
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("activity","activity Destroyed")
         bluetoothManager.stopTimer()
         bluetoothManager.disconnect()
     }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        Log.v("key","action:[${event.action}],keycode:[${event.keyCode}],unicode:[${event.unicodeChar}]")
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            Log.d("key","currentFocus : ${currentFocus}")
+            if(event.keyCode == KeyEvent.KEYCODE_ENTER && !(currentFocus is EditText)){
+                supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let { fragment ->
+                    if (fragment is InputHandler) {
+                        fragment.handleInput(accumulatedInput.toString())
+                        accumulatedInput.clear()
+                        return true;
+                    }else{
+                        accumulatedInput.clear()
+                    }
+                }
+            }else if ( event.keyCode==KeyEvent.KEYCODE_ENTER && currentFocus is EditText) {
+                (currentFocus as EditText).clearFocus()
+                accumulatedInput.clear()
+            }
+            else {
+                val char = event.unicodeChar.toChar()
+                if (char.isLetterOrDigit() || char.isWhitespace()) {
+                    Log.d("key","[${accumulatedInput}] detected")
+                    accumulatedInput.append(char)
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
 
     // 1. 필요한 권한이 허용되어 있는지 체크 -> 허용되지 않은 권한은 missingPermissions에 저장.
     private fun checkPermission(){
@@ -162,55 +236,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 4. 페어링된 장비 정보 불러오기.
-    @Deprecated("아래 getPairedDevice() 사용할 것.")
-    fun getPairedDeviceWithName() {
-        Log.d("bluetooth","Bluetooth initializing...")
-        var pcName = "DESKTOP"
-        try {
-            //로컬 db에 저장되어 있는 연결할 PC Name을 불러옵니다.
-            val dbHelper = DatabaseHelper.getInstance()
-
-            val bluetoothDeviceSaveService = BluetoothDeviceSaveService.getInstance()
-            pcName = dbHelper.getDeviceName()
-            if (pcName.length<1){
-                val currentPCName = bluetoothDeviceSaveService.getPCName()?:""
-                val callback: (String) -> Unit = { text ->
-                    bluetoothDeviceSaveService.insertPCName(text)
-                    pcName=text
-                }
-                DialogUtils.showTextDialog("정비실 노트북(PC)의 이름을 입력하세요.", currentPCName, callback)
-            }
-
-            val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
-            val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-            if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
-                // 페어링된(bonded) 기기 목록을 가져옵니다.
-                val pairedDevices = bluetoothAdapter.bondedDevices
-                if (pairedDevices.isNotEmpty()) {
-                    for (device : BluetoothDevice in pairedDevices){
-                        val deviceName = device.name
-                        val deviceAddress = device.address // MAC 주소
-                        Log.d("bluetooth","Paired Device: Name: $deviceName, Address: $deviceAddress")
-                        if (deviceName==pcName){
-                            this.bluetoothManager.setDevice(device)
-                            return
-                        }else{
-                            continue
-                        }
-                    }
-                }
-                Log.d("bluetooth","기기[${pcName}]를 찾을 수 없습니다.")
-            } else {
-                // 블루투스가 비활성화되어 있거나, 지원하지 않는 경우의 처리 로직
-                Log.d("bluetooth","Exception on Initializing")
-            }
-        } catch(e: Exception) {
-            Log.e("bluetooth",e.toString())
-        }
-        DialogUtils.showAlertDialog("페어링 없음", "기기[${pcName}]를 찾을 수 없습니다. 앱을 종료합니다.") {_,_->finish()}
-    }
-
-    // 4. 페어링된 장비 정보 불러오기.
     fun getPairedDevice() {
         if (!isBluetoothEnabled) {
             Log.d("bluetooth","Bluetooth Device Search Failed : Bluetooth Not Enabled")
@@ -273,10 +298,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setBluetoothManagerListener(listener: BluetoothManager.Listener){
+    fun registerBluetoothManagerListener(listener : BluetoothManager.Listener){
         bluetoothManager.listener=listener
     }
-
+    fun unregisterBluetoothManagerListener(){
+        bluetoothManager.listener=bluetoothManagerListener
+    }
     @Deprecated("old")
     fun getBluetoothManagerOnActivity(): BluetoothManager_Old {
         return bluetoothManagerOld

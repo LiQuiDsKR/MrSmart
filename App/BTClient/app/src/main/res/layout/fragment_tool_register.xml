@@ -7,276 +7,248 @@
     android:background="#F4F4FF"
     android:clickable="true">
 
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="true"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="#32345e"
+            android:gravity="left"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/managerPannel"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/manager_lobby_topview_arguments" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/QR_EditText"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:background="#00FFFFFF"
+                    android:ems="10"
+                    android:inputType="textMultiLine"
+                    android:textColor="#A14343"
+                    android:textSize="8sp" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/WelcomeMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0"
+                android:fontFamily="@font/noto_sans"
+                android:paddingRight="20dp"
+                android:text="님 환영합니다."
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:background="#32345e"
-                android:gravity="left"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/managerPannel"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_weight="0"
-                    android:background="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_topview_arguments" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <EditText
-                        android:id="@+id/QR_EditText"
-                        android:layout_width="1dp"
-                        android:layout_height="1dp"
-                        android:background="#00FFFFFF"
-                        android:ems="10"
-                        android:inputType="textMultiLine"
-                        android:textColor="#A14343"
-                        android:textSize="8sp" />
-                </FrameLayout>
-
-                <TextView
-                    android:id="@+id/WelcomeMessage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:fontFamily="@font/noto_sans"
-                    android:paddingRight="20dp"
-                    android:text="님 환영합니다."
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="80dp"
-                    android:background="@drawable/tool_background"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="300dp"
-                        android:layout_height="45dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="0dp">
-
-                        <EditText
-                            android:id="@+id/editTextName"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="#00FFFFFF"
-                            android:hint="공기구명 검색 또는 품목코드 스캔" />
-
-                        <ImageButton
-                            android:id="@+id/SearchBtn"
-                            android:layout_width="45dp"
-                            android:layout_height="45dp"
-                            android:backgroundTint="#00FFFFFF"
-                            android:scaleType="fitCenter"
-                            app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
-                    </LinearLayout>
-                </LinearLayout>
-
-
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/fragment_tool_register_tool" />
-
-
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="#fff4f4ff"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/ConnectBtn"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:background="#00FFFFFF"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/manager_lobby_connectionbtn" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFF"
+                android:layout_height="80dp"
+                android:background="@drawable/tool_background"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:id="@+id/RentalBtnField"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginEnd="40dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <EditText
+                        android:id="@+id/editTextName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#00FFFFFF"
+                        android:hint="공기구명 검색 또는 품목코드 스캔" />
 
                     <ImageButton
-                        android:id="@+id/RentalBtn"
-                        android:layout_width="54dp"
-                        android:layout_height="51dp"
-                        android:layout_gravity="center"
+                        android:id="@+id/SearchBtn"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
-                        android:focusable="false"
                         android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_menu_off_01" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/noto_sans"
-                        android:gravity="center"
-                        android:text="대여"
-                        android:textColor="#BDBDBD"
-                        android:textSize="16sp" />
+                        app:srcCompat="@drawable/icon_fix_ic_top_search_copy" />
                 </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <LinearLayout
-                    android:id="@+id/ReturnBtnField"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
 
-                    <ImageButton
-                        android:id="@+id/ReturnBtn"
-                        android:layout_width="54dp"
-                        android:layout_height="51dp"
-                        android:layout_gravity="center"
-                        android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_menu_off_02" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/noto_sans"
-                        android:gravity="center"
-                        android:text="반납"
-                        android:textColor="#BDBDBD"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/StandbyBtnField"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <ImageButton
-                        android:id="@+id/StandbyBtn"
-                        android:layout_width="54dp"
-                        android:layout_height="51dp"
-                        android:layout_gravity="center"
-                        android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_menu_off_03" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/noto_sans"
-                        android:gravity="center"
-                        android:text="보류"
-                        android:textColor="#BDBDBD"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/RegisterBtnField"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <ImageButton
-                        android:id="@+id/RegisterBtn"
-                        android:layout_width="54dp"
-                        android:layout_height="51dp"
-                        android:layout_gravity="center"
-                        android:backgroundTint="#00FFFFFF"
-                        android:clickable="false"
-                        android:focusable="false"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_menu_on_04" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/noto_sans"
-                        android:gravity="center"
-                        android:text="등록"
-                        android:textColor="#32345E"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- 부서 검색 -->
-
-            <!-- RecycleView를 담을 FrameLayout -->
         </LinearLayout>
 
-    </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
-    <RelativeLayout
-        android:id="@+id/popupLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="visible" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/fragment_tool_register_tool" />
+
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/RentalBtnField"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/RentalBtn"
+                    android:layout_width="54dp"
+                    android:layout_height="51dp"
+                    android:layout_gravity="center"
+                    android:backgroundTint="#00FFFFFF"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_off_01" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/noto_sans"
+                    android:gravity="center"
+                    android:text="대여"
+                    android:textColor="#BDBDBD"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ReturnBtnField"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/ReturnBtn"
+                    android:layout_width="54dp"
+                    android:layout_height="51dp"
+                    android:layout_gravity="center"
+                    android:backgroundTint="#00FFFFFF"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_off_02" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/noto_sans"
+                    android:gravity="center"
+                    android:text="반납"
+                    android:textColor="#BDBDBD"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/StandbyBtnField"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/StandbyBtn"
+                    android:layout_width="54dp"
+                    android:layout_height="51dp"
+                    android:layout_gravity="center"
+                    android:backgroundTint="#00FFFFFF"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_off_03" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/noto_sans"
+                    android:gravity="center"
+                    android:text="보류"
+                    android:textColor="#BDBDBD"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/RegisterBtnField"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/RegisterBtn"
+                    android:layout_width="54dp"
+                    android:layout_height="51dp"
+                    android:layout_gravity="center"
+                    android:backgroundTint="#00FFFFFF"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_on_04" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/noto_sans"
+                    android:gravity="center"
+                    android:text="등록"
+                    android:textColor="#32345E"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 부서 검색 -->
+
+        <!-- RecycleView를 담을 FrameLayout -->
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,22 +1,14 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 
 
@@ -30,55 +22,15 @@ class LobbyFragment : Fragment() {
 
     private var backPressedTime=0L
 
-    // not using in this Fragment
-    private var bluetoothManager : BluetoothManager? = null
-
-    private val bluetoothManagerListener = object : BluetoothManager.Listener{
-        override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.bluetoothPopupLayout,reconnectFrag)
-                .addToBackStack(null)
-                .commit()
-        }
-
-        override fun onRequestStarted() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestStarted")
-        }
-
-        override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestProcessed")
-        }
-
-        override fun onRequestEnded() {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestEnded")
-        }
-
-        override fun onRequestFailed(message: String) {
-            // 접근 불가.
-            Log.d("bluetooth","Inaccessible point! : ${this::class.java}, onRequestFailed")
-        }
-
-        override fun onException(message: String) {
-            Log.d("bluetooth","Exception : ${this::class.java}, ${message}")
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_lobby, container, false)
 
-        popupLayout = view.findViewById(R.id.bluetoothPopupLayout)
+        popupLayout = view.findViewById(R.id.popupLayout)
 
         workerBtn = view.findViewById(R.id.workerBtn)
         managerBtn = view.findViewById(R.id.managerBtn)
         bluetoothBtn = view.findViewById(R.id.bluetoothBtn)
         settingBtn = view.findViewById(R.id.SettingBtn)
-
-
-        (requireActivity() as MainActivity).setBluetoothManagerListener(bluetoothManagerListener)
 
         workerBtn.setOnClickListener {
             val fragment = WorkerFragment.newInstance()
@@ -125,13 +77,4 @@ class LobbyFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
 
-    override fun onResume() {
-        super.onResume()
-        bluetoothManager = (requireActivity() as MainActivity).bluetoothManager
-    }
-
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
-    }
 }

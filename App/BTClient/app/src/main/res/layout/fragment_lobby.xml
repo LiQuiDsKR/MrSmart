@@ -12,7 +12,7 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:id="@+id/fragmentContainer"
+            android:id="@+id/lobbyContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/background"
@@ -128,29 +128,11 @@
         </FrameLayout>
 
         <RelativeLayout
-            android:id="@+id/bluetoothPopupLayout"
+            android:id="@+id/popupLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:visibility="visible">
-
-            <!-- Progress Bar -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/touchProtector"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="invisible" />
-            </LinearLayout>
-
-        </RelativeLayout>
+            android:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

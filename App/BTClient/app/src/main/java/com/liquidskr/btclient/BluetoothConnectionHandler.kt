@@ -50,7 +50,7 @@ class BluetoothConnectionHandler (
             isConnected = true
         } catch (e: IOException) {
             isConnected = false
-            Log.d("bluetooth", e.toString())
+            Log.e("bluetooth", e.toString())
             // Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             listener.onException(Constants.ExceptionType.BLUETOOTH_DEFAULT_EXCEPTION,e.toString())
@@ -85,7 +85,7 @@ class BluetoothConnectionHandler (
                 } else {
                     //연결이 끊긴 경우 : dataSize == -1
                     isConnected = false
-                    Log.d("bluetooth", "Disconnected")
+                    Log.e("bluetooth", "Disconnected")
                     /*
                     //Toast.makeText(context, "블루투스 연결이 끊겼습니다. 다시 연결해주세요.", Toast.LENGTH_SHORT).show()
                     handler.post {
@@ -135,7 +135,7 @@ class BluetoothConnectionHandler (
                     buffer.get(byteArray)
                     outputStream.write(byteArray)
                     outputStream.flush()
-                    Log.d("bluetooth_Send", byteArrayToHex(buffer.array()))
+                    Log.v("bluetooth_Send", byteArrayToHex(buffer.array()))
                     buffer.clear()
                 }
             }
@@ -150,7 +150,7 @@ class BluetoothConnectionHandler (
     }
 
     fun close(){
-        Log.d("bluetooth","Conn : disconnecting...")
+        Log.i("bluetooth","Conn : disconnecting...")
         isConnected=false
         this.interrupt()
     }

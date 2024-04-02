@@ -3,7 +3,7 @@ package com.liquidskr.listener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import java.lang.reflect.Type
 
 class OutstandingRentalSheetByMemberReq (private val totalPage: Int, private val totalCount: Int, private val listener: Listener) {

@@ -54,5 +54,9 @@ public class SupplySheetController {
     public String supplyTool(Model model) {
     	return "supply/sheet_tool";
     }
+    @GetMapping(value = "sheet/total_monitor")
+	public String supplyTotalMonitor(Model model) {
+		return "supply/total_monitor";
+	}
     
 }

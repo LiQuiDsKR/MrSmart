@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.care4u.constant.OutstandingState;
 import com.care4u.constant.SheetState;
+import com.care4u.exception.NoSuchElementFoundException;
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.membership.MembershipRepository;
 import com.care4u.toolbox.Toolbox;
@@ -63,18 +64,18 @@ public class OutstandingRentalSheetService {
 		Tag tag = tagRepository.findByMacaddress(macAddress);
 		if (tag == null) {
 			logger.error("Invalid Tag : " + macAddress);
-			return null;
+			throw new NoSuchElementFoundException("Qr코드 : "+macAddress+"는 등록되지 않은 코드입니다.");
 		}
 		if (tag.getRentalTool() == null) {
 			logger.error("Tag already returned");
-			return null;
+			throw new IllegalArgumentException("Qr코드 : "+macAddress+"는 이미 반납된 코드입니다.");
 		}
 		long rentalSheetId = tag.getRentalTool().getRentalSheet().getId();
 
 		OutstandingRentalSheet sheet = repository.findByRentalSheetId(rentalSheetId);
 		if (sheet == null) {
 			logger.error("Invalid Tag : " + macAddress);
-			return null;
+			throw new IllegalArgumentException("Qr코드 : "+macAddress+"는 대여중인 코드가 아닙니다.");
 		}
 		return new OutstandingRentalSheetDto(sheet, rentalToolService.list(sheet.getRentalSheet().getId()));
 	}

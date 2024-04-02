@@ -5,9 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.tool.ToolSQLite
 
-class ToolRegisterAdapter(var tools: List<ToolSQLite>, val onItemClick: (ToolSQLite) -> Unit) :
+class ToolRegisterAdapter(var tools: List<ToolDto>, private val onItemClick: (ToolDto) -> Unit) :
     RecyclerView.Adapter<ToolRegisterAdapter.ToolViewHolder>() {
 
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -16,12 +17,20 @@ class ToolRegisterAdapter(var tools: List<ToolSQLite>, val onItemClick: (ToolSQL
         val toolCode: TextView = itemView.findViewById(R.id.RegisterToolList_Code)
     }
 
+    /**
+     * simply inflate.
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToolViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.fragment_tool_register_tool, parent, false)
         return ToolViewHolder(itemView)
     }
 
+    /**
+     * each viewHolder initialize
+     * 1. bind datas
+     * 2. addEventListener
+     */
     override fun onBindViewHolder(holder: ToolViewHolder, position: Int) {
         val currentTool = tools[position]
         holder.toolName.text = currentTool.name
@@ -32,10 +41,15 @@ class ToolRegisterAdapter(var tools: List<ToolSQLite>, val onItemClick: (ToolSQL
             onItemClick(currentTool)
         }
     }
+
+    /**
+     * count info needed
+     */
     override fun getItemCount(): Int {
         return tools.size
     }
-    fun updateList(newList: List<ToolSQLite>) {
+
+    fun updateList(newList: List<ToolDto>) {
         tools = newList
         notifyDataSetChanged()
     }

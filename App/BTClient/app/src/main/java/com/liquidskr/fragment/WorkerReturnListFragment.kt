@@ -31,8 +31,8 @@ import com.liquidskr.btclient.R
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.OutstandingState
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingState
 import java.lang.reflect.Type
 
 class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
@@ -124,7 +124,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         qrEditText = view.findViewById(R.id.QREditText)
         recyclerView = view.findViewById(R.id.Manager_Return_RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = OutstandingRentalSheetAdapter(emptyList()) { outstandingRentalSheet ->
+        val adapter = OutstandingRentalSheetAdapter(emptyList<OutstandingRentalSheetDto>().toMutableList()) { outstandingRentalSheet ->
             if (outstandingRentalSheet.outstandingStatus != OutstandingState.REQUEST) {
                 val fragment = WorkerOutstandingDetailFragment(outstandingRentalSheet)
                 requireActivity().supportFragmentManager.beginTransaction()

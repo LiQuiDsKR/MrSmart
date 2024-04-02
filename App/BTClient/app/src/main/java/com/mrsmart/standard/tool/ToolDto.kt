@@ -1,5 +1,7 @@
 package com.mrsmart.standard.tool
 
+import com.mrsmart.standard.tool.group.SubGroupDto
+
 data class ToolDto(
     val id: Long,
     val subGroupDto: SubGroupDto,
