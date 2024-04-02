@@ -203,7 +203,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		
-		bluetoothServer = new BluetoothServer(bluetoothServerListener);
+		//bluetoothServer = new BluetoothServer(bluetoothServerListener);
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
