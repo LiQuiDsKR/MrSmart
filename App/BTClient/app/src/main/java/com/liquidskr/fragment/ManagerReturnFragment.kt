@@ -42,7 +42,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
 
     private val outstandingRentalSheetService = OutstandingRentalSheetService.getInstance()
 
-    private var bluetoothManager : BluetoothManager? = null
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
@@ -61,9 +61,11 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         val adapter = OutstandingRentalSheetAdapter(emptyList<OutstandingRentalSheetDto>().toMutableList()) { outstandingRentalSheet ->
+            outstandingRentalSheetService.currentSheetId = outstandingRentalSheet.id
             val fragment = ManagerOutstandingDetailFragment(outstandingRentalSheet)
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
+                .add(R.id.fragmentContainer, fragment)
+                //.replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -74,6 +76,12 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerReturnFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -82,6 +90,12 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerReturnFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
 //        standbyBtnField.setOnClickListener {
@@ -150,7 +164,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
         (requireActivity() as MainActivity).bluetoothManager.send(type,data)
     }
 
-    override fun handleResponse(response: Any) {
+    override fun handleTagResponse(response: Any) {
         if (response is OutstandingRentalSheetDto){
             val fragment = ManagerOutstandingDetailFragment(response)
             requireActivity().supportFragmentManager.beginTransaction()
@@ -160,20 +174,9 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
         }
     }
 
+    override fun handleToolboxToolLabelResponse(response: Any) {}
+
     override fun onResume() {
         super.onResume()
-        bluetoothManager = BluetoothManager.getInstance()
-
-        val toolboxService = ToolboxService.getInstance()
-        val toolbox = toolboxService.getToolbox()
-
-        val type =Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT
-        val data ="{toolboxId:${toolbox.id}}"
-        bluetoothManager?.send(type,data)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        bluetoothManager=null
     }
 }

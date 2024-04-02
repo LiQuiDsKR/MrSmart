@@ -26,6 +26,8 @@ import com.care4u.toolbox.stock_status.StockStatus;
 import com.care4u.toolbox.stock_status.StockStatusRepository;
 import com.care4u.toolbox.tool.Tool;
 import com.care4u.toolbox.tool.ToolRepository;
+import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabel;
+import com.care4u.toolbox.toolbox_tool_label.ToolboxToolLabelRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +42,7 @@ public class TagService {
 	private final StockStatusRepository stockStatusRepository;
 	private final ToolRepository toolRepository;
 	private final ToolboxRepository toolboxRepository;
+	private final ToolboxToolLabelRepository toolboxToolLabelRepository;
 	private final RentalToolRepository rentalToolRepository;
 	
 	@Transactional(readOnly = true)
@@ -177,7 +180,7 @@ public class TagService {
 	}
 	
 	@Transactional
-	public Tag addNew(long toolId, long toolboxId, String tagString, String tagGroup) {
+	public Tag addNew(long toolId, long toolboxId, String tagString) {
 
 //		StockStatus stock = stockStatusRepository.findByToolIdAndToolboxIdAndCurrentDay(tool.getId(), toolbox.getId(), LocalDate.now());
 //		if (stock == null) {
@@ -186,60 +189,67 @@ public class TagService {
 //		}
 		
 		Tag tempObject = repository.findByMacaddress(tagString);
+		Boolean flag = true;
 		if (tempObject!=null) {
-			if(tempObject.getTagGroup().equals(tagGroup)) {
-				return tempObject;
-			}else {
+			flag =!(tempObject.getTool().getId()==toolId && tempObject.getToolbox().getId()==toolboxId);
+			if(flag) {
 				logger.error(tagString +" already exists!");
-				throw new IllegalArgumentException("ERROR_ALREADY_EXIST");
+				throw new IllegalArgumentException("QR : "+tagString+ "는 이미 등록된 태그입니다.");
 			}
 		}
 		
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
 			logger.error("Invalid toolboxId : " + toolboxId);
-			return null;
+			throw new NoSuchElementFoundException(toolboxId+"와 일치하는 공구실 데이터가 없습니다.");
 		}
 		
 		Optional<Tool> tool = toolRepository.findById(toolId);
 		if (tool.isEmpty()) {
 			logger.error("Invalid toolId : " + toolId);
-			return null;
+			throw new NoSuchElementFoundException(toolId+"와 일치하는 공구 데이터가 없습니다.");
 		}
 		
 		Tag tag = Tag.builder()
 				.macaddress(tagString)
 				.tool(tool.get())
 				.toolbox(toolbox.get())
-				.tagGroup(tagGroup)
+				.tagGroup("522")
 				.build();
 		
-		logger.info("Tag added : " + tagString + " -> " + tagGroup + " : " + tool.get().getName());
+		logger.info("Tag added : " + tagString + " -> " + tag.getTagGroup() + " : " + tool.get().getName());
 
-		return repository.save(tag);
+		return flag?repository.save(tag):tempObject;
 	}
 	
 	
 	@Transactional
-	public void register(long toolId, long toolboxId, List<String> tagList, String tagGroup) {
-		if (tagGroup.isEmpty()) {
-			if (tagList.size()<1) {
-				logger.error("처음 등록할 거면 리스트라도 좀 채워주세요");
-				return;
-			}
-			tagGroup=tagList.get(0);
-		}
+	public void register(long toolId, long toolboxId, List<String> tagList) {
+		//TODO : tagGroup살려야해
+//		if (tagGroup.isEmpty()) {
+//			if (tagList.size()<1) {
+//				throw new IllegalArgumentException("Invalid TagGroup");
+//			}
+//			tagGroup=tagList.get(0);
+//		}
+//			tagGroup이 지금 무슨 소용임
+		//TODO : 해놓고 나중에 다시 건드려야함
+//		
+//		List<Tag> tempList = repository.findByTagGroup(tagGroup);
+//		for (Tag t : tempList) {
+//			if(!tagList.contains(t.getMacaddress())) {
+//				repository.delete(t);
+//				logger.info("Tag Deleted : "+t.getMacaddress());
+//			}
+//		}
+//		for (String tag : tagList) {
+//			addNew(toolId, toolboxId, tag, tagGroup);
+//		}
 		
-		List<Tag> tempList = repository.findByTagGroup(tagGroup);
-		for (Tag t : tempList) {
-			if(!tagList.contains(t.getMacaddress())) {
-				repository.delete(t);
-				logger.info("Tag Deleted : "+t.getMacaddress());
-			}
-		}
 		for (String tag : tagList) {
-			addNew(toolId, toolboxId, tag, tagGroup);
+			addNew(toolId, toolboxId, tag);
 		}
+		return;
 	}
 	@Transactional(readOnly=true)
 	public List<TagDto> getSiblings(String tagString) {
@@ -248,8 +258,8 @@ public class TagService {
 			logger.error("Invalid tag : "+tagString);
 			return null;
 		}
-		return repository.findByTagGroup(tag.getTagGroup()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
-
+		//return repository.findByTagGroup(tag.getTagGroup()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
+		return repository.findAllByToolIdAndToolboxId(tag.getTool().getId(), tag.getToolbox().getId()).stream().map(e->convertToDto(e)).collect(Collectors.toList());
 	}
 	@Transactional(readOnly=true)
 	public String getTagGroup(String tagString) {
@@ -269,7 +279,43 @@ public class TagService {
 	@Transactional(readOnly=true)
 	public List<TagDto> listByToolIdAndToolboxId(long toolId, long toolboxId) {
 		List<Tag> list = repository.findAllByToolIdAndToolboxId(toolId, toolboxId);
+		logger.info("listByToolIdAndToolboxId : "+list.size());
 		return list.stream().map(e->new TagDto(e)).toList();
 	}
+	
+	@Transactional(readOnly=true)
+	public List<TagDto> listByToolboxToolLabelQrcode(String toolboxToolLabel) {
+		ToolboxToolLabel label = toolboxToolLabelRepository.findByQrcode(toolboxToolLabel);
+		if (label == null) {
+			logger.error("Invalid toolboxToolLabel : " + toolboxToolLabel);
+			throw new NoSuchElementFoundException(toolboxToolLabel+"와 일치하는 선반 QR코드 데이터가 없습니다. 기준정보를 다시 불러와주세요.");
+		}
+		long toolboxId = label.getToolbox().getId();
+		long toolId = label.getTool().getId();
+		
+		List<Tag> list = repository.findAllByToolIdAndToolboxId(toolId, toolboxId);
+		return list.stream().map(e->new TagDto(e)).toList();
+	}
+
+	
+	@Transactional(readOnly=true)
+	public List<TagDto> listByTagMacaddress(String tagMacaddress) {
+		Tag tag = repository.findByMacaddress(tagMacaddress);
+		if (tag == null) {
+			logger.error("Invalid tagMacaddress : " + tagMacaddress);
+			throw new NoSuchElementFoundException(tagMacaddress + "와 일치하는 태그 데이터가 없습니다.");
+		}
+		long toolboxId = tag.getToolbox().getId();
+		long toolId = tag.getTool().getId();
+		
+		List<Tag> list = repository.findAllByToolIdAndToolboxId(toolId, toolboxId);
+		return list.stream().map(e->new TagDto(e)).toList();
+	}
+
+	@Transactional(readOnly=true)
+	public Boolean isAvailable(String tag) {
+        return repository.findByMacaddress(tag)==null;
+	}
+	
 	
 }

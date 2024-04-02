@@ -32,7 +32,7 @@ class BluetoothMessageParser (
 
     fun process(data: ByteArray): ByteArray {
         try {
-            Log.d("bluetooth", "decode Str : ${String(data, Charsets.UTF_8)}}")
+            Log.v("bluetooth", "decode Str : ${String(data, Charsets.UTF_8)}}")
 
             byteArrayOutputStream.write(data)
             byteArrayOutputStream.flush()
@@ -47,7 +47,7 @@ class BluetoothMessageParser (
             if (mDataIndex < receivedData.size) {
                 val nextData = ByteArray(data.size - mDataIndex)
                 System.arraycopy(data, mDataIndex, nextData, 0, nextData.size)
-                Log.d("bluetooth", "start next datas...")
+                Log.v("bluetooth", "start next datas...")
                 initialize()
                 return nextData
             }
@@ -68,7 +68,7 @@ class BluetoothMessageParser (
         //읽어봤는데 다 들어옴
         mSizeReadFlag = true
         val length = byte2int(mSizeDataHolder.data, 0)
-        Log.d("bluetooth", "readSize=${length}, data index=${mDataIndex}")
+        Log.v("bluetooth", "readSize=${length}, data index=${mDataIndex}")
 
         mBodyDataHolder.reset(length)
         return true
@@ -83,7 +83,7 @@ class BluetoothMessageParser (
 
         //읽어봤는데 다 들어옴
         mBodyReadFlag = true
-        Log.d("bluetooth", "readBody=${mBodyDataHolder.data}, data index=$mDataIndex")
+        Log.v("bluetooth", "readBody=${mBodyDataHolder.data}, data index=$mDataIndex")
         return true
     }
 

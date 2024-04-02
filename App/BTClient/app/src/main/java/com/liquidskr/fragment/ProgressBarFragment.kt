@@ -19,9 +19,11 @@ class ProgressBarFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressText: TextView
 
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
+
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
+            val reconnectFrag = ReconnectFragment(this)
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.popupLayout,reconnectFrag)
                 .addToBackStack(null)
@@ -30,6 +32,7 @@ class ProgressBarFragment : Fragment() {
 
         override fun onRequestStarted() {
             Log.d("progressbar","Progress started")
+            bluetoothManager.sendingFlag=false
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
@@ -60,6 +63,7 @@ class ProgressBarFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_progress_bar, container, false)
+        Log.d("progressbar","Progress Bar Fragment Created")
         popupLayout = view.findViewById(R.id.popupLayout)
         progressBar = view.findViewById(R.id.progressBar)
         progressText = view.findViewById(R.id.progressText)
@@ -74,11 +78,16 @@ class ProgressBarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("progressbar","Progress Bar Fragment Created")
 
         // Set up a Back Button listener that consumes all Back Button events
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {}
+            /*
+            if (progressText.text == "Loading...")
+                DialogUtils.showAlertDialog("종료","통신 중입니다. 취소하시겠습니까?"){
+                    _,_-> close()
+                }
+             */
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }

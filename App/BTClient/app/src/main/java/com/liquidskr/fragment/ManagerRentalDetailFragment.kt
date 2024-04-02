@@ -145,10 +145,12 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         (requireActivity() as MainActivity).bluetoothManager.send(type,data)
     }
 
-    override fun handleResponse(response: Any) {
+    override fun handleTagResponse(response: Any) {
         if (response is TagDto)
                 (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
     }
+
+    override fun handleToolboxToolLabelResponse(response: Any) {}
 
     override fun onResume() {
         super.onResume()

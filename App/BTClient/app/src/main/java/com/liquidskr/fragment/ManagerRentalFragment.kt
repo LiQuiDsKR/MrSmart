@@ -58,11 +58,22 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         val layoutManager = LinearLayoutManager(requireContext())
         val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
-            fragmentTransform(ManagerRentalDetailFragment(rentalRequestSheet), null)
+            rentalRequestSheetService.currentSheetId= rentalRequestSheet.id
+            val frag = ManagerRentalDetailFragment(rentalRequestSheet)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, frag)
+                .addToBackStack(null)
+                .commit()
         }
 
         rentalBtnField.setOnClickListener {
             fragmentTransform(ManagerRentalFragment(manager), "ManagerRentalFragment")
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -82,7 +93,8 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         }
 
         recyclerView.adapter = adapter
-        rentalRequestSheetService.setAdapter(adapter)
+        rentalRequestSheetService.
+        setAdapter(adapter)
         recyclerView.layoutManager = layoutManager
 
         selfRentalBtn.setOnClickListener {
@@ -104,13 +116,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
     override fun onResume() {
         super.onResume()
         bluetoothManager = BluetoothManager.getInstance()
-
-        val toolboxService = ToolboxService.getInstance()
-        val toolbox = toolboxService.getToolbox()
-
-        val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-        val data ="{toolboxId:${toolbox.id}}"
-        bluetoothManager?.send(type,data)
     }
 
     override fun onPause() {

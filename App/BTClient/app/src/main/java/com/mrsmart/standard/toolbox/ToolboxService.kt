@@ -36,6 +36,11 @@ class ToolboxService private constructor() {
             throw Exception("Failed to update toolbox data. Error: ${e.message}", e)
         }
     }
+
+    fun getToolboxById(id: Long): ToolboxDto {
+        return dbHelper.getToolboxById(id).toToolboxDto()
+    }
+
     companion object {
         private var instance: ToolboxService? = null
         private const val TAG = "ToolboxService"

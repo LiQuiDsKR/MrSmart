@@ -74,7 +74,7 @@ class BluetoothCommunicationHandler (
         }
 
         override fun onDataSent(datas: ByteArray) {
-            Log.d("bluetooth", "send complete : ${byteArrayToHex(datas)}")
+            Log.v("bluetooth", "send complete : ${byteArrayToHex(datas)}")
             commTimeInMillis=Calendar.getInstance().timeInMillis
         }
 
@@ -157,7 +157,7 @@ class BluetoothCommunicationHandler (
     }
 
     fun disconnect(){
-        Log.d("bluetooth","Comm : disconnecting...")
+        Log.i("bluetooth","Comm : disconnecting...")
         bluetoothConnectionHandler.close() // 이 경우, reconnect는 close()로 인한 onDisconnected()에서 실행.
         connectionState=ConnectionState.DISCONNECTED
         isBluetoothConnectionHandlerNull=true

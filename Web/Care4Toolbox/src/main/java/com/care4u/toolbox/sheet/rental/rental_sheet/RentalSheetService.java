@@ -581,6 +581,9 @@ public class RentalSheetService {
 		} catch (OutOfStockException e) {
 			logger.error("Stock out of stock");
 			throw new OutOfStockException(tool.get().getName() + "," + tool.get().getSpec());
+		} catch (NullPointerException e) {
+			logger.error("Stock not found");
+			throw new NoSuchElementFoundException(tool.get().getName() + "," + tool.get().getSpec());
 		}
 		
 		logger.debug("SupplyTool [Add] : completed");

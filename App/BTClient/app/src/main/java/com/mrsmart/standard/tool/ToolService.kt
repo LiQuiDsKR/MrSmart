@@ -3,6 +3,7 @@ package com.mrsmart.standard.tool
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.zxing.qrcode.encoder.QRCode
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.mrsmart.standard.membership.MembershipDto
@@ -98,6 +99,16 @@ class ToolService private constructor() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch all tools", e)
             throw RuntimeException("Failed to fetch all tools due to an unexpected error.", e)
+        }
+    }
+
+    fun getToolByTBT(qrCode: String): ToolDto {
+        try {
+            val tool = dbHelper.getToolByTBT(qrCode)
+            return tool.toToolDto()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch tool by TBT: $qrCode", e)
+            throw RuntimeException("Failed to fetch tool by TBT: $qrCode due to an unexpected error.", e)
         }
     }
 

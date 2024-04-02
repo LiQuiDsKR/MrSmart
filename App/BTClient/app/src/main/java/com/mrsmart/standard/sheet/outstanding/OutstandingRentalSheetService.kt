@@ -18,6 +18,8 @@ class OutstandingRentalSheetService private constructor() {
     private lateinit var adapter : OutstandingRentalSheetAdapter
     private val viewList : MutableList<OutstandingRentalSheetDto> = mutableListOf()
 
+    var currentSheetId : Long = -1
+
     fun getList(): List<OutstandingRentalSheetDto> {
         return viewList
     }
@@ -50,6 +52,17 @@ class OutstandingRentalSheetService private constructor() {
             throw Exception("Failed to encode rentalRequestSheet data. Error: ${e.message}", e)
         }
     }
+
+    fun deleteItem(){
+        val index = viewList.indexOfFirst { it.id == currentSheetId }
+        if (index>=0){
+            viewList.removeAt(index)
+            handler.post{
+                adapter.notifyItemRemoved(index)
+            }
+        }
+    }
+
     fun clear(){
         viewList.clear()
         handler.post{

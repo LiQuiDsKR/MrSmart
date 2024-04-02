@@ -11,10 +11,16 @@ interface InputHandler {
     fun handleInput(input:String)
 
     /**
-     * handlerInput에서 송신한 정보의 Response를 처리하는 곳.
-     * 대체로 TagService가 handler.post로 호출한다.
+     * handlerInput에서 송신한 정보의 Response 중 tag에 대한 응답을 처리하는 메서드.
+     * TagService가 handler.post로 호출한다.
      */
-    fun handleResponse(response: Any)
+    fun handleTagResponse(response: Any)
+
+    /**
+     * handlerInput에서 송신한 정보의 Response 중 toolboxToolLabel에 대한 응답을 처리하는 메서드.
+     * TagService가 handler.post로 호출한다.
+     */
+    fun handleToolboxToolLabelResponse(response: Any)
 
     //fun handleResponse(response: OutstandingRentalSheetDto)
 }

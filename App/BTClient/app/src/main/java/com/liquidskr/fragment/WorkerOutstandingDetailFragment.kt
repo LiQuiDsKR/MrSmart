@@ -22,8 +22,8 @@ import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.WorkerOutstandingDetailAdapter
-import com.mrsmart.standard.rental.OutstandingRentalSheetDto
-import com.mrsmart.standard.rental.RentalToolDto
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
+import com.mrsmart.standard.sheet.rental.RentalToolDto
 import java.lang.reflect.Type
 
 class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalSheetDto) : Fragment() {

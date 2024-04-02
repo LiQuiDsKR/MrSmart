@@ -11,13 +11,16 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract.Data
 import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.fragment.LobbyFragment
 import com.liquidskr.fragment.ProgressBarFragment
@@ -48,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
-            val reconnectFrag = ReconnectFragment()
+            val reconnectFrag = ReconnectFragment(this)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.popupLayout,reconnectFrag)
                 .addToBackStack(null)
@@ -61,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.popupLayout, fragment)
                 .addToBackStack(null)
                 .commit()
+            bluetoothManager.sendingFlag = false
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
@@ -88,19 +92,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity)
 
-        val dbHelper = DatabaseHelper.initInstance(this)
+        Log.d("activity","activity Created")
+
+        DatabaseHelper.initInstance(this)
         DialogUtils.initialize(this)
 
         checkPermission()
         requestPermission()
 
-        //sharedViewModel.toolBoxId = dbHelper.getToolboxId()
-
         bluetoothManager.listener=bluetoothManagerListener
         bluetoothManagerOld = BluetoothManager_Old(this, this)
 
         val mainFragment = LobbyFragment()
-        val connectFragment = ReconnectFragment()
+        val connectFragment = ReconnectFragment(this.bluetoothManagerListener)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, mainFragment)
             .addToBackStack(null)
@@ -110,8 +114,10 @@ class MainActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
     }
+
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("activity","activity Destroyed")
         bluetoothManager.stopTimer()
         bluetoothManager.disconnect()
     }
@@ -119,24 +125,26 @@ class MainActivity : AppCompatActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         Log.v("key","action:[${event.action}],keycode:[${event.keyCode}],unicode:[${event.unicodeChar}]")
         if (event.action == KeyEvent.ACTION_DOWN) {
-            when (event.keyCode) {
-                KeyEvent.KEYCODE_ENTER -> {
-                    supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let { fragment ->
-                        if (fragment is InputHandler) {
-                            fragment.handleInput(accumulatedInput.toString())
-                            accumulatedInput.clear()
-                            return true;
-                        }else{
-                            accumulatedInput.clear()
-                        }
+            Log.d("key","currentFocus : ${currentFocus}")
+            if(event.keyCode == KeyEvent.KEYCODE_ENTER && !(currentFocus is EditText)){
+                supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let { fragment ->
+                    if (fragment is InputHandler) {
+                        fragment.handleInput(accumulatedInput.toString())
+                        accumulatedInput.clear()
+                        return true;
+                    }else{
+                        accumulatedInput.clear()
                     }
                 }
-                else -> {
-                    val char = event.unicodeChar.toChar()
-                    if (char.isLetterOrDigit() || char.isWhitespace()) {
-                        Log.d("key","[${accumulatedInput}] detected")
-                        accumulatedInput.append(char)
-                    }
+            }else if ( event.keyCode==KeyEvent.KEYCODE_ENTER && currentFocus is EditText) {
+                (currentFocus as EditText).clearFocus()
+                accumulatedInput.clear()
+            }
+            else {
+                val char = event.unicodeChar.toChar()
+                if (char.isLetterOrDigit() || char.isWhitespace()) {
+                    Log.d("key","[${accumulatedInput}] detected")
+                    accumulatedInput.append(char)
                 }
             }
         }

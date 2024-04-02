@@ -53,7 +53,7 @@ object Constants {
         TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),//TODO
         TAG_LIST("개별 QR코드 정보 불러오는 중...",""),//TODO
         TAG_ALL("개별 QR코드 정보 불러오는 중...",""),//TODO
-        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...","선반 QR코드 정보를 전부 불러왔습니다."),//TODO
         TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),//TODO
         OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),//TODO
         TAG_ALL_COUNT("사원 정보 불러오는 중...",""),//TODO
@@ -64,10 +64,15 @@ object Constants {
         RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),//TODO
         RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
         RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),//TODO
-        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("정보 불러오는 중...",""),//TODO
+        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("QR코드 정보 등록 중","QR코드 정보가 정상적으로 저장되었습니다"),//TODO
         TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),//TODO
         OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),//TODO
         OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),//TODO
+        TAG_LIST_BY_TAG_MACADDRESS("개별 QR코드 정보 불러오는 중...",""),
+        TAG_LIST_BY_TOOLBOX_TOOL_LABEL_QRCODE("개별 QR코드 정보 불러오는 중...",""),
+        TAG_LIST_BY_TOOL_AND_TOOLBOX_ID("개별 QR코드 정보 불러오는 중...",""),
+        TAG_AVAILABLE("개별 QR코드 중복 확인 중...",""),
+        TOOLBOX_TOOL_LABEL_AVAILABLE("선반 QR코드 중복 확인 중...",""),
 
         TEST("사원 정보 불러오는 중...",""),
 
@@ -262,9 +267,12 @@ object Constants {
     }
 
 
+    const val BLUETOOTH_SIMPLE_RESPONSE_DELAY: Long = 500L // 0.5초 간격으로 응답
+    const val BLUETOOTH_RESEND_INTERVAL: Long = 300L // 0.3초 간격으로 재송신
     const val BACK_BUTTON_DOUBLE_PRESS_CHECK_INTERVAL = 2000 //2초 안에 백버튼 두번 누르면 앱 종료
     const val MEMBERSHIP_PAGE_SIZE = 10 // 한 페이지당 처리할 사원정보 수
     const val TOOL_PAGE_SIZE = 10 // 한 페이지당 처리할 공기구 수
+    const val TOOLBOX_TOOL_LABEL_PAGE_SIZE = 10 // 한 페이지당 처리할 선반 QR코드 수
     const val SHEET_PAGE_SIZE = 1 // 한 페이지당 처리할 시트(전표) 수
     const val COMMUNICATION_TIMEOUT = 3000 //송신 3초 후 타임아웃
     const val INITIAL_MESSAGE_DELAY = 10000L // 최초 연결 후 메시지는 최소 100밀리초 이후에 전송.

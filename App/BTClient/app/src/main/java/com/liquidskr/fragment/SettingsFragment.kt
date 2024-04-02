@@ -17,6 +17,7 @@
     import com.liquidskr.btclient.MainActivity
     import com.liquidskr.btclient.BluetoothDeviceSaveService
     import com.liquidskr.btclient.R
+    import com.mrsmart.standard.toolbox.ToolboxService
 
     class SettingsFragment() : Fragment() {
         private lateinit var toolImportBtn: LinearLayout
@@ -29,10 +30,13 @@
         private lateinit var popupLayout: View
 
         private val bluetoothDeviceSaveService = BluetoothDeviceSaveService.getInstance()
+        private val toolboxService = ToolboxService.getInstance()
 
         private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
             ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         }
+
+
 
         @SuppressLint("MissingInflatedId")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -79,7 +83,7 @@
                     "선반 QR 코드 정보를 새로 불러오시겠습니까?\n정보를 모두 받는 데 2~5분 정도가 소요됩니다."
                     ,{ _,_->
                         val type = Constants.BluetoothMessageType.TOOLBOX_TOOL_LABEL_ALL_COUNT
-                        val data = ""
+                        val data = "{\"toolboxId\":${toolboxService.getToolbox().id}}"
                         (requireActivity() as MainActivity).bluetoothManager.send(type,data)
                     }, { _,_->} )
             }

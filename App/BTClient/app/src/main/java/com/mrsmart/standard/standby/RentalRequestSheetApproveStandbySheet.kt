@@ -1,5 +1,5 @@
 package com.mrsmart.standard.standby
-import com.mrsmart.standard.rental.RentalRequestSheetApproveFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
 
 data class RentalRequestSheetApproveStandbySheet(
     val sheet: RentalRequestSheetApproveFormDto,

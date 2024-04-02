@@ -73,6 +73,7 @@ import com.mrsmart.standard.membership.MembershipSQLite
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.standby.StandbyDto
 import com.mrsmart.standard.sheet.`return`.ReturnToolFormDto
+import com.mrsmart.standard.tag.ToolboxToolLabelSQLite
 import com.mrsmart.standard.tool.ToolSQLite
 import com.mrsmart.standard.toolbox.ToolboxSQLite
 import java.lang.reflect.Type
@@ -403,7 +404,39 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
         return id
     }
+    fun upsertTBTData(
+        tbtId: Long,
+        tbtToolboxId: Long,
+        tbtLocation: String,
+        tbtToolId: Long,
+        tbtQRcode: String
+    ): Long {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_ID, tbtId)
+        values.put(COLUMN_TBT_TOOLBOX_ID, tbtToolboxId)
+        values.put(COLUMN_TBT_LOCATION, tbtLocation)
+        values.put(COLUMN_TBT_TOOL_ID, tbtToolId)
+        values.put(COLUMN_TBT_QRCODE, tbtQRcode)
 
+        val db = this.writableDatabase
+
+        val numberOfRowsUpdated = db.update(
+            TABLE_TBT_NAME,
+            values,
+            "$COLUMN_TBT_ID = ?",
+            arrayOf(tbtId.toString())
+        )
+
+        val id :Long
+        if (numberOfRowsUpdated == 0) {
+            id = db.insert(TABLE_TBT_NAME, null, values)
+        } else {
+            id = tbtId
+        }
+
+        db.close()
+        return id
+    }
     fun insertStandbyData(
         //standbyId: Long,
         standbyJson: String,
@@ -1225,6 +1258,68 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = this.writableDatabase
         db.execSQL("DELETE FROM $TABLE_TOOLBOX_NAME")
         db.close()
+    }
+
+    fun isTBTExistByToolId(toolId: Long): Boolean {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TBT_ID FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_TOOL_ID = ?"
+        val selectionArgs = arrayOf(toolId.toString())
+        val cursor = db.rawQuery(query, selectionArgs)
+        val result = cursor.count == 1
+        cursor.close()
+        db.close()
+        return result
+    }
+
+    fun isTBTExist(qrCode: String): Boolean {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_TBT_ID FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_QRCODE = ?"
+        val selectionArgs = arrayOf(qrCode)
+        val cursor = db.rawQuery(query, selectionArgs)
+        val result = cursor.count == 1
+        cursor.close()
+        db.close()
+        return result
+    }
+    
+    fun getTBTByQrCode(qrCode: String):ToolboxToolLabelSQLite {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_QRCODE = ?"
+        val selectionArgs = arrayOf(qrCode)
+        val cursor = db.rawQuery(query, selectionArgs)
+        lateinit var toolboxToolLabelSQLite: ToolboxToolLabelSQLite
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_ID))
+            val toolboxId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOLBOX_ID))
+            val location = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_LOCATION))
+            val toolId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOL_ID))
+            val qrCode = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_QRCODE))
+
+            toolboxToolLabelSQLite = ToolboxToolLabelSQLite(id, toolboxId, location, toolId, qrCode)
+        }
+
+        cursor.close()
+        db.close()
+        return toolboxToolLabelSQLite
+    }
+
+    @SuppressLint("Range")
+    fun getToolboxById(id : Long) : ToolboxSQLite{
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_TOOLBOX_NAME WHERE $COLUMN_TOOLBOX_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
+        val cursor = db.rawQuery(query, selectionArgs)
+        lateinit var toolboxSQLite: ToolboxSQLite
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TOOLBOX_ID))
+            val name = cursor.getString(cursor.getColumnIndex(COLUMN_TOOLBOX_NAME))
+
+            toolboxSQLite = ToolboxSQLite(id, name)
+        }
+
+        cursor.close()
+        db.close()
+        return toolboxSQLite
     }
 
 

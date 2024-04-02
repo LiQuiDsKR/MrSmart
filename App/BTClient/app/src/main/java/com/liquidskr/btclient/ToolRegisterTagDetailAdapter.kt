@@ -4,20 +4,17 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
+class ToolRegisterTagDetailAdapter(var tagList: MutableList<String>) :
     RecyclerView.Adapter<ToolRegisterTagDetailAdapter.ToolViewHolder>() {
-    var checkingQR = "default"
+
+    private var checkingQR = "default"
 
     class ToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val qrDisplay: TextView = itemView.findViewById(R.id.qr_display)
@@ -32,14 +29,14 @@ class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
     }
 
     override fun onBindViewHolder(holder: ToolViewHolder, position: Int) {
-        val currentQR = qrcodes[position]
+        val currentQR = tagList[position]
         holder.qrcode = currentQR
         holder.qrDisplay.text = currentQR
         holder.qrDelete.setOnClickListener {
-            Log.d("regiAdapter",qrcodes.toString())
-            val updatedList = qrcodes.toMutableList()
+            Log.d("regiAdapter",tagList.toString())
+            val updatedList = tagList.toMutableList()
             updatedList.removeAt(holder.adapterPosition)
-            qrcodes = updatedList
+            tagList = updatedList
             notifyDataSetChanged()
         }
         if (checkingQR == holder.qrcode) {
@@ -49,44 +46,27 @@ class ToolRegisterTagDetailAdapter(var qrcodes: List<String>) :
             handler.postDelayed({
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT)
             }, 300)
+            checkingQR = "default"
         }
-        checkingQR = "default"
     }
     override fun getItemCount(): Int {
-        return qrcodes.size
+        return tagList.size
     }
-    fun updateList(newList: List<String>) {
-        qrcodes = newList
-        notifyDataSetChanged()
-    }
-    private fun fixCode(input: String): String {
-        val typoMap = mapOf(
-            'ㅁ' to 'A',
-            'ㅠ' to 'B',
-            'ㅊ' to 'C',
-            'ㅇ' to 'D',
-            'ㄷ' to 'E',
-            'ㄹ' to 'F',
-            'ㅎ' to 'G',
-            'ㅗ' to 'H',
-            'ㅑ' to 'I',
-            'ㅓ' to 'J',
-            'ㅏ' to 'K',
-            'ㅣ' to 'L',
-        )
-        val correctedText = StringBuilder()
-        for (char in input) {
-            val correctedChar = typoMap[char] ?: char
-            correctedText.append(correctedChar)
-        }
-        return correctedText.toString()
-    }
-    fun qrCheck(qrcode: String) {
-        for (i in qrcodes.indices) {
-            if (qrcode == qrcodes[i]) {
+    fun qrCheck(qrcode: String) : Boolean {
+        for (i in tagList.indices) {
+            if (qrcode == tagList[i]) {
                 checkingQR = qrcode
                 notifyItemChanged(i)
+                return true
             }
         }
+        return false
+    }
+    fun getResult() : List<String> {
+        return tagList
+    }
+        fun addTag(tag: String) {
+        tagList.add(tag)
+        notifyItemInserted(tagList.size)
     }
 }

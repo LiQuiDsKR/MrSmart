@@ -22,6 +22,7 @@ class RentalRequestSheetService private constructor() {
 
     private lateinit var adapter : RentalRequestSheetAdapter
     private val viewList : MutableList<RentalRequestSheetDto> = mutableListOf()
+    var currentSheetId : Long = -1
 
     fun getList(): List<RentalRequestSheetDto> {
         return viewList
@@ -54,6 +55,17 @@ class RentalRequestSheetService private constructor() {
             throw Exception("Failed to encode rentalRequestSheet data. Error: ${e.message}", e)
         }
     }
+
+    fun deleteItem(){
+        val index = viewList.indexOfFirst { it.id == currentSheetId }
+        if (index>=0){
+            viewList.removeAt(index)
+            handler.post{
+                adapter.notifyItemRemoved(index)
+            }
+        }
+    }
+
     fun clear(){
         viewList.clear()
         handler.post{
