@@ -220,4 +220,36 @@ public class SupplySheetService {
 		
 		return page.map(e -> convertToDto(e));
 	}
+
+	public List<supplySheetCountDto> getMonitor(Long partId, Long membershipId, Boolean isWorker, Boolean isLeader,
+			Boolean isApprover, Long toolId, Long subGroupId, LocalDate startLocalDate, LocalDate endLocalDate) {
+//Long partId, Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover, Tool tool, SubGroup subGroup, LocalDateTime startDate, LocalDateTime endDate
+		Optional<Membership> membershipOptional = membershipRepository.findById(membershipId);
+		Membership membership;
+		if (membershipOptional.isEmpty()) {
+			logger.info("no membership : " +membershipId + " all membership selected.");
+			membership=null;
+		}else {
+			membership=membershipOptional.get();
+		}
+
+		Optional<Tool> toolOptional = toolRepository.findById(toolId);
+		Tool tool;
+		if (toolOptional.isEmpty()) {
+			logger.info("no tool : " +toolId + " all tool selected.");
+			tool=null;
+		}else {
+			tool=toolOptional.get();
+		}
+		Optional<SubGroup> subGroupOptional = subGroupRepository.findById(subGroupId);
+		SubGroup subGroup;
+		if (subGroupOptional.isEmpty()) {
+			logger.info("no subGroup : " +subGroupId + " all subGroup selected.");
+			subGroup=null;
+		}else {
+			subGroup=subGroupOptional.get();
+		}
+		
+		return repository.findToolboxToolCounts(partId, membership, isWorker, isLeader, isApprover, tool, subGroup, startLocalDate.atTime(0, 0), endLocalDate.atTime(23, 59));
+	}
 }

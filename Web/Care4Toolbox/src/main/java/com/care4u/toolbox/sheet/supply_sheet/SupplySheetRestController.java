@@ -70,4 +70,23 @@ public class SupplySheetRestController {
         }
         return ResponseEntity.ok(supplySheetPage);
     }
+    
+    @GetMapping(value="/supply/get_monitor")
+	public ResponseEntity<List<supplySheetCountDto>> getMonitor(@RequestParam(name = "partId") Long partId,
+			@RequestParam(name = "membershipId") Long membershipId, @RequestParam(name = "toolId") Long toolId,
+			@RequestParam(name = "isWorker") Boolean isWorker, @RequestParam(name = "isLeader") Boolean isLeader,
+			@RequestParam(name = "isApprover") Boolean isApprover, @RequestParam(name = "startDate") String startDate,
+			@RequestParam(name = "endDate") String endDate, @RequestParam(name = "subGroupId") Long subGroupId) {
+
+		LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+		LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+		List<supplySheetCountDto> supplySheetList = supplySheetService.getMonitor(partId, membershipId, isWorker, isLeader,
+				isApprover, toolId, subGroupId, startLocalDate, endLocalDate);
+
+		for (supplySheetCountDto item : supplySheetList) {
+			logger.info(item.toString());
+		}
+		return ResponseEntity.ok(supplySheetList);
+	}
 }

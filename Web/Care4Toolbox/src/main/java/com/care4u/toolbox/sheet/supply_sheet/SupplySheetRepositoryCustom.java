@@ -14,4 +14,6 @@ import com.care4u.toolbox.tool.Tool;
 
 public interface SupplySheetRepositoryCustom {
 	Page<SupplySheet> findBySearchQuery(Long partId, Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover, Tool tool, SubGroup subGroup, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+	List<supplySheetCountDto> findToolboxToolCounts(Long partId, Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover, Tool tool, SubGroup subGroup, LocalDateTime startDate, LocalDateTime endDate);
+
 }

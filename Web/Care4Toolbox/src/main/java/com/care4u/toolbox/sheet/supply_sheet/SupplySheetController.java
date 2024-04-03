@@ -54,8 +54,15 @@ public class SupplySheetController {
     public String supplyTool(Model model) {
     	return "supply/sheet_tool";
     }
-    @GetMapping(value = "sheet/total_monitor")
+    @GetMapping(value = "total_monitor")
 	public String supplyTotalMonitor(Model model) {
+    	try {
+    		model.addAttribute("subGroupList",subGroupService.listByMainGroupId(mainGroupService.get("소모자재").getId()));
+    	}catch(Exception e) {
+    		logger.error(e.getMessage());
+    		model.addAttribute("subGroupList",null);
+    	}
+    	model.addAttribute("toolboxList",toolboxService.list());
 		return "supply/total_monitor";
 	}
     

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
@@ -22,15 +23,18 @@ import com.care4u.hr.membership.MembershipRestController;
 import com.care4u.hr.membership.QMembership;
 import com.care4u.hr.part.QPart;
 import com.care4u.hr.sub_part.QSubPart;
+import com.care4u.toolbox.QToolbox;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
 import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.sheet.supply_tool.QSupplyTool;
 import com.care4u.toolbox.tool.QTool;
 import com.care4u.toolbox.tool.Tool;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
@@ -124,4 +128,34 @@ public class SupplySheetRepositoryImpl implements SupplySheetRepositoryCustom {
 
 	        return new PageImpl<>(content, pageable, content.size());
 		}
+		
+		public List<supplySheetCountDto> findToolboxToolCounts(Long partId, Membership membership, Boolean isWorker, Boolean isLeader, Boolean isApprover, Tool tool, SubGroup subGroup, LocalDateTime startDate, LocalDateTime endDate) {
+		    QSupplySheet sSheet = QSupplySheet.supplySheet;
+		    QSupplyTool sTool = QSupplyTool.supplyTool;
+		    QToolbox sToolbox = QToolbox.toolbox; // 가정: Toolbox 엔티티가 있다고 가정합니다.
+
+		    // Toolbox 별로 SupplyTool의 개수를 집계합니다.
+		    List<Tuple> results = queryFactory
+		            .select(sToolbox.name, sTool.countDistinct())
+		            .from(sTool)
+		            .join(sTool.supplySheet,sSheet)
+		            .join(sSheet.toolbox, sToolbox)
+		            .where(
+		                    sSheet.eventTimestamp.between(startDate, endDate)
+		                    .and(searchMembershipEquals(membership, isWorker, isLeader, isApprover))
+		                    .and(searchPartEquals(partId))
+		                    .and(searchSubGroupEquals(subGroup))
+		                    .and(searchToolEquals(tool))
+		            )
+		            .groupBy(sToolbox)
+		            .fetch();
+
+		    // 결과를 ToolboxToolCount DTO나 다른 적합한 형태로 변환합니다.
+		    List<supplySheetCountDto> toolboxToolCounts = results.stream()
+		            .map(tuple -> new supplySheetCountDto(tuple.get(sToolbox.name), tuple.get(sTool.countDistinct())))
+		            .collect(Collectors.toList());
+
+		    return toolboxToolCounts;
+		}
+
 }

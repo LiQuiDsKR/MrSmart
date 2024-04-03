@@ -22,7 +22,20 @@
 						<h3 class="m-4 font-30">소모자재 지급 기록</h3>
 
 						<div class="d-flex row align-items-center ml-auto">
-							<div class="col-4">
+							<div class="col-5">
+							<div class="custom-select style--two m-3" style="max-width:150px;">
+								<select class="theme-input-style" id="subGroupSelect">
+									<option th:each="subGroup : ${subGroupList}" th:value="${subGroup.id}"
+										th:text="${subGroup.name}">name?</option>
+								</select>
+							</div>
+							<div class="custom-select style--two m-3" style="max-width:150px;">
+								<select class="theme-input-style" id="toolboxSelect">
+									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}" th:text="${toolbox.name}">name?</option>
+								</select>
+							</div>
+							</div>	
+							<div class="col-3">
 								<div class="d-flex align-items-center flex-nowrap mr-4"
 									style="box-sizing: content-box;">
 									<div class="custom-select style--two mr-4" style="max-width:200px;">
@@ -73,13 +86,13 @@
 							</div>
 
 							<!-- Search header -->
-							<div class="d-flex col-6 align-items-center justify-content-end media-body mt-3 mt-sm-0">
+							<div class="d-flex col-4 align-items-center justify-content-end media-body mt-3 mt-sm-0 mr-3">
 								<!-- layer 1 -->
-								<div class="row flex-nowrap">
+								<div class="row flex-nowrapmr-2">
 
 
 									<!-- Form Group -->
-									<div class="form-group mr-2">
+									<div class="form-group mr-2" style="max-width:150px">
 										<label class="mb-2 font-14 bold">시작 날짜</label>
 
 										<!-- Date Picker -->
@@ -95,7 +108,7 @@
 									<!-- End Form Group -->
 
 									<!-- Form Group -->
-									<div class="form-group">
+									<div class="form-group" style="max-width:150px">
 										<label class="mb-2 font-14 bold">종료 날짜</label>
 
 										<!-- Date Picker -->
@@ -275,8 +288,10 @@
 		document.querySelectorAll(".date-today").forEach(e => {
 			e.textContent = formatDate(new Date());
 		})
-
-		var chart1 = initializeChart1();
+		var chart1;
+		document.addEventListener("DOMContentLoaded", function() {
+			chart1 = initializeChart1();
+		  // Your chart initialization code here
 		abcHttp.get(
 			'/membership/getbycode',
 			{
@@ -316,10 +331,8 @@
 			.then(toolboxId => {
 				document.getElementById("toolboxSelect").value = toolboxId;
 				loadChart1.apply(chart1, [toolboxId]);
-				loadChart2(toolboxId);
-				loadChart3(toolboxId);
-				loadChart4.apply(chart4, [toolboxId]);
 			});
+		});
 
 		//apex initialize
 		function initializeChart1() {
@@ -333,25 +346,15 @@
 
 			// ApexCharts 설정
 			const options = {
-				series: [
-					{
-						name: '대여 수량',
-						data: [0]
-					}
-				],
 				chart: {
-					id: 'area-datetime',
-					type: 'area',
-					height: 300,
-					zoom: {
-						autoScaleYaxis: true
-					},
-					toolbar: {
-						show: false
-					},
-				},
+				        type: 'bar' // 차트 타입 설정 (예: 'bar', 'line', 'pie' 등)
+				    },
+				series: [{
+				    name: 'Tool Count',
+				    data: 0
+				  }],
 				dataLabels: {
-					enabled: false
+					enabled: true
 				},
 				markers: {
 					size: 0,
@@ -402,7 +405,7 @@
 		function loadChart1(toolboxId) {
 
 			abcHttp.get(
-				'/stock_status/get/analytics/list',
+				'/supply/get_monitor',
 				{
 					toolboxId: toolboxId,
 					partId: $('#searchBySelect').val() === "part" ? mainData.part.id : 0,
@@ -411,58 +414,53 @@
 					isWorker: $('#searchBySelect').val() === "membership",
 					isLeader: $('#searchBySelect').val() === "membership",
 					isApprover: $('#searchBySelect').val() === "membership",
+					subGroupId: $('#subGroupSelect').val(),
 					startDate: $('#start-date').val(),
 					endDate: $('#end-date').val(),
 				}
 			).then(data => {
 				console.log(data);
-				const chartData = [
-					{
-						name: '대여 수량',
-						data: []
-					},
-					{
-						name: '반납 수량',
-						data: []
-					}
-				];
-				for (const item of data) {
-					chartData[0].data.push({
-						x: new Date(item.currentDay),
-						y: item.rentalCount
-					});
-					chartData[1].data.push({
-						x: new Date(item.currentDay),
-						y: item.returnCount
-					});
-				}
-				data.map(item => (
-					{
-						name: '대여 수량',
-						data: {
-							x: new Date(item.currentDay),
-							y: item.rentalCount
-						}
-					},
-					{
-						name: '반납 수량',
-						data: {
-							x: new Date(item.currentDay),
-							y: item.returnCount
-						}
-					}
-				));
-
-				this.updateOptions({
-					series: chartData,
-					xaxis: {
-						min: new Date($('#start-date').val()).getTime(),
-						max: new Date($('#end-date').val()).getTime(),
-					}
-				});
-				setTimeout(_ => {
-					window.dispatchEvent(new Event("resize"));
-				}, 10)
+								const containerDiv = document.getElementById("sector2");
+								containerDiv.innerHTML = '';
+								let htmlString = ``
+								if (data.empty) {
+									htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
+									containerDiv.innerHTML = htmlString;
+									return; //abcsdfwlo
+								}
+									htmlString = `
+									<!-- Sheet -->
+									<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+										<div class="col-12" style="overflow-x:auto;">
+											<table class="tool-list invoice-list-table text-nowrap bg-white">
+												<thead>
+													<tr>
+														<th>정비실</th>
+														<th>지급개수</th>
+													</tr>
+												</thead>
+												<tbody>
+								   `;
+				
+								data.forEach(tool => {
+									htmlString +=
+										`
+												<tr>
+													<td class="time">${tool.toolboxName}</td>
+													<td class="toolbox">${tool.count}</td>
+												</tr>
+									`;
+								});
+									htmlString += `
+									        </tbody>
+										  </table>
+									    </div>
+									  </div>
+									  <!-- End Sheet -->`;
+				
+									var outerDiv = document.createElement('div');
+									outerDiv.innerHTML = htmlString;
+									containerDiv.appendChild(outerDiv);
 			});
 		}
 
@@ -504,9 +502,6 @@
 			toolboxId = this.value;
 
 			loadChart1.apply(chart1, [toolboxId]);
-			loadChart2(toolboxId);
-			loadChart3(toolboxId);
-			loadChart4.apply(chart4, [toolboxId]);
 		}
 
 
