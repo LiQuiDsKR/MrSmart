@@ -69,24 +69,6 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#FEFEFE"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/connectBtn"
-                android:layout_width="120dp"
-                android:layout_height="70dp"
-                android:layout_weight="0"
-                android:backgroundTint="#00FFFFFF"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/manager_lobby_connectionbtn" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
             android:gravity="center"

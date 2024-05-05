@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
@@ -20,6 +21,8 @@ class ProgressBarFragment : Fragment() {
     private lateinit var progressText: TextView
 
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
+
+    var fragmentTime : Long = System.currentTimeMillis()
 
     private val bluetoothManagerListener = object : BluetoothManager.Listener{
         override fun onDisconnected() {
@@ -32,11 +35,13 @@ class ProgressBarFragment : Fragment() {
 
         override fun onRequestStarted() {
             Log.d("progressbar","Progress started")
+            fragmentTime=System.currentTimeMillis()
             bluetoothManager.sendingFlag=false
         }
 
         override fun onRequestProcessed(context: String, processedAmount: Int, totalAmount: Int) {
             //TODO("Not yet implemented")
+            fragmentTime=System.currentTimeMillis()
             setProgressBar(processedAmount,totalAmount,context)
         }
 
@@ -78,16 +83,17 @@ class ProgressBarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        fragmentTime=System.currentTimeMillis()
 
         // Set up a Back Button listener that consumes all Back Button events
         val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {}
-            /*
-            if (progressText.text == "Loading...")
-                DialogUtils.showAlertDialog("종료","통신 중입니다. 취소하시겠습니까?"){
-                    _,_-> close()
+            override fun handleOnBackPressed() {
+                if (System.currentTimeMillis()-fragmentTime>Constants.COMMUNICATION_TIMEOUT) {
+                    DialogUtils.showAlertDialog("경고", "통신 중입니다. 정말로 종료하시겠습니까?") { _, _ ->
+                        close()
+                    }
                 }
-             */
+            }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }

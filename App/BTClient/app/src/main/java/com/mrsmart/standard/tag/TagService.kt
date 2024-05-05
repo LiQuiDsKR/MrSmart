@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
+import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 
 class TagService private constructor() {
     val gson = Gson()
@@ -30,6 +31,12 @@ class TagService private constructor() {
             bluetoothManager.endRequest("")
             inputHandler!!.handleTagResponse(tagList)
             return
+        } else if (response is Long) {
+            // OUTSTANDING_RENTAL_SHEET_ID_BY_TAG
+        } else if (response is OutstandingRentalSheetDto){
+            // OUTSTANDING_RENTAL_SHEET__BY_TAG
+            bluetoothManager.endRequest("")
+            inputHandler!!.handleTagResponse(response)
         }
 
         Log.d("TagService", "handleResponse: $response")

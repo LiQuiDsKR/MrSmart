@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
@@ -85,7 +86,17 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        confirmBtn.setOnClickListener {}
+        confirmBtn.setOnClickListener {
+            if (adapter.isNothingSelected()){
+                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 승인해주세요.")
+            }else if (!adapter.areAllSelected()){
+                DialogUtils.showAlertDialog("반납 승인","반납할 공기구 중 일부만 선택하셨습니다. 정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }else{
+                DialogUtils.showAlertDialog("반납 승인", "정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }
+        }
         return view
     }
 
@@ -111,7 +122,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
     override fun handleTagResponse(response: Any) {
         if (response is TagDto)
-            (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
+            (recyclerView.adapter as OutstandingDetailAdapter).tagAdded(response)
     }
 
     override fun handleToolboxToolLabelResponse(response: Any) {}

@@ -261,4 +261,25 @@ public class OutstandingRentalSheetService {
 	public Long getCount() {
 		return repository.count();
 	}
+
+	@Transactional(readOnly = true)
+	public Long getId(String macAddress) {
+		Tag tag = tagRepository.findByMacaddress(macAddress);
+		if (tag == null) {
+			logger.error("Invalid Tag : " + macAddress);
+			throw new NoSuchElementFoundException("Qr코드 : "+macAddress+"는 등록되지 않은 코드입니다.");
+		}
+		if (tag.getRentalTool() == null) {
+			logger.error("Tag already returned");
+			throw new IllegalArgumentException("Qr코드 : "+macAddress+"는 이미 반납된 코드입니다.");
+		}
+		long rentalSheetId = tag.getRentalTool().getRentalSheet().getId();
+
+		OutstandingRentalSheet sheet = repository.findByRentalSheetId(rentalSheetId);
+		if (sheet == null) {
+			logger.error("Invalid Tag : " + macAddress);
+			throw new IllegalArgumentException("Qr코드 : "+macAddress+"는 대여중인 코드가 아닙니다.");
+		}
+		return sheet.getId();
+	}
 }

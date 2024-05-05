@@ -206,7 +206,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//stockStatusService.addMock();
 		//tagService.addMock();
 		
-		//bluetoothServer = new BluetoothServer(bluetoothServerListener);
+		bluetoothServer = new BluetoothServer(bluetoothServerListener);
 		
 		//stockStatusService.addMock();
 		//tagService.addMock();
@@ -584,7 +584,25 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			} catch (Exception e) {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
-			break;				
+			break;
+		case OUTSTANDING_RENTAL_SHEET_ID_BY_TAG:
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+                    JSONObject jsonObj = new JSONObject(paramJson);
+                    String tag = jsonObj.getString("tag");
+                    
+                    Long sheetId = outstandingRentalSheetService.getId(tag);
+                    handler.sendData(keyword + GsonUtils.toJson(sheetId));
+                }
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
 		case RETURN_SHEET_REQUEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
@@ -811,9 +829,9 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					}
 					tagService.register(toolId, toolboxId, tagList);
 					logger.debug("good_tag");
-					toolboxToolLabelService.register(toolId, toolboxId, qrcode);
+					ToolboxToolLabelDto result = toolboxToolLabelService.register(toolId, toolboxId, qrcode);
 					logger.debug("good_toolbox_tool_label");
-					handler.sendData(keyword + "good");
+					handler.sendData(keyword + GsonUtils.toJson(result));
 				} else {
 					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+",빈 데이터입니다.");
 				}

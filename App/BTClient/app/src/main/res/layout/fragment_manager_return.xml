@@ -50,7 +50,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -110,23 +111,6 @@
             android:inputType="textMultiLine"
             android:textColor="#00FFFFFF"
             android:textSize="0sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#fff4f4ff"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/ConnectBtn"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:background="#00FFFFFF"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/manager_lobby_connectionbtn" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

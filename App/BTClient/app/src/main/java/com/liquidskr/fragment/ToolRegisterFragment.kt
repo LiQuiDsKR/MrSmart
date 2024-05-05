@@ -69,7 +69,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
-        view.requestFocus()
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
@@ -103,9 +102,9 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
             val toolboxService = ToolboxService.getInstance()
             val toolbox = toolboxService.getToolbox()
 
-            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-            val data ="{toolboxId:${toolbox.id}}"
-            bluetoothManager?.send(type,data)
+            //val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            //val data ="{toolboxId:${toolbox.id}}"
+            //bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {

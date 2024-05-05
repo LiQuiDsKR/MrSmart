@@ -96,7 +96,12 @@ class BluetoothManager (private val handler : Handler){
     private val tagService = TagService.getInstance()
     private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
 
-    private var loadingPageIndex : Int = -1 // -1 : not loading , 0~ : loading index
+    /**
+     * -1 : not loading , 0~ : loading index
+     * 연결이 끊겼을 때, 혹은 데이터가 손상되었을 때, 다시 요청할 페이지 인덱스.
+     * 단일 요청에 대해서는 0으로 설정할 것.
+     */
+    private var loadingPageIndex : Int = -1
     private var reloadFlag : Boolean = false // false : 안끊김 (insert) , true : 끊겼었음. 재송신중 (upsert)
     private var lastSendedMessageType : Constants.BluetoothMessageType = NULL
     private var lastSendedMessageData : String = ""
@@ -598,6 +603,17 @@ class BluetoothManager (private val handler : Handler){
 
                 loadingPageIndex=0
             }
+            OUTSTANDING_RENTAL_SHEET_ID_BY_TAG.name->{
+                //response
+                val id = gson.fromJson(jsonStr,Long::class.java)
+
+                //service update
+                handler.post{
+                    tagService.handleResponse(id)
+                }
+
+                loadingPageIndex=0
+            }
             TAG.name -> {
                 //response
                 val tagDto = gson.fromJson(jsonStr, TagDto::class.java)
@@ -653,18 +669,17 @@ class BluetoothManager (private val handler : Handler){
             }
             TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
                 //response
-                val message = gson.fromJson(jsonStr,String::class.java)
+                val resultLabel = gson.fromJson(jsonStr,ToolboxToolLabelDto::class.java)
 
                 //event
-                if (message=="good"){
-                    handler.post{
-                        listener?.onRequestEnded("") //일관성 대단함
-                        DialogUtils.showAlertDialog("성공",TAG_AND_TOOLBOX_TOOL_LABEL_FORM.processEndMessage){
-                            _,_->
-                            toolboxToolLabelService.getToolboxToolLabelTextByToolId()
-                            DialogUtils.activity.supportFragmentManager.popBackStack()
-                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
-                    }
+                handler.post{
+                    listener?.onRequestEnded("") //일관성 대단함
+                    DialogUtils.showAlertDialog("성공",TAG_AND_TOOLBOX_TOOL_LABEL_FORM.processEndMessage){
+                        _,_->
+                        toolboxToolLabelService.update(resultLabel)
+
+                        DialogUtils.activity.supportFragmentManager.popBackStack()
+                    } //이게되네요... 이게되네...ㅋㅋㅋㅋ
                 }
             }
             TAG_AND_TOOLBOX_TOOL_LABEL.name -> {

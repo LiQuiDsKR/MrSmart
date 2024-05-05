@@ -1322,5 +1322,44 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return toolboxSQLite
     }
 
+    fun updateTBTData(
+        id: Long,
+        toolboxId: Long,
+        location: String,
+        toolId: Long,
+        qrcode: String
+    ):Int {
+        val values = ContentValues()
+        values.put(COLUMN_TBT_TOOLBOX_ID, toolboxId)
+        values.put(COLUMN_TBT_LOCATION, location)
+        values.put(COLUMN_TBT_TOOL_ID, toolId)
+        values.put(COLUMN_TBT_QRCODE, qrcode)
 
+        val db = this.writableDatabase
+        val rowsAffected = db.update(TABLE_TBT_NAME, values, "$COLUMN_TBT_ID = ?", arrayOf(id.toString()))
+        db.close()
+        return rowsAffected
+    }
+
+    @SuppressLint("Range")
+    fun getTBTById(id: Long): ToolboxToolLabelSQLite? {
+        val db = this.readableDatabase
+        val query = "SELECT * FROM $TABLE_TBT_NAME WHERE $COLUMN_TBT_ID = ?"
+        val selectionArgs = arrayOf(id.toString())
+        val cursor = db.rawQuery(query, selectionArgs)
+        lateinit var toolboxToolLabelSQLite: ToolboxToolLabelSQLite
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_ID))
+            val toolboxId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOLBOX_ID))
+            val location = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_LOCATION))
+            val toolId = cursor.getLong(cursor.getColumnIndex(COLUMN_TBT_TOOL_ID))
+            val qrCode = cursor.getString(cursor.getColumnIndex(COLUMN_TBT_QRCODE))
+
+            toolboxToolLabelSQLite = ToolboxToolLabelSQLite(id, toolboxId, location, toolId, qrCode)
+        }
+
+        cursor.close()
+        db.close()
+        return toolboxToolLabelSQLite
+    }
 }

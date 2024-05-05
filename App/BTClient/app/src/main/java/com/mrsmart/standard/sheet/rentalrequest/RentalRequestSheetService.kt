@@ -61,7 +61,9 @@ class RentalRequestSheetService private constructor() {
         if (index>=0){
             viewList.removeAt(index)
             handler.post{
+                adapter.updateList(viewList)
                 adapter.notifyItemRemoved(index)
+                adapter.notifyItemRangeChanged(index,viewList.size-index)
             }
         }
     }

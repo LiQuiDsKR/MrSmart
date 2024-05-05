@@ -22,6 +22,7 @@ import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetService
+import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.toolbox.ToolboxService
 
 class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandler {
@@ -79,9 +80,9 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
             val toolboxService = ToolboxService.getInstance()
             val toolbox = toolboxService.getToolbox()
 
-            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-            val data ="{toolboxId:${toolbox.id}}"
-            bluetoothManager?.send(type,data)
+            //val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            //val data ="{toolboxId:${toolbox.id}}"
+            //bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -178,5 +179,11 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
 
     override fun onResume() {
         super.onResume()
+        TagService.getInstance().inputHandler=this
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        TagService.getInstance().inputHandler=null
     }
 }

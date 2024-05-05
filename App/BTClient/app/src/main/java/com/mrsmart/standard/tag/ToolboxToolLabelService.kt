@@ -94,8 +94,40 @@ class ToolboxToolLabelService private constructor() {
         }
     }
 
-    fun update(){
-        dbHelper.updateToolbox
+    fun update(label:ToolboxToolLabelDto){
+        try {
+            val id = label.id
+            val toolboxId = label.toolboxDto.id
+            val location = label.location
+            val toolId = label.toolDto.id
+            val qrcode = label.qrcode
+
+            val prev = dbHelper.getTBTById(id)
+
+            dbHelper.updateTBTData(id, toolboxId, location, toolId, qrcode)
+            Log.d(
+                TAG,
+                "${prev?.qrcode} -> ${qrcode}, ${prev?.toolId} -> ${toolId}, ${prev?.toolboxId} -> ${toolboxId}, ${prev?.location} -> ${location}, ${prev?.id} -> ${id}, updated.}"
+            )
+        } catch (e: UninitializedPropertyAccessException) {
+            Log.e(TAG, "Database not initialized for ID: ${label.id}, Adding new data.", e)
+            try{
+                val id = label.id
+                val toolboxId = label.toolboxDto.id
+                val location = label.location
+                val toolId = label.toolDto.id
+                val qrcode = label.qrcode
+
+                dbHelper.insertTBTData(id, toolboxId, location, toolId, qrcode)
+                Log.d(TAG, "qrcode : ${qrcode}, toolId : ${toolId}, toolboxId : ${toolboxId}, location : ${location}, id : ${id}, inserted.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to insert tool data", e)
+                throw Exception("Failed to insert tool data. Error: ${e.message}", e)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update toolbox tool label data", e)
+            throw Exception("Failed to update toolbox tool label data. Error: ${e.message}", e)
+        }
     }
 
     fun handleResponse(response : Any){

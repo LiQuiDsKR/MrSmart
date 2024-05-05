@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.liquidskr.btclient.DialogUtils.showReturnFormCountSelectDialog
 import com.mrsmart.standard.sheet.`return`.ReturnToolFormSelectedDto
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tool.ToolService
@@ -16,7 +17,7 @@ class OutstandingDetailAdapter(
 ) : RecyclerView.Adapter<OutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
 
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val setToolState: LinearLayout = itemView.findViewById(R.id.toolStateSet)
+        val toolStateSetButton: LinearLayout = itemView.findViewById(R.id.toolStateSet)
         val selectSpace: LinearLayout = itemView.findViewById(R.id.selectSpace)
 
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
@@ -52,8 +53,26 @@ class OutstandingDetailAdapter(
                         toolFormDto.damageCount+
                         toolFormDto.lossCount
                 ).toString()
-        holder.setToolState.setOnClickListener{
-            showCountSelectDialog(holder.toolCount,items[position])
+        holder.toolStateSetButton.setOnClickListener{
+            DialogUtils.showReturnFormCountSelectDialog(
+                count=toolFormDto.originCount,
+                goodCountVal=toolFormDto.originCount,
+                faultCountVal=0,
+                damageCountVal=0,
+                lossCountVal=0,
+                callback = { goodCount, faultCount, damageCount, lossCount, comment ->
+                    holder.toolCount.text = (goodCount+faultCount+damageCount+lossCount).toString()
+                    val item = items.find{it.toolDtoId==toolDtoId}?:null
+                    if (item != null){
+                        item.goodCount=goodCount
+                        item.faultCount=faultCount
+                        item.damageCount=damageCount
+                        item.lossCount=lossCount
+                        item.comment=comment
+                    }
+                    holder.toolState.text="양호 : $goodCount, 불량 : $faultCount, 파손 : $damageCount, 분실 : $lossCount"
+                }
+            )
         }
         holder.selectSpace.setOnClickListener {
             if (items[position].isSelected==true){

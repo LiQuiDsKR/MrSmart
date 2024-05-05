@@ -161,6 +161,7 @@ object DialogUtils {
                 commentEdit.text.toString()
             )
         }
+        builder.create().show()
     }
 
 }
