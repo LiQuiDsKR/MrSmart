@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout1}">
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+	<style>
+		.td_btn,
+		.th_btn {
+			text-align: end;
+		}
+	</style>
+</th:block>
+<!-- Main Content -->
+<div class="main-content" layout:fragment="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-20">
+					<div class="d-flex m-3 flex-column flex-md-row align-items-center">
+
+						<h3 class="m-4 font-30">소모자재 지급 기록</h3>
+
+						<div class="d-flex row align-items-center ml-auto">
+							<div class="col-3">
+								<div class="custom-select style--two m-3" style="max-width:150px;">
+									<select class="theme-input-style" id="subGroupSelect">
+										<option value="0">전체</option>
+										<option th:each="subGroup : ${subGroupList}" th:value="${subGroup.id}"
+											th:text="${subGroup.name}">name?</option>
+									</select>
+								</div>
+								<div class="custom-select style--two m-3" style="max-width:150px;" hidden>
+									<select class="theme-input-style" id="toolboxSelect">
+										<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}"
+											th:text="${toolbox.name}">name?</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-5">
+								<div class="d-flex align-items-center flex-nowrap mr-4"
+									style="box-sizing: content-box;">
+									<div class="custom-select style--two mr-4" style="max-width:200px;">
+										<select class=" theme-input-style" id="searchBySelect" style="cursor: auto;">
+											<option value="tool">공기구</option>
+										</select>
+									</div>
+									<div id="searchByForm" style="width: 200px;">
+										<div id="toolForm" class="d-flex justify-content-between">
+											<div id="tool">
+												선택
+											</div>
+											<div>
+												<span id="toolEditModalBtn" class="contact-edit" data-toggle="modal"
+													data-target="#toolEditModal" style="cursor:pointer;">
+													<img src="/img/svg/c-edit.svg" alt="" class="svg" />
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Search header -->
+							<div
+								class="d-flex col-4 align-items-center justify-content-end media-body mt-3 mt-sm-0 mr-3">
+								<!-- layer 1 -->
+								<div class="row flex-nowrapmr-2">
+
+
+									<!-- Form Group -->
+									<div class="form-group mr-2" style="max-width:150px">
+										<label class="mb-2 font-14 bold">현재 날짜</label>
+
+										<!-- Date Picker -->
+										<div class="dashboard-date style--four">
+											<span id="start-date-btn" class="input-group-addon">
+												<img th:src="@{/img/svg/calender.svg}" alt="" class="svg" />
+											</span>
+
+											<input type="text" id="start-date" placeholder="Select Date" />
+										</div>
+										<!-- End Date Picker -->
+									</div>
+									<!-- End Form Group -->
+
+
+									<!-- 새로고침 / 알림? 등등 -->
+
+								</div>
+
+								<!-- layer 2 -->
+								<!-- Search Condition header -->
+
+								<!-- End Search Condition -->
+							</div>
+							<!-- End Contact Header -->
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<!-- Card -->
+				<div class="card mb-30 bg-white">
+					<div class="card-body">
+
+						<div id="sector2">
+
+						</div>
+					</div>
+				</div>
+				<!-- End Card -->
+			</div>
+		</div>
+		<!-- Tool Edit PopUp -->
+		<div id="toolEditModal" class="modal fade p-4">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<!-- Modal Body -->
+					<div class="modal-body">
+						<div class="media flex-column flex-sm-row">
+							<div class="contact-account-setting media-body">
+								<h4 class="font-20 mb-3">공기구명을 입력하세요</h4>
+								<div class="form-group mb-3">
+									<label id="toolLabel">품목코드 : / 규격 : </label>
+									<div class="search-form" style="width:100%; box-sizing: content-box;">
+										<div class="theme-input-group style--two">
+											<input id="toolInput" type="text" class="theme-input-style"
+												placeholder="검색" />
+											<button id="toolSearchBtn">
+												<img th:src="@{/img/svg/search-icon.svg}" alt="" class="svg" />
+											</button>
+										</div>
+									</div>
+									<input type="text" id="toolId" hidden />
+								</div>
+								<div class="table-responsive mb-3">
+
+								</div>
+								<div>
+									<button id="toolSubmitBtn" class="btn mr-4" type="button">저장</button>
+									<a href="#" class="cancel text-danger font-14 bold" data-dismiss="modal">취소</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End Modal Body -->
+				</div>
+			</div>
+		</div>
+		<!-- End Tool Edit PopUp -->
+	</div>
+</div>
+</div>
+<!-- End Main Content -->
+<!-- 사용자 script 추가 -->
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+
+		var toolboxId = 5222;
+		initializeDatepicker();
+		document.querySelectorAll(".date-today").forEach(e => {
+			e.textContent = formatDate(new Date());
+		})
+		var chart1;
+		document.addEventListener("DOMContentLoaded", function () {
+			chart1 = initializeChart1();
+			// Your chart initialization code here
+			abcHttp.get(
+				'/membership/getbycode',
+				{
+					code: parseInt(document.getElementById("user-code").textContent)
+				}
+			)
+				.then(data => {
+					membershipId = data.id;
+					//mainData.membership.id = data.id;
+					//mainData.membership.name = data.name;
+					//document.getElementById("membership").textContent = data.name;
+					return new Promise((resolved, rejected) => {
+						abcHttp.get(
+							'/toolbox/getbymanagerid',
+							{
+								managerId: data.id
+							}
+						)
+							.then(toolboxData => {
+								if (toolboxData == null || toolboxData?.id == null) {
+									throw error("no toolbox");
+								} else {
+									document.getElementById("toolboxSelect").value = toolboxData.id;
+									resolved(toolboxData.id);
+								}
+							})
+							.catch(error => {
+								console.log('no toolbox for manager');
+								Swal.fire({
+									type: 'error',
+									title: '정비실 없음',
+									text: '로그인한 정비실장에게 지정된 정비실이 존재하지 않습니다. 인원 정보의 메인부서명과 정비실 정보의 정비실명을 일치시켜주세요.'
+								}).then(() => {rejected();});
+							});
+					});
+				})
+				.then(toolboxId => {
+					document.getElementById("toolboxSelect").value = toolboxId;
+					loadChart1.apply(chart1, [toolboxId]);
+				});
+		});
+
+		//apex initialize
+		function initializeChart1() {
+
+			/*
+			const chartData2 = data.map(item => ({
+				x: new Date(item.currentDay),
+				y: item.totalCount
+			}));
+			*/
+
+			// ApexCharts 설정
+			const options = {
+				chart: {
+					type: 'bar' // 차트 타입 설정 (예: 'bar', 'line', 'pie' 등)
+				},
+				series: [{
+					name: 'Tool Count',
+					data: 0
+				}],
+				dataLabels: {
+					enabled: true
+				},
+				markers: {
+					size: 0,
+					style: 'hollow',
+				},
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						datetimeFormatter: {
+							year: 'yyyy',
+							month: 'yyyy-MM',
+							day: 'yyyy-MM-dd'
+						}
+					},
+					min: new Date($('#start-date').val()).getTime(),
+					max: new Date($('#end-date').val()).getTime(),
+					tickAmount: 6,
+					axisTicks: {
+						show: false,
+					},
+					axisBorder: {
+						show: false
+					},
+				},
+				tooltip: {
+					x: {
+						format: 'yyyy-MM-dd'
+					},
+				},
+				fill: {
+					type: 'gradient',
+					gradient: {
+						shadeIntensity: 1,
+						opacityFrom: 0.7,
+						opacityTo: 0.9,
+						stops: [0, 100]
+					}
+				},
+
+
+				//colors: [],
+			};
+			var chart = new ApexCharts(document.querySelector("#sector1"), options);
+			chart.render();
+			return chart;
+		}
+		//apex update
+		function loadChart1(toolboxId) {
+
+			abcHttp.get(
+				'/stock_status/get/toolbox',
+				{
+					//toolboxId: toolboxId,
+					//partId: $('#searchBySelect').val() === "part" ? mainData.part.id : 0,
+					//membershipId: $('#searchBySelect').val() === "membership" ? mainData.membership.id : 0,
+					toolId: $('#searchBySelect').val() === "tool" ? mainData.tool.id : 0,
+					//isWorker: $('#searchBySelect').val() === "membership",
+					//isLeader: $('#searchBySelect').val() === "membership",
+					//isApprover: $('#searchBySelect').val() === "membership",
+					subGroupId: $('#subGroupSelect').val(),
+					date: $('#start-date').val(),
+				}
+			).then(data => {
+				console.log(data);
+				const containerDiv = document.getElementById("sector2");
+				containerDiv.innerHTML = '';
+				let htmlString = ``
+				if (data.empty) {
+					htmlString = `<div class="row m-0 pt-3 pb-3 font-20">대여한 기록이 없습니다</div>`
+					containerDiv.innerHTML = htmlString;
+					return; //abcsdfwlo
+				}
+				htmlString = `
+									<!-- Sheet -->
+									<div class="sheet row bg-white m-0 pt-3 pb-3 mb-4">
+										<div class="col-12" style="overflow-x:auto;">
+											<table class="tool-list invoice-list-table text-nowrap bg-white">
+												<thead>
+													<tr>
+														<th>정비실</th>
+														<th>현재재고</th>
+													</tr>
+												</thead>
+												<tbody>
+								   `;
+
+				data.forEach(tool => {
+					htmlString +=
+						`
+												<tr>
+													<td class="time">${tool.toolboxName}</td>
+													<td class="toolbox">${tool.count}</td>
+												</tr>
+									`;
+				});
+				htmlString += `
+									        </tbody>
+										  </table>
+									    </div>
+									  </div>
+									  <!-- End Sheet -->`;
+
+				var outerDiv = document.createElement('div');
+				outerDiv.innerHTML = htmlString;
+				containerDiv.appendChild(outerDiv);
+			});
+		}
+
+		//script.js에서 참조.
+		//막대 표시용
+		function processControl() {
+			var processBarWrapper = $('.process-bar-wrapper');
+			if (processBarWrapper.length) {
+				processBarWrapper.each(function () {
+					var processBarOffset = $(this).offset().top - $(window).height(),
+						processTime = '2.25s',
+						processBarWidth = $(this)
+							.children('[data-process-width]')
+							.data('process-width');
+
+					if ($(window).scrollTop() > processBarOffset) {
+						if (processBarWidth > 100) {
+							$(this).children('.process-bar').css({
+								width: '100%',
+								transition: processTime,
+							});
+						} else {
+							$(this)
+								.children('.process-bar')
+								.css({
+									width: processBarWidth + '%',
+									transition: processTime,
+								});
+						}
+					}
+				});
+			}
+		}
+
+
+		const subGroupSelect = document.getElementById("subGroupSelect");
+		subGroupSelect.addEventListener("change", subGroupChangeEventHandler)
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function subGroupChangeEventHandler() {
+			loadChart1.apply(chart1, [toolboxId]);
+		}
+
+		function formatDate(date) {
+			const year = date.getFullYear();
+			let month = (date.getMonth() + 1).toString();
+			let day = date.getDate().toString();
+
+			if (month.length < 2) {
+				month = '0' + month;
+			}
+			if (day.length < 2) {
+				day = '0' + day;
+			}
+
+			return `${year}-${month}-${day}`;
+		}
+		//Datepicker 초기화 (현재 날짜 기준 초기 범위 설정, 이벤트 리스너 설정)
+		function initializeDatepicker() {
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = today.getMonth() + 1;
+			const day = today.getDate();
+			const formattedTodayDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+			const lastMonthDate = new Date(); lastMonthDate.setDate(today.getDate() - 36); const formattedLastMonthDate = lastMonthDate.getFullYear() + '-' + (lastMonthDate.getMonth() + 1 < 10 ? '0' : '') + (lastMonthDate.getMonth() + 1) + '-' + (lastMonthDate.getDate() < 10 ? '0' : '') + lastMonthDate.getDate();
+
+			const currentDate = new Date();
+			const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
+			const lastDayOfYear = new Date(currentDate.getFullYear() + 1, 0, 0);
+
+			$('#start-date').val(formatDate(currentDate));
+			$('#end-date').val(formatDate(lastDayOfYear));
+			$('#today-date').val(formattedTodayDate);
+
+			$('#start-date').on('change', function () {
+				loadChart1.apply(chart1, [toolboxId]);
+				console.log('start changed');
+			});
+			$('#end-date').on('change', function () {
+				loadChart1.apply(chart1, [toolboxId]);
+				console.log('end changed');
+			});
+			$('#today-date').on('change', function () {
+				console.log('today changed');
+			});
+
+			$('#start-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('start changed');
+				}
+			});
+			$('#start-date-btn').on('click', function () {
+				$('#start-date').datepicker('show');
+			});
+			$('#end-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('end changed');
+				}
+			});
+			$('#end-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+			$('#today-date').datepicker({
+				language: 'en',
+				dateFormat: 'yyyy-mm-dd',
+				onSelect: function () {
+					loadChart1.apply(chart1, [toolboxId]);
+					console.log('end changed');
+				}
+			});
+			$('#today-date-btn').on('click', function () {
+				$('#end-date').datepicker('show');
+			});
+		}
+
+
+		function formatDateTime(inputDate) {
+			const dateObject = new Date(inputDate);
+			const year = dateObject.getFullYear();
+			const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+			const day = dateObject.getDate().toString().padStart(2, '0');
+			const hours = dateObject.getHours().toString().padStart(2, '0');
+			const minutes = dateObject.getMinutes().toString().padStart(2, '0');
+
+			const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+			return formattedDate;
+		}
+		function formatDate(inputDate) {
+			const year = inputDate.getFullYear();
+			const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+			const day = inputDate.getDate().toString().padStart(2, '0');
+			const formattedDate = `${year}-${month}-${day}`;
+			return formattedDate;
+		}
+
+
+		// =============== Search Modals ===============
+		// toolList를 제외한 rentalRequestSheetFormDto 정보를 저장합니다.
+		const mainData = {
+			"tool": {
+				"id": 0,
+				"name": "",
+			},
+		}
+
+
+		// =============== Tool Search Modal ===============
+
+		//부서 수정
+		document.getElementById("toolEditModalBtn").addEventListener("click", function () {
+			document.getElementById("toolId").value = mainData.tool.id;
+			document.getElementById("toolInput").value = mainData.tool.name;
+			getToolById(mainData.tool.id)
+				.then(data => {
+					document.getElementById("toolLabel").hidden = false;
+					const dataString =
+						"품목번호 : " + data.code + " , " +
+						"분류 : " + data.subGroupDto.mainGroupDto.name +
+						"/" + data.subToolDto.name + " , " +
+						"규격 : " + data.spec;
+					document.getElementById("toolLabel").textContent = dataString;
+				})
+				.catch(error => {
+					document.getElementById("toolLabel").hidden = true;
+				});
+			document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+		});
+		//tool 수정 -> tool 수정 모달
+		document.getElementById("toolSearchBtn").addEventListener("click", function () {
+			const searchName = document.getElementById("toolInput").value;
+			if (searchName.length < 1) {
+				Swal.fire({
+					type: "warning",
+					title: "검색어 없음",
+					text: "검색어를 1글자 이상 입력해주세요",
+				});
+				return;
+			}
+			getToolsPageByName(searchName)
+				.then(data => {
+					console.log(data.empty)
+					if (data.empty) {
+						throw new Error("검색 결과 없음");
+					}
+
+					const newTable = document.createElement('table');
+					newTable.innerHTML =
+						'<thead> <tr><th> 이름 </th><th> 규격 </th><th> 분류 <th></th> </tr> </thead> <tbody> </tbody>';
+					const newTableBody = newTable.querySelector("tbody");
+
+					data.content.forEach(v => {
+						let newRowString = "";
+						newRowString += "<td>" + v.name + "</td>";
+						newRowString += "<td>" + v.spec + "</td>";
+						newRowString += "<td>" + v.subGroupDto.mainGroupDto.name + " / " + v.subGroupDto.name + "</td>";
+						newRowString += '<td class="d-flex justify-content-between align-item-center">' +
+							'<a href="#" class="btn increaseBtn p-2">' +
+							'선택' +
+							'</a>'
+
+						const newRow = document.createElement("tr");
+						newRow.innerHTML = newRowString;
+
+						newRow.querySelector("a").addEventListener("click", function () {
+							document.getElementById("toolId").value = v.id;
+							document.getElementById("toolInput").value = v.name;
+							document.getElementById("toolLabel").hidden = false;
+							const dataString =
+								"품목번호 : " + v.code + " , " +
+								"분류 : " + v.subGroupDto.mainGroupDto.name +
+								"/" + v.subGroupDto.name + " , " +
+								"규격 : " + v.spec;
+							document.getElementById("toolLabel").textContent = dataString;
+							document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+						})
+						newTableBody.appendChild(newRow);
+					});
+
+					document.querySelector("#toolEditModal .table-responsive").innerHTML = "";
+					document.querySelector("#toolEditModal .table-responsive").appendChild(newTable);
+				})
+				.catch(error => {
+					Swal.fire({
+						type: "info",
+						title: "검색 결과 없음",
+						text: "검색 결과가 없습니다. 검색어를 다시 확인해주세요.",
+					});
+					return;
+				});
+		});
+		//tool 수정 모달 -> 검색
+		document.getElementById("toolInput").addEventListener("keypress", e => {
+			if (e.key === "Enter") {
+				document.getElementById("toolSearchBtn").click();
+			}
+		});
+		//tool 수정 모달 -> 모달 내용 저장
+		document.getElementById("toolSubmitBtn").addEventListener("click", function () {
+			const id = document.getElementById("toolId").value;
+			const name = document.getElementById("toolInput").value;
+			if (id <= 0) {
+				Swal.fire({
+					type: "error",
+					title: "필수 입력 누락",
+					text: "부서 정보가 선택되지 않았습니다."
+				});
+				return;
+			}
+			mainData.tool.id = id;
+			mainData.tool.name = name;
+			document.getElementById("tool").textContent = mainData.tool.name;
+			$("#toolEditModal").modal("hide");
+			loadChart1.apply(chart1, [toolboxId]);
+		});
+
+		//fetch
+		function getToolsById(id) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/get',
+					{
+						id: id
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+		//fetch
+		function getToolsPageByName(name) {
+			return new Promise((resolve, reject) => {
+				abcHttp.get(
+					'/tool/getpage',
+					{
+						page: 0,
+						size: 50,
+						name: name
+					}
+				)
+					.then(data => {
+						resolve(data);
+					})
+					.catch(error => {
+						reject(error);
+					});
+			});
+		}
+
+
+		document.getElementById("searchBySelect").addEventListener("change", function () {
+			const membership = document.getElementById("membershipForm");
+			const part = document.getElementById("partForm");
+			const tool = document.getElementById("toolForm");
+			switch (this.value) {
+				case "tool":
+					membership.classList.toggle("d-flex", false);
+					membership.classList.toggle("d-none", true);
+					part.classList.toggle("d-flex", false);
+					part.classList.toggle("d-none", true);
+					tool.classList.toggle("d-flex", true);
+					tool.classList.toggle("d-none", false);
+					break;
+			}
+		});
+
+	</script>
+</th:block>
+
+</html>

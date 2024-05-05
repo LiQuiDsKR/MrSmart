@@ -25,11 +25,12 @@
 							<div class="col-5">
 							<div class="custom-select style--two m-3" style="max-width:150px;">
 								<select class="theme-input-style" id="subGroupSelect">
+									<option value="0">전체</option>
 									<option th:each="subGroup : ${subGroupList}" th:value="${subGroup.id}"
 										th:text="${subGroup.name}">name?</option>
 								</select>
 							</div>
-							<div class="custom-select style--two m-3" style="max-width:150px;">
+							<div class="custom-select style--two m-3" style="max-width:150px;" hidden>
 								<select class="theme-input-style" id="toolboxSelect">
 									<option th:each="toolbox : ${toolboxList}" th:value="${toolbox.id}" th:text="${toolbox.name}">name?</option>
 								</select>
@@ -145,14 +146,6 @@
 			<!-- Card -->
 			<div class="card mb-30 bg-white">
 				<div class="card-body">
-					<div class="d-flex align-items-start align-items-sm-end justify-content-between mb-3">
-						<div class="">
-							<h3 class="mb-1">금일 공기구 재고 현황</h3>
-							<p class="font-16 date-today">
-								2023-12-10
-							</p>
-						</div>
-					</div>
 
 					<div id="sector2">
 
@@ -495,15 +488,13 @@
 			}
 		}
 
-		const toolboxSelect = document.getElementById("toolboxSelect");
-		toolboxSelect.addEventListener("change", toolboxChangeEventHandler)
-		//정비실 선택 드롭다운 change시 이벤트핸들러
-		function toolboxChangeEventHandler() {
-			toolboxId = this.value;
 
+		const subGroupSelect = document.getElementById("subGroupSelect");
+		subGroupSelect.addEventListener("change", subGroupChangeEventHandler)
+		//정비실 선택 드롭다운 change시 이벤트핸들러
+		function subGroupChangeEventHandler() {
 			loadChart1.apply(chart1, [toolboxId]);
 		}
-
 
 		function formatDate(date) {
 			const year = date.getFullYear();

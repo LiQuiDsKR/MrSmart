@@ -105,6 +105,12 @@
 					<i class="icofont-navigation-menu"></i>
 					<span class="link-title">지급 기록 통합 조회</span>
 				</a>
+			</li>			
+			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+			<a th:href="@{/supply/total_monitor2}">
+				<i class="icofont-navigation-menu"></i>
+				<span class="link-title">재고 통합 조회</span>
+			</a>
 			</li>
 			<li class="" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
 				<a th:href="@{/supply/sheet/tool}">

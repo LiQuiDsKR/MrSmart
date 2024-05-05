@@ -65,5 +65,15 @@ public class SupplySheetController {
     	model.addAttribute("toolboxList",toolboxService.list());
 		return "supply/total_monitor";
 	}
-    
+    @GetMapping(value = "total_monitor2")
+	public String supplyTotalMonitor2(Model model) {
+    	try {
+    		model.addAttribute("subGroupList",subGroupService.listByMainGroupId(mainGroupService.get("소모자재").getId()));
+    	}catch(Exception e) {
+    		logger.error(e.getMessage());
+    		model.addAttribute("subGroupList",null);
+    	}
+    	model.addAttribute("toolboxList",toolboxService.list());
+		return "supply/total_monitor2";
+	}
 }

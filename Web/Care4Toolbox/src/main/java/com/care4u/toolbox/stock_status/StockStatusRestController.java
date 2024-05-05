@@ -365,4 +365,14 @@ public class StockStatusRestController {
 			return stock;
 		}
 	}
+	
+	@GetMapping(value="/stock_status/get/toolbox")
+	public ResponseEntity<List<StockStatusSummaryByToolboxDto>> getStockStatusSummaryByToolbox(
+			@RequestParam(name = "date") String date, @RequestParam(name = "toolId") Long toolId,
+			@RequestParam(name = "subGroupId") Long subGroupId) {
+		LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		List<StockStatusSummaryByToolboxDto> summaryDto = stockStatusService
+				.findAllByToolAndSubGroupAndCurrentDay(localDate, toolId, subGroupId);
+		return ResponseEntity.ok(summaryDto);
+	}
 }

@@ -16,13 +16,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import com.care4u.hr.membership.Membership;
+import com.care4u.toolbox.QToolbox;
 import com.care4u.toolbox.ToolboxService;
 import com.care4u.toolbox.group.main_group.QMainGroup;
 import com.care4u.toolbox.group.sub_group.QSubGroup;
+import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.sheet.rental.rental_sheet.QRentalSheet;
 import com.care4u.toolbox.sheet.rental.rental_tool.QRentalTool;
 import com.care4u.toolbox.sheet.return_sheet.QReturnSheet;
 import com.care4u.toolbox.sheet.return_tool.QReturnTool;
+import com.care4u.toolbox.sheet.supply_tool.QSupplyTool;
 import com.care4u.toolbox.tool.QTool;
 import com.care4u.toolbox.tool.Tool;
 import com.querydsl.core.Tuple;
@@ -69,6 +72,14 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 	    			: Expressions.asBoolean(false).isTrue())
 	    	;
 	}
+	
+	private BooleanExpression searchToolEquals(Tool tool) {
+    	return tool == null ? Expressions.asBoolean(true).isTrue() : QStockStatus.stockStatus.tool.eq(tool);
+    }
+    
+    private BooleanExpression searchSubGroupEquals(SubGroup subGroup) {
+    	return subGroup == null ? Expressions.asBoolean(true).isTrue() : QStockStatus.stockStatus.tool.subGroup.eq(subGroup);
+    }
 	
 	@Override
 	public List<StockStatusSummaryByToolStateDto> getStockStatusSummary(Long partId, Membership membership, Tool tool,
@@ -289,4 +300,33 @@ public class StockStatusRepositoryImpl implements StockStatusRepositoryCustom {
 				.and(stock.currentDay.eq(date))).fetchOne();
 		return new PageImpl<>(content, pageable, total);
 	}
+	
+    //Tool, subgroup에 해당하는, Toolbox별 goodCount 조회.
+	@Override
+	public List<StockStatusSummaryByToolboxDto> findAllByToolAndSubGroupAndCurrentDay(LocalDate date, Tool tool, SubGroup subGroup) {
+		QStockStatus stockStatus = QStockStatus.stockStatus;
+		QStockStatus qStockStatus = QStockStatus.stockStatus;
+        QToolbox qToolbox = QToolbox.toolbox;
+        QTool qTool = QTool.tool;
+        QSubGroup qSubGroup = QSubGroup.subGroup;
+        QMainGroup qMainGroup = QMainGroup.mainGroup;
+
+        List<Tuple> results = queryFactory
+            .select(qToolbox.name, qStockStatus.goodCount.sum())
+            .from(qStockStatus)
+            .join(qToolbox).on(qStockStatus.toolbox.id.eq(qToolbox.id))
+            .join(qTool).on(qStockStatus.tool.id.eq(qTool.id))
+            .join(qSubGroup).on(qTool.subGroup.id.eq(qSubGroup.id))
+            .join(qMainGroup).on(qSubGroup.mainGroup.id.eq(qMainGroup.id))
+            .where(qStockStatus.currentDay.eq(date),
+                   qMainGroup.name.eq("소모자재"),
+                   searchToolEquals(tool),
+            	                     searchSubGroupEquals(subGroup))
+            .groupBy(qToolbox.name)
+            .fetch();
+
+		return results.stream().map(tuple -> new StockStatusSummaryByToolboxDto(tuple.get(qToolbox.name),
+                tuple.get(stockStatus.goodCount.sum()))).collect(Collectors.toList());
+	}
+	
 }

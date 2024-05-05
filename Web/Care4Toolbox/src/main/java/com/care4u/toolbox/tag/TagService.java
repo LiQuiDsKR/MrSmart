@@ -2,9 +2,11 @@ package com.care4u.toolbox.tag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -246,8 +248,19 @@ public class TagService {
 //			addNew(toolId, toolboxId, tag, tagGroup);
 //		}
 		
+		List<Tag> tempList = repository.findAllByToolIdAndToolboxId(toolId, toolboxId);
+		for (Tag t : tempList) {
+			if (!tagList.contains(t.getMacaddress())) {
+				repository.delete(t);
+				logger.info("Tag Deleted : " + t.getMacaddress());
+			}
+		}
+		List<String> stringList = tempList.stream().map(e->e.getMacaddress()).collect(Collectors.toList());
+		logger.debug(stringList.toString());
 		for (String tag : tagList) {
-			addNew(toolId, toolboxId, tag);
+			if (!stringList.contains(tag)) {
+				addNew(toolId, toolboxId, tag);
+			}
 		}
 		return;
 	}

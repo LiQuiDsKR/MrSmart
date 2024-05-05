@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.care4u.hr.membership.Membership;
 import com.care4u.hr.part.Part;
+import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.tool.Tool;
 
 public interface StockStatusRepositoryCustom {
@@ -18,4 +19,7 @@ public interface StockStatusRepositoryCustom {
 	List<StockStatusSummaryByMainGroupDto> getStockStatusSummaryByMainGroupDto(long toolboxId, LocalDate currentDate);
 	List<StockStatusSummaryByMainGroupDto> getStockStatusSummaryByMainGroupDtoWithMonth(long toolboxId, LocalDate currentDate);
 	Page<StockStatus> findAllByToolboxIdAndCurrentDay(Long toolboxId,LocalDate date,String toolName,List<Long> subGroupIds,Pageable pageable);
+	List<StockStatusSummaryByToolboxDto> findAllByToolAndSubGroupAndCurrentDay(LocalDate date, Tool tool,
+			SubGroup subGroup);
+	
 }

@@ -32,6 +32,7 @@ import com.care4u.hr.sub_part.SubPart;
 import com.care4u.hr.sub_part.SubPartRepository;
 import com.care4u.toolbox.Toolbox;
 import com.care4u.toolbox.ToolboxRepository;
+import com.care4u.toolbox.group.sub_group.SubGroup;
 import com.care4u.toolbox.group.sub_group.SubGroupDto;
 import com.care4u.toolbox.group.sub_group.SubGroupRepository;
 import com.care4u.toolbox.sheet.rental.rental_tool.RentalToolRepository;
@@ -193,7 +194,7 @@ public class StockStatusService {
 	}
 
 
-	@Scheduled(cron = "00 06 09 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "01 05 12 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		
 		LocalDate latestDate = repository.getLatestCurrentDay();
@@ -380,5 +381,28 @@ public class StockStatusService {
 		}
 		logger.info("Complete, total " + debugCount +" items added");
 	}
-
+	
+	@Transactional(readOnly=true)
+	public List<StockStatusSummaryByToolboxDto> findAllByToolAndSubGroupAndCurrentDay(LocalDate date, long toolId,
+			long subGroupId) {
+		Optional<Tool> toolOptional = toolRepository.findById(toolId);
+		Tool tool;
+		if (toolOptional.isEmpty()) {
+			logger.info("no tool : " + toolId + " all tool selected.");
+			tool = null;
+		} else {
+			tool = toolOptional.get();
+		}
+		Optional<SubGroup> subGroupOptional = subGroupRepository.findById(subGroupId);
+		SubGroup subGroup;
+		if (subGroupOptional.isEmpty()) {
+			logger.info("no subGroup : " + subGroupId + " all subGroup selected.");
+            subGroup = null;
+		} else {
+			subGroup = subGroupOptional.get();
+		}
+		List<StockStatusSummaryByToolboxDto> result =  repository.findAllByToolAndSubGroupAndCurrentDay(date, tool, subGroup);
+		logger.info("result :" +result.toString());
+		return result;
+	}
 }
