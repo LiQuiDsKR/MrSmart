@@ -1,8 +1,6 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +14,6 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MembershipAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.membership.MembershipSQLite
 
 
 class WorkerMembershipFindFragment : Fragment(){
@@ -25,9 +22,6 @@ class WorkerMembershipFindFragment : Fragment(){
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -48,9 +47,6 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
 
 
     val gson = Gson()
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_return_detail, container, false)
 
@@ -75,9 +71,6 @@ class WorkerOutstandingDetailFragment(outstandingRentalSheet: OutstandingRentalS
         workerName.text = outstandingRentalSheet.rentalSheetDto.workerDto.name
         leaderName.text = outstandingRentalSheet.rentalSheetDto.leaderDto.name
         timeStamp.text = outstandingRentalSheet.rentalSheetDto.eventTimestamp
-
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         val adapter = WorkerOutstandingDetailAdapter(existToolList)
         recyclerView.adapter = adapter

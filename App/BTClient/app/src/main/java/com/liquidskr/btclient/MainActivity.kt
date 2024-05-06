@@ -1,6 +1,5 @@
 package com.liquidskr.btclient
 
-import SharedViewModel
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -11,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.ContactsContract.Data
 import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
@@ -20,7 +18,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
 import com.liquidskr.fragment.LobbyFragment
 import com.liquidskr.fragment.ProgressBarFragment
@@ -36,10 +33,6 @@ class MainActivity : AppCompatActivity() {
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance(
         Handler(Looper.getMainLooper())
     ) }
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(this).get(SharedViewModel::class.java)
-    }
-
     private lateinit var missingPermissions:List<String>
     private var bluetoothDevice : BluetoothDevice? = null
     private var allPermissionsGranted : Boolean = false

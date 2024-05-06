@@ -1,16 +1,13 @@
     package com.liquidskr.fragment
 
-    import SharedViewModel
     import android.annotation.SuppressLint
     import android.os.Bundle
-    import android.util.Log
     import android.view.LayoutInflater
     import android.view.View
     import android.view.ViewGroup
     import android.widget.LinearLayout
     import androidx.fragment.app.Fragment
     import androidx.lifecycle.ViewModelProvider
-    import com.liquidskr.btclient.BluetoothManager
     import com.liquidskr.btclient.Constants
     import com.liquidskr.btclient.DialogUtils
     import com.liquidskr.btclient.DialogUtils.showTextDialog
@@ -31,12 +28,6 @@
 
         private val bluetoothDeviceSaveService = BluetoothDeviceSaveService.getInstance()
         private val toolboxService = ToolboxService.getInstance()
-
-        private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-            ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        }
-
-
 
         @SuppressLint("MissingInflatedId")
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -51,9 +50,6 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
     private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     val gson = Gson()
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_rental_detail, container, false)
         bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
@@ -67,8 +63,6 @@ class WorkerRentalDetailFragment(rentalRequestSheet: RentalRequestSheetDto) : Fr
 
         backButton = view.findViewById(R.id.backButton)
 
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
 
         workerName.text = rentalRequestSheet.workerDto.name
         leaderName.text = rentalRequestSheet.leaderDto.name

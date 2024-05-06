@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
@@ -25,17 +24,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.liquidskr.listener.OutstandingRentalSheetByMemberReq
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.page.Page
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.sheet.outstanding.OutstandingState
+import java.lang.NullPointerException
 import java.lang.reflect.Type
 
-class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
+class WorkerReturnListFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var connectBtn: ImageButton
     private lateinit var bluetoothManagerOld: BluetoothManager_Old
@@ -54,16 +56,15 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
     private val REQUEST_PAGE_SIZE = 2
 
     var outStandingRentalSheetList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
-    lateinit var welcomeMessage: TextView
+
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
+    private lateinit var welcomeMessage: TextView
     val gson = Gson()
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     private lateinit var outstandingRentalSheetByMemberReq: OutstandingRentalSheetByMemberReq
     private val outstandingRentalSheetRequestListener = object: OutstandingRentalSheetByMemberReq.Listener {
         override fun onNextPage(pageNum: Int) {
-            requestOutstandingRentalSheet(pageNum)
+
         }
 
         override fun onLastPageArrived() {
@@ -84,6 +85,12 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_return_list, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val worker = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = worker.name + "님 환영합니다."
@@ -138,7 +145,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         }
 
         rentalBtnField.setOnClickListener {
-            val fragment = WorkerRentalListFragment(worker)
+            val fragment = WorkerRentalListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
@@ -147,7 +154,7 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
 
         returnBtnField.setOnClickListener {
 
-            val fragment = WorkerReturnListFragment(worker)
+            val fragment = WorkerReturnListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
@@ -159,56 +166,9 @@ class WorkerReturnListFragment(var worker: MembershipDto) : Fragment() {
         }
 
         recyclerView.adapter = adapter
-        getOutstandingRentalSheetList()
         return view
     }
 
-    fun getOutstandingRentalSheetList() {
-        outStandingRentalSheetList.clear()
-        showPopup() // UI블로킹
-        var sheetCount = 0
-        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT,"{membershipId:${sharedViewModel.loginWorker!!.id}}",object:BluetoothManager_Old.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                try {
-                    sheetCount = result.toInt()
-                    val totalPage = Math.ceil(sheetCount / 10.0).toInt()
-                    outstandingRentalSheetByMemberReq = OutstandingRentalSheetByMemberReq(totalPage, sheetCount, outstandingRentalSheetRequestListener)
-                    handler.post {
-                        if (sheetCount > 0) { // UI블로킹 start
-                            requestOutstandingRentalSheet(0) // 알잘딱 넣으세요
-                        } else {
-                            hidePopup()
-                        }
-                    }
-                    progressBar.max = totalPage // UI블로킹 end
-                } catch (e: Exception) {
-                    Log.d("RentalRequestSheetReady", e.toString())
-                }
-            }
-
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
-    }
-    fun requestOutstandingRentalSheet(pageNum: Int) {
-        bluetoothManagerOld.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP ,"{\"size\":${10},\"page\":${pageNum},membershipId:${sharedViewModel.loginWorker!!.id}}",object: BluetoothManager_Old.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                var page: Page = gson.fromJson(result, type)
-                outstandingRentalSheetByMemberReq.process(page)
-                handler.post { // UI블로킹 start
-                    progressBar.progress = page.pageable.page
-                    if ((page.total/REQUEST_PAGE_SIZE) > 0) {
-                        progressText.setText("대여 신청 목록 불러오는 중, ${page.pageable.page}/${page.total/REQUEST_PAGE_SIZE}, ${page.pageable.page * 100 / (page.total/REQUEST_PAGE_SIZE)}%")
-                    }
-                } // UI블로킹 end
-            }
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
-    }
     fun filterByLeader(adapter: OutstandingRentalSheetAdapter, sheets: List<OutstandingRentalSheetDto>, keyword: String) {
         val newList: MutableList<OutstandingRentalSheetDto> = mutableListOf()
         for (sheet in sheets) {

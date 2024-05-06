@@ -11,6 +11,8 @@ class MembershipService private constructor() {
     val dbHelper: DatabaseHelper by lazy { DatabaseHelper.getInstance() }
     val gson = Gson()
 
+    var loggedInMembership: MembershipDto? = null
+
     fun getMembershipById(id: Long): MembershipDto {
         try {
             val membershipEntity = dbHelper.getMembershipById(id)
@@ -103,6 +105,25 @@ class MembershipService private constructor() {
             Log.e(TAG, "Failed to insert membership data", e)
             throw Exception("Failed to insert membership data. Error: ${e.message}", e)
         }
+    }
+
+    fun loginWorker(id:String) : Boolean {
+        val worker = getMembershipByCode(id)
+        loggedInMembership = worker
+        // 관리자도 반납 신청하고 싶을 수 있으니까 걍 열어둠
+        return true
+    }
+
+    fun loginManager(id:String, pw:String) : Boolean { // 보안 수준 실화?
+        val manager = getMembershipByCode(id)
+        if(manager.role != Role.MANAGER){
+            throw IllegalArgumentException("해당 직원은 관리자가 아닙니다.")
+        }
+        if(manager.password != pw){
+            throw IllegalArgumentException("비밀번호가 맞지 않습니다.")
+        }
+        loggedInMembership = manager
+        return true
     }
 
     companion object {

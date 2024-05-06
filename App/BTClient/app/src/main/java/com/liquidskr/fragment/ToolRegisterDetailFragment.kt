@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -12,7 +11,6 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,13 +23,10 @@ import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterTagDetailAdapter
-import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
-import com.mrsmart.standard.tag.ToolboxToolLabelDto
 import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolDto
 import com.mrsmart.standard.toolbox.ToolboxService
-import kotlinx.coroutines.selects.select
 
 class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>, var selectedTag:String?) : Fragment(), InputHandler {
     private lateinit var toolName: TextView
@@ -54,9 +49,6 @@ class ToolRegisterDetailFragment(var tool: ToolDto, var tagList: List<String>, v
     private val toolboxService = ToolboxService.getInstance()
 
     val gson = Gson()
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
 
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 

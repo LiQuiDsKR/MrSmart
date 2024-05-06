@@ -95,8 +95,8 @@ public class RentalRequestSheetService {
 	public Page<RentalRequestSheetDto> getPageByToolbox(SheetState status, Long toolboxId, Pageable pageable) {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
-			logger.error("Invalid toolbox : " + toolboxId);
-			return null;
+			logger.error("toolbox not found : " + toolboxId);
+			throw new IllegalArgumentException("toolbox not found : " + toolboxId);
 		}
 		Page<RentalRequestSheet> page = repository.findByToolbox(status, toolbox.get(), pageable);
 		return page.map(e -> convertToDto(e));
@@ -105,8 +105,8 @@ public class RentalRequestSheetService {
 	public Long getCountByToolbox(SheetState status, long toolboxId) {
 		Optional<Toolbox> toolbox = toolboxRepository.findById(toolboxId);
 		if (toolbox.isEmpty()) {
-			logger.error("Invalid toolbox : " + toolboxId);
-			return null;
+			logger.error("toolbox not found : " + toolboxId);
+			throw new IllegalArgumentException("toolbox not found : " + toolboxId);
 		}
 		long count = repository.countByToolbox(status, toolbox.get());
 		return count;
@@ -116,8 +116,8 @@ public class RentalRequestSheetService {
 	public Page<RentalRequestSheetDto> getPageByMembership(SheetState status, Long membershipId, Pageable pageable) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		if (membership.isEmpty()) {
-			logger.error("worker : " + membership);
-			return null;
+			logger.error("membership not found : " + membershipId);
+			throw new IllegalArgumentException("membership not found : " + membershipId);
 		}
 		Page<RentalRequestSheet> page = repository.findByMembership(status, membership.get(), pageable);
 		return page.map(e -> convertToDto(e));
@@ -127,8 +127,8 @@ public class RentalRequestSheetService {
 	public Long getCountByMembership(SheetState status, Long membershipId) {
 		Optional<Membership> membership = membershipRepository.findById(membershipId);
 		if (membership.isEmpty()) {
-			logger.error("Invalid membership : " + membershipId);
-			return null;
+			logger.error("membership not found : " + membershipId);
+			throw new IllegalArgumentException("membership not found : " + membershipId);
 		}
 		long count = repository.countByMembership(status, membership.get());
 		return count;

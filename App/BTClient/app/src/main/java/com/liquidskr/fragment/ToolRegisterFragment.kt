@@ -1,8 +1,6 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.content.Context
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -16,34 +14,33 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.addCallback
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolRegisterAdapter
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolDto
-import com.mrsmart.standard.tool.ToolSQLite
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.toolbox.ToolboxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
+import java.lang.NullPointerException
 
 
-class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandler {
+class ToolRegisterFragment() : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
 
     lateinit var rentalBtnField: LinearLayout
@@ -54,6 +51,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
     private lateinit var welcomeMessage: TextView
 
     private var selectedTag : String? = null
@@ -64,10 +62,6 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
     private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
     private val tagService = TagService.getInstance()
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
-
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 
     override fun onCreateView(
@@ -75,6 +69,12 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_tool_register, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val manager = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
@@ -108,7 +108,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         }
 
         rentalBtnField.setOnClickListener {
-            val fragment = ManagerRentalFragment(manager)
+            val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ToolRegisterFragment")
@@ -122,7 +122,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         }
 
         returnBtnField.setOnClickListener {
-            val fragment = ManagerReturnFragment(manager)
+            val fragment = ManagerReturnFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ToolRegisterFragment")
@@ -146,7 +146,7 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         */
 
         registerBtnField.setOnClickListener {
-            val fragment = ToolRegisterFragment(manager)
+            val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ToolRegisterFragment")

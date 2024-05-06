@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,25 +15,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
-import com.liquidskr.btclient.RentalRequestToolApproveAdapter
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipService
-import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetFormDto
-import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormSelectedDto
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolService
-import com.mrsmart.standard.tool.ToolWithCount
 import com.mrsmart.standard.toolbox.ToolboxService
 
 class ManagerSelfRentalFragment() : Fragment(), InputHandler {
@@ -54,9 +48,6 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
     private lateinit var leader: MembershipDto
 
     var gson = Gson()
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
 
     private val tagService = TagService.getInstance()
     private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()

@@ -1,23 +1,16 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.liquidskr.btclient.BluetoothManager
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
-import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.membership.Role
@@ -28,9 +21,6 @@ class WorkerFragment : Fragment() {
 
     private lateinit var popupLayout: View
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     @SuppressLint("SuspiciousIndentation")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker, container, false)
@@ -48,19 +38,17 @@ class WorkerFragment : Fragment() {
         }
         loginBtn.setOnClickListener {
             try {
-                var code = idTextField.text.toString()
-                val membershipService = MembershipService.getInstance()
-                var member = membershipService.getMembershipByCode(code)
-                if (member.role != Role.USER) {
-                    DialogUtils.showAlertDialog("로그인 실패","해당 직원은 작업자가 아닙니다.")
-                } else {
-                    val fragment = WorkerLobbyFragment(member)
-                    sharedViewModel.loginWorker = member
+                val id = idTextField.text.toString()
+                if (MembershipService.getInstance().loginWorker(id)) {
+                    val fragment = WorkerLobbyFragment()
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, fragment)
                         .addToBackStack("WorkerLogin")
                         .commit()
                 }
+            } catch (e: IllegalArgumentException){
+                Log.d("login",e.toString())
+                DialogUtils.showAlertDialog("로그인 실패", "아이디 또는 비밀번호가 일치하지 않습니다.")
             } catch (e: IllegalStateException) {
                 Log.d("login",e.toString())
                 DialogUtils.showAlertDialog("로그인 실패", "사용자 정보가 없습니다.")

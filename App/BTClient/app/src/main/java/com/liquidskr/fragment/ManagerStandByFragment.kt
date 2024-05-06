@@ -22,12 +22,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.StandByAdapter
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
+import java.lang.NullPointerException
 
-class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
+class ManagerStandByFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
     lateinit var standbySyncBtn: ImageButton
     val gson = Gson()
@@ -45,11 +48,18 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
     lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
 
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
     private lateinit var welcomeMessage: TextView
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_standby, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val manager = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
@@ -94,7 +104,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         })
 
         rentalBtnField.setOnClickListener {
-            val fragment = ManagerRentalFragment(manager)
+            val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerStandByFragment")
@@ -102,7 +112,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         }
 
         returnBtnField.setOnClickListener {
-            val fragment = ManagerReturnFragment(manager)
+            val fragment = ManagerReturnFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerStandByFragment")
@@ -110,7 +120,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         }
 
         standbyBtnField.setOnClickListener {
-            val fragment = ManagerStandByFragment(manager)
+            val fragment = ManagerStandByFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerStandByFragment")
@@ -118,7 +128,7 @@ class ManagerStandByFragment(val manager: MembershipDto) : Fragment() {
         }
 
         registerBtnField.setOnClickListener {
-            val fragment = ToolRegisterFragment(manager)
+            val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerStandByFragment")

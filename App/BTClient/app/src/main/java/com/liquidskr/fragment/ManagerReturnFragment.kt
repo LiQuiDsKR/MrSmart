@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,17 +14,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingRentalSheetAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetService
 import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.toolbox.ToolboxService
+import java.lang.NullPointerException
 
-class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandler {
+class ManagerReturnFragment() : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
     //private lateinit var searchSheetEdit: EditText
     //private lateinit var sheetSearchBtn: ImageButton // 이거 없애냐 마냐 ㅋㅋ
@@ -35,11 +37,8 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
     //lateinit var standbyBtnField: LinearLayout
     lateinit var registerBtnField: LinearLayout
 
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
     private lateinit var welcomeMessage: TextView
-
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
 
     private val outstandingRentalSheetService = OutstandingRentalSheetService.getInstance()
 
@@ -47,6 +46,12 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val manager = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
@@ -72,7 +77,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
         }
 
         rentalBtnField.setOnClickListener {
-            val fragment = ManagerRentalFragment(manager)
+            val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerReturnFragment")
@@ -86,7 +91,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
         }
 
         returnBtnField.setOnClickListener {
-            val fragment = ManagerReturnFragment(manager)
+            val fragment = ManagerReturnFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerReturnFragment")
@@ -108,7 +113,7 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
 //        }
 
         registerBtnField.setOnClickListener {
-            val fragment = ToolRegisterFragment(manager)
+            val fragment = ToolRegisterFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerReturnFragment")

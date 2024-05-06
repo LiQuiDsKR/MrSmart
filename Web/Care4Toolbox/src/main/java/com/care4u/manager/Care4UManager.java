@@ -296,35 +296,65 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
 		//작업자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long membershipId = jsonObj.getLong("membershipId");
-		        Long count = rentalRequestSheetService.getCountByMembership(SheetState.READY,membershipId);
-				handler.sendData(keyword + GsonUtils.toJson(count));
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long membershipId = jsonObj.getLong("membershipId");
+					Long count = rentalRequestSheetService.getCountByMembership(SheetState.READY,membershipId);
+					handler.sendData(keyword + GsonUtils.toJson(count));
+				}				
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리
 		//관리자 - 대여 페이지에서 보여주는 항목
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				int page = jsonObj.getInt("page");
-				int pageSize = jsonObj.getInt("size");
-				long toolboxId = jsonObj.getLong("toolboxId");
-
-		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.REQUEST,toolboxId,pageable);
-				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					int page = jsonObj.getInt("page");
+					int pageSize = jsonObj.getInt("size");
+					long toolboxId = jsonObj.getLong("toolboxId");
+					
+					Pageable pageable = PageRequest.of(page,pageSize);
+					Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.REQUEST,toolboxId,pageable);
+					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
 		//관리자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long toolboxId = jsonObj.getLong("toolboxId");
-		        Long count = rentalRequestSheetService.getCountByToolbox(SheetState.REQUEST,toolboxId);
-				handler.sendData(keyword + GsonUtils.toJson(count));
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolboxId = jsonObj.getLong("toolboxId");
+			        Long count = rentalRequestSheetService.getCountByToolbox(SheetState.REQUEST,toolboxId);
+					handler.sendData(keyword + GsonUtils.toJson(count));
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 //		//ToolboxId로 status가 Request인 RentalRequestSheet 리스트 쿼리

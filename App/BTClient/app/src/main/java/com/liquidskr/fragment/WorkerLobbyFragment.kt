@@ -1,11 +1,7 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,62 +10,51 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager_Old
-import com.liquidskr.btclient.MainActivity
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
+import java.lang.NullPointerException
 
-class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
-    private lateinit var connectBtn: ImageView
+class WorkerLobbyFragment() : Fragment() {
     private lateinit var rentalBtn: ImageView
     private lateinit var returnBtn: ImageButton
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
 
-    private val handler = Handler(Looper.getMainLooper()) { true }
+    private lateinit var popupLayout: View
 
-    lateinit var welcomeMessage: TextView
     val gson = Gson()
-    private lateinit var bluetoothManagerOld: BluetoothManager_Old
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
+
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
+    private lateinit var welcomeMessage: TextView
+
     @SuppressLint("MissingInflatedId")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val view = inflater.inflate(R.layout.fragment_worker_lobby, container, false)
 
-        connectBtn = view.findViewById(R.id.connectBtn)
-        rentalBtn = view.findViewById(R.id.RentalBtn)
-        returnBtn = view.findViewById(R.id.ReturnBtn)
-        rentalBtnField  = view.findViewById(R.id.RentalBtnField)
-        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val worker = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
+        rentalBtn = view.findViewById(R.id.RentalBtn)
+        returnBtn = view.findViewById(R.id.ReturnBtn)
+        rentalBtnField = view.findViewById(R.id.RentalBtnField)
+        returnBtnField = view.findViewById(R.id.ReturnBtnField)
+
+        popupLayout = view.findViewById(R.id.popupLayout)
         welcomeMessage.text = worker.name + "님 환영합니다."
 
-        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-        bluetoothManagerOld.setBluetoothConnectionListener(object : BluetoothManager_Old.BluetoothConnectionListener {
-            override fun onBluetoothDisconnected() {
-                handler.post {
-                    connectBtn.setImageResource(R.drawable.group_11_copy)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결이 끊겼습니다.")
-            }
-
-            override fun onBluetoothConnected() {
-                handler.post {
-                    connectBtn.setImageResource(R.drawable.manager_lobby_connectionbtn)
-                }
-                Log.d("BluetoothStatus", "Bluetooth 연결에 성공했습니다.")
-            }
-        })
-
         rentalBtnField.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_on_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_off_02)
-            val fragment = WorkerRentalListFragment(worker)
+            val fragment = WorkerRentalListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
@@ -77,38 +62,13 @@ class WorkerLobbyFragment(var worker: MembershipDto) : Fragment() {
         }
 
         returnBtnField.setOnClickListener {
-            rentalBtn.setImageResource(R.drawable.ic_menu_off_01)
-            returnBtn.setImageResource(R.drawable.ic_menu_on_02)
-
-            val fragment = WorkerReturnListFragment(worker)
+            val fragment = WorkerReturnListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
                 .commit()
         }
 
-        connectBtn.setOnClickListener{
-            bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
-            bluetoothManagerOld.bluetoothOpen()
-        }
-
-        //getOutstandingRentalSheetList()
         return view
     }
-    /*
-    fun getOutstandingRentalSheetList() {
-        bluetoothManager = (requireActivity() as LobbyActivity).getBluetoothManagerOnActivity()
-        bluetoothManager.requestData(Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP,"{membershipId:${sharedViewModel.loginWorker.id}}",object: BluetoothManager.RequestCallback{
-            override fun onSuccess(result: String, type: Type) {
-                val updatedList: List<OutstandingRentalSheetDto> = gson.fromJson(result, type)
-                requireActivity().runOnUiThread {
-                    (recyclerView.adapter as OutstandingRentalSheetAdapter).updateList(updatedList)
-                }
-            }
-
-            override fun onError(e: Exception) {
-                e.printStackTrace()
-            }
-        })
-    }*/
 }

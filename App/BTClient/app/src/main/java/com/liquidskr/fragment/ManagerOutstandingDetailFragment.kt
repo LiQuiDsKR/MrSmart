@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,12 +18,14 @@ import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.sheet.`return`.ReturnSheetFormDto
 import com.mrsmart.standard.sheet.`return`.ReturnToolFormDto
 import com.mrsmart.standard.sheet.`return`.ReturnToolFormSelectedDto
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
+import java.lang.NullPointerException
 
 class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: OutstandingRentalSheetDto) : Fragment(),
     InputHandler {
@@ -39,13 +40,18 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
 
     private lateinit var confirmBtn: LinearLayout
 
-    val gson = Gson()
+    private val gson = Gson()
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_return_detail, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val manager = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         returnerName = view.findViewById(R.id.returnerName)
         workerName = view.findViewById(R.id.workerName)
@@ -104,7 +110,7 @@ class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: Outst
         val data = gson.toJson(ReturnSheetFormDto(
             outstandingRentalSheet.rentalSheetDto.id,
             outstandingRentalSheet.rentalSheetDto.workerDto.id,
-            sharedViewModel.loginManager!!.id,
+            loggedInMembership!!.id,
             outstandingRentalSheet.rentalSheetDto.toolboxDto.id,
             (recyclerView.adapter as OutstandingDetailAdapter).getResult().map{
                 ReturnToolFormDto(it.rentalToolDtoId,it.toolDtoId,it.tags,it.goodCount,it.faultCount,it.damageCount,it.lossCount,it.comment)

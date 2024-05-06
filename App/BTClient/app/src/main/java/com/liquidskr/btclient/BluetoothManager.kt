@@ -20,6 +20,7 @@ import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.toolbox.ToolboxDto
 import com.mrsmart.standard.toolbox.ToolboxService
+import java.lang.reflect.Member
 import java.lang.reflect.Type
 
 class BluetoothManager (private val handler : Handler){
@@ -652,12 +653,79 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.name -> {
-                val type: Type = object : TypeToken<Page>() {}.type
-                TODO("not implemented yet")
+                //response
+                val rentalRequestSheetPage = gson.fromJson(jsonStr, Page::class.java)
+
+                //service update
+                rentalRequestSheetService.add(rentalRequestSheetPage)
+
+                //preprocess - parse
+                //val size = rentalRequestSheetPage.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
+                val index = rentalRequestSheetPage.pageable.page
+                val total = rentalRequestSheetPage.total
+
+                //preprocess - logic
+                val pageSize = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                Log.i("rentalRequestSheet","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                loadingPageIndex+=1
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.processMessage,index,total/pageSize)
+                }
+
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
+
+                    //send 1 - sheet load finished
+                    Log.i("rentalRequestSheet", "rentalRequestSheet insert complete (size : ${total})")
+                    handler.post{
+                        listener?.onRequestEnded(RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP.processEndMessage)
+                    }
+
+                } else{
+                    //send 2 - sheet load not finished
+                    val membership = MembershipService.getInstance().loggedInMembership
+                    // 굳이 여기서 assert(!!)를 하진 않겠습니다 : error 핸들링이 어려움.
+                    // 그냥 null 보내놓고 서버에서 IllegalArgumentException 뜨는 게 쉬움.
+
+                    val type = RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP
+                    val data = "{\"size\":${pageSize},\"page\":${loadingPageIndex},\"membershipId\":${membership?.id}}"
+                    send(type, data)
+                }
             }
             RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val total = gson.fromJson(jsonStr,Int::class.java)
+
+                //service update
+                rentalRequestSheetService.clear()
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.processMessage,1,1)
+                }
+                if (total<1) {
+                    handler.post{
+                        listener?.onRequestEnded(RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT.processEndMessage)
+                    }
+                    return
+                }
+
+                //postprocess - logic
+                val size = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                loadingPageIndex=0
+
+                //send
+                val membership = MembershipService.getInstance().loggedInMembership
+                // 굳이 여기서 assert(!!)를 하진 않겠습니다 : error 핸들링이 어려움.
+                // 그냥 null 보내놓고 서버에서 IllegalArgumentException 뜨는 게 쉬움.
+
+                val type = RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP
+                val data = "{\"size\":${size},\"page\":${loadingPageIndex},\"membershipId\":${membership?.id}}"
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
             RENTAL_REQUEST_SHEET_CANCEL.name -> {
                 //response

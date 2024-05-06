@@ -1,11 +1,9 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.TextUtils.replace
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -23,17 +21,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager_Old
-import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalToolAdapter
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.membership.MembershipSQLite
-import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetFormDto
-import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormDto
 import com.mrsmart.standard.tool.ToolWithCount
-import java.lang.reflect.Type
 
 class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
     lateinit var leaderSearchBtn: LinearLayout
@@ -59,9 +52,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 
     var gson = Gson()
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)

@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,12 +18,14 @@ import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolApproveAdapter
+import com.mrsmart.standard.membership.MembershipService
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormSelectedDto
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
+import java.lang.NullPointerException
 
 class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalRequestSheetDto) : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
@@ -38,13 +39,17 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
     private lateinit var confirmBtn: LinearLayout
     private lateinit var cancelBtn: LinearLayout
 
-    val gson = Gson()
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
+    private val gson = Gson()
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_rental_detail, container, false)
+
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        val manager = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
@@ -108,7 +113,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
                 rentalRequestSheetDto.id,
                 rentalRequestSheetDto.workerDto.id,
                 rentalRequestSheetDto.leaderDto.id,
-                sharedViewModel.loginManager!!.id,
+                loggedInMembership!!.id,
                 rentalRequestSheetDto.toolboxDto.id,
                 (recyclerView.adapter as RentalRequestToolApproveAdapter).getResult().map{
                     RentalRequestToolApproveFormDto(it.id,it.toolDtoId,it.count,it.tags)
