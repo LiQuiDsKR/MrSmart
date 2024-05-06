@@ -64,10 +64,9 @@ class WorkerRentalListFragment() : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
         val adapter = RentalRequestSheetAdapter(emptyList<RentalRequestSheetDto>().toMutableList()) { rentalRequestSheet ->
             if (rentalRequestSheet.status != SheetState.REQUEST) {
-
                 val fragment = WorkerRentalDetailFragment(rentalRequestSheet)
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, fragment)
+                    .add(R.id.fragmentContainer, fragment)
                     .addToBackStack(null)
                     .commit()
             }
@@ -79,8 +78,6 @@ class WorkerRentalListFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerRentalListFragment")
                 .commit()
-            val toolboxService = ToolboxService.getInstance()
-            val toolbox = toolboxService.getToolbox()
 
             val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT
             val data = "{membershipId:${worker.id}}"
@@ -93,9 +90,7 @@ class WorkerRentalListFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerRentalListFragment")
                 .commit()
-//            val toolboxService = ToolboxService.getInstance()
-//            val toolbox = toolboxService.getToolbox()
-//
+
 //            val type = Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP
 //            val data = "membershipId:${worker.id}"
 //            bluetoothManager?.send(type,data)
@@ -112,7 +107,7 @@ class WorkerRentalListFragment() : Fragment() {
         selfRentalBtn.setOnClickListener {
             val fragment = WorkerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
+                .add(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }

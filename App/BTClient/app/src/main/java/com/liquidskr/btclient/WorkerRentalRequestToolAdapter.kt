@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolDto
 
-class WorkerRentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestToolDto>) :
+class WorkerRentalRequestToolAdapter(private var items: MutableList<RentalRequestToolDto>) :
     RecyclerView.Adapter<WorkerRentalRequestToolAdapter.RentalRequestToolViewHolder>() {
     class RentalRequestToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var toolName: TextView = itemView.findViewById(R.id.ToolName)
@@ -24,7 +24,7 @@ class WorkerRentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestT
     }
 
     override fun onBindViewHolder(holder: RentalRequestToolViewHolder, position: Int) {
-        val currentRentalRequestTool = rentalRequestTools[position]
+        val currentRentalRequestTool = items[position]
         holder.toolName.text = currentRentalRequestTool.toolDto.name
         holder.toolSpec.text = currentRentalRequestTool.toolDto.spec
         holder.toolCount.text = currentRentalRequestTool.count.toString()
@@ -34,7 +34,7 @@ class WorkerRentalRequestToolAdapter(val rentalRequestTools: List<RentalRequestT
     }
 
     override fun getItemCount(): Int {
-        return rentalRequestTools.size
+        return items.size
     }
     private fun showNumberDialog(textView: TextView, maxCount: Int) {
         val builder = AlertDialog.Builder(textView.context)

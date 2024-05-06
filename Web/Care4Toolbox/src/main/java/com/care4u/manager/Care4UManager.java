@@ -72,40 +72,40 @@ import lombok.RequiredArgsConstructor;
 public class Care4UManager implements InitializingBean, DisposableBean {
 
 	private final Logger logger = LoggerFactory.getLogger(Care4UManager.class);
-	
+
 	@Autowired
 	private MembershipService membershipService;
-	
+
 	@Autowired
 	private ToolService toolService;
-	
+
 	@Autowired
 	private RentalRequestSheetService rentalRequestSheetService;
-	
+
 	@Autowired
 	private OutstandingRentalSheetService outstandingRentalSheetService;
-	
+
 	@Autowired
 	private RentalSheetService rentalSheetService;
-	
+
 	@Autowired
 	private ReturnSheetService returnSheetService;
-	
+
 	@Autowired
 	private ToolboxToolLabelService toolboxToolLabelService;
-	
+
 	@Autowired
 	private MainGroupService mainGroupService;
-	
+
 	@Autowired
 	private SubGroupService subGroupService;
-	
+
 	@Autowired
 	private MainPartService mainPartService;
-	
+
 	@Autowired
 	private SubPartService subPartService;
-	
+
 	@Autowired
 	private PartService partService;
 	@Autowired
@@ -117,72 +117,75 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 	private TagService tagService;
 	private BluetoothServer bluetoothServer;
 	private BluetoothServer.Listener bluetoothServerListener = new BluetoothServer.Listener() {
-		
+
 		@Override
 		public void onConnected(StreamConnection connection) {
 			// TODO Auto-generated method stub
-			new BluetoothCommunicationHandler("macaddress", connection, bluetoothCommunicationHandlerListener); // connection 이 정의되므로 communicationHandler를 정의함
+			new BluetoothCommunicationHandler("macaddress", connection, bluetoothCommunicationHandlerListener); // connection
+																												// 이
+																												// 정의되므로
+																												// communicationHandler를
+																												// 정의함
 			logger.debug("클라이언트 연결됨: " + connection.toString());
 		}
 	};
-		
+
 	private BluetoothCommunicationHandler.Listener bluetoothCommunicationHandlerListener = new BluetoothCommunicationHandler.Listener() {
-		
+
 		@Override
 		public void onException(BluetoothCommunicationHandler handler, String message) {
 			// TODO Auto-generated method stub
 			logger.error("Error : " + handler.getMacaddress() + ", " + message);
 		}
-		
+
 		@Override
 		public void onDisconnected(BluetoothCommunicationHandler handler) {
 			// TODO Auto-generated method stub
 			workersPool.remove(handler);
 			logger.info("workersPool size : " + workersPool.size() + ", Bye : " + handler.getMacaddress());
 		}
-		
+
 		@Override
 		public void onDataSent(BluetoothCommunicationHandler handler, String data) {
 			// TODO Auto-generated method stub
 			logger.info("Sent: " + data);
 		}
-		
+
 		@Override
-		public void onDataArrived(BluetoothCommunicationHandler handler, String data) {			
+		public void onDataArrived(BluetoothCommunicationHandler handler, String data) {
 			process(handler, data);
 		}
-		
+
 		@Override
-		public void onConnected(BluetoothCommunicationHandler handler) {			
+		public void onConnected(BluetoothCommunicationHandler handler) {
 			// TODO Auto-generated method stub
 			logger.info(handler.toString());
 			workersPool.add(handler);
-			
+
 			/*
-			sendMembership(handler);
-			handler.sendData("RESPONSE_FINISH");
-			sendTool(handler);
-			handler.sendData("RESPONSE_FINISH");
-			*/
+			 * sendMembership(handler); handler.sendData("RESPONSE_FINISH");
+			 * sendTool(handler); handler.sendData("RESPONSE_FINISH");
+			 */
 		}
-		/* 요청에 대한 응답이 더 필요하면 이것처럼 만들기
-		public void onRequestSheetArrived(BluetoothCommunicationHandler handler, RentalSheet rentalSheet) {
-			List<ToolDto> toolDtoList = toolService.list();
-			Message command = new Message(GlobalConstants.REQUEST_TOOL_LIST, toolDtoList);
-			handler.send(command);
-		}*/
+		/*
+		 * 요청에 대한 응답이 더 필요하면 이것처럼 만들기 public void
+		 * onRequestSheetArrived(BluetoothCommunicationHandler handler, RentalSheet
+		 * rentalSheet) { List<ToolDto> toolDtoList = toolService.list(); Message
+		 * command = new Message(GlobalConstants.REQUEST_TOOL_LIST, toolDtoList);
+		 * handler.send(command); }
+		 */
 	};
-	
+
 	private final List<BluetoothCommunicationHandler> workersPool = new CopyOnWriteArrayList<BluetoothCommunicationHandler>();
-	
+
 	private Timer timer;
-	private final TimerTask timerTask = new TimerTask(){
+	private final TimerTask timerTask = new TimerTask() {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
 			Iterator<BluetoothCommunicationHandler> iterator = workersPool.iterator();
 			BluetoothCommunicationHandler worker = null;
-			while(iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				worker = iterator.next();
 				if (!worker.isValid()) {
 					worker.disconnect();
@@ -191,118 +194,121 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 		}
 	};
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		// TODO Auto-generated method stub
 
-		//MemberParsing memberParsing = new MemberParsing(mainPartService, subPartService, partService, membershipService);
-		//memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
-		
-		//ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService, toolService, stockStatusService, toolboxService);
-		//toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
-		//toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
-		
-		//stockStatusService.addMock();
-		//tagService.addMock();
-		
+		// MemberParsing memberParsing = new MemberParsing(mainPartService,
+		// subPartService, partService, membershipService);
+		// memberParsing.readCsvFile("C:/Care4U/Temp/member.csv");
+
+		// ToolParsing toolParsing = new ToolParsing(mainGroupService, subGroupService,
+		// toolService, stockStatusService, toolboxService);
+		// toolParsing.readCsvFile("C:/Care4u/Temp/tool.csv");
+		// toolParsing.checkCsvFile("C:/Care4u/Temp/tool.csv");
+
+		// stockStatusService.addMock();
+		// tagService.addMock();
+
 		bluetoothServer = new BluetoothServer(bluetoothServerListener);
-		
-		//stockStatusService.addMock();
-		//tagService.addMock();
-		//membershipService.updatePasswords();
-		//membershipService.downdatePasswords();
-		
+
+		// stockStatusService.addMock();
+		// tagService.addMock();
+		// membershipService.updatePasswords();
+		// membershipService.downdatePasswords();
+
 		timer = new Timer();
 		timer.schedule(timerTask, 10 * 1000, 1000);
-		
+
 		logger.info("Care4UManager  afterPropertiesSet... ");
 	}
-	
+
 	@Override
 	public void destroy() throws Exception {
 		// TODO Auto-generated method stub
-		
+
 		logger.info("Care4UManager destroy... ");
-		
+
 		if (timer != null) {
-		    timer.cancel();
-		    timer = null;
+			timer.cancel();
+			timer = null;
 		}
-		
+
 		bluetoothServer.destroy();
-		
+
 		Iterator<BluetoothCommunicationHandler> iterator = workersPool.iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			iterator.next().disconnect();
 		}
 		workersPool.clear();
 	}
-	
+
 	private void process(BluetoothCommunicationHandler handler, String data) {
 		logger.info("Arrived: " + data); // 지금 전달받은 내용 data 로 출력 (로그)
-		String[] datas = data.split(",",2);
+		String[] datas = data.split(",", 2);
 		RequestType type = RequestType.valueOf(datas[0]);
 		String paramJson = null;
-		if (datas.length>1) {				
+		if (datas.length > 1) {
 			paramJson = datas[1];
 		}
 		String keyword = type.name() + ",";
-		switch(type) {
-		//앱 최초 화면 인원 기준정보 다운로드 전 항목 총 개수
+		switch (type) {
+		// 앱 최초 화면 인원 기준정보 다운로드 전 항목 총 개수
 		case MEMBERSHIP_ALL_COUNT:
-			handler.sendData(keyword+GsonUtils.toJson(membershipService.getMembershipCount()));
+			handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipCount()));
 			break;
-		//앱 최초 화면 인원 기준정보 다운로드
+		// 앱 최초 화면 인원 기준정보 다운로드
 		case MEMBERSHIP_ALL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
-				
-				Pageable pageable = PageRequest.of(page,pageSize);
+
+				Pageable pageable = PageRequest.of(page, pageSize);
 				handler.sendData(keyword + GsonUtils.toJson(membershipService.getMembershipPage(pageable)));
 			}
 			break;
-		//앱 최초 화면 공기구 기준정보 다운로드 전 항목 총 개수
+		// 앱 최초 화면 공기구 기준정보 다운로드 전 항목 총 개수
 		case TOOL_ALL_COUNT:
-			handler.sendData(keyword+GsonUtils.toJson(toolService.getToolCount()));
+			handler.sendData(keyword + GsonUtils.toJson(toolService.getToolCount()));
 			break;
-		//앱 최초 화면 공기구 기준정보 다운로드 
+		// 앱 최초 화면 공기구 기준정보 다운로드
 		case TOOL_ALL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
-				
-				Pageable pageable = PageRequest.of(page,pageSize);
+
+				Pageable pageable = PageRequest.of(page, pageSize);
 				handler.sendData(keyword + GsonUtils.toJson(toolService.getToolPage(pageable)));
 			}
 			break;
-		//MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리
-		//작업자 - 대여 페이지에서 보여주는 항목
+		// MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리
+		// 작업자 - 대여 페이지에서 보여주는 항목
 		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
 				long membershipId = jsonObj.getLong("membershipId");
 
-		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByMembership(SheetState.READY,membershipId,pageable);
+				Pageable pageable = PageRequest.of(page, pageSize);
+				Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByMembership(SheetState.READY,
+						membershipId, pageable);
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
-		//MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
-		//작업자 - 대여 페이지에서 보여주는 항목 수
+		// MembershipId로 status가 Ready인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
+		// 작업자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long membershipId = jsonObj.getLong("membershipId");
-					Long count = rentalRequestSheetService.getCountByMembership(SheetState.READY,membershipId);
+					Long count = rentalRequestSheetService.getCountByMembership(SheetState.READY, membershipId);
 					handler.sendData(keyword + GsonUtils.toJson(count));
-				}				
+				}
 			} catch (JSONException e) {
 				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
@@ -313,18 +319,19 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
-		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리
-		//관리자 - 대여 페이지에서 보여주는 항목
+		// ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리
+		// 관리자 - 대여 페이지에서 보여주는 항목
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					int page = jsonObj.getInt("page");
 					int pageSize = jsonObj.getInt("size");
 					long toolboxId = jsonObj.getLong("toolboxId");
-					
-					Pageable pageable = PageRequest.of(page,pageSize);
-					Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService.getPageByToolbox(SheetState.REQUEST,toolboxId,pageable);
+
+					Pageable pageable = PageRequest.of(page, pageSize);
+					Page<RentalRequestSheetDto> sheetPage = rentalRequestSheetService
+							.getPageByToolbox(SheetState.REQUEST, toolboxId, pageable);
 					handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 				}
 			} catch (JSONException e) {
@@ -337,14 +344,14 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
-		//ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
-		//관리자 - 대여 페이지에서 보여주는 항목 수
+		// ToolboxId로 status가 Request인 RentalRequestSheet 페이지 쿼리를 위한 총 항목 개수
+		// 관리자 - 대여 페이지에서 보여주는 항목 수
 		case RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
-			        Long count = rentalRequestSheetService.getCountByToolbox(SheetState.REQUEST,toolboxId);
+					Long count = rentalRequestSheetService.getCountByToolbox(SheetState.REQUEST, toolboxId);
 					handler.sendData(keyword + GsonUtils.toJson(count));
 				}
 			} catch (JSONException e) {
@@ -369,210 +376,221 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 //				handler.sendData(keyword + GsonUtils.toJson(sheetList));
 //			}
 //			break;
-		//RentalRequestSheetFormDto를 통해 RentalRequestSheet(status : REQUEST)를 생성
-		//관리자 - 대여 신청 페이지 - 확인 버튼 터치시 신청됨.
+		// RentalRequestSheetFormDto를 통해 RentalRequestSheet(status : REQUEST)를 생성
+		// 관리자 - 대여 신청 페이지 - 확인 버튼 터치시 신청됨.
 		case RENTAL_REQUEST_SHEET_FORM:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					RentalRequestSheetFormDto formDto;
 					formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
-		    		rentalRequestSheetService.addNew(formDto,SheetState.REQUEST);
-		    		handler.sendData(keyword + "good");
-				}	
-			}catch(JSONException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(OutOfStockException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalArgumentException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			} catch (NoSuchElementFoundException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
-			}catch (NullPointerException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+ keyword +","+ e.getMessage());
-			}catch(Exception e) {
-				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
-			}
-			break;
-		//RentalRequestSheetFormWithTimestampDto를 통해 RentalRequestSheet(status : REQUEST)를 생성.
-		//관리자 - 보류 페이지 - 동기화 시 신청됨.
-		//eventTimestamp를 통해 중복 신청 여부를 확인함.
-		case RENTAL_REQUEST_SHEET_FORM_STANDBY:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetFormWithTimestampDto mainDto;
-		    	try {
-					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormWithTimestampDto.class);
-					RentalRequestSheetFormDto formDto = mainDto.getSheet();
-					String timeString = mainDto.getTimestamp();
-					
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
-			        
-		    		rentalRequestSheetService.addNew(formDto,eventTimestamp,SheetState.REQUEST);
-		    		handler.sendData(keyword + "good");
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
-			}
-			break;
-		//RentalRequestSheetApproveFormAndTimestampDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경, RentalSheet를 생성.
-		//관리자 - 보류 페이지 - 동기화 시 신청됨.
-		//eventTimestamp를 통해 중복 신청 여부를 확인함.
-		case RENTAL_REQUEST_SHEET_APPROVE_STANDBY:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetApproveFormAndTimestampDto mainDto;
-		    	try {
-					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormAndTimestampDto.class);
-					RentalRequestSheetApproveFormDto formDto = mainDto.getSheet();
-					String timeString = mainDto.getTimestamp();
-
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
-					
-		            RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(formDto,eventTimestamp);
-		            
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
-			}
-			break;
-		//RentalRequestSheetApproveFormDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경, RentalSheet를 생성.
-		//관리자 - 대여 승인 페이지 - 확인 버튼 터치 시 신청.
-		case RENTAL_REQUEST_SHEET_APPROVE:
-			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-					RentalRequestSheetApproveFormDto mainDto;
-					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormDto.class);
-					
-					RentalSheetDto result = rentalSheetService.create(mainDto);
-					
+					rentalRequestSheetService.addNew(formDto, SheetState.REQUEST);
 					handler.sendData(keyword + "good");
-				}else {
-					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+"빈 데이터입니다.");
 				}
-			}catch(JSONException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(OutOfStockException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalArgumentException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
-			}catch (NullPointerException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+ keyword +","+ e.getMessage());
-			}catch(Exception e) {
-				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
-			}
-			break;
-		//RentalRequestSheet의 Id를 통해 해당 시트의 status를 CANCEL로 변경.
-		//관리자 - 대여 승인 - 취소 버튼 OR 
-		//작업자 - 대여 신청 - 취소 버튼으로 신청.
-		case RENTAL_REQUEST_SHEET_CANCEL:
-			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    long sheetId = jsonObj.getLong("rentalRequestSheetId");
-                    rentalRequestSheetService.cancel(sheetId);
-                    handler.sendData(keyword + "good");
-				}
-			}catch(JSONException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalStateException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalArgumentException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(NoSuchElementFoundException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
 			} catch (NullPointerException e) {
 				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
-		//RentalRequestSheet의 Id를 통해 해당 시트의 status를 REQUEST로 변경.
-		//작업자 - 대여 신청 - 확인 버튼으로 신청.
-		//status:READY인 RentalRequestSheet에 대해서 필요한 로직임.
+		// RentalRequestSheetFormWithTimestampDto를 통해 RentalRequestSheet(status :
+		// REQUEST)를 생성.
+		// 관리자 - 보류 페이지 - 동기화 시 신청됨.
+		// eventTimestamp를 통해 중복 신청 여부를 확인함.
+		case RENTAL_REQUEST_SHEET_FORM_STANDBY:
+			if (!(paramJson.isEmpty() || paramJson == null)) {
+				RentalRequestSheetFormWithTimestampDto mainDto;
+				try {
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormWithTimestampDto.class);
+					RentalRequestSheetFormDto formDto = mainDto.getSheet();
+					String timeString = mainDto.getTimestamp();
+
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+					LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+
+					rentalRequestSheetService.addNew(formDto, eventTimestamp, SheetState.REQUEST);
+					handler.sendData(keyword + "good");
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+			break;
+		// RentalRequestSheetApproveFormAndTimestampDto를 통해 RentalRequestSheet를
+		// Status:APPROVE로 변경, RentalSheet를 생성.
+		// 관리자 - 보류 페이지 - 동기화 시 신청됨.
+		// eventTimestamp를 통해 중복 신청 여부를 확인함.
+		case RENTAL_REQUEST_SHEET_APPROVE_STANDBY:
+			if (!(paramJson.isEmpty() || paramJson == null)) {
+				RentalRequestSheetApproveFormAndTimestampDto mainDto;
+				try {
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormAndTimestampDto.class);
+					RentalRequestSheetApproveFormDto formDto = mainDto.getSheet();
+					String timeString = mainDto.getTimestamp();
+
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+					LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+
+					RentalSheetDto result = rentalSheetService.updateAndAddNewInTransaction(formDto, eventTimestamp);
+
+					handler.sendData(keyword + "good");
+				} catch (IllegalStateException e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+			break;
+		// RentalRequestSheetApproveFormDto를 통해 RentalRequestSheet를 Status:APPROVE로 변경,
+		// RentalSheet를 생성.
+		// 관리자 - 대여 승인 페이지 - 확인 버튼 터치 시 신청.
+		case RENTAL_REQUEST_SHEET_APPROVE:
+			try {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					RentalRequestSheetApproveFormDto mainDto;
+					mainDto = GsonUtils.fromJson(paramJson, RentalRequestSheetApproveFormDto.class);
+
+					RentalSheetDto result = rentalSheetService.create(mainDto);
+
+					handler.sendData(keyword + "good");
+				} else {
+					handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + "빈 데이터입니다.");
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
+			break;
+		// RentalRequestSheet의 Id를 통해 해당 시트의 status를 CANCEL로 변경.
+		// 관리자 - 대여 승인 - 취소 버튼 OR
+		// 작업자 - 대여 신청 - 취소 버튼으로 신청.
+		case RENTAL_REQUEST_SHEET_CANCEL:
+			try {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long sheetId = jsonObj.getLong("rentalRequestSheetId");
+					rentalRequestSheetService.cancel(sheetId);
+					handler.sendData(keyword + "good");
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalStateException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
+			break;
+		// RentalRequestSheet의 Id를 통해 해당 시트의 status를 REQUEST로 변경.
+		// 작업자 - 대여 신청 - 확인 버튼으로 신청.
+		// status:READY인 RentalRequestSheet에 대해서 필요한 로직임.
 		case RENTAL_REQUEST_SHEET_APPLY:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long sheetId = jsonObj.getLong("rentalRequestSheetId");
-		    	try {
-		    		rentalRequestSheetService.updateState(sheetId,SheetState.REQUEST);
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+			try {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long sheetId = jsonObj.getLong("rentalRequestSheetId");
+					rentalRequestSheetService.updateState(sheetId, SheetState.REQUEST);
+					handler.sendData(keyword + "good");
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalStateException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_ALL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
-		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(pageable);
-		        
+				Pageable pageable = PageRequest.of(page, pageSize);
+				Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPage(pageable);
+
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
-		       	Long count = outstandingRentalSheetService.getCount();
-		        
+				Long count = outstandingRentalSheetService.getCount();
+
 				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
 			break;
-		//MembershipId로 status와 관계없이 OutstandingRentalSheet 페이지 쿼리
-		//관리자 - 반납 페이지에서 검색 시 보여주는 항목
+		// MembershipId로 status와 관계없이 OutstandingRentalSheet 페이지 쿼리
+		// 관리자 - 반납 페이지에서 검색 시 보여주는 항목
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
 				long membershipId = jsonObj.getLong("membershipId");
-		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByMembershipId(membershipId, pageable);
-		        
+				Pageable pageable = PageRequest.of(page, pageSize);
+				Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService
+						.getPageByMembershipId(membershipId, pageable);
+
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long membershipId = jsonObj.getLong("membershipId");
-		       	Long count = outstandingRentalSheetService.getCountByMembershipId(membershipId);
-		        
+				Long count = outstandingRentalSheetService.getCountByMembershipId(membershipId);
+
 				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
 				long toolboxId = jsonObj.getLong("toolboxId");
 
-		        Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService.getPageByToolboxId(OutstandingState.REQUEST, toolboxId, pageable);
+				Pageable pageable = PageRequest.of(page, pageSize);
+				Page<OutstandingRentalSheetDto> sheetPage = outstandingRentalSheetService
+						.getPageByToolboxId(OutstandingState.REQUEST, toolboxId, pageable);
 				handler.sendData(keyword + GsonUtils.toJson(sheetPage));
 			}
 			break;
 		case OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
-		       	Long count = outstandingRentalSheetService.getCountByToolboxId(OutstandingState.REQUEST,toolboxId);
-		        
+				Long count = outstandingRentalSheetService.getCountByToolboxId(OutstandingState.REQUEST, toolboxId);
+
 				handler.sendData(keyword + GsonUtils.toJson(count));
 			}
 			break;
@@ -607,15 +625,15 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 //			break;
 		case OUTSTANDING_RENTAL_SHEET_BY_TAG:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					String tag = jsonObj.getString("tag");
-					
+
 					OutstandingRentalSheetDto sheet = outstandingRentalSheetService.get(tag);
 					handler.sendData(keyword + GsonUtils.toJson(sheet));
 				}
-			}catch(JSONException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (IllegalArgumentException e) {
@@ -626,13 +644,13 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case OUTSTANDING_RENTAL_SHEET_ID_BY_TAG:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    String tag = jsonObj.getString("tag");
-                    
-                    Long sheetId = outstandingRentalSheetService.getId(tag);
-                    handler.sendData(keyword + GsonUtils.toJson(sheetId));
-                }
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tag = jsonObj.getString("tag");
+
+					Long sheetId = outstandingRentalSheetService.getId(tag);
+					handler.sendData(keyword + GsonUtils.toJson(sheetId));
+				}
 			} catch (JSONException e) {
 				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
@@ -644,127 +662,129 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		case RETURN_SHEET_REQUEST:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				JSONObject jsonObj = new JSONObject(paramJson);
-				long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
-		    	try {
-		    		outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalStateException e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+			try {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long outstandingRentalSheetId = jsonObj.getLong("outstandingRentalSheetId");
+					outstandingRentalSheetService.requestOutstandingState(outstandingRentalSheetId);
+					handler.sendData(keyword + "good");
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalStateException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		case RETURN_SHEET_FORM:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					ReturnSheetFormDto formDto;
 					formDto = GsonUtils.fromJson(paramJson, ReturnSheetFormDto.class);
-		    		returnSheetService.addNew(formDto);
-		    		handler.sendData(keyword + "good");
+					returnSheetService.addNew(formDto);
+					handler.sendData(keyword + "good");
 				}
-	    	}catch(JSONException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(OutOfStockException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalArgumentException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
-			}catch(Exception e) {
-				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		case RETURN_SHEET_FORM_STANDBY:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-		    	ReturnSheetFormWithTimestampDto mainDto;
-		    	try {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
+				ReturnSheetFormWithTimestampDto mainDto;
+				try {
 					mainDto = GsonUtils.fromJson(paramJson, ReturnSheetFormWithTimestampDto.class);
 					ReturnSheetFormDto formDto = mainDto.getSheet();
 					String timeString = mainDto.getTimestamp();
 
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			        LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
-			        
-					
-		    		returnSheetService.addNew(formDto,eventTimestamp);
-		    		handler.sendData(keyword + "good");
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+					LocalDateTime eventTimestamp = LocalDateTime.parse(timeString, formatter);
+
+					returnSheetService.addNew(formDto, eventTimestamp);
+					handler.sendData(keyword + "good");
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
 			}
 			break;
 		case TOOLBOX_TOOL_LABEL_FORM:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolId = jsonObj.getLong("toolId");
 				long toolboxId = jsonObj.getLong("toolboxId");
 				String qrcode = jsonObj.getString("qrcode");
-		    	try {
+				try {
 					toolboxToolLabelService.register(toolId, toolboxId, qrcode);
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalArgumentException e) {
-		    		handler.sendData(e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    		
-		    	}
+					handler.sendData(keyword + "good");
+				} catch (IllegalArgumentException e) {
+					handler.sendData(e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+
+				}
 			}
 			break;
 		case TAG_FORM:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolId = jsonObj.getLong("toolId");
 				long toolboxId = jsonObj.getLong("toolboxId");
 				String tagGroup = jsonObj.getString("tagGroup");
 				JSONArray tagListArray = jsonObj.getJSONArray("tagList");
-		        List<String> tagList = new ArrayList<String>();
-		        for (int i = 0; i < tagListArray.length(); i++) {
-		            tagList.add(tagListArray.getString(i));
-		        }
+				List<String> tagList = new ArrayList<String>();
+				for (int i = 0; i < tagListArray.length(); i++) {
+					tagList.add(tagListArray.getString(i));
+				}
 
-		    	try {
+				try {
 					tagService.register(toolId, toolboxId, tagList);
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalArgumentException e) {
-		    		handler.sendData(keyword + e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+					handler.sendData(keyword + "good");
+				} catch (IllegalArgumentException e) {
+					handler.sendData(keyword + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
 			}
 			break;
 		case TOOLBOX_TOOL_LABEL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolId = jsonObj.getLong("toolId");
 				long toolboxId = jsonObj.getLong("toolboxId");
-				
+
 				if (toolboxToolLabelService.get(toolId, toolboxId) == null) {
 					handler.sendData(keyword + "null");
-				}					
-				else {	
+				} else {
 					String result = toolboxToolLabelService.get(toolId, toolboxId).getQrcode();
 					handler.sendData(keyword + result);
 				}
 			}
 			break;
 		case TAG_LIST:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
-				String tagString = jsonObj.getString("tag");				
+				String tagString = jsonObj.getString("tag");
 				if (tagService.getSiblings(tagString) != null) {
-					List<String> strings= tagService.getSiblings(tagString)
-							.stream()
-							.map(e->e.getMacaddress())
+					List<String> strings = tagService.getSiblings(tagString).stream().map(e -> e.getMacaddress())
 							.collect(Collectors.toList());
 					handler.sendData(keyword + GsonUtils.toJson(strings));
 				} else {
@@ -773,18 +793,18 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			}
 			break;
 		case TAG_ALL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
 				int page = jsonObj.getInt("page");
 				int pageSize = jsonObj.getInt("size");
-				Pageable pageable = PageRequest.of(page,pageSize);
-		        Page<TagDto> tagPage = tagService.getPage(toolboxId,pageable);
+				Pageable pageable = PageRequest.of(page, pageSize);
+				Page<TagDto> tagPage = tagService.getPage(toolboxId, pageable);
 				handler.sendData(keyword + GsonUtils.toJson(tagPage));
 			}
 			break;
 		case TAG_ALL_COUNT:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				long toolboxId = jsonObj.getLong("toolboxId");
 				handler.sendData(keyword + GsonUtils.toJson(tagService.getCount(toolboxId)));
@@ -792,19 +812,19 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case TOOLBOX_TOOL_LABEL_ALL:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
 					int page = jsonObj.getInt("page");
 					int pageSize = jsonObj.getInt("size");
-					Pageable pageable = PageRequest.of(page,pageSize);
-					Page<ToolboxToolLabelDto> labelPage = toolboxToolLabelService.getPage(toolboxId,pageable);
+					Pageable pageable = PageRequest.of(page, pageSize);
+					Page<ToolboxToolLabelDto> labelPage = toolboxToolLabelService.getPage(toolboxId, pageable);
 					handler.sendData(keyword + GsonUtils.toJson(labelPage));
-				}				
-			}catch (JSONException e){
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            }catch (NullPointerException e) {
-            	handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
@@ -813,23 +833,23 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case TOOLBOX_TOOL_LABEL_ALL_COUNT:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolboxId = jsonObj.getLong("toolboxId");
 					handler.sendData(keyword + GsonUtils.toJson(toolboxToolLabelService.getCount(toolboxId)));
-				}				
-			}catch (JSONException e){
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch (NullPointerException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            }catch (NoSuchElementFoundException e) {
-            	handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
 		case TAG_GROUP:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				String tagString = jsonObj.getString("tag");
 				handler.sendData(keyword + GsonUtils.toJson(tagService.getSiblings(tagString)));
@@ -837,30 +857,31 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case TAG:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					String tagString = jsonObj.getString("tag");
 					handler.sendData(keyword + GsonUtils.toJson(tagService.get(tagString)));
-				}else {
-					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+",빈 데이터입니다.");
+				} else {
+					handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + ",빈 데이터입니다.");
 				}
-			}catch (JSONException e){
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch (NullPointerException e) {
-				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch (NoSuchElementFoundException e) {
-				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch (Exception e) {
-				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+keyword+","+e.getMessage()+","+paramJson);
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(
+						RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage() + "," + paramJson);
 			}
 			break;
 		case TAG_AND_TOOLBOX_TOOL_LABEL_FORM:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
 					JSONObject jsonObj = new JSONObject(paramJson);
 					long toolId = jsonObj.getLong("toolId");
 					long toolboxId = jsonObj.getLong("toolboxId");
-					//String tagGroup = jsonObj.getString("tagGroup");
+					// String tagGroup = jsonObj.getString("tagGroup");
 					JSONArray tagListArray = jsonObj.getJSONArray("tagList");
 					String qrcode = jsonObj.getString("qrcode");
 					List<String> tagList = new ArrayList<String>();
@@ -873,92 +894,87 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 					logger.debug("good_toolbox_tool_label");
 					handler.sendData(keyword + GsonUtils.toJson(result));
 				} else {
-					handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+",빈 데이터입니다.");
+					handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + ",빈 데이터입니다.");
 				}
-			}catch(JSONException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(NoSuchElementFoundException e) {
-                handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(IllegalArgumentException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(Exception e) {
-                handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+keyword+","+e.getMessage());
-            }
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
 			break;
 		case TAG_AND_TOOLBOX_TOOL_LABEL:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-	            JSONObject jsonObj = new JSONObject(paramJson);
-	            long toolId = jsonObj.getLong("toolId");
-	            long toolboxId = jsonObj.getLong("toolboxId");
-	            try {
-	            	handler.sendData(keyword + 
-	            			GsonUtils.toJson(
-	            					TagAndToolboxToolLabelDto.builder()
-					            	.tagDtoList(tagService.listByToolIdAndToolboxId(toolId,toolboxId))
-					            	.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId))
-					            	.build()
-					            	)
-	            			);
-	             }catch(IllegalArgumentException e) {
-	                handler.sendData(keyword + e.getMessage());
-	                e.printStackTrace();
-	             }catch(Exception e) {
-	            	handler.sendData(keyword + "bad, "+ e.getMessage());
-	                e.printStackTrace();
-	             }
-	         }
-	         break;
+			if (!(paramJson.isEmpty() || paramJson == null)) {
+				JSONObject jsonObj = new JSONObject(paramJson);
+				long toolId = jsonObj.getLong("toolId");
+				long toolboxId = jsonObj.getLong("toolboxId");
+				try {
+					handler.sendData(keyword + GsonUtils.toJson(TagAndToolboxToolLabelDto.builder()
+							.tagDtoList(tagService.listByToolIdAndToolboxId(toolId, toolboxId))
+							.toolboxToolLabelDto(toolboxToolLabelService.get(toolId, toolboxId)).build()));
+				} catch (IllegalArgumentException e) {
+					handler.sendData(keyword + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+			break;
 		case TEST:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
+			if (!(paramJson.isEmpty() || paramJson == null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);
 				String string = jsonObj.getString("string");
 
-		    	try {
-					logger.debug("number : "+string);
-		    		handler.sendData(keyword + "good");
-		    	}catch(IllegalArgumentException e) {
-		    		handler.sendData(keyword + e.getMessage());
-		    		e.printStackTrace();
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		e.printStackTrace();
-		    	}
+				try {
+					logger.debug("number : " + string);
+					handler.sendData(keyword + "good");
+				} catch (IllegalArgumentException e) {
+					handler.sendData(keyword + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					handler.sendData(keyword + "bad, " + e.getMessage());
+					e.printStackTrace();
+				}
 			}
 			break;
 		case TOOLBOX_ALL:
 			logger.debug(toolboxService.listCompressed().toString());
-			handler.sendData(keyword+GsonUtils.toJson(toolboxService.listCompressed()));
+			handler.sendData(keyword + GsonUtils.toJson(toolboxService.listCompressed()));
 			break;
 		case TAG_LIST_BY_TAG_MACADDRESS:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    String tagMacaddress = jsonObj.getString("tag");
-                    handler.sendData(keyword + GsonUtils.toJson(tagService.listByTagMacaddress(tagMacaddress)));
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tagMacaddress = jsonObj.getString("tag");
+					handler.sendData(keyword + GsonUtils.toJson(tagService.listByTagMacaddress(tagMacaddress)));
 				} else {
-                	throw new JSONException("빈 데이터입니다.");
-                }
-			}catch (JSONException e){
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            }catch (NullPointerException e) {
-            	handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            } catch (NoSuchElementFoundException e) {
-                handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
-            } catch (Exception e) {
-            	handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
-            }
+					throw new JSONException("빈 데이터입니다.");
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
 			break;
 		case TAG_LIST_BY_TOOLBOX_TOOL_LABEL_QRCODE:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    String qrcode = jsonObj.getString("toolboxToolLabel");
-                    handler.sendData(keyword + GsonUtils.toJson(tagService.listByToolboxToolLabelQrcode(qrcode)));
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String qrcode = jsonObj.getString("toolboxToolLabel");
+					handler.sendData(keyword + GsonUtils.toJson(tagService.listByToolboxToolLabelQrcode(qrcode)));
 				}
-			}catch (JSONException e){
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            }catch (NullPointerException e) {
-            	handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
@@ -967,16 +983,17 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case TAG_LIST_BY_TOOL_AND_TOOLBOX_ID:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    long toolId = jsonObj.getLong("toolId");
-                    long toolboxId = jsonObj.getLong("toolboxId");
-                    handler.sendData(keyword + GsonUtils.toJson(tagService.listByToolIdAndToolboxId(toolId,toolboxId)));
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					long toolId = jsonObj.getLong("toolId");
+					long toolboxId = jsonObj.getLong("toolboxId");
+					handler.sendData(
+							keyword + GsonUtils.toJson(tagService.listByToolIdAndToolboxId(toolId, toolboxId)));
 				}
-			}catch (JSONException e){
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-            }catch (NullPointerException e) {
-            	handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (NullPointerException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (NoSuchElementFoundException e) {
 				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
@@ -985,43 +1002,40 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			break;
 		case TOOLBOX_TOOL_LABEL_AVAILABLE:
 			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    String toolboxToolLabel = jsonObj.getString("toolboxToolLabel");
-                    
-                    String result = (toolboxToolLabelService.isAvailable(toolboxToolLabel)?1:0)+toolboxToolLabel;
-                    handler.sendData(keyword + GsonUtils.toJson(result));
-                }
-			}catch(JSONException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
-			}catch(Exception e) {
-                handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+keyword+","+e.getMessage());
-            }
-			break;
-		case TAG_AVAILABLE:
-			try {
-				if (!(paramJson.isEmpty() || paramJson==null)) {
-                    JSONObject jsonObj = new JSONObject(paramJson);
-                    String tag = jsonObj.getString("tag");
-                    
-                    String result = (tagService.isAvailable(tag)?1:0)+tag;
-                    handler.sendData(keyword + GsonUtils.toJson(result));
-                }
-			}catch(JSONException e) {
-                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String toolboxToolLabel = jsonObj.getString("toolboxToolLabel");
+
+					String result = (toolboxToolLabelService.isAvailable(toolboxToolLabel) ? 1 : 0) + toolboxToolLabel;
+					handler.sendData(keyword + GsonUtils.toJson(result));
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
 			} catch (Exception e) {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
 			break;
-			
-			
-			
-		case HI :
+		case TAG_AVAILABLE:
+			try {
+				if (!(paramJson.isEmpty() || paramJson == null)) {
+					JSONObject jsonObj = new JSONObject(paramJson);
+					String tag = jsonObj.getString("tag");
+
+					String result = (tagService.isAvailable(tag) ? 1 : 0) + tag;
+					handler.sendData(keyword + GsonUtils.toJson(result));
+				}
+			} catch (JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION + "," + keyword + "," + e.getMessage());
+			} catch (Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}
+			break;
+
+		case HI:
 			logger.debug("");
 			handler.setHeartBeat();
-			handler.sendData(keyword+Calendar.getInstance().getTimeInMillis());
+			handler.sendData(keyword + Calendar.getInstance().getTimeInMillis());
 			break;
 		}
 	}
 }
-

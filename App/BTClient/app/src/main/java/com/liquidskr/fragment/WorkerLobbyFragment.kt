@@ -11,6 +11,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
@@ -25,10 +27,10 @@ class WorkerLobbyFragment() : Fragment() {
 
     private lateinit var popupLayout: View
 
-    val gson = Gson()
-
     private val loggedInMembership = MembershipService.getInstance().loggedInMembership
     private lateinit var welcomeMessage: TextView
+
+    private var bluetoothManager : BluetoothManager? =null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
@@ -59,6 +61,10 @@ class WorkerLobbyFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
                 .commit()
+
+            val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT
+            val data = "{membershipId:${worker.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -70,5 +76,15 @@ class WorkerLobbyFragment() : Fragment() {
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = BluetoothManager.getInstance()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager = null
     }
 }

@@ -10,10 +10,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipService
+import com.mrsmart.standard.toolbox.ToolboxService
 import java.lang.NullPointerException
 
 class ManagerLobbyFragment() : Fragment() {
@@ -28,10 +31,10 @@ class ManagerLobbyFragment() : Fragment() {
 
     private lateinit var popupLayout: View
 
-    val gson = Gson()
-
     private val loggedInMembership = MembershipService.getInstance().loggedInMembership
     private lateinit var welcomeMessage: TextView
+
+    private var bluetoothManager : BluetoothManager? =null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -63,6 +66,13 @@ class ManagerLobbyFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerLobbyFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
+
         }
 
         returnBtnField.setOnClickListener {
@@ -71,6 +81,12 @@ class ManagerLobbyFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ManagerLobbyFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
 //        standbyBtnField.setOnClickListener {
@@ -90,5 +106,15 @@ class ManagerLobbyFragment() : Fragment() {
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bluetoothManager = BluetoothManager.getInstance()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        bluetoothManager = null
     }
 }

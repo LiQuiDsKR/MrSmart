@@ -2,217 +2,193 @@ package com.liquidskr.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager_Old
-import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.BluetoothManager
+import com.liquidskr.btclient.Constants
+import com.liquidskr.btclient.DialogUtils
+import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalToolAdapter
+import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.tool.ToolWithCount
+import com.mrsmart.standard.membership.MembershipService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormSelectedDto
+import com.mrsmart.standard.tag.TagDto
+import com.mrsmart.standard.tag.TagService
+import com.mrsmart.standard.tag.ToolboxToolLabelService
+import com.mrsmart.standard.tool.ToolService
+import com.mrsmart.standard.toolbox.ToolboxService
+import java.lang.NullPointerException
 
-class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemClickListener {
+class WorkerSelfRentalFragment() : Fragment(), InputHandler {
     lateinit var leaderSearchBtn: LinearLayout
-    lateinit var qrEditText: EditText
     lateinit var addToolBtn: LinearLayout
+
     lateinit var confirmBtn: LinearLayout
     lateinit var clearBtn: LinearLayout
     lateinit var backButton: ImageButton
 
-    private val handler = Handler(Looper.getMainLooper()) // UI블로킹 start
-    private lateinit var popupLayout: View
-    private lateinit var progressText: TextView
-    private var isPopupVisible = false // UI블로킹 end
-
-
     lateinit var workerName: TextView
     lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
-    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
-    var worker: MembershipDto? = null
-    var leader: MembershipDto? = null
+    private lateinit var worker: MembershipDto
+    private lateinit var leader: MembershipDto
 
     var gson = Gson()
+
+    private val tagService = TagService.getInstance()
+    private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
+    private val toolService = ToolService.getInstance()
+    private val membershipService = MembershipService.getInstance()
+    private val toolboxService = ToolboxService.getInstance()
+
+    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
+
+    private val loggedInMembership = MembershipService.getInstance().loggedInMembership
 
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_worker_self_rental, container, false)
-        val dbHelper = DatabaseHelper.getInstance()
 
-        bluetoothManagerOld = (requireActivity() as MainActivity).getBluetoothManagerOnActivity()
+        if (loggedInMembership == null)
+            DialogUtils.showAlertDialog("비정상적인 접근", "로그인 정보가 없습니다. 앱을 종료합니다."){ _, _ ->
+                requireActivity().finish()
+            }
+        worker = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         leaderSearchBtn = view.findViewById(R.id.LeaderSearchBtn)
-        qrEditText = view.findViewById((R.id.QR_EditText))
         addToolBtn = view.findViewById(R.id.AddToolBtn)
         confirmBtn = view.findViewById(R.id.confirmBtn)
         clearBtn = view.findViewById(R.id.ClearBtn)
+
         backButton = view.findViewById(R.id.backButton)
 
         workerName = view.findViewById(R.id.workerName)
         leaderName = view.findViewById(R.id.leaderName)
-        popupLayout = view.findViewById(R.id.popupLayout) // UI블로킹 start
-        progressText = view.findViewById(R.id.progressText) // UI블로킹 end
+        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        workerName.text=worker.name
+
+        var adapter = RentalRequestToolAdapter(mutableListOf())
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
-        //toolList.addAll(sharedViewModel.toolWithCountList)
-        val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
-
-//        for (id in sharedViewModel.rentalRequestToolIdList) {
-//            var toolWithCountFound = false
-//
-//            for (toolWithCount in toolList) {
-//                if (id == toolWithCount.tool.id) {
-//                    // 이미 존재하는 경우
-//                    toolWithCount.count += 1
-//                    toolWithCountFound = true
-//                    break
-//                }
-//            }
-//            if (!toolWithCountFound) {
-//                // 존재하지 않는 경우
-//                val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
-//                newToolList.add(toolWithCount)
-//            }
-//        }
-        
-        val adapter = RentalToolAdapter(toolList, this)
-        var finalToolList: MutableList<ToolWithCount> = toolList
-        finalToolList.addAll(newToolList)
-        adapter.updateList(finalToolList)
-//        sharedViewModel.toolWithCountList = adapter.tools
-//        sharedViewModel.rentalRequestToolIdList.clear()
-//
-//        worker = sharedViewModel.loginWorker
-//        workerName.text = sharedViewModel.loginWorker!!.name
-//        leader = sharedViewModel.leader
-//        leaderName.text = sharedViewModel.leader!!.name
-//
-//        backButton.setOnClickListener {
-//            requireActivity().supportFragmentManager.popBackStack()
-//        }
-//        leaderSearchBtn.setOnClickListener {
-//            sharedViewModel.toolWithCountList = adapter.tools
-//
-//            val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
-//            requireActivity().supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragmentContainer, fragment)
-//                .addToBackStack(null)
-//                .commit()
-//        }
-        qrEditText.setOnEditorActionListener { _, actionId, event ->
-            Log.d("tst","textEditted")
-            if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
-                val tbt = qrEditText.text.toString().replace("\n", "")
-
-                Log.d("tst",tbt)
-                try {
-                    val taggedTool = dbHelper.getToolByTBT(tbt)
-                    val taggedToolId = taggedTool.id
-                    var toolIdList: MutableList<Long> = mutableListOf()
-                    for (toolWithCnt in adapter.tools) {
-                        toolIdList.add(toolWithCnt.tool.id)
-                    }
-                    if (!(taggedToolId in toolIdList)) {
-                        adapter.tools.add(ToolWithCount(taggedTool,1))
-                    } else {
-                        for (toolWithCnt in adapter.tools) {
-                            Log.d("wrf",toolWithCnt.tool.name)
-                            if (toolWithCnt.tool.id == taggedToolId) {
-                                toolWithCnt.count += 1
-                            }
-                        }
-                    }
-                    //sharedViewModel.toolWithCountList = adapter.tools
-                    recyclerView.adapter = adapter
-
-                } catch (e: UninitializedPropertyAccessException) {
-                    Toast.makeText(requireContext(), "읽어들인 QR코드에 해당하는 공구를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                }
-                qrEditText.text.clear()
-                qrEditText.requestFocus()
-
-                return@setOnEditorActionListener true
-            }
-            false
+        parentFragmentManager.setFragmentResultListener("toolIdList", this) { key, bundle ->
+            val toolIdList = bundle.getLongArray("toolIdList")
+            val toolList = toolIdList?.map { RentalRequestToolFormSelectedDto(it,if (adapter.containsId(it)) adapter.getCountById(it) else 1,true) }
+            adapter = RentalRequestToolAdapter(toolList?.toMutableList() ?: mutableListOf())
+            recyclerView.adapter = adapter
         }
-        qrEditText.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) {
-                qrEditText.requestFocus()
-            }
+        parentFragmentManager.setFragmentResultListener("leaderId", this) { key, bundle ->
+            val leaderId = bundle.getLong("leaderId")
+            leader = membershipService.getMembershipById(leaderId)
+            leaderName.text = leader.name
         }
 
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+        leaderSearchBtn.setOnClickListener {
+            val fragment = MembershipFindFragment.newInstance(2) // type = 2 : leader
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
         addToolBtn.setOnClickListener {
-            //sharedViewModel.toolWithCountList = adapter.tools
-
-//            //val fragment = ToolFindFragment()
-//            //requireActivity().supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragmentContainer, fragment)
-//                .addToBackStack(null)
-//                .commit()
-        }
-        confirmBtn.setOnClickListener {
+            val fragment = ToolFindFragment(adapter.getResult().map{it.toolDtoId}.toMutableList())
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
         clearBtn.setOnClickListener {
-//            sharedViewModel.rentalRequestToolIdList.clear()
-//            sharedViewModel.toolWithCountList.clear()
-//            sharedViewModel.toolWithCountList = adapter.tools
-            var toolList: MutableList<ToolWithCount> = mutableListOf()
-            adapter.updateList(toolList)
+            //workerName.text = ""
+            //leaderName.text = ""
+            adapter = RentalRequestToolAdapter(mutableListOf())
+            recyclerView.adapter = adapter
         }
-        qrEditText.setOnFocusChangeListener { v, hasFocus ->
-            if (!hasFocus) {
-                qrEditText.requestFocus()
+        confirmBtn.setOnClickListener {
+            if (workerName.text=="") {
+                DialogUtils.showAlertDialog("작업자 미선택", "작업자가 선택되지 않았습니다. 작업자를 선택해주세요.")
+                return@setOnClickListener
+            }
+            if (leaderName.text==""){
+                DialogUtils.showAlertDialog("리더 미선택","리더가 선택되지 않았습니다. 리더를 선택해주세요.")
+                return@setOnClickListener
+            }
+
+            if (adapter.isNothingSelected()){
+                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 신청해주세요.")
+            }else if (!adapter.areAllSelected()){
+                DialogUtils.showAlertDialog("대여 신청","추가된 공기구 중 일부만 선택하셨습니다. 정말로 신청하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }else{
+                // 240506 위의 두 조건 분기는 들어갈 일 없음.
+                DialogUtils.showAlertDialog("대여 신청", "정말로 신청하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
             }
         }
-
-        qrEditText.requestFocus()
         recyclerView.adapter = adapter
         return view
     }
 
-    override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
-       // sharedViewModel.toolWithCountList = list
-    }
-    private fun showPopup() { // UI 블로킹 end
-        isPopupVisible = true
-        popupLayout.requestFocus()
-        popupLayout.setOnClickListener {
-
-        }
-        popupLayout.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-                return@setOnKeyListener true
+    private fun confirm(){
+        val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM
+        val data = gson.toJson(RentalRequestSheetFormDto(
+            "",
+            worker.id,
+            leader.id,
+            toolboxService.getToolbox().id,
+            (recyclerView.adapter as RentalRequestToolAdapter).getResult().map{
+                RentalRequestToolFormDto(it.toolDtoId,it.count)
             }
-            false
-        }
-        popupLayout.visibility = View.VISIBLE
+        ))
+        (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
-    private fun hidePopup() {
-        handler.post {
-            isPopupVisible = false
-            popupLayout.visibility = View.GONE
+
+    override fun handleInput(input: String) {
+        if (toolboxToolLabelService.isToolboxToolLabelExist(input)) {
+            val toolId = toolService.getToolByTBT(input).id
+            (recyclerView.adapter as RentalRequestToolAdapter).addTool(toolId)
+        }else{
+            val type = Constants.BluetoothMessageType.TAG
+            val data = "{\"tag\":\"$input\"}"
+            bluetoothManager?.send(type,data)
         }
-    } // UI 블로킹 end
+    }
+
+    override fun handleTagResponse(response: Any) {
+        if (response is TagDto) (recyclerView.adapter as RentalRequestToolAdapter).addTag(response)
+    }
+
+    //toolboxToolLabel input은 handleInput에서 바로 처리됩니다 (local DB에서 쿼리)
+    override fun handleToolboxToolLabelResponse(response: Any) {}
+
+    override fun onResume() {
+        super.onResume()
+        tagService.inputHandler=this
+        toolboxToolLabelService.inputHandler=this
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        tagService.inputHandler=null
+        toolboxToolLabelService.inputHandler=null
+    }
+
 }

@@ -435,15 +435,80 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.name -> {
-                val pageType: Type = object : TypeToken<Page>() {}.type
-                TODO("not implemented yet")
+                //response
+                val outstandingRentalSheetPage = gson.fromJson(jsonStr, Page::class.java)
+
+                //service update
+                outstandingRentalSheetService.add(outstandingRentalSheetPage)
+
+                //preprocess - parse
+                //val size = outstandingRentalSheetPage.size  ** Page 객체가 JSON으로 불러오는 데이터 포맷과 정확히 호환되지 않고 있습니다
+                //TODO : size <- Page
+                val index = outstandingRentalSheetPage.pageable.page
+                val total = outstandingRentalSheetPage.total
+
+                //preprocess - logic
+                val pageSize = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                Log.i("outstandingRentalSheet","$index / ${total/pageSize} pages inserted. (size : ${pageSize})")
+                loadingPageIndex+=1
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.processMessage,index,total/pageSize)
+                }
+
+                //postprocess - logic
+                if (loadingPageIndex>total/pageSize) {
+
+                    //send 1 - sheet load finished
+                    Log.i("outstandingRentalSheet", "outstandingRentalSheet insert complete (size : ${total})")
+                    handler.post{
+                        listener?.onRequestEnded(OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP.processEndMessage)
+                    }
+
+                } else{
+                    //send 2 - sheet load not finished
+                    val membership = MembershipService.getInstance().loggedInMembership
+                    // 굳이 여기서 assert(!!)를 하진 않겠습니다 : error 핸들링이 어려움.
+                    // 그냥 null 보내놓고 서버에서 IllegalArgumentException 뜨는 게 쉬움.
+
+                    val type = OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP
+                    val data = "{\"size\":${pageSize},\"page\":${loadingPageIndex},\"membershipId\":${membership?.id}}"
+                    send(type, data)
+                }
             }
             OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.name -> {
                 //response
                 val total = gson.fromJson(jsonStr,Int::class.java)
 
                 //service update
-                TODO("not implemented yet")
+                outstandingRentalSheetService.clear()
+
+                //event
+                handler.post{
+                    listener?.onRequestProcessed(OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.processMessage,1,1)
+                }
+                if (total<1) {
+                    handler.post{
+                        listener?.onRequestEnded(OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT.processEndMessage)
+                    }
+                    return
+                }
+
+                //postprocess - logic
+                val size = Constants.SHEET_PAGE_SIZE.coerceAtMost(total)
+                loadingPageIndex=0
+
+                //send
+                val membership = MembershipService.getInstance().loggedInMembership
+                // 굳이 여기서 assert(!!)를 하진 않겠습니다 : error 핸들링이 어려움.
+                // 그냥 null 보내놓고 서버에서 IllegalArgumentException 뜨는 게 쉬움.
+
+                val type = OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP
+                val data = "{\"size\":${size},\"page\":${loadingPageIndex},\"membershipId\":${membership?.id}}"
+                handler.postDelayed({
+                    send(type,data)
+                },Constants.BLUETOOTH_FIRST_OF_SUCCESIVE_SEND_DELAY)
             }
             OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP.name -> {
                 val type: Type = object : TypeToken<List<OutstandingRentalSheetDto>>() {}.type
@@ -510,8 +575,23 @@ class BluetoothManager (private val handler : Handler){
                 }
             }
             RETURN_SHEET_REQUEST.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                //event
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //일관성 대단함
+                        outstandingRentalSheetService.deleteItem()
+                        DialogUtils.showAlertDialog("성공",RETURN_SHEET_REQUEST.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
+                    }
+                }else{
+                    handler.post {
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RETURN_SHEET_REQUEST")
+                    }
+                }
             }
             TOOLBOX_TOOL_LABEL_FORM.name -> {
                 val pageType: Type = object : TypeToken<String>() {}.type
@@ -741,13 +821,27 @@ class BluetoothManager (private val handler : Handler){
                     }
                 }else{
                     handler.post{
-                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_APPROVE")
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_CANCEL")
                     }
                 }
             }
             RENTAL_REQUEST_SHEET_APPLY.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("")
+                        rentalRequestSheetService.deleteItem()
+                        DialogUtils.showAlertDialog("성공",RENTAL_REQUEST_SHEET_APPLY.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        }
+                    }
+                }else{
+                    handler.post{
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_APPLY")
+                    }
+                }
             }
             TAG_AND_TOOLBOX_TOOL_LABEL_FORM.name -> {
                 //response

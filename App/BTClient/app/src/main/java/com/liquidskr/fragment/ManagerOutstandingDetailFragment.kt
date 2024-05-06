@@ -27,6 +27,7 @@ import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
 import java.lang.NullPointerException
 
+//TODO : 파라미터 Bundle 같은 거로 빼놓으세요
 class ManagerOutstandingDetailFragment(private var outstandingRentalSheet: OutstandingRentalSheetDto) : Fragment(),
     InputHandler {
     private lateinit var recyclerView: RecyclerView

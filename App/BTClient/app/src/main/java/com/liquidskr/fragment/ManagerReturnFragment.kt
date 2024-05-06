@@ -30,7 +30,7 @@ import java.lang.NullPointerException
 class ManagerReturnFragment() : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
     //private lateinit var searchSheetEdit: EditText
-    //private lateinit var sheetSearchBtn: ImageButton // 이거 없애냐 마냐 ㅋㅋ
+    //private lateinit var sheetSearchBtn: ImageButton
 
     lateinit var rentalBtnField: LinearLayout
     lateinit var returnBtnField: LinearLayout
@@ -42,7 +42,7 @@ class ManagerReturnFragment() : Fragment(), InputHandler {
 
     private val outstandingRentalSheetService = OutstandingRentalSheetService.getInstance()
 
-    val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
+    private val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_manager_return, container, false)

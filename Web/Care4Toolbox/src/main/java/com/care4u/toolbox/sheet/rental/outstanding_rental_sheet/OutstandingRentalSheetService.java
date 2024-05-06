@@ -216,8 +216,8 @@ public class OutstandingRentalSheetService {
 	public String requestOutstandingState(long id) {
 		Optional<OutstandingRentalSheet> sheetOptional = repository.findById(id);
 		if (sheetOptional.isEmpty()) {
-			logger.error("outstandingSheet not found!");
-			return null;
+			logger.error("OutstandingRentalSheet not found : " + id);
+			throw new NoSuchElementFoundException("OutstandingRentalSheet Id : " + id + " not found.");
 		}
 		OutstandingRentalSheet sheet = sheetOptional.get();
 		sheet.updateOutstandingState(OutstandingState.REQUEST);

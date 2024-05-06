@@ -20,21 +20,20 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.liquidskr.btclient.BluetoothManager_Old
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.StandByAdapter
-import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.membership.MembershipService
 import java.lang.NullPointerException
 
 class ManagerStandByFragment() : Fragment() {
+    /*
     private lateinit var recyclerView: RecyclerView
     lateinit var standbySyncBtn: ImageButton
     val gson = Gson()
-    lateinit var bluetoothManagerOld: BluetoothManager_Old
+
     private lateinit var connectBtn: ImageButton
 
     private val handler = Handler(Looper.getMainLooper()) { true } // UI블로킹 start
@@ -210,4 +209,6 @@ class ManagerStandByFragment() : Fragment() {
             popupLayout.visibility = View.GONE
         }
     }
+
+     */
 }

@@ -27,9 +27,6 @@ import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
 
-    @Deprecated("old")
-    lateinit var bluetoothManagerOld: BluetoothManager_Old
-
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance(
         Handler(Looper.getMainLooper())
     ) }
@@ -94,7 +91,6 @@ class MainActivity : AppCompatActivity() {
         requestPermission()
 
         bluetoothManager.listener=bluetoothManagerListener
-        bluetoothManagerOld = BluetoothManager_Old(this, this)
 
         val mainFragment = LobbyFragment()
         val connectFragment = ReconnectFragment(this.bluetoothManagerListener)
@@ -296,9 +292,5 @@ class MainActivity : AppCompatActivity() {
     }
     fun unregisterBluetoothManagerListener(){
         bluetoothManager.listener=bluetoothManagerListener
-    }
-    @Deprecated("old")
-    fun getBluetoothManagerOnActivity(): BluetoothManager_Old {
-        return bluetoothManagerOld
     }
 }

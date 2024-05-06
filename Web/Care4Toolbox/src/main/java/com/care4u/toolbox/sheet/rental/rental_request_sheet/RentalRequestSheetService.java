@@ -382,8 +382,8 @@ public class RentalRequestSheetService {
 	public RentalRequestSheetDto updateState(long sheetId, SheetState status) {
 		Optional<RentalRequestSheet> findSheet = repository.findById(sheetId);
 		if (findSheet.isEmpty()) {
-			logger.error("rentalSheet not exists! : " + sheetId);
-			return null;
+			logger.error("Sheet not found");
+			throw new IllegalArgumentException("Sheet not found");
 		}
 		RentalRequestSheet sheet = findSheet.get();
 		sheet.updateState(status);

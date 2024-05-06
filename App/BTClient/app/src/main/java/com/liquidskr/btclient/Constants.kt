@@ -32,232 +32,57 @@ object Constants {
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...","대여 신청 정보가 없습니다."),
         RENTAL_REQUEST_SHEET_CANCEL("승인 취소 중...","대여 신청 목록이 삭제되었습니다."),
         RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 승인 처리되었습니다."),
+        RENTAL_REQUEST_SHEET_APPLY("대여 신청 처리 중...","정상적으로 신청 처리되었습니다."),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("대여 저장 목록 정보 불러오는 중...",""),
+        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("대여 저장 목록 정보 크기 확인 중...",""),
         RETURN_SHEET_FORM("반납 승인 처리 중...","정상적으로 승인 처리되었습니다."),
+        RETURN_SHEET_REQUEST("반납 신청 처리 중...","정상적으로 신청 처리되었습니다."),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("미반납 정보 크기 확인 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),
+        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...","미반납 정보가 없습니다."),
+        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),
         TAG("QR 확인 중...",""),
-        TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
-
-        //TODO("이 아래로 메시지 변경 해야함")
-
-        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""), //NOT USING
-        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""), //TODO : NEXT UPDATE
-        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""), //TODO : NEXT UPDATE
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...","미반납 정보가 없습니다."),//TODO : NEXT UPDATE
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//NOT USING
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
-        OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("미반납 정보 크기 확인 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//NOT USING
-        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),//TODO
-        RETURN_SHEET_REQUEST("반납 신청 처리 중...",""),//TODO
-        TAG_FORM("개별 QR코드 등록 중...",""),//TODO
-        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),//TODO
-        TAG_LIST("개별 QR코드 정보 불러오는 중...",""),//TODO
-        TAG_ALL("개별 QR코드 정보 불러오는 중...",""),//TODO
-        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...","선반 QR코드 정보를 전부 불러왔습니다."),//TODO
-        TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_BY_TAG("미반납 정보 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_ID_BY_TAG("미반납 정보 불러오는 중...",""),//TODO
-        TAG_ALL_COUNT("사원 정보 불러오는 중...",""),//TODO
-        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중...",""),//TODO
-        RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중...",""),//TODO : NEXT UPDATE
-        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
-        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP("정보 불러오는 중...",""),//TODO
-        RENTAL_REQUEST_SHEET_READY_PAGE_BY_MEMBERSHIP_COUNT("정보 불러오는 중...",""),//TODO
-        RENTAL_REQUEST_SHEET_APPLY("정보 불러오는 중...",""),//TODO
-        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("QR코드 정보 등록 중","QR코드 정보가 정상적으로 저장되었습니다"),//TODO
-        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),//TODO
-        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),//TODO
         TAG_LIST_BY_TAG_MACADDRESS("개별 QR코드 정보 불러오는 중...",""),
         TAG_LIST_BY_TOOLBOX_TOOL_LABEL_QRCODE("개별 QR코드 정보 불러오는 중...",""),
         TAG_LIST_BY_TOOL_AND_TOOLBOX_ID("개별 QR코드 정보 불러오는 중...",""),
         TAG_AVAILABLE("개별 QR코드 중복 확인 중...",""),
+        TOOLBOX_TOOL_LABEL_ALL("선반 QR코드 정보 불러오는 중...","선반 QR코드 정보를 전부 불러왔습니다."),
+        TOOLBOX_TOOL_LABEL_ALL_COUNT("선반 QR코드 정보 크기 확인 중...",""),
         TOOLBOX_TOOL_LABEL_AVAILABLE("선반 QR코드 중복 확인 중...",""),
-
-        TEST("사원 정보 불러오는 중...",""),
+        TAG_AND_TOOLBOX_TOOL_LABEL_FORM("QR코드 정보 등록 중","QR코드 정보가 정상적으로 저장되었습니다"),
+        TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
 
         DATA_TYPE_EXCEPTION("오류",""),
         DATA_SEMANTIC_EXCEPTION("잘못된 입력",""),
         UNKNOWN_EXCEPTION("오류",""),
 
         // 연결 상태 확인용. CommunicationHandler에서 사용.
-        HI("heartBeat set","")
+        HI("heartBeat set",""),
 
-/*
-        // 각 함수들도 정의해줍니다.
-        fun membershipAll(size: Int, index: Int): String {
-            return MEMBERSHIP_ALL.toString() + ",{\"size\":${size},\"page\":${index}}"
-        }
+        //TODO("이 아래로 메시지 변경 해야함")
 
-        fun membershipAllCount(): String {
-            return MEMBERSHIP_ALL_COUNT.toString()
-        }
+        RENTAL_REQUEST_SHEET_LIST_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""), //NOT USING
+        RENTAL_SHEET_PAGE_BY_MEMBERSHIP("대여 신청 정보 불러오는 중...",""), //TODO : NEXT UPDATE
+        RETURN_SHEET_PAGE_BY_MEMBERSHIP("그없",""), //TODO : NEXT UPDATE
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_MEMBERSHIP("미반납 정보 불러오는 중...",""),//NOT USING
+        OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//NOT USING
+        TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),//TODO
+        TAG_FORM("개별 QR코드 등록 중...",""),//TODO
+        TOOLBOX_TOOL_LABEL("선반 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_LIST("개별 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_ALL("개별 QR코드 정보 불러오는 중...",""),//TODO
+        TAG_GROUP("개별 QR코드 목록 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_ID_BY_TAG("미반납 정보 불러오는 중...",""),
+        TAG_ALL_COUNT("사원 정보 불러오는 중...",""),//TODO
+        RENTAL_REQUEST_SHEET_APPROVE_STANDBY("사원 정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        RENTAL_REQUEST_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        RETURN_SHEET_FORM_STANDBY("정보 불러오는 중...",""),//TODO : NEXT UPDATE
+        TAG_AND_TOOLBOX_TOOL_LABEL("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL_COUNT("정보 불러오는 중...",""),//TODO
+        OUTSTANDING_RENTAL_SHEET_PAGE_ALL("정보 불러오는 중...",""),//TODO
 
-        fun toolAll(size: Int, index: Int): String {
-            return TOOL_ALL.toString() + ",{\"size\":${size},\"page\":${index}}"
-        }
-
-        fun toolAllCount(): String {
-            return TOOL_ALL_COUNT.toString()
-        }
-        fun rentalRequestSheetPageByToolbox() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetListByToolbox() {
-            // 함수 구현
-        }
-
-        fun rentalSheetPageByMembership() {
-            // 함수 구현
-        }
-
-        fun returnSheetPageByMembership() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageByMembership() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetListByMembership() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageByToolbox() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetListByToolbox() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetForm() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetApprove() {
-            // 함수 구현
-        }
-
-        fun returnSheetForm() {
-            // 함수 구현
-        }
-
-        fun toolboxToolLabelForm() {
-            // 함수 구현
-        }
-
-        fun returnSheetRequest() {
-            // 함수 구현
-        }
-
-        fun tagForm() {
-            // 함수 구현
-        }
-
-        fun toolboxToolLabel() {
-            // 함수 구현
-        }
-
-        fun tagList() {
-            // 함수 구현
-        }
-
-        fun tagAll() {
-            // 함수 구현
-        }
-
-        fun toolboxToolLabelAll() {
-            // 함수 구현
-        }
-
-        fun tagGroup() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetByTag() {
-            // 함수 구현
-        }
-
-        fun tagAllCount() {
-            // 함수 구현
-        }
-
-        fun toolboxToolLabelAllCount() {
-            // 함수 구현
-        }
-
-        fun tag() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetApproveStandby() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetFormStandby() {
-            // 함수 구현
-        }
-
-        fun returnSheetFormStandby() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetCancel() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetReadyPageByMembership() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageByMembershipCount() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetReadyPageByMembershipCount() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageByToolboxCount() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetPageByToolboxCount() {
-            // 함수 구현
-        }
-
-        fun rentalRequestSheetApply() {
-            // 함수 구현
-        }
-
-        fun tagAndToolboxToolLabelForm() {
-            // 함수 구현
-        }
-
-        fun tagAndToolboxToolLabel() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageAllCount() {
-            // 함수 구현
-        }
-
-        fun outstandingRentalSheetPageAll() {
-            // 함수 구현
-        }
-
-        fun toolboxAll() {
-            // 함수 구현
-        }
-
-        fun test() {
-            // 함수 구현
-        }
-
- */
+        TEST("사원 정보 불러오는 중...","")
     }
 
     enum class ConnectionState(val value: Int)
