@@ -109,7 +109,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/noto_sans"
                     android:gravity="center"
-                    android:text="대여"
+                    android:text="대여 승인"
                     android:textColor="#32345E"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -138,7 +138,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/noto_sans"
                     android:gravity="center"
-                    android:text="반납"
+                    android:text="반납 승인"
                     android:textColor="#BDBDBD"
                     android:textSize="16sp" />
             </LinearLayout>

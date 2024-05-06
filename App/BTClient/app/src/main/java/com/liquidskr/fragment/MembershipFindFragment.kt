@@ -1,6 +1,5 @@
 package com.liquidskr.fragment
 
-import SharedViewModel
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,14 +8,16 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.MembershipAdapter
 import com.liquidskr.btclient.R
 import com.mrsmart.standard.membership.MembershipDto
-import com.mrsmart.standard.membership.MembershipSQLite
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MembershipFindFragment : Fragment(){
@@ -25,9 +26,8 @@ class MembershipFindFragment : Fragment(){
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
+    private lateinit var memberships: List<MembershipDto>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,27 +38,30 @@ class MembershipFindFragment : Fragment(){
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // DatabaseHelper 인스턴스 생성
         val databaseHelper = DatabaseHelper.getInstance()
-        val memberships: List<MembershipDto> = databaseHelper.getAllMemberships().map{membershipSQLite -> membershipSQLite.toMembershipDto()}
+        val adapter = MembershipAdapter(mutableListOf(), this::onItemClick)
 
-        searchBtn.setOnClickListener {
-            filterByName(memberships, editTextName.text.toString())
+        //Coroutine으로 비동기 로딩 ()
+        GlobalScope.launch(Dispatchers.IO) {
+            Log.d("MembershipFindFragment", "getAllMemberships start")
+            memberships = databaseHelper.getAllMemberships().map{membershipSQLite -> membershipSQLite.toMembershipDto()}
+            Log.d("MembershipFindFragment", "getAllMemberships end")
+            withContext(Dispatchers.Main) {
+                // UI 업데이트
+                adapter.updateList(memberships)
+            }
         }
 
-        val adapter = MembershipAdapter(memberships) { membership ->
-            val type = getType()
-//
-//            if (type == 1) {
-//                sharedViewModel.worker = membership
-//                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
-//
-//            } else if (type == 2) {
-//                sharedViewModel.leader = membership
-//                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
-//            }
-
-            requireActivity().supportFragmentManager.popBackStack()
+        searchBtn.setOnClickListener {
+            //filter by name
+            if (memberships==null) return@setOnClickListener
+            val newList: MutableList<MembershipDto> = mutableListOf()
+            for (membership in memberships) {
+                if (editTextName.text.toString() in membership.name) {
+                    newList.add(membership)
+                }
+            }
+            adapter.updateList(newList)
         }
 
         recyclerView.adapter = adapter
@@ -66,35 +69,24 @@ class MembershipFindFragment : Fragment(){
         return view
     }
 
-    fun filterByName(memberships: List<MembershipDto>, keyword: String) {
-        val newList: MutableList<MembershipDto> = mutableListOf()
-        for (membership in memberships) {
-            if (keyword in membership.name) {
-                newList.add(membership)
-            }
+    private fun onItemClick(membership: MembershipDto) {
+        if (type==1){
+            requireActivity().supportFragmentManager.setFragmentResult("workerId", Bundle().apply {
+                putLong("workerId", membership.id)
+            })
+        } else if (type==2) {
+            requireActivity().supportFragmentManager.setFragmentResult("leaderId", Bundle().apply {
+                putLong("leaderId", membership.id)
+            })
+        } else {
+            Log.d("MembershipFindFragment", "type error")
         }
-        val adapter = MembershipAdapter(newList) { membership ->
-            val type = getType()
-
-//            if (type == 1) {
-//                sharedViewModel.worker = membership
-//                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
-//
-//            } else if (type == 2) {
-//                sharedViewModel.leader = membership
-//                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
-//            }
-
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-        recyclerView.adapter = adapter
+        requireActivity().supportFragmentManager.popBackStack()
     }
+
     companion object {
         private var type: Int = 0
 
-        fun getType(): Int {
-            return type
-        }
         fun newInstance(type: Int): MembershipFindFragment {
             val fragment = MembershipFindFragment()
             this.type = type

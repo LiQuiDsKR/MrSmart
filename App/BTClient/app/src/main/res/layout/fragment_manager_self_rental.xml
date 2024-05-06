@@ -100,8 +100,7 @@
                             android:id="@+id/workerName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="홍길동" />
+                            android:gravity="center" />
 
                         <TextView
                             android:id="@+id/textView16"
@@ -156,8 +155,7 @@
                             android:id="@+id/leaderName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="홍길동" />
+                            android:gravity="center" />
 
                         <TextView
                             android:id="@+id/textView19"

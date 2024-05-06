@@ -17,17 +17,25 @@ import com.google.gson.Gson
 import com.liquidskr.btclient.BluetoothManager
 import com.liquidskr.btclient.Constants
 import com.liquidskr.btclient.DatabaseHelper
+import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
+import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.liquidskr.btclient.RentalRequestToolApproveAdapter
 import com.mrsmart.standard.membership.MembershipDto
+import com.mrsmart.standard.membership.MembershipService
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormDto
+import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolFormSelectedDto
 import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.tool.ToolWithCount
+import com.mrsmart.standard.toolbox.ToolboxService
 
 class ManagerSelfRentalFragment() : Fragment(), InputHandler {
     private lateinit var workerSearchBtn: LinearLayout
@@ -42,11 +50,19 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
     private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var worker: MembershipDto
+    private lateinit var leader: MembershipDto
+
     var gson = Gson()
+    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
+        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+    }
 
     private val tagService = TagService.getInstance()
     private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
     private val toolService = ToolService.getInstance()
+    private val membershipService = MembershipService.getInstance()
+    private val toolboxService = ToolboxService.getInstance()
 
     val bluetoothManager : BluetoothManager by lazy { BluetoothManager.getInstance() }
 
@@ -76,23 +92,33 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
             adapter = RentalRequestToolAdapter(toolList?.toMutableList() ?: mutableListOf())
             recyclerView.adapter = adapter
         }
+        parentFragmentManager.setFragmentResultListener("workerId", this) { key, bundle ->
+            val workerId = bundle.getLong("workerId")
+            worker = membershipService.getMembershipById(workerId)
+            workerName.text = worker.name
+        }
+        parentFragmentManager.setFragmentResultListener("leaderId", this) { key, bundle ->
+            val leaderId = bundle.getLong("leaderId")
+            leader = membershipService.getMembershipById(leaderId)
+            leaderName.text = leader.name
+        }
 
         backButton.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
         workerSearchBtn.setOnClickListener {
-//            val fragment = MembershipFindFragment.newInstance(1) // type = 1
-//            requireActivity().supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragmentContainer, fragment)
-//                .addToBackStack(null)
-//                .commit()
+            val fragment = MembershipFindFragment.newInstance(1) // type = 1 : worker
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
         leaderSearchBtn.setOnClickListener {
-//            val fragment = MembershipFindFragment.newInstance(2) // type = 2
-//            requireActivity().supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragmentContainer, fragment)
-//                .addToBackStack(null)
-//                .commit()
+            val fragment = MembershipFindFragment.newInstance(2) // type = 2 : leader
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
         addToolBtn.setOnClickListener {
             val fragment = ToolFindFragment(adapter.getResult().map{it.toolDtoId}.toMutableList())
@@ -102,10 +128,48 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
                 .commit()
         }
         clearBtn.setOnClickListener {
+            //workerName.text = ""
+            //leaderName.text = ""
+            adapter = RentalRequestToolAdapter(mutableListOf())
+            recyclerView.adapter = adapter
+        }
+        confirmBtn.setOnClickListener{
+            if (workerName.text=="") {
+                DialogUtils.showAlertDialog("작업자 미선택", "작업자가 선택되지 않았습니다. 작업자를 선택해주세요.")
+                return@setOnClickListener
+            }
+            if (leaderName.text==""){
+                DialogUtils.showAlertDialog("리더 미선택","리더가 선택되지 않았습니다. 리더를 선택해주세요.")
+                return@setOnClickListener
+            }
 
+            if (adapter.isNothingSelected()){
+                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 승인해주세요.")
+            }else if (!adapter.areAllSelected()){
+                DialogUtils.showAlertDialog("대여 승인","신청된 공기구 중 일부만 선택하셨습니다. 정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }else{
+                // 240506 위의 두 조건 분기는 들어갈 일 없음.
+                DialogUtils.showAlertDialog("대여 승인", "정말로 승인하시겠습니까?",
+                    { _,_->confirm() }, { _,_-> })
+            }
         }
         recyclerView.adapter = adapter
         return view
+    }
+
+    private fun confirm(){
+        val type = Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM
+        val data = gson.toJson(RentalRequestSheetFormDto(
+            "",
+            worker.id,
+            leader.id,
+            toolboxService.getToolbox().id,
+            (recyclerView.adapter as RentalRequestToolAdapter).getResult().map{
+                RentalRequestToolFormDto(it.toolDtoId,it.count)
+            }
+        ))
+        (requireActivity() as MainActivity).bluetoothManager?.send(type,data)
     }
 
     override fun handleInput(input: String) {

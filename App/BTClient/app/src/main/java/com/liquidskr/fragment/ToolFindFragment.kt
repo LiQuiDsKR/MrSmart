@@ -31,6 +31,8 @@ class ToolFindFragment(private val selectedToolIdList : MutableList<Long>) : Fra
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
+    private lateinit var tools : List<ToolSQLite>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,19 +46,12 @@ class ToolFindFragment(private val selectedToolIdList : MutableList<Long>) : Fra
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
         val databaseHelper = DatabaseHelper.getInstance()
-        // 굳이 toolService에서 DTO로 변환 후 받는 것보단 SQLite로 받는게 더 빠를 것 같음
-        // TODO : ToolRegisterFragment에서도 ToolSQLite로 받아서 넘겨주는 것으로 수정
-//        Log.d("ToolFindFragment", "getAllTools start")
-//        val tools: List<ToolSQLite> = databaseHelper.getToolsByQuery("")
-//        Log.d("ToolFindFragment", "getAllTools end")
-
-
-
         val adapter = ToolAdapter(mutableListOf())
+
         //Coroutine으로 비동기 로딩 (평균 2.5초 정도 걸림)
         GlobalScope.launch(Dispatchers.IO) {
             Log.d("ToolFindFragment", "getAllTools start")
-            val tools: List<ToolSQLite> = databaseHelper.getAllTools()
+            tools = databaseHelper.getAllTools()
             Log.d("ToolFindFragment", "getAllTools end")
             withContext(Dispatchers.Main) {
                 // UI 업데이트
@@ -79,8 +74,9 @@ class ToolFindFragment(private val selectedToolIdList : MutableList<Long>) : Fra
         }
         searchBtn.setOnClickListener {
             //filter by name
+            if (tools==null) return@setOnClickListener
             val newList: MutableList<ToolSQLite> = mutableListOf()
-            for (tool in adapter.tools) {
+            for (tool in tools) {
                 if ( editTextName.text.toString() in tool.name) {
                     newList.add(tool)
                 }

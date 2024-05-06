@@ -25,7 +25,7 @@ class MembershipAdapter(var memberships: List<MembershipDto>, private val onItem
     override fun onBindViewHolder(holder: MembershipViewHolder, position: Int) {
         val currentMembership = memberships[position]
         holder.membershipName.text = currentMembership.name
-        holder.membershipPart.text = "${currentMembership.partDto.subPartDto.mainPartDto.name} / ${currentMembership.partDto.subPartDto.name} / ${currentMembership.partDto}"
+        holder.membershipPart.text = "${currentMembership.partDto.subPartDto.mainPartDto.name} / ${currentMembership.partDto.subPartDto.name} / ${currentMembership.partDto.name}"
 
         holder.itemView.setOnClickListener {
             onItemClick(currentMembership)
