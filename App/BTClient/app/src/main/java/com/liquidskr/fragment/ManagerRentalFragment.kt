@@ -78,6 +78,12 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
 
         returnBtnField.setOnClickListener {
             fragmentTransform(ManagerReturnFragment(manager), "ManagerRentalFragment")
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type =Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
 //        standbyBtnField.setOnClickListener {
@@ -98,9 +104,6 @@ class ManagerRentalFragment(val manager: MembershipDto) : Fragment() {
         recyclerView.layoutManager = layoutManager
 
         selfRentalBtn.setOnClickListener {
-            sharedViewModel.worker = null
-            sharedViewModel.leader = null
-            sharedViewModel.rentalRequestToolIdList.clear()
             fragmentTransform(ManagerSelfRentalFragment(), null)
         }
 

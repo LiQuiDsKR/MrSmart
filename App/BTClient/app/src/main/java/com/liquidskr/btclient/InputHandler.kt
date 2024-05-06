@@ -18,7 +18,7 @@ interface InputHandler {
 
     /**
      * handlerInput에서 송신한 정보의 Response 중 toolboxToolLabel에 대한 응답을 처리하는 메서드.
-     * TagService가 handler.post로 호출한다.
+     * ToolboxToolLabelService가 handler.post로 호출한다.
      */
     fun handleToolboxToolLabelResponse(response: Any)
 

@@ -80,9 +80,9 @@ class ManagerReturnFragment(val manager: MembershipDto) : Fragment(), InputHandl
             val toolboxService = ToolboxService.getInstance()
             val toolbox = toolboxService.getToolbox()
 
-            //val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-            //val data ="{toolboxId:${toolbox.id}}"
-            //bluetoothManager?.send(type,data)
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {

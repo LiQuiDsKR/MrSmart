@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils.replace
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -84,51 +85,51 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val toolList: MutableList<ToolWithCount> = mutableListOf() // fragment 이동 전 공구 목록
-        toolList.addAll(sharedViewModel.toolWithCountList)
+        //toolList.addAll(sharedViewModel.toolWithCountList)
         val newToolList: MutableList<ToolWithCount> = mutableListOf() // toolFindFragment에서 추가한것 추가
 
-        for (id in sharedViewModel.rentalRequestToolIdList) {
-            var toolWithCountFound = false
-
-            for (toolWithCount in toolList) {
-                if (id == toolWithCount.tool.id) {
-                    // 이미 존재하는 경우
-                    toolWithCount.count += 1
-                    toolWithCountFound = true
-                    break
-                }
-            }
-            if (!toolWithCountFound) {
-                // 존재하지 않는 경우
-                val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
-                newToolList.add(toolWithCount)
-            }
-        }
+//        for (id in sharedViewModel.rentalRequestToolIdList) {
+//            var toolWithCountFound = false
+//
+//            for (toolWithCount in toolList) {
+//                if (id == toolWithCount.tool.id) {
+//                    // 이미 존재하는 경우
+//                    toolWithCount.count += 1
+//                    toolWithCountFound = true
+//                    break
+//                }
+//            }
+//            if (!toolWithCountFound) {
+//                // 존재하지 않는 경우
+//                val toolWithCount = ToolWithCount(dbHelper.getToolById(id), 1)
+//                newToolList.add(toolWithCount)
+//            }
+//        }
         
         val adapter = RentalToolAdapter(toolList, this)
         var finalToolList: MutableList<ToolWithCount> = toolList
         finalToolList.addAll(newToolList)
         adapter.updateList(finalToolList)
-        sharedViewModel.toolWithCountList = adapter.tools
-        sharedViewModel.rentalRequestToolIdList.clear()
-
-        worker = sharedViewModel.loginWorker
-        workerName.text = sharedViewModel.loginWorker!!.name
-        leader = sharedViewModel.leader
-        leaderName.text = sharedViewModel.leader!!.name
-
-        backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-        leaderSearchBtn.setOnClickListener {
-            sharedViewModel.toolWithCountList = adapter.tools
-
-            val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
+//        sharedViewModel.toolWithCountList = adapter.tools
+//        sharedViewModel.rentalRequestToolIdList.clear()
+//
+//        worker = sharedViewModel.loginWorker
+//        workerName.text = sharedViewModel.loginWorker!!.name
+//        leader = sharedViewModel.leader
+//        leaderName.text = sharedViewModel.leader!!.name
+//
+//        backButton.setOnClickListener {
+//            requireActivity().supportFragmentManager.popBackStack()
+//        }
+//        leaderSearchBtn.setOnClickListener {
+//            sharedViewModel.toolWithCountList = adapter.tools
+//
+//            val fragment = WorkerMembershipFindFragment.newInstance(2) // type = 2
+//            requireActivity().supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragmentContainer, fragment)
+//                .addToBackStack(null)
+//                .commit()
+//        }
         qrEditText.setOnEditorActionListener { _, actionId, event ->
             Log.d("tst","textEditted")
             if (actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)) {
@@ -152,7 +153,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                             }
                         }
                     }
-                    sharedViewModel.toolWithCountList = adapter.tools
+                    //sharedViewModel.toolWithCountList = adapter.tools
                     recyclerView.adapter = adapter
 
                 } catch (e: UninitializedPropertyAccessException) {
@@ -172,13 +173,13 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
         }
 
         addToolBtn.setOnClickListener {
-            sharedViewModel.toolWithCountList = adapter.tools
+            //sharedViewModel.toolWithCountList = adapter.tools
 
-            val fragment = ToolFindFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
+//            //val fragment = ToolFindFragment()
+//            //requireActivity().supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragmentContainer, fragment)
+//                .addToBackStack(null)
+//                .commit()
         }
         confirmBtn.setOnClickListener {
             if (adapter is RentalToolAdapter) {
@@ -197,10 +198,10 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
                                     handler.post {
                                         Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
                                     }
-                                    sharedViewModel.worker = null
-                                    sharedViewModel.leader = null
-                                    sharedViewModel.rentalRequestToolIdList.clear()
-                                    sharedViewModel.toolWithCountList.clear()
+//                                    sharedViewModel.worker = null
+//                                    sharedViewModel.leader = null
+//                                    sharedViewModel.rentalRequestToolIdList.clear()
+//                                    sharedViewModel.toolWithCountList.clear()
                                     requireActivity().supportFragmentManager.popBackStack()
                                 }
                                 override fun onError(e: Exception) {
@@ -223,9 +224,9 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
             }
         }
         clearBtn.setOnClickListener {
-            sharedViewModel.rentalRequestToolIdList.clear()
-            sharedViewModel.toolWithCountList.clear()
-            sharedViewModel.toolWithCountList = adapter.tools
+//            sharedViewModel.rentalRequestToolIdList.clear()
+//            sharedViewModel.toolWithCountList.clear()
+//            sharedViewModel.toolWithCountList = adapter.tools
             var toolList: MutableList<ToolWithCount> = mutableListOf()
             adapter.updateList(toolList)
         }
@@ -241,7 +242,7 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
     }
 
     override fun onDeleteItemClicked(list: MutableList<ToolWithCount>) {
-        sharedViewModel.toolWithCountList = list
+       // sharedViewModel.toolWithCountList = list
     }
     private fun showPopup() { // UI 블로킹 end
         isPopupVisible = true

@@ -142,10 +142,10 @@ class WorkerRentalListFragment(var worker: MembershipDto) : Fragment() {
             val mainActivity = activity as? MainActivity
 
             // managerRentalFragment가 null이 아니라면 프래그먼트 교체
-            sharedViewModel.worker = null
-            sharedViewModel.leader = null
-            sharedViewModel.rentalRequestToolIdList.clear()
-            sharedViewModel.toolWithCountList.clear()
+//            sharedViewModel.worker = null
+//            sharedViewModel.leader = null
+//            sharedViewModel.rentalRequestToolIdList.clear()
+//            sharedViewModel.toolWithCountList.clear()
             val fragment = WorkerSelfRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)

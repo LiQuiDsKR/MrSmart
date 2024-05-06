@@ -19,7 +19,6 @@ import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.OutstandingDetailAdapter
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestToolAdapter
 import com.mrsmart.standard.sheet.outstanding.OutstandingRentalSheetDto
 import com.mrsmart.standard.sheet.`return`.ReturnSheetFormDto
 import com.mrsmart.standard.sheet.`return`.ReturnToolFormDto

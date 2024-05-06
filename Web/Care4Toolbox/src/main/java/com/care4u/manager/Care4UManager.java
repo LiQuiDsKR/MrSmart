@@ -342,17 +342,26 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 		//RentalRequestSheetFormDto를 통해 RentalRequestSheet(status : REQUEST)를 생성
 		//관리자 - 대여 신청 페이지 - 확인 버튼 터치시 신청됨.
 		case RENTAL_REQUEST_SHEET_FORM:
-			if (!(paramJson.isEmpty() || paramJson==null)) {
-				RentalRequestSheetFormDto formDto;
-		    	try {
+			try {
+				if (!(paramJson.isEmpty() || paramJson==null)) {
+					RentalRequestSheetFormDto formDto;
 					formDto = GsonUtils.fromJson(paramJson, RentalRequestSheetFormDto.class);
 		    		rentalRequestSheetService.addNew(formDto,SheetState.REQUEST);
 		    		handler.sendData(keyword + "good");
-		    	}catch(Exception e) {
-		    		handler.sendData(keyword + "bad, "+ e.getMessage());
-		    		logger.error("bad, " , e);
-		    	}
-			}	
+				}	
+			}catch(JSONException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(OutOfStockException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION+","+keyword+","+e.getMessage());
+			}catch(IllegalArgumentException e) {
+				handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+keyword+","+e.getMessage());
+			} catch (NoSuchElementFoundException e) {
+				handler.sendData(RequestType.DATA_SEMANTIC_EXCEPTION + "," + keyword + "," + e.getMessage());
+			}catch (NullPointerException e) {
+                handler.sendData(RequestType.DATA_TYPE_EXCEPTION+","+ keyword +","+ e.getMessage());
+			}catch(Exception e) {
+				handler.sendData(RequestType.UNKNOWN_EXCEPTION+","+ keyword +","+ e.getMessage());
+			}
 			break;
 		//RentalRequestSheetFormWithTimestampDto를 통해 RentalRequestSheet(status : REQUEST)를 생성.
 		//관리자 - 보류 페이지 - 동기화 시 신청됨.
@@ -603,6 +612,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			} catch (Exception e) {
 				handler.sendData(RequestType.UNKNOWN_EXCEPTION + "," + keyword + "," + e.getMessage());
 			}
+			break;
 		case RETURN_SHEET_REQUEST:
 			if (!(paramJson.isEmpty() || paramJson==null)) {
 				JSONObject jsonObj = new JSONObject(paramJson);

@@ -19,25 +19,22 @@ import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.R
 import com.liquidskr.btclient.ToolAdapter
 import com.mrsmart.standard.tool.ToolSQLite
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-
-class ToolFindFragment() : Fragment() {
+class ToolFindFragment(private val selectedToolIdList : MutableList<Long>) : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var confirmBtn: LinearLayout
-    private lateinit var bluetoothManagerOld: BluetoothManager_Old
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
 
-    private val sharedViewModel: SharedViewModel by lazy { // Access to SharedViewModel
-        ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        bluetoothManagerOld = BluetoothManager_Old(requireContext(), requireActivity())
-        val gson = Gson()
         val view = inflater.inflate(R.layout.fragment_tool_list, container, false)
 
         editTextName = view.findViewById(R.id.editTextName)
@@ -46,47 +43,59 @@ class ToolFindFragment() : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         confirmBtn = view.findViewById(R.id.confirmBtn)
 
-
         val databaseHelper = DatabaseHelper.getInstance()
-        val tools: List<ToolSQLite> = databaseHelper.getAllTools() // 재고가 포함된, 특정 toolbox의 toolList를 가져와야함 >> X
-        val adapter = ToolAdapter(tools) {
+        // 굳이 toolService에서 DTO로 변환 후 받는 것보단 SQLite로 받는게 더 빠를 것 같음
+        // TODO : ToolRegisterFragment에서도 ToolSQLite로 받아서 넘겨주는 것으로 수정
+//        Log.d("ToolFindFragment", "getAllTools start")
+//        val tools: List<ToolSQLite> = databaseHelper.getToolsByQuery("")
+//        Log.d("ToolFindFragment", "getAllTools end")
 
+
+
+        val adapter = ToolAdapter(mutableListOf())
+        //Coroutine으로 비동기 로딩 (평균 2.5초 정도 걸림)
+        GlobalScope.launch(Dispatchers.IO) {
+            Log.d("ToolFindFragment", "getAllTools start")
+            val tools: List<ToolSQLite> = databaseHelper.getAllTools()
+            Log.d("ToolFindFragment", "getAllTools end")
+            withContext(Dispatchers.Main) {
+                // UI 업데이트
+                adapter.updateList(tools)
+                for (toolId in selectedToolIdList) {
+                    adapter.selectTool(toolId)
+                }
+            }
         }
+
         confirmBtn.setOnClickListener {
-            printFragmentStack()
             val toolIdList: MutableList<Long> = mutableListOf()
             for (tool: ToolSQLite in adapter.getSelectedTools()) {
-                toolIdList.add(tool.id) // sharedViewModel 의 rental_ToolList 에다가 toolList의 내용을 복사
+                toolIdList.add(tool.id)
             }
-            sharedViewModel.rentalRequestToolIdList.clear()
-            sharedViewModel.rentalRequestToolIdList.addAll(toolIdList)
+            requireActivity().supportFragmentManager.setFragmentResult("toolIdList", Bundle().apply {
+                putLongArray("toolIdList", toolIdList.toLongArray())
+            })
             requireActivity().supportFragmentManager.popBackStack()
         }
         searchBtn.setOnClickListener {
-            filterByName(adapter, tools, editTextName.text.toString())
+            //filter by name
+            val newList: MutableList<ToolSQLite> = mutableListOf()
+            for (tool in adapter.tools) {
+                if ( editTextName.text.toString() in tool.name) {
+                    newList.add(tool)
+                }
+            }
+            adapter.updateList(newList)
         }
 
         recyclerView.adapter = adapter
 
+        Log.d("ToolFindFragment", "return view")
         return view
     }
-    fun filterByName(adapter: ToolAdapter, tools: List<ToolSQLite>, keyword: String) {
-        val newList: MutableList<ToolSQLite> = mutableListOf()
-        for (tool in tools) {
-            if (keyword in tool.name) {
-                newList.add(tool)
-            }
-        }
-        adapter.updateList(newList)
-    }
-    fun printFragmentStack() {
-        val activity = requireActivity()
-        val fragmentManager = activity.supportFragmentManager
-        val backStackCount = fragmentManager.backStackEntryCount
 
-        for (i in 0 until backStackCount) {
-            val fragmentName = fragmentManager.getBackStackEntryAt(i).javaClass.simpleName
-            Log.d("FragmentStack", "position : ${fragmentName}")
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d("ToolFindFragment", "onViewCreated")
     }
 }

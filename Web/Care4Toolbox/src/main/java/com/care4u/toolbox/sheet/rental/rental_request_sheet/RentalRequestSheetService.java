@@ -193,52 +193,77 @@ public class RentalRequestSheetService {
 
 	@Transactional
 	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto) {
+		
+		logger.debug("RentalRequestSheet [Add] : Start");
 
+		// parameter null check
 		Optional<Membership> worker = membershipRepository.findById(formDto.getWorkerDtoId());
 		Optional<Membership> leader = membershipRepository.findById(formDto.getLeaderDtoId());
 		Optional<Toolbox> toolbox = toolboxRepository.findById(formDto.getToolboxDtoId());
 		if (worker.isEmpty()) {
-			logger.debug("worker : " + worker);
-			return null;
+			logger.debug("Worker not found");
+			throw new IllegalArgumentException("Worker not found");
 		}
 		if (leader.isEmpty()) {
-			logger.debug("leader :" + leader);
-			return null;
+			logger.debug("Leader not found");
+			throw new IllegalArgumentException("Leader not found");
 		}
 		if (toolbox.isEmpty()) {
-			logger.debug("toolbox : " + toolbox);
-			return null;
+			logger.debug("Toolbox not found");
+			throw new IllegalArgumentException("Toolbox not found");
 		}
 
 		logger.debug("worker : " + worker + "\r\n" + "leader : " + leader + "\r\n" + "toolbox : " + toolbox);
+		logger.debug("RentalRequestSheet [Add] : Param Null check completed");
 
-		RentalRequestSheet rentalRequestSheet = RentalRequestSheet.builder().worker(worker.get()).leader(leader.get())
-				.status(SheetState.READY).toolbox(toolbox.get()).eventTimestamp(LocalDateTime.now()).build();
+		// sheet save
+		RentalRequestSheet rentalRequestSheet = RentalRequestSheet.builder()
+				.worker(worker.get())
+				.leader(leader.get())
+				.status(SheetState.READY)
+				.toolbox(toolbox.get())
+				.eventTimestamp(LocalDateTime.now())
+				.build();
 
 		RentalRequestSheet savedRentalRequestSheet = repository.save(rentalRequestSheet);
+		
+		logger.debug("RentalRequestSheet [Add] : RentalRequestSheet("+savedRentalRequestSheet.getId()+") saved");
 
+		// tool save
 		List<RentalRequestTool> toolList = new ArrayList<RentalRequestTool>();
+		
+		logger.debug("RentalRequestSheet [Add] : RentalRequestToolList Add start");
 		for (RentalRequestToolFormDto tool : formDto.getToolList()) {
 			RentalRequestTool newTool = rentalRequestToolService.addNew(tool, savedRentalRequestSheet);
 			toolList.add(newTool);
+			logger.info(newTool.getTool().getName() + " added to RentalSheet:" + savedRentalRequestSheet.getId());
 		}
-		return convertToDto(savedRentalRequestSheet);
+		logger.debug("RentalRequestSheet [Add] : RentalRequestToolList Add complete");
+		
+		logger.debug("RentalRequestSheet [Add] : Dto convert start");
+		RentalRequestSheetDto sheetdto = convertToDto(savedRentalRequestSheet);
+		logger.debug("RentalRequestSheet [Add] : Dto convert complete");
+		
+		return sheetdto; 
 	}
 
 	// 위를 호출
 	@Transactional
 	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, SheetState status) {
 		RentalRequestSheetDto sheetDto = addNew(formDto);
-		return update(sheetDto, status);
+		RentalRequestSheetDto updatedSheetDto = update(sheetDto, status);
+		logger.debug("RentalRequestSheet [Add] : RentalRequestSheetDto(" + sheetDto.getId() + ") updated to " + status);
+		return updatedSheetDto;
 	}
 
 	// 위를 호출
+	// eventTimestamp가 같을 경우, 중복 신청으로 판단. STANDBY 용.
 	@Transactional
 	public RentalRequestSheetDto addNew(RentalRequestSheetFormDto formDto, LocalDateTime eventTimestamp,
 			SheetState status) {
 		RentalRequestSheet findSheet = repository.findByEventTimestamp(eventTimestamp);
 		if (findSheet != null) {
-			logger.error("rntalSheet already exists! : " + eventTimestamp);
+			logger.error("rentalSheet already exists! : " + eventTimestamp);
 			return null;
 		} else {
 			Optional<RentalRequestSheet> sheetOptional = repository.findById(addNew(formDto, status).getId());

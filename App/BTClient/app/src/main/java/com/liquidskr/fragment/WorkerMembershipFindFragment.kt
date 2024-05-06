@@ -43,8 +43,8 @@ class WorkerMembershipFindFragment : Fragment(){
         val memberships: List<MembershipDto> = databaseHelper.getAllMemberships().map{membershipSQLite -> membershipSQLite.toMembershipDto() }
 
         val adapter = MembershipAdapter(memberships) { membership ->
-            sharedViewModel.leader = membership
-            Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
+            //sharedViewModel.leader = membership
+            //Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
             requireActivity().supportFragmentManager.popBackStack()
         }
         searchBtn.setOnClickListener {

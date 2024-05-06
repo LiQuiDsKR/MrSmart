@@ -4,6 +4,7 @@ import SharedViewModel
 import android.content.Context
 import android.nfc.Tag
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -32,9 +33,14 @@ import com.mrsmart.standard.tag.TagDto
 import com.mrsmart.standard.tag.TagService
 import com.mrsmart.standard.tag.ToolboxToolLabelService
 import com.mrsmart.standard.tool.ToolDto
+import com.mrsmart.standard.tool.ToolSQLite
 import com.mrsmart.standard.tool.ToolService
 import com.mrsmart.standard.toolbox.ToolboxService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.withContext
 
 
 class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandler {
@@ -83,14 +89,22 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
         //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
         registerBtnField = view.findViewById(R.id.RegisterBtnField)
 
-        val tools: List<ToolDto> = toolService.getAllTools()
 
-        val adapter = ToolRegisterAdapter(tools){
+        val adapter = ToolRegisterAdapter(mutableListOf()){
             selectedTag=null
             selectedToolId = it.id
             val type = Constants.BluetoothMessageType.TAG_LIST_BY_TOOL_AND_TOOLBOX_ID
             val data = "{\"toolId\":${it.id},\"toolboxId\":${toolboxService.getToolbox().id}}"
             bluetoothManager?.send(type,data)
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            Log.d("ToolRegisterFragment", "getAllTools start")
+            val tools: List<ToolDto> = toolService.getAllTools()
+            Log.d("ToolRegisterFragment", "getAllTools end")
+            withContext(Dispatchers.Main) {
+                // UI 업데이트
+                adapter.updateList(tools)
+            }
         }
 
         rentalBtnField.setOnClickListener {
@@ -102,9 +116,9 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
             val toolboxService = ToolboxService.getInstance()
             val toolbox = toolboxService.getToolbox()
 
-            //val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
-            //val data ="{toolboxId:${toolbox.id}}"
-            //bluetoothManager?.send(type,data)
+            val type =Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data ="{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         returnBtnField.setOnClickListener {
@@ -113,6 +127,12 @@ class ToolRegisterFragment(val manager: MembershipDto) : Fragment(), InputHandle
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("ToolRegisterFragment")
                 .commit()
+            val toolboxService = ToolboxService.getInstance()
+            val toolbox = toolboxService.getToolbox()
+
+            val type = Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT
+            val data = "{toolboxId:${toolbox.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         /*

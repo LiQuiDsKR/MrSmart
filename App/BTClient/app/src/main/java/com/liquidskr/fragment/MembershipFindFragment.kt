@@ -48,15 +48,15 @@ class MembershipFindFragment : Fragment(){
 
         val adapter = MembershipAdapter(memberships) { membership ->
             val type = getType()
-
-            if (type == 1) {
-                sharedViewModel.worker = membership
-                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
-
-            } else if (type == 2) {
-                sharedViewModel.leader = membership
-                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
-            }
+//
+//            if (type == 1) {
+//                sharedViewModel.worker = membership
+//                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
+//
+//            } else if (type == 2) {
+//                sharedViewModel.leader = membership
+//                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
+//            }
 
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -76,14 +76,14 @@ class MembershipFindFragment : Fragment(){
         val adapter = MembershipAdapter(newList) { membership ->
             val type = getType()
 
-            if (type == 1) {
-                sharedViewModel.worker = membership
-                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
-
-            } else if (type == 2) {
-                sharedViewModel.leader = membership
-                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
-            }
+//            if (type == 1) {
+//                sharedViewModel.worker = membership
+//                Log.d("test", membership.toString() + "///" + sharedViewModel.worker.toString())
+//
+//            } else if (type == 2) {
+//                sharedViewModel.leader = membership
+//                Log.d("test", membership.toString() + "///" + sharedViewModel.leader.toString())
+//            }
 
             requireActivity().supportFragmentManager.popBackStack()
         }

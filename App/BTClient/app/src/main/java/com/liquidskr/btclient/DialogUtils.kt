@@ -2,6 +2,7 @@ package com.liquidskr.btclient
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.text.InputFilter
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.ImageView
@@ -77,6 +78,12 @@ object DialogUtils {
         val editText = EditText(activity)
         editText.setText(defaultText)
         editText.inputType = inputType
+        if (inputType == android.text.InputType.TYPE_CLASS_NUMBER){
+            editText.setRawInputType(android.text.InputType.TYPE_CLASS_NUMBER)
+            val maxLength = 9
+            val filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
+            editText.filters = filters
+        }
 
         val builder = AlertDialog.Builder(activity)
             .setTitle(title)

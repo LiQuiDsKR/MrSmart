@@ -18,7 +18,7 @@ import com.liquidskr.btclient.DialogUtils
 import com.liquidskr.btclient.InputHandler
 import com.liquidskr.btclient.MainActivity
 import com.liquidskr.btclient.R
-import com.liquidskr.btclient.RentalRequestToolAdapter
+import com.liquidskr.btclient.RentalRequestToolApproveAdapter
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetApproveFormDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestSheetDto
 import com.mrsmart.standard.sheet.rentalrequest.RentalRequestToolApproveFormDto
@@ -60,7 +60,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
         leaderName.text = rentalRequestSheetDto.leaderDto.name
         timeStamp.text = rentalRequestSheetDto.eventTimestamp //LocalDateTime.parse(rentalRequestSheet.eventTimestamp).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
-        var adapter = RentalRequestToolAdapter(
+        var adapter = RentalRequestToolApproveAdapter(
             rentalRequestSheetDto.toolList.map{
                 RentalRequestToolApproveFormSelectedDto(
                     id = it.id,
@@ -110,7 +110,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
                 rentalRequestSheetDto.leaderDto.id,
                 sharedViewModel.loginManager!!.id,
                 rentalRequestSheetDto.toolboxDto.id,
-                (recyclerView.adapter as RentalRequestToolAdapter).getResult().map{
+                (recyclerView.adapter as RentalRequestToolApproveAdapter).getResult().map{
                     RentalRequestToolApproveFormDto(it.id,it.toolDtoId,it.count,it.tags)
                 }
         ))
@@ -147,7 +147,7 @@ class ManagerRentalDetailFragment(private var rentalRequestSheetDto: RentalReque
 
     override fun handleTagResponse(response: Any) {
         if (response is TagDto)
-                (recyclerView.adapter as RentalRequestToolAdapter).tagAdded(response)
+                (recyclerView.adapter as RentalRequestToolApproveAdapter).addTag(response)
     }
 
     override fun handleToolboxToolLabelResponse(response: Any) {}

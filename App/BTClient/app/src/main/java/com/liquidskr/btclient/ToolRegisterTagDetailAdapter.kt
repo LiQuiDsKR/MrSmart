@@ -11,6 +11,9 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * ToolRegisterDetailFragment에서 Tag를 보여주는 RecyclerView Adapter
+ */
 class ToolRegisterTagDetailAdapter(var tagList: MutableList<String>) :
     RecyclerView.Adapter<ToolRegisterTagDetailAdapter.ToolViewHolder>() {
 

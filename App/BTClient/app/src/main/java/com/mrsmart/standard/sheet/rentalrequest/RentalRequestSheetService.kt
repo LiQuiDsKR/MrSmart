@@ -5,13 +5,8 @@ import android.os.Looper
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.liquidskr.btclient.Constants
-import com.liquidskr.btclient.DatabaseHelper
 import com.liquidskr.btclient.RentalRequestSheetAdapter
-import com.mrsmart.standard.membership.MembershipDto
 import com.mrsmart.standard.page.Page
-import com.mrsmart.standard.tool.ToolDto
-import com.mrsmart.standard.tool.ToolService
 
 class RentalRequestSheetService private constructor() {
     //얘는 Db까지 갈건 없음 ㅇㅇ 걍 임시 데이터 저장소? 느낌
