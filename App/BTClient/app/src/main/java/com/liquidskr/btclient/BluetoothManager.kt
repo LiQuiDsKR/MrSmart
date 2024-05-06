@@ -453,8 +453,22 @@ class BluetoothManager (private val handler : Handler){
                 TODO("not implemented yet")
             }
             RENTAL_REQUEST_SHEET_FORM.name -> {
-                val type: Type = object : TypeToken<String>() {}.type
-                TODO("not implemented yet")
+                //response
+                val message = gson.fromJson(jsonStr,String::class.java)
+
+                //event
+                if (message=="good"){
+                    handler.post{
+                        listener?.onRequestEnded("") //일관성 대단함
+                        DialogUtils.showAlertDialog("성공",RENTAL_REQUEST_SHEET_FORM.processEndMessage){
+                                _,_-> DialogUtils.activity.supportFragmentManager.popBackStack()
+                        } //이게되네요... 이게되네...ㅋㅋㅋㅋ
+                    }
+                }else{
+                    handler.post{
+                        listener?.onRequestFailed("알수없는오류발생 : $message : RENTAL_REQUEST_SHEET_FORM")
+                    }
+                }
             }
             RENTAL_REQUEST_SHEET_APPROVE.name -> {
                 //response

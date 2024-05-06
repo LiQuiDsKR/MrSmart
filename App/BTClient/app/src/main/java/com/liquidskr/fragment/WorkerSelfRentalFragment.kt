@@ -182,46 +182,6 @@ class WorkerSelfRentalFragment() : Fragment(), RentalToolAdapter.OnDeleteItemCli
 //                .commit()
         }
         confirmBtn.setOnClickListener {
-            if (adapter is RentalToolAdapter) {
-                if (adapter.tools.isNotEmpty()) {
-                    showPopup() // UI 블로킹
-                    val rentalRequestToolFormDtoList: MutableList<RentalRequestToolFormDto> = mutableListOf()
-                    for (toolwithCnt in adapter.tools) {
-                        rentalRequestToolFormDtoList.add(RentalRequestToolFormDto(toolwithCnt.tool.id, toolwithCnt.count))
-                    }
-                    if (!(worker!!.code.equals(""))) {
-                        if (!(leader!!.code.equals(""))) {
-                            val rentalRequestSheet = gson.toJson(RentalRequestSheetFormDto("DefaultWorkName", worker!!.id, leader!!.id, sharedViewModel.toolBoxId ,rentalRequestToolFormDtoList.toList()))
-                            bluetoothManagerOld.requestData(Constants.BluetoothMessageType.RENTAL_REQUEST_SHEET_FORM, rentalRequestSheet, object:
-                                BluetoothManager_Old.RequestCallback{
-                                override fun onSuccess(result: String, type: Type) {
-                                    handler.post {
-                                        Toast.makeText(requireActivity(), "대여 신청 완료", Toast.LENGTH_SHORT).show()
-                                    }
-//                                    sharedViewModel.worker = null
-//                                    sharedViewModel.leader = null
-//                                    sharedViewModel.rentalRequestToolIdList.clear()
-//                                    sharedViewModel.toolWithCountList.clear()
-                                    requireActivity().supportFragmentManager.popBackStack()
-                                }
-                                override fun onError(e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            })
-
-                        } else {
-                            hidePopup() // UI 블로킹
-                            Toast.makeText(requireContext(), "리더를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        hidePopup() // UI 블로킹
-                        Toast.makeText(requireContext(), "작업자를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    hidePopup() // UI 블로킹
-                    Toast.makeText(requireContext(), "공기구를 선택하지 않았습니다.",Toast.LENGTH_SHORT).show()
-                }
-            }
         }
         clearBtn.setOnClickListener {
 //            sharedViewModel.rentalRequestToolIdList.clear()

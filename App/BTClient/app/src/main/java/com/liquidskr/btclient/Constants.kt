@@ -27,11 +27,12 @@ object Constants {
         MEMBERSHIP_ALL_COUNT("전체 사원 정보 크기 확인 중...",""),
         TOOL_ALL("공기구 기준정보 불러오는 중...","기준정보를 전부 불러왔습니다."),//TODO 기준정보 끝이 여기가 맞아?
         TOOL_ALL_COUNT("전체 공기구 정보 크기 확인 중...",""),
+        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...","정상적으로 신청 처리되었습니다."),
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX("대여 신청 정보 불러오는 중...",""),
         RENTAL_REQUEST_SHEET_PAGE_BY_TOOLBOX_COUNT("대여 신청 정보 크기 확인 중...","대여 신청 정보가 없습니다."),
         RENTAL_REQUEST_SHEET_CANCEL("승인 취소 중...","대여 신청 목록이 삭제되었습니다."),
         RENTAL_REQUEST_SHEET_APPROVE("대여 승인 처리 중...","정상적으로 승인 처리되었습니다."),
-        RETURN_SHEET_FORM("반납 승인 처리 중...","정상적으로 승인 처리되었습니다."),//TODO
+        RETURN_SHEET_FORM("반납 승인 처리 중...","정상적으로 승인 처리되었습니다."),
         TAG("QR 확인 중...",""),
         TOOLBOX_ALL("정비실 정보 불러오는 중...",""),
 
@@ -46,7 +47,6 @@ object Constants {
         OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//TODO : NEXT UPDATE
         OUTSTANDING_RENTAL_SHEET_PAGE_BY_TOOLBOX_COUNT("미반납 정보 크기 확인 중...",""),//TODO
         OUTSTANDING_RENTAL_SHEET_LIST_BY_TOOLBOX("미반납 정보 불러오는 중...",""),//NOT USING
-        RENTAL_REQUEST_SHEET_FORM("대여 신청 처리 중...",""),//TODO
         TOOLBOX_TOOL_LABEL_FORM("선반 QR코드 등록 중...",""),//TODO
         RETURN_SHEET_REQUEST("반납 신청 처리 중...",""),//TODO
         TAG_FORM("개별 QR코드 등록 중...",""),//TODO

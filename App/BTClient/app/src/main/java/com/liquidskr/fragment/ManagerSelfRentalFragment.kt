@@ -88,7 +88,7 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
 
         parentFragmentManager.setFragmentResultListener("toolIdList", this) { key, bundle ->
             val toolIdList = bundle.getLongArray("toolIdList")
-            val toolList = toolIdList?.map { RentalRequestToolFormSelectedDto(it,if (adapter.containsId(it)) adapter.getCountById(it) else 0,true) }
+            val toolList = toolIdList?.map { RentalRequestToolFormSelectedDto(it,if (adapter.containsId(it)) adapter.getCountById(it) else 1,true) }
             adapter = RentalRequestToolAdapter(toolList?.toMutableList() ?: mutableListOf())
             recyclerView.adapter = adapter
         }
@@ -144,13 +144,13 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
             }
 
             if (adapter.isNothingSelected()){
-                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 승인해주세요.")
+                DialogUtils.showAlertDialog("선택된 항목 없음","선택한 공기구가 없습니다. 화면의 목록을 터치해서 공기구를 선택한 후, 신청해주세요.")
             }else if (!adapter.areAllSelected()){
-                DialogUtils.showAlertDialog("대여 승인","신청된 공기구 중 일부만 선택하셨습니다. 정말로 승인하시겠습니까?",
+                DialogUtils.showAlertDialog("대여 신청","추가된 공기구 중 일부만 선택하셨습니다. 정말로 신청하시겠습니까?",
                     { _,_->confirm() }, { _,_-> })
             }else{
                 // 240506 위의 두 조건 분기는 들어갈 일 없음.
-                DialogUtils.showAlertDialog("대여 승인", "정말로 승인하시겠습니까?",
+                DialogUtils.showAlertDialog("대여 신청", "정말로 신청하시겠습니까?",
                     { _,_->confirm() }, { _,_-> })
             }
         }

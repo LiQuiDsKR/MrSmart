@@ -72,6 +72,7 @@ class RentalRequestSheetService private constructor() {
     fun setAdapter(adapter:RentalRequestSheetAdapter){
         this.adapter=adapter
     }
+
     companion object {
         private var instance: RentalRequestSheetService? = null
         private const val TAG = "rentalRequestSheetService"
