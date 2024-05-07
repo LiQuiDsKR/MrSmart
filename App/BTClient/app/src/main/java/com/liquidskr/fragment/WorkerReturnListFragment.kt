@@ -26,6 +26,7 @@ import java.lang.NullPointerException
 class WorkerReturnListFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var selfRentalBtnField: LinearLayout
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
 
@@ -49,6 +50,7 @@ class WorkerReturnListFragment() : Fragment() {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = worker.name + "님 환영합니다."
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField  = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
 
@@ -66,6 +68,13 @@ class WorkerReturnListFragment() : Fragment() {
             }
         }
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = WorkerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerReturnFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = WorkerRentalListFragment()
             requireActivity().supportFragmentManager.beginTransaction()

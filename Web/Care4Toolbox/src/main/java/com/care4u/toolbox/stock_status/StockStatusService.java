@@ -180,12 +180,12 @@ public class StockStatusService {
 		Optional<StockStatus> stockOptional=repository.findById(id);
 		if (stockOptional.isEmpty()) {
 			logger.error("Invalid StockStatus id : "+id);
-			return null;
+			throw new NoSuchElementFoundException(id+" 재고를 찾을 수 없습니다.");
 		}
 		stock=stockOptional.get();
 		if (count>stock.getGoodCount()) {
 			logger.error("request count("+count+") is over stock(" + stock.getGoodCount()+")");
-			return null;
+			throw new OutOfStockException(id+" 재고가 부족합니다.");
 		}
 		logger.info("stock updated from (supply) : "+stock.toString());
 		stock.supplyUpdate(count);
@@ -194,7 +194,7 @@ public class StockStatusService {
 	}
 
 
-	@Scheduled(cron = "01 26 19 * * ?") // 매일 자정에 실행
+	@Scheduled(cron = "01 43 00 * * ?") // 매일 자정에 실행
     public void copyEntities() {
 		
 		LocalDate latestDate = repository.getLatestCurrentDay();

@@ -26,8 +26,8 @@ import java.lang.NullPointerException
 
 class ManagerRentalFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var selfRentalBtn: ImageButton
 
+    private lateinit var selfRentalBtnField : LinearLayout
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
     //private lateinit var standbyBtnField: LinearLayout
@@ -51,8 +51,8 @@ class ManagerRentalFragment() : Fragment() {
 
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
-        selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
@@ -71,6 +71,13 @@ class ManagerRentalFragment() : Fragment() {
                 .commit()
         }
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = ManagerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerRentalFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()
@@ -122,14 +129,6 @@ class ManagerRentalFragment() : Fragment() {
         recyclerView.adapter = adapter
         rentalRequestSheetService.setAdapter(adapter)
         recyclerView.layoutManager = layoutManager
-
-        selfRentalBtn.setOnClickListener {
-            val fragment = ManagerSelfRentalFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
 
         return view
     }

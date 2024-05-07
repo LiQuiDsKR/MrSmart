@@ -32,6 +32,7 @@ class ManagerReturnFragment() : Fragment(), InputHandler {
     //private lateinit var searchSheetEdit: EditText
     //private lateinit var sheetSearchBtn: ImageButton
 
+    lateinit var selfRentalBtnField: LinearLayout
     lateinit var rentalBtnField: LinearLayout
     lateinit var returnBtnField: LinearLayout
     //lateinit var standbyBtnField: LinearLayout
@@ -56,6 +57,7 @@ class ManagerReturnFragment() : Fragment(), InputHandler {
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
         welcomeMessage.text = manager.name + "님 환영합니다."
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
@@ -76,6 +78,13 @@ class ManagerReturnFragment() : Fragment(), InputHandler {
                 .commit()
         }
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = ManagerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerReturnFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()

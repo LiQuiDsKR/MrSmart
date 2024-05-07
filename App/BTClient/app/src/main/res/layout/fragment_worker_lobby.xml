@@ -75,6 +75,35 @@
             android:orientation="horizontal">
 
             <LinearLayout
+                android:id="@+id/SelfRentalBtnField"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/SelfRentalBtn"
+                    android:layout_width="54dp"
+                    android:layout_height="51dp"
+                    android:layout_gravity="center"
+                    android:backgroundTint="#00FFFFFF"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_off_01" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/noto_sans"
+                    android:gravity="center"
+                    android:text="대여 신청"
+                    android:textColor="#BDBDBD"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/RentalBtnField"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -93,12 +122,12 @@
                     app:srcCompat="@drawable/ic_menu_off_01" />
 
                 <TextView
-                    android:id="@+id/textView4"
+                    android:id="@+id/textView5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/noto_sans"
                     android:gravity="center"
-                    android:text="대여"
+                    android:text="대여 목록"
                     android:textColor="#BDBDBD"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -122,7 +151,7 @@
                     app:srcCompat="@drawable/ic_menu_off_02" />
 
                 <TextView
-                    android:id="@+id/textView4"
+                    android:id="@+id/textView6"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/noto_sans"

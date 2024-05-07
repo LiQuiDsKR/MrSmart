@@ -43,10 +43,11 @@ import java.lang.NullPointerException
 class ToolRegisterFragment() : Fragment(), InputHandler {
     private lateinit var recyclerView: RecyclerView
 
-    lateinit var rentalBtnField: LinearLayout
-    lateinit var returnBtnField: LinearLayout
-    //lateinit var standbyBtnField: LinearLayout
-    lateinit var registerBtnField: LinearLayout
+    private lateinit var selfRentalBtnField : LinearLayout
+    private lateinit var rentalBtnField: LinearLayout
+    private lateinit var returnBtnField: LinearLayout
+    //private lateinit var standbyBtnField: LinearLayout
+    private lateinit var registerBtnField: LinearLayout
 
     private lateinit var editTextName: EditText
     private lateinit var searchBtn: ImageButton
@@ -84,6 +85,7 @@ class ToolRegisterFragment() : Fragment(), InputHandler {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
@@ -107,6 +109,13 @@ class ToolRegisterFragment() : Fragment(), InputHandler {
             }
         }
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = ManagerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ToolRegisterFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()

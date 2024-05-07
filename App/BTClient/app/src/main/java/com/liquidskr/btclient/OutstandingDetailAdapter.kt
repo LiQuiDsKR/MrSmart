@@ -96,28 +96,7 @@ class OutstandingDetailAdapter(
     override fun getItemCount(): Int {
         return items.size
     }
-    /**
-     * count edit. - viewholder-toolCount view click event
-    */
-    private fun showCountSelectDialog(textView: TextView, toolDto: ReturnToolFormSelectedDto) {
-        DialogUtils.showReturnFormCountSelectDialog(
-            toolDto.originCount,
-            toolDto.goodCount,
-            toolDto.faultCount,
-            toolDto.damageCount,
-            toolDto.lossCount
-        ){ goodCount, faultCount, damageCount, lossCount, comment ->
-            textView.text = (goodCount+faultCount+damageCount+lossCount).toString()
-            val item = items.find{it.toolDtoId==toolDto.toolDtoId}?:null
-            if (item != null){
-                item.goodCount=goodCount
-                item.faultCount=faultCount
-                item.damageCount=damageCount
-                item.lossCount=lossCount
-                item.comment=comment
-            }
-        }
-    }
+
     fun tagAdded(tag: TagDto) {
         Log.d("tagAdded","before added : " + tag.macaddress + " / " + items.toString())
         val item = items.find{it.toolDtoId==tag.toolDto.id}?:null

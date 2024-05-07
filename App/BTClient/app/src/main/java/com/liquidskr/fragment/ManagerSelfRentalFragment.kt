@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -95,7 +97,7 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
         }
 
         backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
         workerSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(1) // type = 1 : worker
@@ -145,6 +147,11 @@ class ManagerSelfRentalFragment() : Fragment(), InputHandler {
                     { _,_->confirm() }, { _,_-> })
             }
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("ManagerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+
         recyclerView.adapter = adapter
         return view
     }

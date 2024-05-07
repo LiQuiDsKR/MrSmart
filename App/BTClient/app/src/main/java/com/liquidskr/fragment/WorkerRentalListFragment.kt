@@ -29,8 +29,8 @@ import java.lang.NullPointerException
 
 class WorkerRentalListFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var selfRentalBtn: ImageButton
 
+    private lateinit var selfRentalBtnField: LinearLayout
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
 
@@ -53,8 +53,8 @@ class WorkerRentalListFragment() : Fragment() {
 
 
         recyclerView = view.findViewById(R.id.Manager_Rental_RecyclerView)
-        selfRentalBtn = view.findViewById(R.id.Manager_SelfRentalBtn)
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField  = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
 
@@ -70,6 +70,14 @@ class WorkerRentalListFragment() : Fragment() {
                     .addToBackStack(null)
                     .commit()
             }
+        }
+
+        selfRentalBtnField.setOnClickListener{
+            val fragment = WorkerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerRentalListFragment")
+                .commit()
         }
 
         rentalBtnField.setOnClickListener {
@@ -91,9 +99,9 @@ class WorkerRentalListFragment() : Fragment() {
                 .addToBackStack("WorkerRentalListFragment")
                 .commit()
 
-//            val type = Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP
-//            val data = "membershipId:${worker.id}"
-//            bluetoothManager?.send(type,data)
+            val type = Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT
+            val data = "{membershipId:${worker.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
@@ -103,14 +111,6 @@ class WorkerRentalListFragment() : Fragment() {
         recyclerView.adapter = adapter
         rentalRequestSheetService.setAdapter(adapter)
         recyclerView.layoutManager = layoutManager
-
-        selfRentalBtn.setOnClickListener {
-            val fragment = WorkerSelfRentalFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .add(R.id.fragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
 
         return view
     }

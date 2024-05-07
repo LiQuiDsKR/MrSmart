@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -32,21 +34,21 @@ import com.mrsmart.standard.toolbox.ToolboxService
 import java.lang.NullPointerException
 
 class WorkerSelfRentalFragment() : Fragment(), InputHandler {
-    lateinit var leaderSearchBtn: LinearLayout
-    lateinit var addToolBtn: LinearLayout
+    private lateinit var leaderSearchBtn: LinearLayout
+    private lateinit var addToolBtn: LinearLayout
 
-    lateinit var confirmBtn: LinearLayout
-    lateinit var clearBtn: LinearLayout
-    lateinit var backButton: ImageButton
+    private lateinit var confirmBtn: LinearLayout
+    private lateinit var clearBtn: LinearLayout
+    private lateinit var backButton: ImageButton
 
-    lateinit var workerName: TextView
-    lateinit var leaderName: TextView
+    private lateinit var workerName: TextView
+    private lateinit var leaderName: TextView
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var worker: MembershipDto
     private lateinit var leader: MembershipDto
 
-    var gson = Gson()
+    private var gson = Gson()
 
     private val tagService = TagService.getInstance()
     private val toolboxToolLabelService = ToolboxToolLabelService.getInstance()
@@ -100,7 +102,7 @@ class WorkerSelfRentalFragment() : Fragment(), InputHandler {
         }
 
         backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+            requireActivity().supportFragmentManager.popBackStack("WorkerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
         leaderSearchBtn.setOnClickListener {
             val fragment = MembershipFindFragment.newInstance(2) // type = 2 : leader
@@ -143,6 +145,11 @@ class WorkerSelfRentalFragment() : Fragment(), InputHandler {
                     { _,_->confirm() }, { _,_-> })
             }
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().supportFragmentManager.popBackStack("WorkerLobbyFragment", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+
         recyclerView.adapter = adapter
         return view
     }

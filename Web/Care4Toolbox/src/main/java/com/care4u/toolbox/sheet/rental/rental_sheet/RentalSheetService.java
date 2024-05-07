@@ -420,7 +420,7 @@ public class RentalSheetService {
 		}
 		if (!toolNotFoundExceptionList.isEmpty()) {
 			logger.error("Tool not found : " + toolNotFoundExceptionList.toString());
-			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "공기구 정보를 찾을 수 없습니다.");
+			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "재고 정보를 찾을 수 없습니다.");
 		}
 		logger.debug("RentalSheet [Add] : RentalToolList Add Completed");
 
@@ -546,7 +546,7 @@ public class RentalSheetService {
 		}
 		if (!toolNotFoundExceptionList.isEmpty()) {
 			logger.error("Tool not found : " + toolNotFoundExceptionList.toString());
-			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "공기구 정보를 찾을 수 없습니다.");
+			throw new IllegalArgumentException(toolNotFoundExceptionList.toString() + "재고 정보를 찾을 수 없습니다.");
 		}
 		
 		logger.debug("SupplySheet [Add] : SupplyToolList Add Completed");

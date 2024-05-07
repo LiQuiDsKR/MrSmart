@@ -20,6 +20,7 @@ import com.mrsmart.standard.toolbox.ToolboxService
 import java.lang.NullPointerException
 
 class ManagerLobbyFragment() : Fragment() {
+    private lateinit var selfRentalBtnField: LinearLayout
     private lateinit var rentalBtn: ImageButton
     private lateinit var returnBtn: ImageButton
     //private lateinit var standbyBtn: ImageButton
@@ -45,6 +46,7 @@ class ManagerLobbyFragment() : Fragment() {
         //standbyBtn = view.findViewById(R.id.StandbyBtn)
         registerBtn = view.findViewById(R.id.RegisterBtn)
 
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
         //standbyBtnField = view.findViewById(R.id.StandbyBtnField)
@@ -60,6 +62,13 @@ class ManagerLobbyFragment() : Fragment() {
 
         welcomeMessage.text = manager.name + "님 환영합니다."
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = ManagerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("ManagerLobbyFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = ManagerRentalFragment()
             requireActivity().supportFragmentManager.beginTransaction()

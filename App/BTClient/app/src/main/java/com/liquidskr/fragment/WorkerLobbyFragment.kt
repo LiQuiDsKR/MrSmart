@@ -20,8 +20,7 @@ import com.mrsmart.standard.membership.MembershipService
 import java.lang.NullPointerException
 
 class WorkerLobbyFragment() : Fragment() {
-    private lateinit var rentalBtn: ImageView
-    private lateinit var returnBtn: ImageButton
+    private lateinit var selfRentalBtnField: LinearLayout
     private lateinit var rentalBtnField: LinearLayout
     private lateinit var returnBtnField: LinearLayout
 
@@ -47,14 +46,20 @@ class WorkerLobbyFragment() : Fragment() {
         val worker = loggedInMembership ?: throw NullPointerException("로그인 정보가 없습니다.")
 
         welcomeMessage = view.findViewById(R.id.WelcomeMessage)
-        rentalBtn = view.findViewById(R.id.RentalBtn)
-        returnBtn = view.findViewById(R.id.ReturnBtn)
+        selfRentalBtnField = view.findViewById(R.id.SelfRentalBtnField)
         rentalBtnField = view.findViewById(R.id.RentalBtnField)
         returnBtnField = view.findViewById(R.id.ReturnBtnField)
 
         popupLayout = view.findViewById(R.id.popupLayout)
         welcomeMessage.text = worker.name + "님 환영합니다."
 
+        selfRentalBtnField.setOnClickListener {
+            val fragment = WorkerSelfRentalFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack("WorkerLobbyFragment")
+                .commit()
+        }
         rentalBtnField.setOnClickListener {
             val fragment = WorkerRentalListFragment()
             requireActivity().supportFragmentManager.beginTransaction()
@@ -73,6 +78,10 @@ class WorkerLobbyFragment() : Fragment() {
                 .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack("WorkerLobbyFragment")
                 .commit()
+
+            val type = Constants.BluetoothMessageType.OUTSTANDING_RENTAL_SHEET_PAGE_BY_MEMBERSHIP_COUNT
+            val data = "{membershipId:${worker.id}}"
+            bluetoothManager?.send(type,data)
         }
 
         return view

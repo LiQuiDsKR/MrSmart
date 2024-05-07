@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mrsmart.standard.sheet.rental.RentalToolDto
 
-class WorkerOutstandingDetailAdapter(val outstandingRentalTools: List<RentalToolDto>) :
+class WorkerOutstandingDetailAdapter(private val outstandingRentalTools: MutableList<RentalToolDto>) : // 굳이 MutableList로 선언할 필요는 없지만 귀찮음
     RecyclerView.Adapter<WorkerOutstandingDetailAdapter.OutstandingRentalToolViewHolder>() {
 
     class OutstandingRentalToolViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
