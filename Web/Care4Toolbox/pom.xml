@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.care4u</groupId>
-	<artifactId>Care4U</artifactId>
-	<version>1.0.9</version>
+	<artifactId>Care4U-Laptop</artifactId>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 	
 	<name>Care4Toolbox</name>

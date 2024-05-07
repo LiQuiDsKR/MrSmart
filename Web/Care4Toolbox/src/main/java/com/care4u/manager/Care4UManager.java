@@ -124,7 +124,7 @@ public class Care4UManager implements InitializingBean, DisposableBean {
 			new BluetoothCommunicationHandler("macaddress", connection, bluetoothCommunicationHandlerListener); // connection
 																												// 이
 																												// 정의되므로
-																												// communicationHandler를
+																											// communicationHandler를
 																												// 정의함
 			logger.debug("클라이언트 연결됨: " + connection.toString());
 		}
